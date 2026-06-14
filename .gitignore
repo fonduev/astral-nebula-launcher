@@ -1,0 +1,8 @@
+# Ignore the launcher binaries folder (exceeds GitHub's 100MB file limit)
+xd/
+
+# Ignore logs and temp files
+*.log
+*.temp
+*.bak
+test_run.txt
