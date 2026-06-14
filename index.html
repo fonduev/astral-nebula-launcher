@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="./icon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Astral Nebula Launcher | El Cosmos de Minecraft</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="./assets/index-u6Dxd4Rz.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Cx4y_T6q.css">
+    <style>
+      /* ── Showcase Section ── */
+      .showcase {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 5% 6rem;
+      }
+      .showcase-header {
+        text-align: center;
+        margin-bottom: 5rem;
+      }
+      .showcase-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #a78bfa33, #fbcfe833);
+        border: 1px solid var(--border-glass);
+        color: var(--accent-s);
+        border-radius: 100px;
+        padding: .5rem 1.5rem;
+        font-size: .85rem;
+        font-weight: 600;
+        letter-spacing: .5px;
+        margin-bottom: 1.5rem;
+      }
+      .showcase-header h2 {
+        font-size: clamp(2rem, 5vw, 3.2rem);
+        font-weight: 800;
+        letter-spacing: -1.5px;
+        line-height: 1.15;
+        margin-bottom: 1rem;
+      }
+      .showcase-header p {
+        color: var(--text-muted);
+        max-width: 550px;
+        margin: 0 auto;
+        font-size: 1.1rem;
+      }
+
+      /* ── Showcase Items (image + text rows) ── */
+      .showcase-item {
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 4rem;
+        align-items: center;
+        margin-bottom: 6rem;
+      }
+      .showcase-item:last-child {
+        margin-bottom: 0;
+      }
+      .showcase-item-reverse {
+        grid-template-columns: 1.4fr 1fr;
+      }
+      .showcase-item-reverse .showcase-text {
+        order: 2;
+      }
+      .showcase-item-reverse .showcase-mockup {
+        order: 1;
+      }
+
+      /* ── Text side ── */
+      .showcase-label {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        color: var(--accent-p);
+        font-size: .9rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        letter-spacing: .3px;
+      }
+      .showcase-text h3 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        letter-spacing: -.5px;
+        margin-bottom: 1rem;
+      }
+      .showcase-text p {
+        color: var(--text-muted);
+        font-size: 1.05rem;
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+      }
+      .showcase-text strong {
+        color: var(--text-main);
+        font-weight: 600;
+      }
+
+      /* ── Features list ── */
+      .showcase-features-list {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: .75rem;
+      }
+      .showcase-features-list li {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        color: var(--text-muted);
+        font-size: .95rem;
+      }
+      .showcase-features-list li svg {
+        flex-shrink: 0;
+        color: #34d399;
+      }
+
+      /* ── Image mockup side ── */
+      .showcase-mockup {
+        background: #ffffff08;
+        border: 1px solid var(--border-glass);
+        border-radius: 20px;
+        padding: 8px;
+        box-shadow: 0 25px 50px rgba(0,0,0,.5), 0 0 80px #a78bfa12;
+        transition: transform .4s cubic-bezier(.4,0,.2,1), box-shadow .4s;
+      }
+      .showcase-mockup:hover {
+        transform: translateY(-6px) scale(1.01);
+        box-shadow: 0 35px 60px rgba(0,0,0,.6), 0 0 120px #a78bfa25;
+      }
+      .showcase-mockup img {
+        border-radius: 14px;
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      /* ── Responsive ── */
+      @media (max-width: 900px) {
+        .showcase-item,
+        .showcase-item-reverse {
+          grid-template-columns: 1fr;
+          gap: 2rem;
+        }
+        .showcase-item-reverse .showcase-text,
+        .showcase-item-reverse .showcase-mockup {
+          order: unset;
+        }
+        .showcase-header {
+          margin-bottom: 3rem;
+        }
+        .showcase-item {
+          margin-bottom: 4rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-gradients"></div>
+
+    <header>
+      <div class="logo-nav">
+        <img src="./icon.ico" alt="Astral Nebula Logo" style="border-radius: 50%; object-fit: cover;">
+        <span>Astral Nebula</span>
+      </div>
+    </header>
+
+    <main class="hero">
+      <h1>Explora el <span class="glow-text">Cosmos</span> de Minecraft</h1>
+      <p>El Launcher de Minecraft de próxima generación. Configuración automática de múltiples instancias, integración total con Forge y Fabric, y rendimiento desatado a un solo clic.</p>
+      
+      <a href="https://github.com/diegoojedachacin-a11y/Astral-Nebula/releases/download/2.0/Astral.Nebula.Launcher.Setup.2.0.3.exe" class="btn-primary" download>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+        Descargar para Windows
+      </a>
+
+      <div class="hero-mockup">
+        <!-- The screenshot we took using Electron! -->
+        <img src="./hero-mockup.png" alt="Astral Nebula Launcher Interfaz">
+      </div>
+    </main>
+
+    <section class="features">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+        </div>
+        <h3>Instalación 1-Clic</h3>
+        <p>Olvídate de procesos manuales tediosos. Obtén Vanilla, OptiFine o Fabric+Sodium preconfigurados y optimizados al instante.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+        </div>
+        <h3>Ecosistemas Aislados</h3>
+        <p>Tu mundo de Forge jamás colisionará con Fabric de nuevo. Múltiples instancias completamente limpias conviviendo juntas sin problemas.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        </div>
+        <h3>Rendimiento Sideral</h3>
+        <p>Diseño sin bordes, aceleración por hardware ultraeficiente y un código ágil que garantiza que el consumo de RAM sea mínimo.</p>
+      </div>
+    </section>
+
+    <section class="showcase" id="showcase-mods">
+      <div class="showcase-header">
+        <span class="showcase-badge">✦ Explora el Poder</span>
+        <h2>Gestión de <span class="glow-text">Mods</span> Sin Límites</h2>
+        <p>Todo lo que necesitas para personalizar tu experiencia de Minecraft, centralizado en una interfaz elegante e intuitiva.</p>
+      </div>
+
+      <div class="showcase-item">
+        <div class="showcase-text">
+          <div class="showcase-label">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            Modificadores & Mods
+          </div>
+          <h3>OptiFine, Forge, Fabric y más</h3>
+          <p>Instala y gestiona todos tus modificadores desde un solo lugar. Compatible con <strong>OptiFine</strong> para shaders y rendimiento, <strong>Forge</strong> con acceso a miles de mods, y <strong>Sodium + Fabric</strong> para optimización extrema con Iris, Lithium y más.</p>
+          <ul class="showcase-features-list">
+            <li>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Importa modpacks de CurseForge y Modrinth
+            </li>
+            <li>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Busca e instala mods directamente desde el launcher
+            </li>
+            <li>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Gestiona mods por versión instalada (Fabric / Forge)
+            </li>
+            <li>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Instala desde archivos .jar locales
+            </li>
+          </ul>
+        </div>
+        <div class="showcase-mockup">
+          <img src="./mods-screenshot.png" alt="Panel de Modificadores y Mods del Launcher Astral Nebula">
+        </div>
+      </div>
+
+      <div class="showcase-item showcase-item-reverse">
+        <div class="showcase-text">
+          <div class="showcase-label">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Iniciar Minecraft
+          </div>
+          <h3>Lanza tu juego con un clic</h3>
+          <p>Selecciona tu versión de Minecraft, elige el modificador que prefieras y ajusta la <strong>memoria RAM</strong> asignada. La consola integrada te muestra el progreso en tiempo real con logs de salida detallados.</p>
+          <ul class="showcase-features-list">
+            <li>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Soporte para todas las versiones de Minecraft
+            </li>
+            <li>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Control de RAM con slider intuitivo
+            </li>
+            <li>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Consola de output integrada en tiempo real
+            </li>
+          </ul>
+        </div>
+        <div class="showcase-mockup">
+          <img src="./launcher-play.png" alt="Panel de Inicio de Minecraft del Launcher Astral Nebula">
+        </div>
+      </div>
+
+      <div class="showcase-item">
+        <div class="showcase-text">
+          <div class="showcase-label">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            Buscador de Modpacks
+          </div>
+          <h3>CurseForge y Modrinth Integrados</h3>
+          <p>Explora, busca e instala miles de modpacks populares online de CurseForge y Modrinth con un solo clic. Además, el nuevo gestor te permite importar tus archivos locales en formatos <strong>.zip</strong> y <strong>.mrpack</strong>, organizando automáticamente el perfil, los mods y el loader requerido (Forge o Fabric).</p>
+          <ul class="showcase-features-list">
+            <li>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Búsqueda en vivo y descarga automática de dependencias
+            </li>
+            <li>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Importación de packs en formato .mrpack y .zip
+            </li>
+            <li>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Aislamiento completo de carpetas de juego por modpack
+            </li>
+          </ul>
+        </div>
+        <div class="showcase-mockup">
+          <img src="./modpacks-screenshot.png" alt="Buscador de Modpacks del Launcher Astral Nebula">
+        </div>
+      </div>
+
+      <div class="showcase-item showcase-item-reverse">
+        <div class="showcase-text">
+          <div class="showcase-label">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18v3.5a.5.5 0 01-.5.5h-3.5"></path></svg>
+            Auto-Updater & Control Inteligente
+          </div>
+          <h3>Actualizaciones Automáticas de 1-Clic</h3>
+          <p>Tu launcher se mantiene siempre al día con un sistema de actualizaciones en segundo plano súper ligero que descarga y aplica las mejoras en segundos, sin necesidad de re-descargar todo el instalador. Además, el nuevo sistema inteligente de protección de hardware limita la RAM según tu memoria física real para evitar inestabilidades.</p>
+          <ul class="showcase-features-list">
+            <li>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Descarga e instalación incremental de archivos base en menos de 5 segundos
+            </li>
+            <li>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Límite adaptativo de RAM para proteger la memoria física del equipo
+            </li>
+            <li>
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              Guardado inmediato y sincronización de perfiles en tiempo real
+            </li>
+          </ul>
+        </div>
+        <div class="showcase-mockup">
+          <img src="./updater-screenshot.png" alt="Actualizaciones inteligentes del Launcher Astral Nebula">
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>&copy; 2026 Astral Nebula. Diseñado de forma premium para la comunidad de Minecraft.</p>
+    </footer>
+
+  </body>
+</html>
