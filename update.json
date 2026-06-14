@@ -1,10 +1,10 @@
 {
   "version": "2.0.4",
   "notes": "• Buscador integrado de Modpacks (CurseForge y Modrinth).\n• Importación local de archivos .zip y .mrpack.\n• Límite adaptativo de RAM según la memoria física real.\n• Optimización de rendimiento y sincronización en tiempo real.",
-  "url": "https://github.com/renee/astral-nebula-launcher/releases/download/v2.0.4/app.asar",
+  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.4/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/renee/astral-nebula-launcher/releases/download/v2.0.4/app.asar"
+      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.4/app.asar"
     }
   }
 }
