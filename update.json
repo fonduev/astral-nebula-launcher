@@ -1,10 +1,10 @@
 {
-  "version": "2.0.6",
-  "notes": "\u2022 Red Social y Amigos en tiempo real (con Firebase Firestore).\n\u2022 Chat de mensajeria instantanea.\n\u2022 Presencia y estado de juego en tiempo real.",
-  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.6/app.asar",
+  "version": "2.0.7",
+  "notes": "\u2022 Modpack exclusivo FUSSIONBORN integrado con dise\u00f1o premium.\n\u2022 Soporte para NeoForge y versiones recientes optimizado.\n\u2022 Descarga e instalaci\u00f3n autom\u00e1tica optimizada en caliente.",
+  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.7/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.6/app.asar"
+      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.7/app.asar"
     }
   }
 }
