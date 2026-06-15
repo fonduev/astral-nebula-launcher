@@ -1,10 +1,10 @@
 {
-  "version": "2.1.0",
-  "notes": "\u2022 Red Social y Chat en tiempo real liberado para todos (Firebase Firestore activo por defecto).\n\u2022 Modpack exclusivo FUSSIONBORN integrado con dise\u00f1o premium.",
-  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.0/app.asar",
+  "version": "2.1.1",
+  "notes": "\u2022 Bot\u00f3n de apoyo Ko-fi en Fussionborn.\n\u2022 Comando Prepend y argumentos JVM personalizables.\n\u2022 Ocultaci\u00f3n de credenciales Firebase / Ads.",
+  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.1/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.0/app.asar"
+      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.1/app.asar"
     }
   }
 }
