@@ -1,10 +1,10 @@
 {
-  "version": "2.0.7",
-  "notes": "\u2022 Modpack exclusivo FUSSIONBORN integrado con dise\u00f1o premium.\n\u2022 Soporte para NeoForge y versiones recientes optimizado.\n\u2022 Descarga e instalaci\u00f3n autom\u00e1tica optimizada en caliente.",
-  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.7/app.asar",
+  "version": "2.0.8",
+  "notes": "\u2022 Integraci\u00f3n del badge oficial del creador BOOMBERBOY y el logotipo FUSSIONBORN.\n\u2022 Detalles del modpack importados directamente de CurseForge con dise\u00f1o premium.\n\u2022 Descarga e instalaci\u00f3n autom\u00e1tica optimizada en caliente.",
+  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.8/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.7/app.asar"
+      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.8/app.asar"
     }
   }
 }
