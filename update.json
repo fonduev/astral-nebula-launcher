@@ -1,10 +1,10 @@
 {
-  "version": "2.0.9",
-  "notes": "\u2022 Secci\u00f3n destacada 'Patrocinado por Nebula Launcher' integrada en el modpack FUSSIONBORN.\n\u2022 Estabilidad general y mejoras de hot-swap.",
-  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.9/app.asar",
+  "version": "2.1.0",
+  "notes": "\u2022 Red Social y Chat en tiempo real liberado para todos (Firebase Firestore activo por defecto).\n\u2022 Modpack exclusivo FUSSIONBORN integrado con dise\u00f1o premium.",
+  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.0/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.9/app.asar"
+      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.0/app.asar"
     }
   }
 }
