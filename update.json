@@ -1,10 +1,10 @@
 {
-  "version": "2.1.1",
-  "notes": "\u2022 Bot\u00f3n de apoyo Ko-fi en Fussionborn.\n\u2022 Comando Prepend y argumentos JVM personalizables.\n\u2022 Ocultaci\u00f3n de credenciales Firebase / Ads.",
-  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.1/app.asar",
+  "version": "2.1.2",
+  "notes": "\u2022 Proceso de actualizaci\u00f3n silencioso (se elimin\u00f3 la ventana de CMD).\n\u2022 Auto-limpieza de scripts temporales tras aplicar la actualizaci\u00f3n.",
+  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.2/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.1/app.asar"
+      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.2/app.asar"
     }
   }
 }
