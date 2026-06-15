@@ -1,10 +1,10 @@
 {
-  "version": "2.0.4",
-  "notes": "• Buscador integrado de Modpacks (CurseForge y Modrinth).\n• Importación local de archivos .zip y .mrpack.\n• Límite adaptativo de RAM según la memoria física real.\n• Optimización de rendimiento y sincronización en tiempo real.",
-  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.4/app.asar",
+  "version": "2.0.6",
+  "notes": "\u2022 Red Social y Amigos en tiempo real (con Firebase Firestore).\n\u2022 Chat de mensajeria instantanea.\n\u2022 Presencia y estado de juego en tiempo real.\n\u2022 Modo Demo / Simulacion sin configuracion.",
+  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.6/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.4/app.asar"
+      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.0.6/app.asar"
     }
   }
 }
