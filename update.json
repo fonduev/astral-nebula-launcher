@@ -1,10 +1,10 @@
 {
-  "version": "2.1.7",
-  "notes": "\u2022 Soporte para Fussionborn Completo (ZIP de 4.17 GB) con copiado local ultrarr\u00e1pido y autogeneraci\u00f3n de perfiles NeoForge 1.21.1.",
-  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.7/app.asar",
+  "version": "2.1.8",
+  "notes": "\u2022 Descarga del modpack Fussionborn Completo (4.17 GB) optimizado desde Cloudflare R2 con instalaci\u00f3n NeoForge 1.21.1 autom\u00e1tica.",
+  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.8/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.7/app.asar"
+      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.8/app.asar"
     }
   }
 }
