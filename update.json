@@ -1,10 +1,10 @@
 {
   "version": "2.1.9",
-  "notes": "\u2022 Fix crítico: extracción del modpack Fussionborn (4.17 GB) ahora compatible con archivos mayores de 2 GiB.",
-  "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.9/app.asar",
+  "notes": "• Fix crítico: extracción del modpack Fussionborn (4.17 GB) ahora compatible con archivos mayores de 2 GiB.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.1.9/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/diegoojedachacin-a11y/astral-nebula-launcher/releases/download/v2.1.9/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.1.9/app.asar"
     }
   }
 }
