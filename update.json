@@ -1,10 +1,10 @@
 {
-  "version": "2.2.4",
-  "notes": "• Red social Nebula oficial: API de amigos y chat ahora disponible para todos sin menú secreto.\n• Modpack Fussionborn más ligero, descargable desde Cloudflare R2.\n• Versión oficial estable — salimos de beta.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.4/app.asar",
+  "version": "2.2.5",
+  "notes": "• Auto-instalación Fussionborn 1-click desde Cloudflare R2 (MC 1.21.1 + NeoForge 21.1.233)\n• Modpack más ligero y optimizado\n• Correcciones de estabilidad en el updater",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.5/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.4/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.5/app.asar"
     }
   },
   "modpack": {
