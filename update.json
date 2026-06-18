@@ -6,5 +6,19 @@
     "windows-x64": {
       "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.4/app.asar"
     }
+  },
+  "modpack": {
+    "name": "FussionBorn",
+    "version": "1.1.1",
+    "minecraft": "1.21.1",
+    "loader": {
+      "type": "neoforge",
+      "version": "21.1.233"
+    },
+    "download": {
+      "url": "https://pub-d38529ebbdbe4598b4d3d552ffc4246f.r2.dev/FUSSIONBORN.zip",
+      "format": "zip",
+      "size": 1417330688
+    }
   }
 }
