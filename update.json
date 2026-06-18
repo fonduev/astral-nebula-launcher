@@ -1,10 +1,10 @@
 {
-  "version": "2.2.3",
-  "notes": "• Fix: el modpack Fussionborn ahora siempre se descarga desde Cloudflare R2 para todos los usuarios.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.3/app.asar",
+  "version": "2.2.4",
+  "notes": "• Red social Nebula oficial: API de amigos y chat ahora disponible para todos sin menú secreto.\n• Modpack Fussionborn más ligero, descargable desde Cloudflare R2.\n• Versión oficial estable — salimos de beta.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.4/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.3/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.4/app.asar"
     }
   }
 }

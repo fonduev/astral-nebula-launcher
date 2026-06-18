@@ -7,3 +7,16 @@ xd/
 *.bak
 *.exe
 test_run.txt
+
+# Modpack files (large, hosted on Cloudflare R2)
+FUSSIONBORN/
+FUSSIONBORN.zip
+
+# Upload scripts (contain sensitive config)
+upload_r2.py
+upload_r2_v2.py
+upload_r2_s3.py
+
+# Temporary / junk files
+historial.db
+nul
