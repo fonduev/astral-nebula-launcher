@@ -1,10 +1,10 @@
 {
-  "version": "2.2.5",
-  "notes": "• Auto-instalación Fussionborn 1-click desde Cloudflare R2 (MC 1.21.1 + NeoForge 21.1.233)\n• Modpack más ligero y optimizado\n• Correcciones de estabilidad en el updater",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.5/app.asar",
+  "version": "2.2.6",
+  "notes": "\u2022 Fix: ENOENT al iniciar FussionBorn \u2014 el launcher ahora verifica que el JSON de NeoForge/Forge existe antes de lanzar.\n\u2022 Instalaci\u00f3n 1-click de FussionBorn m\u00e1s robusta.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.6/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.5/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.6/app.asar"
     }
   },
   "modpack": {
