@@ -3363,11 +3363,10 @@ ipcMain.on('apply-update', () => {
     const currentAsar = path.join(resourcesDir, 'app.asar');
     const currentAppDir = path.join(resourcesDir, 'app');
     const batPath = path.join(resourcesDir, 'apply_update.bat');
-    const vbsPath = path.join(resourcesDir, 'apply_update.vbs');
 
     const batContent = [
         '@echo off',
-        'ping -n 4 127.0.0.1 >nul',
+        'ping -n 8 127.0.0.1 >nul',
         ':retry',
         `if exist "${currentAsar}" (`,
         `  del /f /q "${currentAsar}" 2>nul`,
@@ -3387,19 +3386,12 @@ ipcMain.on('apply-update', () => {
         `  move /y "${updateAsar}" "${currentAsar}"`,
         `)`,
         `start "" "${exePath}"`,
-        `del "${vbsPath}" 2>nul`,
         `del "%~f0" 2>nul`,
-    ].join('\r\n');
-
-    const vbsContent = [
-        'Set WshShell = CreateObject("WScript.Shell")',
-        `WshShell.Run """" & "${batPath}" & """", 0, False`
     ].join('\r\n');
 
     try {
         fs.writeFileSync(batPath, batContent, 'utf8');
-        fs.writeFileSync(vbsPath, vbsContent, 'utf8');
-        const child = spawn('wscript.exe', [vbsPath], {
+        const child = spawn('cmd.exe', ['/c', 'start', '/min', '', batPath], {
             detached: true,
             stdio: 'ignore',
             windowsHide: true
