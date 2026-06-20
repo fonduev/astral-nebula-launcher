@@ -3354,7 +3354,7 @@ ipcMain.on('launch-game', async (event, data) => {
                                 let resolved = arg;
                                 resolved = resolved.replace(/$\{library_directory\}/g, path.join(mcPath, 'libraries'));
                                 resolved = resolved.replace(/$\{classpath_separator\}/g, ';');
-                                if (!opts.customArgs.includes(resolved)) {
+                                if (resolved.startsWith('--add-') || resolved === '-p' || resolved === '--module-path' || !opts.customArgs.includes(resolved)) {
                                     opts.customArgs.push(resolved);
                                 }
                             } else if (arg && typeof arg === 'object' && Array.isArray(arg.value)) {
@@ -3368,8 +3368,10 @@ ipcMain.on('launch-game', async (event, data) => {
                                 }
                                 if (allowed) {
                                     for (const v of arg.value) {
-                                        if (typeof v === 'string' && !opts.customArgs.includes(v)) {
-                                            opts.customArgs.push(v);
+                                        if (typeof v === 'string') {
+                                            if (v.startsWith('--add-') || v === '-p' || v === '--module-path' || !opts.customArgs.includes(v)) {
+                                                opts.customArgs.push(v);
+                                            }
                                         }
                                     }
                                 }
