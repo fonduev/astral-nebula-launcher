@@ -30,14 +30,6 @@ const resourcesDir = app.isPackaged
 // │    - mc_logo        (logo de Minecraft)                     │
 // └─────────────────────────────────────────────────────────────┘
 const DISCORD_CLIENT_ID = '1492726711752851466';
-// Critical JVM args required by NeoForge/Forge to run on modern Java
-const NEOFORGE_CRITICAL_JVM_ARGS = [
-    '--add-modules=ALL-MODULE-PATH',
-    '--add-opens=java.base/java.util.jar=ALL-UNNAMED',
-    '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED',
-    '--add-exports=java.base/sun.security.util=ALL-UNNAMED',
-    '--add-exports=jdk.naming.dns/com.sun.jndi.dns=java.naming'
-];
 
 let rpcClient = null;
 let rpcReady = false;
@@ -1839,8 +1831,6 @@ async function ensureNeoForgeLoader(mcVersion, neoforgeVersion) {
             fs.renameSync(mcVersionJson, expectedJson);
             sendLog(`📝 Corrigiendo nombre del JSON: ${mcVersion}.json → ${installedNeoForgeVer}.json`);
         }
-        // Ensure critical JVM args are also present in pre-existing versions
-        ensureCriticalNeoForgeJvmArgs(expectedJson);
         return installedNeoForgeVer;
     }
 
@@ -1875,20 +1865,29 @@ async function ensureNeoForgeLoader(mcVersion, neoforgeVersion) {
     try { fs.unlinkSync(installerPath); } catch {}
     
     // Fix JSON naming after NeoForge installer (it uses {mcVersion}.json instead of {folderName}.json)
+    if (fs.existsSync(versionsDir)) {
+        const dirs = fs.readdirSync(versionsDir);
+        const found = dirs.find(d => {
+            const dl = d.toLowerCase();
+            return dl.includes('neoforge') && dl.includes(neoforgeVersion.toLowerCase());
+        });
+        if (found) {
+            const vDir = path.join(versionsDir, found);
+            const expectedJson = path.join(vDir, `${found}.json`);
+            const mcVersionJson = path.join(vDir, `${mcVersion}.json`);
+            if (!fs.existsSync(expectedJson) && fs.existsSync(mcVersionJson)) {
+                fs.renameSync(mcVersionJson, expectedJson);
+                sendLog(`📝 Corrigiendo nombre del JSON: ${mcVersion}.json → ${found}.json`);
+            }
+        }
+    }
     
-if (fs.existsSync(versionsDir)) {
+    if (fs.existsSync(versionsDir)) {
         const dirs = fs.readdirSync(versionsDir);
         installedNeoForgeVer = dirs.find(d => {
             const dl = d.toLowerCase();
             return dl.includes('neoforge') && dl.includes(neoforgeVersion.toLowerCase()) && fs.existsSync(path.join(versionsDir, d, `${d}.json`)) && (() => { try { return JSON.parse(fs.readFileSync(path.join(versionsDir, d, `${d}.json`), 'utf8')).inheritsFrom; } catch { return false; } })();
         });
-    }
-    // Write critical JVM args to the version JSON after fresh NeoForge install
-    if (installedNeoForgeVer) {
-        const vJsonPath = path.join(versionsDir, installedNeoForgeVer, `${installedNeoForgeVer}.json`);
-        if (ensureCriticalNeoForgeJvmArgs(vJsonPath)) {
-            sendLog('📝 JVM args críticos inyectados en version JSON tras instalación de NeoForge');
-        }
     }
     return installedNeoForgeVer || (mcVersion === '1.20.1' ? `1.20.1-neoforge-${neoforgeVersion}` : `neoforge-${neoforgeVersion}`);
 }
@@ -1941,42 +1940,6 @@ async function ensureForgeLoader(mcVersion, forgeVersion) {
         });
     }
     return installedForgeVer || `${mcVersion}-forge-${forgeVersion}`;
-}
-
-// ── Helper: ensure critical NeoForge/Forge JVM args are in a version JSON ──
-function ensureCriticalNeoForgeJvmArgs(jsonPath) {
-    try {
-        if (!fs.existsSync(jsonPath)) return false;
-        const vJson = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-        // Handle both modern format (arguments object) and legacy format (arguments array)
-        if (!vJson.arguments || Array.isArray(vJson.arguments)) {
-            vJson.arguments = {};
-        }
-        // Guard: if jvm exists but is not an array, log warning and return (prevent data loss)
-        if (vJson.arguments.jvm && !Array.isArray(vJson.arguments.jvm)) {
-            sendLog('⚠️ Version JSON tiene arguments.jvm no-array, no se modifica', 'warn');
-            return false;
-        }
-        if (!vJson.arguments.jvm) {
-            vJson.arguments.jvm = [];
-        }
-        const criticalArgs = NEOFORGE_CRITICAL_JVM_ARGS;
-        let changed = false;
-        for (const arg of criticalArgs) {
-            if (!vJson.arguments.jvm.includes(arg)) {
-                vJson.arguments.jvm.push(arg);
-                changed = true;
-            }
-        }
-        if (changed) {
-            fs.writeFileSync(jsonPath, JSON.stringify(vJson, null, 2), 'utf8');
-            return true;
-        }
-        return false;
-    } catch (e) {
-        sendLog(`⚠️ No se pudieron inyectar JVM args en version JSON: ${e.message}`, 'warn');
-        return false;
-    }
 }
 
 ipcMain.handle('import-modpack', async (event) => {
@@ -2240,64 +2203,6 @@ ipcMain.handle('install-fussionborn', async () => {
                 sendLog('✅ Overrides integrados correctamente.');
             } catch (e) {
                 sendLog(`⚠️ Advertencia integrando overrides: ${e.message}`, 'warn');
-            }
-        }
-
-        // Download mods from CurseForge using the manifest.json
-        // The zip includes a manifest.json listing ALL mods with projectID/fileID
-        // NOTE: mods in overrides/mods/ are removed before downloading to avoid duplicates
-        const manifestJsonPath = path.join(fussionbornDir, 'manifest.json');
-        const modsDir = path.join(fussionbornDir, 'mods');
-        fs.mkdirSync(modsDir, { recursive: true });
-        if (fs.existsSync(manifestJsonPath)) {
-            try {
-                const manifestData = JSON.parse(fs.readFileSync(manifestJsonPath, 'utf8'));
-                const modFiles = manifestData.files || [];
-                if (modFiles.length > 0) {
-                    // Download missing mods from CurseForge
-                    const existingMods = new Set();
-                    try { fs.readdirSync(modsDir).forEach(f => existingMods.add(f.toLowerCase())); } catch {}
-                    const missingMods = modFiles.filter(f => {
-                        const pattern = `mod_${f.fileID}.jar`;
-                        return !existingMods.has(pattern.toLowerCase());
-                    });
-                    if (missingMods.length > 0) {
-                        sendLog(`📥 Descargando ${missingMods.length} mods desde CurseForge...`);
-                        let downloaded = 0;
-                        for (const modFile of missingMods) {
-                            if (currentOperation.cancelled) throw new Error('Operación cancelada');
-                            try {
-                                const modUrl = `https://www.curseforge.com/api/v1/mods/${modFile.projectID}/files/${modFile.fileID}/download`;
-                                const modPath = path.join(modsDir, `mod_${modFile.fileID}.jar`);
-                                await downloadFile(modUrl, modPath);
-                                downloaded++;
-                                if (downloaded % 20 === 0) {
-                                    sendProgress(80 + Math.floor((downloaded / missingMods.length) * 15), `Descargando mods: ${downloaded}/${missingMods.length}`);
-                                }
-                            } catch (modErr) {
-                                sendLog(`⚠️ Error descargando mod ${modFile.projectID}/${modFile.fileID}: ${modErr.message}`, 'warn');
-                            }
-                        }
-                        sendLog(`✅ ${downloaded}/${missingMods.length} mods descargados correctamente.`);
-                        // Clean up original-named JARs from overrides that are now superseded by mod_*.jar downloads
-                        try {
-                            const allMods = new Set();
-                            for (const mf of modFiles) {
-                                allMods.add(`mod_${mf.fileID}.jar`.toLowerCase());
-                            }
-                            const afterFiles = fs.readdirSync(modsDir);
-                            for (const f of afterFiles) {
-                                if (f.endsWith('.jar') && !f.startsWith('mod_')) {
-                                    fs.unlinkSync(path.join(modsDir, f));
-                                }
-                            }
-                        } catch {}
-                    } else {
-                        sendLog('✅ Todos los mods ya están en la instancia.');
-                    }
-                }
-            } catch (manifestErr) {
-                sendLog(`⚠️ Error procesando manifest.json: ${manifestErr.message}`, 'warn');
             }
         }
 
@@ -3342,10 +3247,26 @@ ipcMain.on('launch-game', async (event, data) => {
     } else if (activeJvmArgs && activeJvmArgs.trim()) {
         opts.customArgs = activeJvmArgs.trim().split(/\s+/);
         sendLog(`Custom JVM Arguments: ${opts.customArgs.join(' ')}`);
-    }            } catch (e) {
-                sendLog(`⚠️ No se pudieron inyectar JVM args de ${launchModId}: ${e.message}`, 'warn');
+    }
+        launcher.on('progress', e => {
+            const p = Math.floor((e.task / e.total) * 100);
+            sendProgress(p, `${e.type}: ${e.task}/${e.total}`);
+        });
+        launcher.on('debug', e => { const s = String(e); if (s.length < 300) sendLog(s); });
+        launcher.on('data', e => sendLog(String(e)));
+        launcher.on('close', code => {
+            runningInstances.delete(instanceId);
+            const count = runningInstances.size;
+            sendLog(`✅ Instancia #${instanceId} cerrada (código: ${code}).`);
+            win?.webContents.send('instances-update', { count, closedId: instanceId });
+            if (count === 0) {
+                sendProgress(0, '');
+                setRPCLauncher();
             }
-        }
+        });
+
+        // Limpiar currentOperation ANTES de lanzar
+        currentOperation = null;
 
         launcher.launch(opts);
 
