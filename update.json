@@ -1,10 +1,10 @@
 {
-  "version": "2.2.6",
-  "notes": "\u2022 Fix: ENOENT al iniciar FussionBorn \u2014 el launcher ahora verifica que el JSON de NeoForge/Forge existe antes de lanzar.\n\u2022 Instalaci\u00f3n 1-click de FussionBorn m\u00e1s robusta.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.6/app.asar",
+  "version": "2.2.7",
+  "notes": "\u2022 Fix: JVM args de NeoForge inyectados correctamente (module path + --add-opens/--add-exports).\n\u2022 Corrige error 'Module cpw.mods.securejarhandler not found' en Java 21+.\n\u2022 Descarga autom\u00e1tica de mods desde CurseForge en FussionBorn.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.7/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.6/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.7/app.asar"
     }
   },
   "modpack": {
