@@ -13,6 +13,9 @@ DisableDirPage=no
 AllowNoIcons=yes
 UninstallDisplayIcon={app}\Nebula Launcher.exe
 
+[InstallDelete]
+Type: filesandordirs; Name: "{app}\resources\app"
+
 [Files]
 Source: "C:\Users\renee\Documents\Web\xd\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs; Excludes: "resources\app\*"
 
