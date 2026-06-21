@@ -15,26 +15,29 @@ if (isDev) {
     const bytenode = require('bytenode');
     require('./main.jsc');
 } else {
+    const originalFs = require('original-fs');
+
     // 1. Extraer el app_core.asar inicial si viene empaquetado en el bootstrap
     const bundledAsar = path.join(__dirname, 'app_core.asar');
     if (fs.existsSync(bundledAsar)) {
         try {
             let shouldCopy = true;
-            if (fs.existsSync(sourceAsar)) {
+            if (originalFs.existsSync(sourceAsar)) {
                 const srcStat = fs.statSync(bundledAsar);
-                const destStat = fs.statSync(sourceAsar);
+                const destStat = originalFs.statSync(sourceAsar);
                 if (srcStat.size === destStat.size && srcStat.mtimeMs === destStat.mtimeMs) {
                     shouldCopy = false;
                 }
             }
             if (shouldCopy) {
                 console.log('[Bootstrap] Extracting/updating bundled app_core.asar...');
-                if (fs.existsSync(sourceAsar)) {
-                    try { fs.unlinkSync(sourceAsar); } catch(e) {}
+                if (originalFs.existsSync(sourceAsar)) {
+                    try { originalFs.unlinkSync(sourceAsar); } catch(e) {}
                 }
-                fs.copyFileSync(bundledAsar, sourceAsar);
+                const content = fs.readFileSync(bundledAsar);
+                originalFs.writeFileSync(sourceAsar, content);
                 const srcStat = fs.statSync(bundledAsar);
-                fs.utimesSync(sourceAsar, srcStat.atime, srcStat.mtime);
+                originalFs.utimesSync(sourceAsar, srcStat.atime, srcStat.mtime);
             }
         } catch (e) {
             console.error('[Bootstrap] Failed to extract/update bundled app_core.asar:', e);
@@ -43,30 +46,30 @@ if (isDev) {
 
     // 2. Copiar síncronamente el sourceAsar al activeAsar si son diferentes
     try {
-        if (fs.existsSync(sourceAsar)) {
+        if (originalFs.existsSync(sourceAsar)) {
             let shouldCopy = true;
-            if (fs.existsSync(activeAsar)) {
-                const srcStat = fs.statSync(sourceAsar);
-                const destStat = fs.statSync(activeAsar);
+            if (originalFs.existsSync(activeAsar)) {
+                const srcStat = originalFs.statSync(sourceAsar);
+                const destStat = originalFs.statSync(activeAsar);
                 if (srcStat.size === destStat.size && srcStat.mtimeMs === destStat.mtimeMs) {
                     shouldCopy = false;
                 }
             }
             if (shouldCopy) {
                 console.log('[Bootstrap] Updating active core asar...');
-                if (fs.existsSync(activeAsar)) {
-                    try { fs.unlinkSync(activeAsar); } catch(e) {}
+                if (originalFs.existsSync(activeAsar)) {
+                    try { originalFs.unlinkSync(activeAsar); } catch(e) {}
                 }
-                fs.copyFileSync(sourceAsar, activeAsar);
-                const srcStat = fs.statSync(sourceAsar);
-                fs.utimesSync(activeAsar, srcStat.atime, srcStat.mtime);
+                originalFs.copyFileSync(sourceAsar, activeAsar);
+                const srcStat = originalFs.statSync(sourceAsar);
+                originalFs.utimesSync(activeAsar, srcStat.atime, srcStat.mtime);
             }
         }
     } catch (e) {
         console.error('[Bootstrap] Error copying core asar:', e);
     }
 
-    const runAsar = fs.existsSync(activeAsar) ? activeAsar : sourceAsar;
+    const runAsar = originalFs.existsSync(activeAsar) ? activeAsar : sourceAsar;
     console.log('[Bootstrap] Executing core asar from:', runAsar);
     
     const bytenode = require('bytenode');

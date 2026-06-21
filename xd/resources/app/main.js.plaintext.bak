@@ -146,7 +146,7 @@ function createWindow() {
         icon: path.join(__dirname, 'icon.ico'),
         webPreferences: { nodeIntegration: false, contextIsolation: true }
     });
-    splash.loadFile('splash.html');
+    splash.loadFile(path.join(__dirname, 'splash.html'));
     splash.center();
 
     // 2. Crear ventana principal oculta
@@ -159,7 +159,7 @@ function createWindow() {
         backgroundColor: '#00000000',
         webPreferences: { nodeIntegration: true, contextIsolation: false }
     });
-    win.loadFile('index.html');
+    win.loadFile(path.join(__dirname, 'index.html'));
     
     // AUTOMATION TEST HARNESS
     win.webContents.on('did-finish-load', () => {
