@@ -6,7 +6,7 @@ console.log('[Bootstrap] Starting launcher bootstrap...');
 
 const resourcesDir = path.join(path.dirname(process.execPath), 'resources');
 const sourceAsar = path.join(resourcesDir, 'app_core.asar');
-const activeAsar = path.join(resourcesDir, 'app_core.asar.active');
+const activeAsar = path.join(resourcesDir, 'app_core_active.asar');
 
 const isDev = !app.isPackaged;
 
