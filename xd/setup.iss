@@ -18,7 +18,23 @@ PrivilegesRequired=lowest
 Type: filesandordirs; Name: "{app}\resources\app"
 
 [Files]
-Source: ".\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs; Excludes: "resources\app\*,resources\app_bootstrap\*,fussionborn.zip,*.asar.bak,*.asar.tmp,*.log,*.txt,compile_*.js,pack_asar.py,setup.iss,err.txt,out.txt,search_debug.txt"
+; ── Binarios principales (exe, dll, pak, bin) ──
+Source: "Nebula Launcher.exe"; DestDir: "{app}"
+Source: "*.dll"; DestDir: "{app}"
+Source: "*.bin"; DestDir: "{app}"
+Source: "*.dat"; DestDir: "{app}"
+Source: "*.pak"; DestDir: "{app}"
+; ── Resources (asar files, elevate.exe) ──
+Source: "resources\app.asar"; DestDir: "{app}\resources"
+Source: "resources\app_core.asar"; DestDir: "{app}\resources"
+Source: "resources\elevate.exe"; DestDir: "{app}\resources"
+; ── Locales ──
+Source: "locales\*"; DestDir: "{app}\locales"; Flags: recursesubdirs
+; ── License ──
+Source: "LICENSE.*"; DestDir: "{app}"
+Source: "LICENSES.*"; DestDir: "{app}"
+; ── Config files ──
+Source: "vk_swiftshader_icd.json"; DestDir: "{app}"
 
 [Icons]
 Name: "{group}\Nebula Launcher"; Filename: "{app}\Nebula Launcher.exe"
