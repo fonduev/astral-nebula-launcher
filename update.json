@@ -1,10 +1,10 @@
 {
-  "version": "2.2.9",
-  "notes": "• Fix: Corregido toggle de múltiples instancias en configuraciones.\n• Fix: Resuelto crash de NeoForge (securejarhandler no encontrado) al iniciar juego.\n• Fix: Corregido fallo de actualización automática al reiniciar por espacios en la ruta.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.9/app.asar",
+  "version": "3.0.0",
+  "notes": "• Fix: Corregido crash de NeoForge (securejarhandler no encontrado) debido a deduplicación de argumentos de JVM.\n• Fix: Resuelto fallo de actualizaciones automáticas donde se descargaba el nuevo asar pero no se aplicaba al reiniciar.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.0/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v2.2.9/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.0/app.asar"
     }
   },
   "modpack": {
