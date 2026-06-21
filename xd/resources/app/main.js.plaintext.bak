@@ -3574,8 +3574,9 @@ ipcMain.on('apply-update', () => {
 
     const batContent = [
         '@echo off',
+        'taskkill /f /im "Nebula Launcher.exe" 2>nul',
         'set /a count=0',
-        'ping -n 8 127.0.0.1 >nul',
+        'ping -n 3 127.0.0.1 >nul',
         ':retry',
         'set /a count+=1',
         'if %count% gtr 10 goto launch',
@@ -3588,10 +3589,6 @@ ipcMain.on('apply-update', () => {
         `)`,
         `if exist "${currentAppDir}" (`,
         `  rd /s /q "${currentAppDir}" 2>nul`,
-        `  if exist "${currentAppDir}" (`,
-        `    ping -n 2 127.0.0.1 >nul`,
-        `    goto retry`,
-        `  )`,
         `)`,
         `if exist "${updateAsar}" (`,
         `  move /y "${updateAsar}" "${currentAsar}"`,
