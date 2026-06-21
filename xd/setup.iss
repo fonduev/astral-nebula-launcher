@@ -1,10 +1,10 @@
 [Setup]
 AppName=Nebula Launcher
-AppVersion=2.2.9
+AppVersion=3.0.0
 DefaultDirName={localappdata}\Programs\Nebula Launcher
 DefaultGroupName=Nebula Launcher
 OutputDir=C:\Users\renee\Documents\Web
-OutputBaseFilename=Nebula.Launcher.Setup.2.2.9
+OutputBaseFilename=Nebula.Launcher.Setup.3.0.0
 SetupIconFile=C:\Users\renee\Documents\Web\icon.ico
 Compression=lzma
 SolidCompression=yes
@@ -12,6 +12,7 @@ DisableProgramGroupPage=yes
 DisableDirPage=no
 AllowNoIcons=yes
 UninstallDisplayIcon={app}\Nebula Launcher.exe
+PrivilegesRequired=lowest
 
 [InstallDelete]
 Type: filesandordirs; Name: "{app}\resources\app"
