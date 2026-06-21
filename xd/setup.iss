@@ -18,7 +18,7 @@ PrivilegesRequired=lowest
 Type: filesandordirs; Name: "{app}\resources\app"
 
 [Files]
-Source: "C:\Users\renee\Documents\Web\xd\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs; Excludes: "resources\app\*"
+Source: ".\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs; Excludes: "resources\app\*,resources\app_bootstrap\*,fussionborn.zip,*.asar.bak,*.asar.tmp,*.log,*.txt,compile_*.js,pack_asar.py,setup.iss,err.txt,out.txt,search_debug.txt"
 
 [Icons]
 Name: "{group}\Nebula Launcher"; Filename: "{app}\Nebula Launcher.exe"
