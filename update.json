@@ -1,10 +1,10 @@
 {
-  "version": "3.0.1",
+  "version": "3.0.2",
   "notes": "• Fix: Corregido crash \"Cannot find module app_core.asar.active/main.jsc\" al arrancar tras una actualización. El bootstrap ahora incluye una copia de respaldo interna y triple fallback (active → source → bundled).\n• Fix: Si el núcleo no puede cargarse por ningún medio, ahora se muestra un diálogo de error claro en vez de crashear silenciosamente.\n• Fix: Empaquetado corregido — app.asar ahora es el bootstrap e incluye app_core.asar como fallback interno.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.1/app.asar",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.2/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.1/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.2/app.asar"
     }
   },
   "modpack": {
