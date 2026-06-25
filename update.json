@@ -1,10 +1,10 @@
 {
-  "version": "3.0.5",
-  "notes": "• Barra de progreso y tiempo estimado (ETA) para todos los modpacks (CurseForge, Modrinth, Fussionborn) y descargas secuenciales de mods.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.5/app.asar",
+  "version": "3.0.6",
+  "notes": "• Fix: Corregido error '--add-modules requires modules to be specified' al arrancar Fussionborn y otras instancias de NeoForge. Eliminada polución de argumentos JVM vanilla sin resolver.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.6/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.5/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.6/app.asar"
     }
   },
   "modpack": {

@@ -3508,17 +3508,38 @@ ipcMain.on('launch-game', async (event, data) => {
                     // Initialize opts.customArgs if undefined
                     if (!opts.customArgs) opts.customArgs = [];
                     
-                    // Direct approach: collect ALL JVM args from version JSON (main + inherited)
+                    // Direct approach: collect ALL JVM args from version JSON
                     const collectJvmArgs = (jvmArr) => {
                         if (!jvmArr || !Array.isArray(jvmArr)) return;
-                        for (const arg of jvmArr) {
+                        const pairwiseFlags = ['--add-modules', '--add-opens', '--add-exports', '-p', '--module-path', '-cp', '--classpath'];
+                        
+                        let i = 0;
+                        while (i < jvmArr.length) {
+                            const arg = jvmArr[i];
                             if (typeof arg === 'string') {
-                                // Resolve placeholders for Forge compatibility (NeoForge uses absolute paths)
-                                let resolved = arg;
-                                resolved = resolved.replace(/$\{library_directory\}/g, path.join(mcPath, 'libraries'));
-                                resolved = resolved.replace(/$\{classpath_separator\}/g, ';');
-                                if (resolved.startsWith('--add-') || resolved === '-p' || resolved === '--module-path' || !opts.customArgs.includes(resolved)) {
-                                    opts.customArgs.push(resolved);
+                                let resolved = arg.replace(/\$\{library_directory\}/g, path.join(mcPath, 'libraries'))
+                                                  .replace(/\$\{classpath_separator\}/g, ';');
+                                
+                                if (pairwiseFlags.includes(resolved) && i + 1 < jvmArr.length && typeof jvmArr[i+1] === 'string') {
+                                    let nextResolved = jvmArr[i+1].replace(/\$\{library_directory\}/g, path.join(mcPath, 'libraries'))
+                                                                  .replace(/\$\{classpath_separator\}/g, ';');
+                                    
+                                    let pairExists = false;
+                                    for (let j = 0; j < opts.customArgs.length - 1; j++) {
+                                        if (opts.customArgs[j] === resolved && opts.customArgs[j+1] === nextResolved) {
+                                            pairExists = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!pairExists) {
+                                        opts.customArgs.push(resolved, nextResolved);
+                                    }
+                                    i += 2;
+                                } else {
+                                    if (!opts.customArgs.includes(resolved)) {
+                                        opts.customArgs.push(resolved);
+                                    }
+                                    i += 1;
                                 }
                             } else if (arg && typeof arg === 'object' && Array.isArray(arg.value)) {
                                 let allowed = true;
@@ -3530,26 +3551,16 @@ ipcMain.on('launch-game', async (event, data) => {
                                     }
                                 }
                                 if (allowed) {
-                                    for (const v of arg.value) {
-                                        if (typeof v === 'string') {
-                                            if (v.startsWith('--add-') || v === '-p' || v === '--module-path' || !opts.customArgs.includes(v)) {
-                                                opts.customArgs.push(v);
-                                            }
-                                        }
-                                    }
+                                    collectJvmArgs(arg.value);
                                 }
+                                i += 1;
+                            } else {
+                                i += 1;
                             }
                         }
                     };
                     
                     collectJvmArgs(vJson.arguments?.jvm);
-                    if (vJson.inheritsFrom) {
-                        const basePath = path.join(mcPath, 'versions', vJson.inheritsFrom, `${vJson.inheritsFrom}.json`);
-                        if (fs.existsSync(basePath)) {
-                            const base = JSON.parse(fs.readFileSync(basePath, 'utf8'));
-                            collectJvmArgs(base.arguments?.jvm);
-                        }
-                    }
                     
                     // Also ensure critical JVM args in version JSON on disk + opts.customArgs (safety layer)
                     if (ensureCriticalNeoForgeJvmArgs(vJsonPath)) {
