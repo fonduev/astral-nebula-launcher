@@ -3686,19 +3686,21 @@ ipcMain.on('apply-update', () => {
 
     try {
         fs.writeFileSync(batPath, batContent, 'utf8');
-        // Usar spawn con shell: true para manejar comillas y espacios de forma nativa.
-        const child = spawn(batPath, [], {
+        // Ejecutar cmd.exe /c batPath de forma explícita y detached para evitar problemas de rutas con espacios
+        const child = spawn('cmd.exe', ['/c', batPath], {
             detached: true,
             stdio: 'ignore',
-            windowsHide: true,
-            shell: true
+            windowsHide: true
         });
         child.unref();
     } catch (e) {
         console.error('[apply-update] bat error:', e);
     }
 
-    app.quit();
+    // Retrasar 1 segundo la salida para dar tiempo a Windows de registrar e iniciar el proceso secundario
+    setTimeout(() => {
+        app.quit();
+    }, 1000);
 });
 
 

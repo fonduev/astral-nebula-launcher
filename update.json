@@ -1,10 +1,10 @@
 {
-  "version": "3.0.3",
-  "notes": "• Fix: Añadido soporte de descarga de mods de CurseForge con fallback de API key oficial y URLs de CDN alternativas para solucionar fallas al descargar y errores de inicio/crasheos en varios modpacks.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.3/app.asar",
+  "version": "3.0.4",
+  "notes": "• Fix: Añadido soporte de descarga de mods de CurseForge con fallback de API key y reconstrucción de URLs de CDN. Corregido error al instalar actualizaciones en Windows con rutas con espacios.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.4/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.3/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.4/app.asar"
     }
   },
   "modpack": {
