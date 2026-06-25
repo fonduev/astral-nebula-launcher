@@ -1,0 +1,442 @@
+﻿2026-06-21 10:04:06.889   Log opened. (Time zone: UTC-04:00)
+2026-06-21 10:04:06.890   Setup version: Inno Setup version 6.7.3
+2026-06-21 10:04:06.890   Original Setup EXE: C:\Users\renee\Documents\Web\Nebula.Launcher.Setup.3.0.1.exe
+2026-06-21 10:04:06.890   Setup command line: /SL5="$C0248,81369333,936960,C:\Users\renee\Documents\Web\Nebula.Launcher.Setup.3.0.1.exe" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /LOG=C:\Users\renee\Documents\Web\install_log.txt 
+2026-06-21 10:04:06.890   Compatibility mode: Yes (ElevateCreateProcess)
+2026-06-21 10:04:06.890   Windows version: 10.0.26200
+2026-06-21 10:04:06.890   Windows architecture: x64 (64-bit)
+2026-06-21 10:04:06.890   Machine types supported by system: x86 x64
+2026-06-21 10:04:06.890   User privileges: None
+2026-06-21 10:04:06.894   Administrative install mode: No
+2026-06-21 10:04:06.894   Install mode root key: HKEY_CURRENT_USER
+2026-06-21 10:04:06.894   64-bit install mode: No
+2026-06-21 10:04:06.894   RedirectionGuard status for current process: Enabled in enforcing mode
+2026-06-21 10:04:06.897   Created temporary directory: C:\Users\renee\AppData\Local\Temp\is-7MEHR281M1.tmp
+2026-06-21 10:04:07.303   Found 8 files to register with RestartManager.
+2026-06-21 10:04:07.303   Calling RestartManager's RmGetList.
+2026-06-21 10:04:07.312   RmGetList finished successfully.
+2026-06-21 10:04:07.312   RestartManager found no applications using one of our files.
+2026-06-21 10:04:07.318   Starting the installation process.
+2026-06-21 10:04:07.320   Directory for uninstall files: C:\Users\renee\AppData\Local\Programs\Nebula Launcher
+2026-06-21 10:04:07.322   Creating new uninstall log: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\unins000.dat
+2026-06-21 10:04:07.399   -- File entry --
+2026-06-21 10:04:07.399   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\unins000.exe
+2026-06-21 10:04:07.426   Time stamp of our file: 2026-06-21 10:04:06.559
+2026-06-21 10:04:07.426   Installing the file.
+2026-06-21 10:04:07.438   Successfully installed the file.
+2026-06-21 10:04:07.438   -- File entry --
+2026-06-21 10:04:07.438   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\Nebula Launcher.exe
+2026-06-21 10:04:07.439   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:07.439   Dest file exists.
+2026-06-21 10:04:07.439   Time stamp of existing file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:07.439   Version of our file: 2.0.3.0
+2026-06-21 10:04:07.516   Version of existing file: 2.0.3.0
+2026-06-21 10:04:07.516   Same version. Skipping.
+2026-06-21 10:04:07.516   -- File entry --
+2026-06-21 10:04:07.516   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\d3dcompiler_47.dll
+2026-06-21 10:04:07.517   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:07.517   Dest file exists.
+2026-06-21 10:04:07.517   Time stamp of existing file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:07.517   Version of our file: 10.0.22621.2428
+2026-06-21 10:04:07.524   Version of existing file: 10.0.22621.2428
+2026-06-21 10:04:07.524   Same version. Skipping.
+2026-06-21 10:04:07.524   -- File entry --
+2026-06-21 10:04:07.525   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\ffmpeg.dll
+2026-06-21 10:04:07.525   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:07.525   Dest file exists.
+2026-06-21 10:04:07.525   Time stamp of existing file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:07.525   Version of our file: (none)
+2026-06-21 10:04:07.528   Version of existing file: (none)
+2026-06-21 10:04:07.529   Installing the file.
+2026-06-21 10:04:11.071   Successfully installed the file.
+2026-06-21 10:04:11.071   -- File entry --
+2026-06-21 10:04:11.071   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\libEGL.dll
+2026-06-21 10:04:11.071   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.072   Dest file exists.
+2026-06-21 10:04:11.072   Time stamp of existing file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.072   Version of our file: 2.1.22785.0
+2026-06-21 10:04:11.075   Version of existing file: 2.1.22785.0
+2026-06-21 10:04:11.075   Same version. Skipping.
+2026-06-21 10:04:11.075   -- File entry --
+2026-06-21 10:04:11.075   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\libGLESv2.dll
+2026-06-21 10:04:11.076   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.076   Dest file exists.
+2026-06-21 10:04:11.076   Time stamp of existing file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.076   Version of our file: 2.1.22785.0
+2026-06-21 10:04:11.083   Version of existing file: 2.1.22785.0
+2026-06-21 10:04:11.083   Same version. Skipping.
+2026-06-21 10:04:11.083   -- File entry --
+2026-06-21 10:04:11.084   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\vk_swiftshader.dll
+2026-06-21 10:04:11.084   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.084   Dest file exists.
+2026-06-21 10:04:11.084   Time stamp of existing file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.084   Version of our file: 5.0.0.1
+2026-06-21 10:04:11.091   Version of existing file: 5.0.0.1
+2026-06-21 10:04:11.091   Same version. Skipping.
+2026-06-21 10:04:11.091   -- File entry --
+2026-06-21 10:04:11.091   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\vulkan-1.dll
+2026-06-21 10:04:11.092   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.092   Installing the file.
+2026-06-21 10:04:11.316   Successfully installed the file.
+2026-06-21 10:04:11.316   -- File entry --
+2026-06-21 10:04:11.316   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\snapshot_blob.bin
+2026-06-21 10:04:11.317   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.317   Installing the file.
+2026-06-21 10:04:11.327   Successfully installed the file.
+2026-06-21 10:04:11.327   -- File entry --
+2026-06-21 10:04:11.327   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\v8_context_snapshot.bin
+2026-06-21 10:04:11.328   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.328   Dest file exists.
+2026-06-21 10:04:11.328   Time stamp of existing file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.328   Version of our file: (none)
+2026-06-21 10:04:11.339   Version of existing file: (none)
+2026-06-21 10:04:11.339   Installing the file.
+2026-06-21 10:04:11.357   Successfully installed the file.
+2026-06-21 10:04:11.357   -- File entry --
+2026-06-21 10:04:11.357   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\icudtl.dat
+2026-06-21 10:04:11.358   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.358   Dest file exists.
+2026-06-21 10:04:11.358   Time stamp of existing file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.358   Version of our file: (none)
+2026-06-21 10:04:11.367   Version of existing file: (none)
+2026-06-21 10:04:11.368   Installing the file.
+2026-06-21 10:04:11.675   Successfully installed the file.
+2026-06-21 10:04:11.675   -- File entry --
+2026-06-21 10:04:11.675   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\chrome_100_percent.pak
+2026-06-21 10:04:11.676   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.676   Installing the file.
+2026-06-21 10:04:11.689   Successfully installed the file.
+2026-06-21 10:04:11.689   -- File entry --
+2026-06-21 10:04:11.689   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\chrome_200_percent.pak
+2026-06-21 10:04:11.690   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.690   Installing the file.
+2026-06-21 10:04:11.703   Successfully installed the file.
+2026-06-21 10:04:11.703   -- File entry --
+2026-06-21 10:04:11.703   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\resources.pak
+2026-06-21 10:04:11.703   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:11.703   Installing the file.
+2026-06-21 10:04:12.039   Successfully installed the file.
+2026-06-21 10:04:12.039   -- File entry --
+2026-06-21 10:04:12.039   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\resources\app.asar
+2026-06-21 10:04:12.040   Time stamp of our file: 2026-06-21 10:02:16.000
+2026-06-21 10:04:12.040   Dest file exists.
+2026-06-21 10:04:12.040   Time stamp of existing file: 2026-06-20 20:53:46.000
+2026-06-21 10:04:12.040   Version of our file: (none)
+2026-06-21 10:04:12.050   Version of existing file: (none)
+2026-06-21 10:04:12.050   Installing the file.
+2026-06-21 10:04:12.289   Successfully installed the file.
+2026-06-21 10:04:12.289   -- File entry --
+2026-06-21 10:04:12.289   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\resources\app_core.asar
+2026-06-21 10:04:12.290   Time stamp of our file: 2026-06-21 10:02:16.000
+2026-06-21 10:04:12.290   Installing the file.
+2026-06-21 10:04:12.369   Successfully installed the file.
+2026-06-21 10:04:12.369   -- File entry --
+2026-06-21 10:04:12.370   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\resources\elevate.exe
+2026-06-21 10:04:12.370   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.370   Installing the file.
+2026-06-21 10:04:12.378   Successfully installed the file.
+2026-06-21 10:04:12.378   -- File entry --
+2026-06-21 10:04:12.379   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\af.pak
+2026-06-21 10:04:12.379   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.379   Installing the file.
+2026-06-21 10:04:12.380   Creating directory: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales
+2026-06-21 10:04:12.395   Successfully installed the file.
+2026-06-21 10:04:12.396   -- File entry --
+2026-06-21 10:04:12.396   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\am.pak
+2026-06-21 10:04:12.396   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.396   Installing the file.
+2026-06-21 10:04:12.416   Successfully installed the file.
+2026-06-21 10:04:12.416   -- File entry --
+2026-06-21 10:04:12.417   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\ar.pak
+2026-06-21 10:04:12.417   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.417   Installing the file.
+2026-06-21 10:04:12.438   Successfully installed the file.
+2026-06-21 10:04:12.439   -- File entry --
+2026-06-21 10:04:12.439   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\bg.pak
+2026-06-21 10:04:12.439   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.439   Installing the file.
+2026-06-21 10:04:12.459   Successfully installed the file.
+2026-06-21 10:04:12.460   -- File entry --
+2026-06-21 10:04:12.460   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\bn.pak
+2026-06-21 10:04:12.460   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.460   Installing the file.
+2026-06-21 10:04:12.483   Successfully installed the file.
+2026-06-21 10:04:12.484   -- File entry --
+2026-06-21 10:04:12.484   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\ca.pak
+2026-06-21 10:04:12.484   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.484   Installing the file.
+2026-06-21 10:04:12.501   Successfully installed the file.
+2026-06-21 10:04:12.501   -- File entry --
+2026-06-21 10:04:12.502   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\cs.pak
+2026-06-21 10:04:12.502   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.502   Installing the file.
+2026-06-21 10:04:12.519   Successfully installed the file.
+2026-06-21 10:04:12.520   -- File entry --
+2026-06-21 10:04:12.520   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\da.pak
+2026-06-21 10:04:12.520   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.520   Installing the file.
+2026-06-21 10:04:12.536   Successfully installed the file.
+2026-06-21 10:04:12.537   -- File entry --
+2026-06-21 10:04:12.537   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\de.pak
+2026-06-21 10:04:12.537   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.537   Installing the file.
+2026-06-21 10:04:12.554   Successfully installed the file.
+2026-06-21 10:04:12.554   -- File entry --
+2026-06-21 10:04:12.555   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\el.pak
+2026-06-21 10:04:12.555   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.555   Installing the file.
+2026-06-21 10:04:12.577   Successfully installed the file.
+2026-06-21 10:04:12.577   -- File entry --
+2026-06-21 10:04:12.577   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\en-GB.pak
+2026-06-21 10:04:12.578   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.578   Installing the file.
+2026-06-21 10:04:12.592   Successfully installed the file.
+2026-06-21 10:04:12.592   -- File entry --
+2026-06-21 10:04:12.593   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\en-US.pak
+2026-06-21 10:04:12.593   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.593   Installing the file.
+2026-06-21 10:04:12.604   Successfully installed the file.
+2026-06-21 10:04:12.604   -- File entry --
+2026-06-21 10:04:12.604   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\es-419.pak
+2026-06-21 10:04:12.605   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.605   Installing the file.
+2026-06-21 10:04:12.620   Successfully installed the file.
+2026-06-21 10:04:12.620   -- File entry --
+2026-06-21 10:04:12.620   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\es.pak
+2026-06-21 10:04:12.620   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.620   Installing the file.
+2026-06-21 10:04:12.634   Successfully installed the file.
+2026-06-21 10:04:12.634   -- File entry --
+2026-06-21 10:04:12.634   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\et.pak
+2026-06-21 10:04:12.635   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.635   Installing the file.
+2026-06-21 10:04:12.650   Successfully installed the file.
+2026-06-21 10:04:12.650   -- File entry --
+2026-06-21 10:04:12.650   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\fa.pak
+2026-06-21 10:04:12.651   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.651   Installing the file.
+2026-06-21 10:04:12.669   Successfully installed the file.
+2026-06-21 10:04:12.670   -- File entry --
+2026-06-21 10:04:12.670   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\fi.pak
+2026-06-21 10:04:12.670   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.670   Installing the file.
+2026-06-21 10:04:12.686   Successfully installed the file.
+2026-06-21 10:04:12.686   -- File entry --
+2026-06-21 10:04:12.687   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\fil.pak
+2026-06-21 10:04:12.687   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.687   Installing the file.
+2026-06-21 10:04:12.703   Successfully installed the file.
+2026-06-21 10:04:12.703   -- File entry --
+2026-06-21 10:04:12.703   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\fr.pak
+2026-06-21 10:04:12.704   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.704   Installing the file.
+2026-06-21 10:04:12.720   Successfully installed the file.
+2026-06-21 10:04:12.720   -- File entry --
+2026-06-21 10:04:12.720   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\gu.pak
+2026-06-21 10:04:12.721   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.721   Installing the file.
+2026-06-21 10:04:12.744   Successfully installed the file.
+2026-06-21 10:04:12.744   -- File entry --
+2026-06-21 10:04:12.744   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\he.pak
+2026-06-21 10:04:12.745   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.745   Installing the file.
+2026-06-21 10:04:12.762   Successfully installed the file.
+2026-06-21 10:04:12.762   -- File entry --
+2026-06-21 10:04:12.762   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\hi.pak
+2026-06-21 10:04:12.763   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.763   Installing the file.
+2026-06-21 10:04:12.787   Successfully installed the file.
+2026-06-21 10:04:12.787   -- File entry --
+2026-06-21 10:04:12.788   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\hr.pak
+2026-06-21 10:04:12.788   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.788   Installing the file.
+2026-06-21 10:04:12.804   Successfully installed the file.
+2026-06-21 10:04:12.804   -- File entry --
+2026-06-21 10:04:12.804   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\hu.pak
+2026-06-21 10:04:12.805   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.805   Installing the file.
+2026-06-21 10:04:12.824   Successfully installed the file.
+2026-06-21 10:04:12.824   -- File entry --
+2026-06-21 10:04:12.824   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\id.pak
+2026-06-21 10:04:12.825   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.825   Installing the file.
+2026-06-21 10:04:12.839   Successfully installed the file.
+2026-06-21 10:04:12.839   -- File entry --
+2026-06-21 10:04:12.839   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\it.pak
+2026-06-21 10:04:12.840   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.840   Installing the file.
+2026-06-21 10:04:12.855   Successfully installed the file.
+2026-06-21 10:04:12.857   -- File entry --
+2026-06-21 10:04:12.857   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\ja.pak
+2026-06-21 10:04:12.857   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.857   Installing the file.
+2026-06-21 10:04:12.874   Successfully installed the file.
+2026-06-21 10:04:12.874   -- File entry --
+2026-06-21 10:04:12.874   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\kn.pak
+2026-06-21 10:04:12.874   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.874   Installing the file.
+2026-06-21 10:04:12.898   Successfully installed the file.
+2026-06-21 10:04:12.898   -- File entry --
+2026-06-21 10:04:12.900   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\ko.pak
+2026-06-21 10:04:12.900   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.900   Installing the file.
+2026-06-21 10:04:12.915   Successfully installed the file.
+2026-06-21 10:04:12.915   -- File entry --
+2026-06-21 10:04:12.916   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\lt.pak
+2026-06-21 10:04:12.916   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.916   Installing the file.
+2026-06-21 10:04:12.932   Successfully installed the file.
+2026-06-21 10:04:12.933   -- File entry --
+2026-06-21 10:04:12.933   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\lv.pak
+2026-06-21 10:04:12.933   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.933   Installing the file.
+2026-06-21 10:04:12.950   Successfully installed the file.
+2026-06-21 10:04:12.950   -- File entry --
+2026-06-21 10:04:12.952   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\ml.pak
+2026-06-21 10:04:12.952   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.952   Installing the file.
+2026-06-21 10:04:12.976   Successfully installed the file.
+2026-06-21 10:04:12.976   -- File entry --
+2026-06-21 10:04:12.977   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\mr.pak
+2026-06-21 10:04:12.977   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:12.977   Installing the file.
+2026-06-21 10:04:12.999   Successfully installed the file.
+2026-06-21 10:04:12.999   -- File entry --
+2026-06-21 10:04:12.999   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\ms.pak
+2026-06-21 10:04:13.000   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.000   Installing the file.
+2026-06-21 10:04:13.016   Successfully installed the file.
+2026-06-21 10:04:13.016   -- File entry --
+2026-06-21 10:04:13.016   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\nb.pak
+2026-06-21 10:04:13.016   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.016   Installing the file.
+2026-06-21 10:04:13.033   Successfully installed the file.
+2026-06-21 10:04:13.033   -- File entry --
+2026-06-21 10:04:13.033   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\nl.pak
+2026-06-21 10:04:13.033   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.033   Installing the file.
+2026-06-21 10:04:13.049   Successfully installed the file.
+2026-06-21 10:04:13.049   -- File entry --
+2026-06-21 10:04:13.050   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\pl.pak
+2026-06-21 10:04:13.050   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.050   Installing the file.
+2026-06-21 10:04:13.067   Successfully installed the file.
+2026-06-21 10:04:13.067   -- File entry --
+2026-06-21 10:04:13.067   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\pt-BR.pak
+2026-06-21 10:04:13.067   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.067   Installing the file.
+2026-06-21 10:04:13.084   Successfully installed the file.
+2026-06-21 10:04:13.084   -- File entry --
+2026-06-21 10:04:13.084   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\pt-PT.pak
+2026-06-21 10:04:13.085   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.085   Installing the file.
+2026-06-21 10:04:13.098   Successfully installed the file.
+2026-06-21 10:04:13.098   -- File entry --
+2026-06-21 10:04:13.099   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\ro.pak
+2026-06-21 10:04:13.099   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.099   Installing the file.
+2026-06-21 10:04:13.115   Successfully installed the file.
+2026-06-21 10:04:13.115   -- File entry --
+2026-06-21 10:04:13.115   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\ru.pak
+2026-06-21 10:04:13.116   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.116   Installing the file.
+2026-06-21 10:04:13.137   Successfully installed the file.
+2026-06-21 10:04:13.137   -- File entry --
+2026-06-21 10:04:13.138   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\sk.pak
+2026-06-21 10:04:13.138   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.138   Installing the file.
+2026-06-21 10:04:13.155   Successfully installed the file.
+2026-06-21 10:04:13.155   -- File entry --
+2026-06-21 10:04:13.156   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\sl.pak
+2026-06-21 10:04:13.156   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.156   Installing the file.
+2026-06-21 10:04:13.171   Successfully installed the file.
+2026-06-21 10:04:13.171   -- File entry --
+2026-06-21 10:04:13.172   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\sr.pak
+2026-06-21 10:04:13.172   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.172   Installing the file.
+2026-06-21 10:04:13.192   Successfully installed the file.
+2026-06-21 10:04:13.192   -- File entry --
+2026-06-21 10:04:13.192   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\sv.pak
+2026-06-21 10:04:13.192   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.192   Installing the file.
+2026-06-21 10:04:13.208   Successfully installed the file.
+2026-06-21 10:04:13.209   -- File entry --
+2026-06-21 10:04:13.209   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\sw.pak
+2026-06-21 10:04:13.209   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.209   Installing the file.
+2026-06-21 10:04:13.225   Successfully installed the file.
+2026-06-21 10:04:13.225   -- File entry --
+2026-06-21 10:04:13.225   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\ta.pak
+2026-06-21 10:04:13.226   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.226   Installing the file.
+2026-06-21 10:04:13.251   Successfully installed the file.
+2026-06-21 10:04:13.251   -- File entry --
+2026-06-21 10:04:13.252   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\te.pak
+2026-06-21 10:04:13.252   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.252   Installing the file.
+2026-06-21 10:04:13.275   Successfully installed the file.
+2026-06-21 10:04:13.277   -- File entry --
+2026-06-21 10:04:13.277   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\th.pak
+2026-06-21 10:04:13.277   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.277   Installing the file.
+2026-06-21 10:04:13.299   Successfully installed the file.
+2026-06-21 10:04:13.299   -- File entry --
+2026-06-21 10:04:13.299   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\tr.pak
+2026-06-21 10:04:13.299   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.299   Installing the file.
+2026-06-21 10:04:13.315   Successfully installed the file.
+2026-06-21 10:04:13.315   -- File entry --
+2026-06-21 10:04:13.316   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\uk.pak
+2026-06-21 10:04:13.316   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.316   Installing the file.
+2026-06-21 10:04:13.337   Successfully installed the file.
+2026-06-21 10:04:13.337   -- File entry --
+2026-06-21 10:04:13.337   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\ur.pak
+2026-06-21 10:04:13.337   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.337   Installing the file.
+2026-06-21 10:04:13.356   Successfully installed the file.
+2026-06-21 10:04:13.356   -- File entry --
+2026-06-21 10:04:13.356   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\vi.pak
+2026-06-21 10:04:13.357   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.357   Installing the file.
+2026-06-21 10:04:13.374   Successfully installed the file.
+2026-06-21 10:04:13.375   -- File entry --
+2026-06-21 10:04:13.375   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\zh-CN.pak
+2026-06-21 10:04:13.375   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.375   Installing the file.
+2026-06-21 10:04:13.390   Successfully installed the file.
+2026-06-21 10:04:13.390   -- File entry --
+2026-06-21 10:04:13.390   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\locales\zh-TW.pak
+2026-06-21 10:04:13.391   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.391   Installing the file.
+2026-06-21 10:04:13.405   Successfully installed the file.
+2026-06-21 10:04:13.405   -- File entry --
+2026-06-21 10:04:13.405   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\LICENSE.electron.txt
+2026-06-21 10:04:13.405   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.405   Installing the file.
+2026-06-21 10:04:13.409   Successfully installed the file.
+2026-06-21 10:04:13.409   -- File entry --
+2026-06-21 10:04:13.409   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\LICENSES.chromium.html
+2026-06-21 10:04:13.410   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.410   Installing the file.
+2026-06-21 10:04:13.523   Successfully installed the file.
+2026-06-21 10:04:13.523   -- File entry --
+2026-06-21 10:04:13.523   Dest filename: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\vk_swiftshader_icd.json
+2026-06-21 10:04:13.524   Time stamp of our file: 2026-04-12 22:02:04.000
+2026-06-21 10:04:13.524   Installing the file.
+2026-06-21 10:04:13.527   Successfully installed the file.
+2026-06-21 10:04:13.527   -- Icon entry --
+2026-06-21 10:04:13.527   Dest filename: C:\Users\renee\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Nebula Launcher\Nebula Launcher.lnk
+2026-06-21 10:04:13.528   Creating directory: C:\Users\renee\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Nebula Launcher
+2026-06-21 10:04:13.533   Creating the icon.
+2026-06-21 10:04:13.702   Successfully created the icon.
+2026-06-21 10:04:13.703   Saving uninstall information.
+2026-06-21 10:04:13.703   Creating new uninstall key: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall\Nebula Launcher_is1
+2026-06-21 10:04:13.703   Writing uninstall key values.
+2026-06-21 10:04:13.704   Detected previous administrative 32-bit install? No
+2026-06-21 10:04:13.704   Detected previous administrative 64-bit install? No
+2026-06-21 10:04:13.708   Installation process succeeded.
+2026-06-21 10:04:13.709   Need to restart Windows? No
+2026-06-21 10:04:13.713   Deinitializing Setup.
+2026-06-21 10:04:13.723   Log closed.

@@ -484,13 +484,41 @@ function downloadFile(url, dest, onProgress, opts = {}) {
                 const total = parseInt(res.headers['content-length'] ?? '0');
                 let received = 0;
 
+                const startTime = Date.now();
                 res.on('data', chunk => {
                     received += chunk.length;
                     if (onProgress) {
+                        const elapsed = (Date.now() - startTime) / 1000;
+                        let speedMBps = 0;
+                        let remainingTimeStr = '';
+                        if (elapsed > 0.1) {
+                            const speed = received / elapsed; // bytes/sec
+                            speedMBps = speed / 1048576;
+                            if (total > received && speed > 0) {
+                                const remainingSecs = Math.round((total - received) / speed);
+                                if (remainingSecs > 60) {
+                                    remainingTimeStr = `${Math.floor(remainingSecs / 60)}m ${remainingSecs % 60}s`;
+                                } else {
+                                    remainingTimeStr = `${remainingSecs}s`;
+                                }
+                            }
+                        }
+                        const receivedMB = (received / 1048576).toFixed(1);
+                        const totalMB = (total / 1048576).toFixed(1);
                         if (total > 0) {
-                            onProgress(Math.floor((received / total) * 100));
+                            onProgress(Math.floor((received / total) * 100), receivedMB, {
+                                speedMBps,
+                                remainingTimeStr,
+                                receivedMB,
+                                totalMB
+                            });
                         } else {
-                            onProgress(-1, (received / 1048576).toFixed(1));
+                            onProgress(-1, receivedMB, {
+                                speedMBps,
+                                remainingTimeStr: '',
+                                receivedMB,
+                                totalMB: '0.0'
+                            });
                         }
                     }
                 });
@@ -2190,9 +2218,13 @@ ipcMain.handle('install-fussionborn', async () => {
         if (currentOperation.cancelled) throw new Error('Operación cancelada');
 
         // Timeout de 5 minutos de inactividad para archivos grandes (1.4+ GB desde Google Drive)
-        await downloadFile(downloadUrl, tempZipPath, p => {
+        await downloadFile(downloadUrl, tempZipPath, (p, mb, extra) => {
             if (currentOperation.cancelled) throw new Error('Operación cancelada');
-            sendProgress(10 + Math.floor(p * 0.7), `Descargando: ${p}%`);
+            let label = `Descargando Fussionborn: ${p}%`;
+            if (extra && extra.remainingTimeStr) {
+                label += ` (${extra.speedMBps.toFixed(1)} MB/s, restante: ${extra.remainingTimeStr})`;
+            }
+            sendProgress(10 + Math.floor(p * 0.7), label);
         }, { socketTimeoutMs: 300000 });
 
         sendLog('✅ Descarga completada');
@@ -2276,15 +2308,26 @@ ipcMain.handle('install-fussionborn', async () => {
                     if (missingMods.length > 0) {
                         sendLog(`📥 Descargando ${missingMods.length} mods desde CurseForge...`);
                         let downloaded = 0;
+                        const startTimeMods = Date.now();
                         for (const modFile of missingMods) {
                             if (currentOperation.cancelled) throw new Error('Operación cancelada');
                             try {
                                 const modPath = path.join(modsDir, `mod_${modFile.fileID}.jar`);
                                 await downloadCurseForgeMod(modFile.projectID, modFile.fileID, modPath);
                                 downloaded++;
-                                if (downloaded % 20 === 0) {
-                                    sendProgress(80 + Math.floor((downloaded / missingMods.length) * 15), `Descargando mods: ${downloaded}/${missingMods.length}`);
+                                
+                                let etaStr = '';
+                                if (downloaded > 2) {
+                                    const elapsed = (Date.now() - startTimeMods) / 1000;
+                                    const avgTimePerMod = elapsed / downloaded;
+                                    const remainingSeconds = Math.round((missingMods.length - downloaded) * avgTimePerMod);
+                                    if (remainingSeconds > 60) {
+                                        etaStr = `, restante: ${Math.floor(remainingSeconds / 60)}m ${remainingSeconds % 60}s`;
+                                    } else {
+                                        etaStr = `, restante: ${remainingSeconds}s`;
+                                    }
                                 }
+                                sendProgress(80 + Math.floor((downloaded / missingMods.length) * 15), `Descargando mods: ${downloaded}/${missingMods.length}${etaStr}`);
                             } catch (modErr) {
                                 sendLog(`⚠️ Error descargando mod ${modFile.projectID}/${modFile.fileID}: ${modErr.message}`, 'warn');
                             }
@@ -2546,9 +2589,13 @@ async function installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl
 
         sendLog(`📥 Descargando archivo del modpack: ${latestFile.displayName}...`);
         sendProgress(10, 'Descargando modpack...');
-        await downloadFile(downloadUrl, tempZipPath, p => {
+        await downloadFile(downloadUrl, tempZipPath, (p, mb, extra) => {
             if (currentOperation.cancelled) throw new Error('Operación cancelada');
-            sendProgress(10 + Math.floor(p * 0.15), `Descargando modpack: ${p}%`);
+            let label = `Descargando modpack: ${p}%`;
+            if (extra && extra.remainingTimeStr) {
+                label += ` (${extra.speedMBps.toFixed(1)} MB/s, restante: ${extra.remainingTimeStr})`;
+            }
+            sendProgress(10 + Math.floor(p * 0.15), label);
         });
 
         sendLog(`📦 Instalando modpack...`);
@@ -2601,6 +2648,7 @@ async function installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl
         let downloaded = 0;
         let failedMods = [];
         const totalFiles = manifest.files.length;
+        const startTimeMods = Date.now();
         
         for (const file of manifest.files) {
             if (currentOperation.cancelled) throw new Error('Operación cancelada');
@@ -2609,7 +2657,19 @@ async function installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl
                 const modPath = path.join(modsDir, `mod_${file.fileID}.jar`);
                 await downloadCurseForgeMod(file.projectID, file.fileID, modPath);
                 downloaded++;
-                sendProgress(40 + Math.floor((downloaded / totalFiles) * 55), `Descargando mods: ${downloaded}/${totalFiles}`);
+                
+                let etaStr = '';
+                if (downloaded > 2) {
+                    const elapsed = (Date.now() - startTimeMods) / 1000;
+                    const avgTimePerMod = elapsed / downloaded;
+                    const remainingSeconds = Math.round((totalFiles - downloaded) * avgTimePerMod);
+                    if (remainingSeconds > 60) {
+                        etaStr = `, restante: ${Math.floor(remainingSeconds / 60)}m ${remainingSeconds % 60}s`;
+                    } else {
+                        etaStr = `, restante: ${remainingSeconds}s`;
+                    }
+                }
+                sendProgress(40 + Math.floor((downloaded / totalFiles) * 55), `Descargando mods: ${downloaded}/${totalFiles}${etaStr}`);
             } catch (err) {
                 failedMods.push({ projectID: file.projectID, fileID: file.fileID, error: err.message });
                 sendLog(`⚠️ Error descargando mod ${file.projectID}: ${err.message}`);
@@ -2763,9 +2823,13 @@ ipcMain.handle('install-modpack-from-search', async (event, { projectId, title, 
 
         sendLog(`📥 Descargando archivo del modpack: ${mrpackFile.filename}...`);
         sendProgress(10, 'Descargando modpack...');
-        await downloadFile(downloadUrl, tempMrpackPath, p => {
+        await downloadFile(downloadUrl, tempMrpackPath, (p, mb, extra) => {
             if (currentOperation.cancelled) throw new Error('Operación cancelada');
-            sendProgress(10 + Math.floor(p * 0.15), `Descargando modpack: ${p}%`);
+            let label = `Descargando modpack: ${p}%`;
+            if (extra && extra.remainingTimeStr) {
+                label += ` (${extra.speedMBps.toFixed(1)} MB/s, restante: ${extra.remainingTimeStr})`;
+            }
+            sendProgress(10 + Math.floor(p * 0.15), label);
         });
 
         sendLog(`📦 Instalando modpack...`);
@@ -2799,6 +2863,7 @@ ipcMain.handle('install-modpack-from-search', async (event, { projectId, title, 
 
         let downloaded = 0;
         const totalFiles = manifest.files.length;
+        const startTimeMods = Date.now();
         
         for (const file of manifest.files) {
             if (currentOperation.cancelled) throw new Error('Operación cancelada');
@@ -2809,7 +2874,19 @@ ipcMain.handle('install-modpack-from-search', async (event, { projectId, title, 
 
                 await downloadFile(file.downloads[0], targetFilePath, () => { });
                 downloaded++;
-                sendProgress(40 + Math.floor((downloaded / totalFiles) * 55), `Descargando archivos: ${downloaded}/${totalFiles}`);
+                
+                let etaStr = '';
+                if (downloaded > 2) {
+                    const elapsed = (Date.now() - startTimeMods) / 1000;
+                    const avgTimePerMod = elapsed / downloaded;
+                    const remainingSeconds = Math.round((totalFiles - downloaded) * avgTimePerMod);
+                    if (remainingSeconds > 60) {
+                        etaStr = `, restante: ${Math.floor(remainingSeconds / 60)}m ${remainingSeconds % 60}s`;
+                    } else {
+                        etaStr = `, restante: ${remainingSeconds}s`;
+                    }
+                }
+                sendProgress(40 + Math.floor((downloaded / totalFiles) * 55), `Descargando archivos: ${downloaded}/${totalFiles}${etaStr}`);
             } catch (err) {
                 sendLog(`⚠️ Error descargando archivo ${file.path}: ${err.message}`);
             }

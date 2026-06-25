@@ -1,0 +1,8 @@
+
+[Bootstrap] Starting launcher bootstrap...
+[Bootstrap] Updating active core asar...
+[Bootstrap] Active core asar updated.
+[Bootstrap] Executing core asar from: C:\Users\renee\AppData\Local\Programs\Nebula Launcher\resources\app_core_active.asar
+[DEBUG] ready-to-show disparado en ventana principal!
+[DEBUG] 2.5s pasaron. Cerrando splash y mostrando win.
+[DEBUG] win.setOpacity(1) ejecutado
