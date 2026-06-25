@@ -451,7 +451,8 @@ function cleanCorruptedLibs(mcPath) {
 }
 
 // ── Network utils ─────────────────────────────────────────────────
-function downloadFile(url, dest, onProgress) {
+function downloadFile(url, dest, onProgress, opts = {}) {
+    const socketTimeoutMs = opts.socketTimeoutMs || 60000; // default 60s idle timeout
     return new Promise((resolve, reject) => {
         fs.mkdirSync(path.dirname(dest), { recursive: true });
 
@@ -507,10 +508,10 @@ function downloadFile(url, dest, onProgress) {
                 reject(new Error(`Error de red: ${err.message}`));
             });
 
-            // Timeout de 60 segundos por intento
-            req.setTimeout(60000, () => {
+            // Timeout de socket inactivo (sin datos recibidos)
+            req.setTimeout(socketTimeoutMs, () => {
                 req.destroy();
-                reject(new Error('Timeout descargando archivo (60s)'));
+                reject(new Error(`Timeout descargando archivo (${socketTimeoutMs / 1000}s sin actividad)`));
             });
 
             if (currentOperation) currentOperation.request = req;
@@ -656,7 +657,7 @@ function loadSettings() {
         updateUrl: 'https://raw.githubusercontent.com/fonduev/astral-nebula-launcher/main/update.json',
         adsUrl: 'https://raw.githubusercontent.com/fonduev/astral-nebula-launcher/main/ads.json',
         personalizedAds: false,
-        fussionbornDownloadUrl: 'https://pub-d38529ebbdbe4598b4d3d552ffc4246f.r2.dev/FUSSIONBORN.zip',
+        fussionbornDownloadUrl: 'https://drive.usercontent.google.com/download?id=1U9PgwXMPTZT-xNoQzKjP8EtXdY7lSGuB&export=download&confirm=t',
         socialFirebase: {
             apiKey: "AIzaSyCfka9dpsVQvfsJ883segPzATNDUEuIVwc",
             projectId: "astral-nebula-social",
@@ -680,6 +681,13 @@ function loadSettings() {
                 data[k] = defaultSettings[k];
                 changed = true;
             }
+        }
+
+        // Migración: Actualizar URL antigua de Fussionborn (R2) a Google Drive
+        const oldR2Url = 'https://pub-d38529ebbdbe4598b4d3d552ffc4246f.r2.dev/FUSSIONBORN.zip';
+        if (data.fussionbornDownloadUrl === oldR2Url) {
+            data.fussionbornDownloadUrl = defaultSettings.fussionbornDownloadUrl;
+            changed = true;
         }
         
         if (changed) {
@@ -2057,17 +2065,20 @@ ipcMain.handle('import-modpack', async (event) => {
             fs.mkdirSync(modsDir, { recursive: true });
 
             let downloaded = 0;
+            let failedMods = [];
             for (const file of manifest.files) {
                 try {
-                    const modUrl = `https://www.curseforge.com/api/v1/mods/${file.projectID}/files/${file.fileID}/download`;
                     const modPath = path.join(modsDir, `mod_${file.fileID}.jar`);
-
-                    await downloadFile(modUrl, modPath, () => { });
+                    await downloadCurseForgeMod(file.projectID, file.fileID, modPath);
                     downloaded++;
                     sendProgress(50 + Math.floor((downloaded / manifest.files.length) * 40), `Descargando mods: ${downloaded}/${manifest.files.length}`);
                 } catch (err) {
+                    failedMods.push({ projectID: file.projectID, fileID: file.fileID, error: err.message });
                     sendLog(`⚠️ Error descargando mod ${file.projectID}: ${err.message}`);
                 }
+            }
+            if (failedMods.length > 0) {
+                sendLog(`⚠️ ${failedMods.length} mod(s) no pudieron descargarse. El modpack podría no funcionar correctamente.`, 'warn');
             }
 
             // Write instance.json metadata
@@ -2171,17 +2182,18 @@ ipcMain.handle('install-fussionborn', async () => {
         fs.mkdirSync(tempDir, { recursive: true });
 
         const tempZipPath = path.join(tempDir, 'fussionborn.zip');
-        const downloadUrl = s.fussionbornDownloadUrl || 'https://pub-d38529ebbdbe4598b4d3d552ffc4246f.r2.dev/FUSSIONBORN.zip';
+        const downloadUrl = s.fussionbornDownloadUrl || 'https://drive.usercontent.google.com/download?id=1U9PgwXMPTZT-xNoQzKjP8EtXdY7lSGuB&export=download&confirm=t';
 
         sendLog('📥 Descargando Fussionborn modpack desde la nube…');
         sendProgress(10, 'Descargando Fussionborn…');
 
         if (currentOperation.cancelled) throw new Error('Operación cancelada');
 
+        // Timeout de 5 minutos de inactividad para archivos grandes (1.4+ GB desde Google Drive)
         await downloadFile(downloadUrl, tempZipPath, p => {
             if (currentOperation.cancelled) throw new Error('Operación cancelada');
             sendProgress(10 + Math.floor(p * 0.7), `Descargando: ${p}%`);
-        });
+        }, { socketTimeoutMs: 300000 });
 
         sendLog('✅ Descarga completada');
 
@@ -2267,9 +2279,8 @@ ipcMain.handle('install-fussionborn', async () => {
                         for (const modFile of missingMods) {
                             if (currentOperation.cancelled) throw new Error('Operación cancelada');
                             try {
-                                const modUrl = `https://www.curseforge.com/api/v1/mods/${modFile.projectID}/files/${modFile.fileID}/download`;
                                 const modPath = path.join(modsDir, `mod_${modFile.fileID}.jar`);
-                                await downloadFile(modUrl, modPath);
+                                await downloadCurseForgeMod(modFile.projectID, modFile.fileID, modPath);
                                 downloaded++;
                                 if (downloaded % 20 === 0) {
                                     sendProgress(80 + Math.floor((downloaded / missingMods.length) * 15), `Descargando mods: ${downloaded}/${missingMods.length}`);
@@ -2301,13 +2312,38 @@ ipcMain.handle('install-fussionborn', async () => {
             }
         }
 
-        // Write instance.json metadata specifying Minecraft 1.21.1 and NeoForge 21.1.233
+        // Write instance.json metadata – read version info from manifest.json when available
         const instanceJsonPath = path.join(fussionbornDir, 'instance.json');
+        let fbMcVersion = "1.21.1";
+        let fbLoader = "neoforge";
+        let fbLoaderVersion = "21.1.233";
+        if (fs.existsSync(manifestJsonPath)) {
+            try {
+                const manifest = JSON.parse(fs.readFileSync(manifestJsonPath, 'utf8'));
+                if (manifest.minecraft && manifest.minecraft.version) {
+                    fbMcVersion = manifest.minecraft.version;
+                }
+                if (manifest.minecraft && manifest.minecraft.modLoaders) {
+                    const primary = manifest.minecraft.modLoaders.find(l => l.primary) || manifest.minecraft.modLoaders[0];
+                    if (primary && primary.id) {
+                        // Format: "neoforge-21.1.233" or "forge-47.3.22"
+                        const parts = primary.id.split('-');
+                        if (parts.length >= 2) {
+                            fbLoader = parts[0];
+                            fbLoaderVersion = parts.slice(1).join('-');
+                        }
+                    }
+                }
+                sendLog(`📋 Detectado: Minecraft ${fbMcVersion} + ${fbLoader} ${fbLoaderVersion}`);
+            } catch (e) {
+                sendLog(`⚠️ Usando versión predeterminada (error leyendo manifest): ${e.message}`, 'warn');
+            }
+        }
         const instanceMeta = {
             name: "Fussionborn",
-            mcVersion: "1.21.1",
-            loader: "neoforge",
-            loaderVersion: "21.1.233",
+            mcVersion: fbMcVersion,
+            loader: fbLoader,
+            loaderVersion: fbLoaderVersion,
             iconUrl: "fussionborn_logo.png",
             screenshotUrl: "fussionborn_gameplay1.png",
             description: "Fussionborn official medieval adventure modpack."
@@ -2404,6 +2440,53 @@ ipcMain.handle('delete-modpack', async (event, folderName) => {
         return { success: false, error: err.message };
     }
 });
+
+// ── CurseForge mod download with fallback strategies ─────────────────
+const CF_API_KEY = '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm';
+
+async function downloadCurseForgeMod(projectID, fileID, destPath) {
+    // Strategy 1: Public API endpoint (works for most mods)
+    const publicUrl = `https://www.curseforge.com/api/v1/mods/${projectID}/files/${fileID}/download`;
+    try {
+        await downloadFile(publicUrl, destPath);
+        return true;
+    } catch (err1) {
+        // Strategy 2: Official CurseForge API with API key to get real download URL
+        try {
+            const apiUrl = `https://api.curseforge.com/v1/mods/${projectID}/files/${fileID}`;
+            const fileData = JSON.parse(await httpsGetWithHeaders(apiUrl, { 'x-api-key': CF_API_KEY }));
+            const realUrl = fileData?.data?.downloadUrl;
+            if (realUrl) {
+                await downloadFile(realUrl, destPath);
+                return true;
+            }
+            // If downloadUrl is null (mod author disabled 3rd-party distribution),
+            // try constructing the CDN URL manually
+            const fileName = fileData?.data?.fileName;
+            if (fileName) {
+                // CurseForge CDN pattern: https://edge.forgecdn.net/files/{first4}/{last3}/{filename}
+                const idStr = String(fileID);
+                const first4 = idStr.substring(0, 4);
+                const last3 = idStr.substring(4);
+                const cdnUrl = `https://edge.forgecdn.net/files/${first4}/${last3}/${encodeURIComponent(fileName)}`;
+                try {
+                    await downloadFile(cdnUrl, destPath);
+                    return true;
+                } catch (cdnErr) {
+                    // CDN also failed
+                }
+                // Also try mediafilez.forgecdn.net
+                const cdnUrl2 = `https://mediafilez.forgecdn.net/files/${first4}/${last3}/${encodeURIComponent(fileName)}`;
+                await downloadFile(cdnUrl2, destPath);
+                return true;
+            }
+            throw new Error(`Mod ${projectID}/${fileID}: descarga no disponible (distribución restringida por el autor)`);
+        } catch (err2) {
+            // Both strategies failed - throw the combined error
+            throw new Error(`No se pudo descargar mod ${projectID}/${fileID}: ${err1.message} | Fallback: ${err2.message}`);
+        }
+    }
+}
 
 function httpsGetWithHeaders(url, headers = {}, timeoutMs = 15000) {
     return new Promise((resolve, reject) => {
@@ -2516,21 +2599,24 @@ async function installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl
         fs.mkdirSync(modsDir, { recursive: true });
 
         let downloaded = 0;
+        let failedMods = [];
         const totalFiles = manifest.files.length;
         
         for (const file of manifest.files) {
             if (currentOperation.cancelled) throw new Error('Operación cancelada');
             
             try {
-                const modUrl = `https://www.curseforge.com/api/v1/mods/${file.projectID}/files/${file.fileID}/download`;
                 const modPath = path.join(modsDir, `mod_${file.fileID}.jar`);
-
-                await downloadFile(modUrl, modPath, () => { });
+                await downloadCurseForgeMod(file.projectID, file.fileID, modPath);
                 downloaded++;
                 sendProgress(40 + Math.floor((downloaded / totalFiles) * 55), `Descargando mods: ${downloaded}/${totalFiles}`);
             } catch (err) {
+                failedMods.push({ projectID: file.projectID, fileID: file.fileID, error: err.message });
                 sendLog(`⚠️ Error descargando mod ${file.projectID}: ${err.message}`);
             }
+        }
+        if (failedMods.length > 0) {
+            sendLog(`⚠️ ${failedMods.length} mod(s) no pudieron descargarse. El modpack podría no funcionar correctamente.`, 'warn');
         }
 
         try { fs.unlinkSync(tempZipPath); } catch {}
