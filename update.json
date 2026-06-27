@@ -9,16 +9,16 @@
   },
   "modpack": {
     "name": "FussionBorn",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "minecraft": "1.21.1",
     "loader": {
       "type": "neoforge",
       "version": "21.1.233"
     },
     "download": {
-      "url": "https://pub-d38529ebbdbe4598b4d3d552ffc4246f.r2.dev/FUSSIONBORN.zip",
+      "url": "https://drive.usercontent.google.com/download?id=1U9PgwXMPTZT-xNoQzKjP8EtXdY7lSGuB&export=download&confirm=t",
       "format": "zip",
-      "size": 1417330688
+      "size": 1382659611
     }
   }
 }
