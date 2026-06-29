@@ -1,10 +1,10 @@
 {
-  "version": "3.0.9",
-  "notes": "• Renovación visual de marca a Nebula Launcher.\n• Agregado crédito 'made by fondue_x' en la barra lateral del launcher.\n• Actualizaciones completamente invisibles y silenciosas en segundo plano (sin parpadeos de CMD).",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.9/app.asar",
+  "version": "3.1.0",
+  "notes": "• Removida la sección de anuncios de patrocinadores en la configuración para una experiencia más limpia.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.1.0/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.9/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.1.0/app.asar"
     }
   }
 }

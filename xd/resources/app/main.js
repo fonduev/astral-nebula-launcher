@@ -683,8 +683,6 @@ function loadSettings() {
         theme: 'nebula', 
         lastLoginType: 'offline',
         updateUrl: 'https://raw.githubusercontent.com/fonduev/astral-nebula-launcher/main/update.json',
-        adsUrl: 'https://raw.githubusercontent.com/fonduev/astral-nebula-launcher/main/ads.json',
-        personalizedAds: false,
 
         socialFirebase: {
             apiKey: "AIzaSyCfka9dpsVQvfsJ883segPzATNDUEuIVwc",

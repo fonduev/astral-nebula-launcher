@@ -38,9 +38,9 @@ if not os.path.exists(bootstrap_dir):
     print(f"Error: Bootstrap directory {bootstrap_dir} does not exist!")
     sys.exit(1)
 
-bundled_asar = os.path.join(bootstrap_dir, "app_core.asar")
+bundled_asar = os.path.join(bootstrap_dir, "app_core.pak")
 if os.path.exists(core_dest):
-    print(f"Bundling app_core.asar into bootstrap: {core_dest} -> {bundled_asar}")
+    print(f"Bundling app_core.asar into bootstrap as pak: {core_dest} -> {bundled_asar}")
     try:
         shutil.copyfile(core_dest, bundled_asar)
         print("Success! app_core.asar bundled into bootstrap.")

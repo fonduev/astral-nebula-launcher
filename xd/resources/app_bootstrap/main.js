@@ -17,7 +17,7 @@ if (isDev) {
 } else {
     const originalFs = require('original-fs');
     // bundledAsar is the ultimate fallback — shipped inside app.asar itself
-    const bundledAsar = path.join(__dirname, 'app_core.asar');
+    const bundledAsar = path.join(__dirname, 'app_core.pak');
 
     // 1. Extraer el app_core.asar inicial si viene empaquetado en el bootstrap
     //    Esto asegura que sourceAsar siempre exista aunque el updater lo haya borrado
