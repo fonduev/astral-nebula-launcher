@@ -329,6 +329,131 @@
         font-size: .85rem;
         font-weight: 600;
       }
+
+      /* ── Comparison Section ── */
+      .comparison {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 6rem 5% 4rem;
+      }
+      .comparison-header {
+        text-align: center;
+        margin-bottom: 4rem;
+      }
+      .comparison-wrapper {
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+      }
+      .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+      }
+      .comparison-table th, 
+      .comparison-table td {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-glass);
+        font-size: .95rem;
+      }
+      .comparison-table th {
+        background: rgba(255, 255, 255, 0.02);
+        font-weight: 700;
+        letter-spacing: -.3px;
+        color: var(--text-main);
+        font-size: 1.05rem;
+      }
+      .comparison-table tr:last-child td {
+        border-bottom: none;
+      }
+      
+      /* Highlighted Nebula Column */
+      .col-nebula {
+        background: rgba(167, 139, 250, 0.04);
+        font-weight: 600;
+        color: #fff;
+        border-left: 1px solid rgba(167, 139, 250, 0.12);
+        border-right: 1px solid rgba(167, 139, 250, 0.12);
+      }
+      th.col-nebula {
+        background: rgba(167, 139, 250, 0.08) !important;
+        border-top: 3px solid var(--accent-p);
+        color: var(--accent-p) !important;
+      }
+      td.col-nebula {
+        color: var(--text-main);
+      }
+      
+      /* Status badges */
+      .badge-status {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        font-size: .8rem;
+        font-weight: 600;
+        padding: .35rem .75rem;
+        border-radius: 100px;
+      }
+      .badge-success {
+        background: rgba(52, 211, 153, 0.1);
+        color: #34d399;
+        border: 1px solid rgba(52, 211, 153, 0.18);
+      }
+      .badge-warning {
+        background: rgba(251, 191, 36, 0.1);
+        color: #fbbf24;
+        border: 1px solid rgba(251, 191, 36, 0.18);
+      }
+      .badge-danger {
+        background: rgba(248, 113, 113, 0.1);
+        color: #f87171;
+        border: 1px solid rgba(248, 113, 113, 0.18);
+      }
+
+      /* Responsive comparison cards for small devices */
+      @media (max-width: 768px) {
+        .comparison-table thead {
+          display: none;
+        }
+        .comparison-table, 
+        .comparison-table tbody, 
+        .comparison-table tr, 
+        .comparison-table td {
+          display: block;
+          width: 100%;
+        }
+        .comparison-table tr {
+          margin-bottom: 2rem;
+          background: rgba(255, 255, 255, 0.01);
+          border-radius: 16px;
+          border: 1px solid var(--border-glass);
+          overflow: hidden;
+        }
+        .comparison-table td {
+          text-align: right;
+          padding: 1rem;
+          border-bottom: 1px solid var(--border-glass);
+          position: relative;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .comparison-table td::before {
+          content: attr(data-label);
+          font-weight: 700;
+          color: var(--text-muted);
+          font-size: .85rem;
+        }
+        .comparison-table td.col-nebula {
+          border-left: none;
+          border-right: none;
+          background: rgba(167, 139, 250, 0.05);
+        }
+      }
     </style>
   </head>
   <body>
@@ -509,6 +634,99 @@
         <div class="showcase-mockup">
           <img src="./updater-screenshot.png" alt="Actualizaciones inteligentes del Launcher Nebula Launcher">
         </div>
+      </div>
+    </section>
+
+    <section class="comparison">
+      <div class="comparison-header">
+        <span class="showcase-badge">✦ Comparativa Honesta</span>
+        <h2>¿Por qué elegir <span class="glow-text">Nebula Launcher</span>?</h2>
+        <p>Comparamos de forma transparente las características y la seguridad de Nebula Launcher con otras opciones populares en el ecosistema.</p>
+      </div>
+
+      <div class="comparison-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Característica</th>
+              <th class="col-nebula">🌌 Nebula Launcher</th>
+              <th>🛡️ Battly Launcher</th>
+              <th>🔴 TLauncher</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Seguridad / Virus</strong></td>
+              <td class="col-nebula" data-label="🌌 Nebula Launcher">
+                <span class="badge-status badge-success">
+                  💚 100% Seguro (Sin Malware)
+                </span>
+              </td>
+              <td data-label="🛡️ Battly Launcher">
+                <span class="badge-status badge-success">Seguro (Sin virus)</span>
+              </td>
+              <td data-label="🔴 TLauncher">
+                <span class="badge-status badge-danger">Cuestionado (Historial de Spyware)</span>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Publicidad e Intrusión</strong></td>
+              <td class="col-nebula" data-label="🌌 Nebula Launcher">
+                <span class="badge-status badge-success">
+                  💚 Sin Anuncios / 100% Limpio
+                </span>
+              </td>
+              <td data-label="🛡️ Battly Launcher">
+                <span class="badge-status badge-warning">Peticiones de Donación</span>
+              </td>
+              <td data-label="🔴 TLauncher">
+                <span class="badge-status badge-danger">Banners y anuncios molestos</span>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Aislamiento de Archivos</strong></td>
+              <td class="col-nebula" data-label="🌌 Nebula Launcher">
+                <span class="badge-status badge-success">
+                  💚 Total (Instancias independientes)
+                </span>
+              </td>
+              <td data-label="🛡️ Battly Launcher">
+                <span class="badge-status badge-warning">Parcial (Mods compartidos)</span>
+              </td>
+              <td data-label="🔴 TLauncher">
+                <span class="badge-status badge-danger">Ninguno (Frecuentes conflictos)</span>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Actualizaciones de Fondo</strong></td>
+              <td class="col-nebula" data-label="🌌 Nebula Launcher">
+                <span class="badge-status badge-success">
+                  💚 Silencioso e Invisible (wscript)
+                </span>
+              </td>
+              <td data-label="🛡️ Battly Launcher">
+                <span class="badge-status badge-warning">Actualizador interno</span>
+              </td>
+              <td data-label="🔴 TLauncher">
+                <span class="badge-status badge-warning">Actualizador externo</span>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Rendimiento e Impacto</strong></td>
+              <td class="col-nebula" data-label="🌌 Nebula Launcher">
+                <span class="badge-status badge-success">
+                  💚 Optimizado (Bajo uso de RAM)
+                </span>
+              </td>
+              <td data-label="🛡️ Battly Launcher">
+                <span class="badge-status badge-warning">Consumo Medio</span>
+              </td>
+              <td data-label="🔴 TLauncher">
+                <span class="badge-status badge-danger">Consumo Alto</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
