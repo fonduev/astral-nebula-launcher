@@ -155,6 +155,180 @@
           margin-bottom: 4rem;
         }
       }
+
+      /* ── Support Floating Button & Modal ── */
+      .support-trigger {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 99;
+        background: linear-gradient(135deg, var(--accent-p), #8b5cf6);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 100px;
+        padding: .85rem 1.5rem;
+        font-family: 'Inter', sans-serif;
+        font-size: .95rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        box-shadow: 0 10px 30px rgba(167, 139, 250, 0.4), 0 0 0 0px rgba(167, 139, 250, 0.2);
+        transition: all .3s cubic-bezier(.4,0,.2,1);
+        animation: pulseSupport 2.5s infinite;
+      }
+      .support-trigger:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 15px 40px rgba(167, 139, 250, 0.6);
+        background: linear-gradient(135deg, var(--accent-p-hover), #7c3aed);
+      }
+      @keyframes pulseSupport {
+        0% {
+          box-shadow: 0 10px 30px rgba(167, 139, 250, 0.4), 0 0 0 0px rgba(167, 139, 250, 0.3);
+        }
+        70% {
+          box-shadow: 0 10px 30px rgba(167, 139, 250, 0.4), 0 0 0 12px rgba(167, 139, 250, 0);
+        }
+        100% {
+          box-shadow: 0 10px 30px rgba(167, 139, 250, 0.4), 0 0 0 0px rgba(167, 139, 250, 0);
+        }
+      }
+
+      /* Modal Backdrop */
+      .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(15, 16, 22, 0.75);
+        -webkit-backdrop-filter: blur(15px);
+        backdrop-filter: blur(15px);
+        z-index: 200;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .35s cubic-bezier(.4,0,.2,1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-backdrop.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* Modal Dialog Box */
+      .modal-dialog {
+        background: rgba(25, 26, 35, 0.85);
+        border: 1px solid var(--border-glass);
+        box-shadow: 0 30px 70px rgba(0,0,0,0.8), 0 0 100px rgba(167, 139, 250, 0.08);
+        border-radius: 28px;
+        width: 90%;
+        max-width: 520px;
+        padding: 2.25rem;
+        position: relative;
+        transform: scale(0.9) translateY(30px);
+        opacity: 0;
+        transition: transform .4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity .3s ease;
+      }
+      .modal-backdrop.active .modal-dialog {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+
+      /* Close Button */
+      .modal-close {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: var(--text-muted);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all .2s;
+      }
+      .modal-close:hover {
+        background: rgba(255,255,255,0.12);
+        color: var(--text-main);
+        transform: rotate(90deg);
+      }
+
+      /* Form styling */
+      .support-form-group {
+        margin-bottom: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+      }
+      .support-form-group label {
+        font-size: .85rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+      .support-input {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid var(--border-glass);
+        color: var(--text-main);
+        font-family: 'Inter', sans-serif;
+        font-size: .95rem;
+        padding: .85rem 1rem;
+        border-radius: 12px;
+        width: 100%;
+        transition: all .25s ease;
+      }
+      .support-input:focus {
+        outline: none;
+        border-color: var(--accent-p);
+        background: rgba(167, 139, 250, 0.04);
+        box-shadow: 0 0 15px rgba(167, 139, 250, 0.15);
+      }
+      textarea.support-input {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      /* Support options grid */
+      .support-options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        border-top: 1px solid var(--border-glass);
+        padding-top: 1.5rem;
+      }
+      .support-option-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 1rem;
+        text-align: center;
+        text-decoration: none;
+        color: var(--text-main);
+        transition: all .25s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .5rem;
+      }
+      .support-option-card:hover {
+        background: rgba(167, 139, 250, 0.05);
+        border-color: rgba(167, 139, 250, 0.3);
+        transform: translateY(-3px);
+      }
+      .support-option-card svg {
+        color: var(--accent-s);
+      }
+      .support-option-card span {
+        font-size: .85rem;
+        font-weight: 600;
+      }
     </style>
   </head>
   <body>
@@ -165,6 +339,10 @@
         <img src="./icon.ico" alt="Nebula Launcher Logo" style="border-radius: 50%; object-fit: cover;">
         <span>Nebula Launcher</span>
       </div>
+      <nav style="display: flex; gap: 2rem; align-items: center;">
+        <a href="#showcase-mods" style="color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--text-main)'" onmouseout="this.style.color='var(--text-muted)'">Características</a>
+        <a href="#" onclick="event.preventDefault(); openSupportModal();" style="color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--text-main)'" onmouseout="this.style.color='var(--text-muted)'">Soporte</a>
+      </nav>
     </header>
 
     <main class="hero">
@@ -341,5 +519,118 @@
       </div>
     </footer>
 
+    <!-- ── Support Modal ── -->
+    <button class="support-trigger" id="supportBtn" onclick="openSupportModal()">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+      </svg>
+      Soporte
+    </button>
+
+    <div class="modal-backdrop" id="supportModal" onclick="closeSupportModalOnClick(event)">
+      <div class="modal-dialog">
+        <button class="modal-close" onclick="closeSupportModal()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        
+        <div id="support-form-content">
+          <div style="margin-bottom: 2rem;">
+            <h2 style="font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 0.5rem; background: linear-gradient(135deg, #fff, var(--accent-s)); -webkit-text-fill-color: transparent; -webkit-background-clip: text;">Centro de Soporte</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">¿Tienes algún problema o sugerencia? Cuéntanos en detalle.</p>
+          </div>
+
+          <form id="supportForm" onsubmit="submitSupportForm(event)">
+            <div class="support-form-group">
+              <label for="sup-name">Nombre</label>
+              <input type="text" id="sup-name" class="support-input" placeholder="Tu nombre" required>
+            </div>
+            <div class="support-form-group">
+              <label for="sup-email">Correo Electrónico</label>
+              <input type="email" id="sup-email" class="support-input" placeholder="tu@correo.com" required>
+            </div>
+            <div class="support-form-group">
+              <label for="sup-msg">Mensaje / Detalle del problema</label>
+              <textarea id="sup-msg" class="support-input" placeholder="Escribe aquí tu consulta..." required></textarea>
+            </div>
+            
+            <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1rem; border-radius: 12px; margin-top: 0.5rem;">
+              Enviar Solicitud
+            </button>
+          </form>
+
+          <div class="support-options-grid">
+            <a href="https://discord.gg/nebula" target="_blank" class="support-option-card">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
+              <span>Servidor Discord</span>
+            </a>
+            <a href="https://github.com/fonduev/astral-nebula-launcher/issues" target="_blank" class="support-option-card">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              <span>Reportar en GitHub</span>
+            </a>
+          </div>
+        </div>
+
+        <div id="support-success-content" style="display: none;">
+          <div style="text-align:center; padding: 2rem 0;">
+            <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(167, 139, 250, 0.15); border: 2px solid var(--accent-p); color: var(--accent-p); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; box-shadow: 0 0 30px rgba(167, 139, 250, 0.3);">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="38" height="38"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h3 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 0.75rem; background: linear-gradient(135deg, #fff, var(--accent-s)); -webkit-text-fill-color: transparent; -webkit-background-clip: text;">¡Mensaje Enviado!</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; max-width: 340px; margin: 0 auto 2rem;">Tu consulta ha sido procesada de forma segura. Nebula Studios te responderá por correo electrónico lo antes posible.</p>
+            <button class="btn-primary" onclick="closeSupportModal()" style="padding: 0.8rem 2rem; font-size: 0.95rem; border-radius: 100px; box-shadow: none;">
+              Entendido
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function openSupportModal() {
+        const modal = document.getElementById('supportModal');
+        const formContent = document.getElementById('support-form-content');
+        const successContent = document.getElementById('support-success-content');
+        
+        formContent.style.display = 'block';
+        successContent.style.display = 'none';
+        document.getElementById('supportForm').reset();
+        
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeSupportModal() {
+        const modal = document.getElementById('supportModal');
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      function closeSupportModalOnClick(event) {
+        if (event.target === document.getElementById('supportModal')) {
+          closeSupportModal();
+        }
+      }
+
+      function submitSupportForm(event) {
+        event.preventDefault();
+        
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Enviando...';
+        
+        // Simular un envío premium con retardo de red
+        setTimeout(() => {
+          const formContent = document.getElementById('support-form-content');
+          const successContent = document.getElementById('support-success-content');
+          
+          formContent.style.display = 'none';
+          successContent.style.display = 'block';
+          
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }, 1200);
+      }
+    </script>
   </body>
 </html>
