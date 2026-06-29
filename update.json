@@ -1,10 +1,10 @@
 {
-  "version": "3.1.1",
-  "notes": "• Removida la sección de anuncios de patrocinadores en la configuración para una experiencia más limpia.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.1.1/app.asar",
+  "version": "3.1.2",
+  "notes": "• Agregado soporte completo para el cargador de mods Quilt en el launcher frontend y backend.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.1.2/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.1.1/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.1.2/app.asar"
     }
   }
 }

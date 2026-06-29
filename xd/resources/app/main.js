@@ -112,7 +112,8 @@ function setRPCPlaying(mcVersion, modType = null, modpackName = null) {
             : modType === 'neoforge' ? '🌿 NeoForge'
                 : modType === 'forge' ? '🔥 Forge'
                     : modType === 'fabric' ? '💎 Fabric'
-                        : '🎮 Modificado';
+                        : modType === 'quilt' ? '🔮 Quilt'
+                            : '🎮 Modificado';
     }
     
     try {
@@ -400,7 +401,7 @@ async function ensureJava(mcVersion, customJava) {
 
     await downloadFile(url, zipPath, p => sendProgress(Math.floor(p * 0.8), `Java ${jv}: ${p}%`));
     sendLog('Extrayendo Java…');
-    execSync(`tar -xf "${zipPath}" -C "${javaDir}"`);
+    execSync(`tar -xf "${zipPath}" -C "${javaDir}"`, { windowsHide: true });
     try { fs.unlinkSync(zipPath); } catch { }
     exe = findJavaExe(javaDir);
     if (!exe) throw new Error(`No se pudo instalar Java ${jv}`);
@@ -776,6 +777,11 @@ function getInstanceDir(mcPath, versionId) {
         const mcVer = match ? match[1] : versionId;
         return path.join(mcPath, 'instances', `fabric-${mcVer}`);
     }
+    if (lower.includes('quilt')) {
+        const match = versionId.match(/quilt-loader-[\d.]+-([\d.]+)/);
+        const mcVer = match ? match[1] : versionId;
+        return path.join(mcPath, 'instances', `quilt-${mcVer}`);
+    }
     // Vanilla u otro: sin instancia separada
     return mcPath;
 }
@@ -834,6 +840,13 @@ ipcMain.handle('get-installed-versions', () => {
                         type = 'fabric';
                         if (!versionData.inheritsFrom) {
                             const match = dir.match(/fabric-loader-[\d\.]+-(\d+\.\d+(?:\.\d+)?)/);
+                            if (match) baseVersion = match[1];
+                        }
+                    }
+                    else if (dir.toLowerCase().includes('quilt')) {
+                        type = 'quilt';
+                        if (!versionData.inheritsFrom) {
+                            const match = dir.match(/quilt-loader-[\d\.]+-(\d+\.\d+(?:\.\d+)?)/);
                             if (match) baseVersion = match[1];
                         }
                     }
@@ -1129,7 +1142,7 @@ ipcMain.handle('auto-install-optifine', async (event, mcVersion) => {
                     const dstLibs = path.join(mcPath, 'libraries', 'optifine');
                     if (fs.existsSync(srcLibs)) {
                         fs.mkdirSync(dstLibs, { recursive: true });
-                        execSync(`xcopy "${srcLibs}" "${dstLibs}" /E /I /Y /Q`, { stdio: 'ignore' });
+                        execSync(`xcopy "${srcLibs}" "${dstLibs}" /E /I /Y /Q`, { stdio: 'ignore', windowsHide: true });
                     }
                     sendLog(`✅ OptiFine instalado: ${vid}`);
                     enrichOptiFineVersionJson(path.join(dstDir, `${vid}.json`), mcPath, sendLog);
@@ -1809,6 +1822,159 @@ ipcMain.handle('auto-install-sodium', async (event, mcVersion) => {
     }
 });
 
+// ── QUILT LOADER INSTALLATION (NEW) ─────────────────────────────────
+ipcMain.handle('check-quilt-available', async (event, mcVersion) => {
+    try {
+        sendLog(`🔍 Verificando Quilt disponible para ${mcVersion}...`);
+        const quiltVersionsUrl = `https://meta.quiltmc.org/v3/versions/loader/${mcVersion}`;
+        const data = await httpsGet(quiltVersionsUrl);
+        const versions = JSON.parse(data);
+
+        if (versions && versions.length > 0) {
+            sendLog(`✅ Quilt disponible para ${mcVersion}`);
+            return { available: true, versions };
+        } else {
+            sendLog(`❌ Quilt NO disponible para ${mcVersion}`);
+            return { available: false, error: `No hay Quilt para Minecraft ${mcVersion}` };
+        }
+    } catch (err) {
+        sendLog(`⚠️ Error verificando Quilt: ${err.message}`);
+        return { available: false, error: err.message };
+    }
+});
+
+ipcMain.handle('auto-install-quilt', async (event, mcVersion) => {
+    currentOperation = { type: 'quilt', cancelled: false };
+
+    try {
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        const versionsDir = path.join(mcPath, 'versions');
+        const tempDir = path.join(BASE_DATA_DIR, 'temp');
+        fs.mkdirSync(tempDir, { recursive: true });
+
+        // Check if Quilt is available
+        sendLog(`🔍 Verificando disponibilidad de Quilt para ${mcVersion}...`);
+        sendProgress(5, 'Verificando Quilt...');
+
+        const quiltCheck = await httpsGet(`https://meta.quiltmc.org/v3/versions/loader/${mcVersion}`);
+        const quiltVersions = JSON.parse(quiltCheck);
+
+        if (!quiltVersions || quiltVersions.length === 0) {
+            throw new Error(`Quilt no disponible para ${mcVersion}`);
+        }
+
+        const latestQuiltLoader = quiltVersions[0].loader.version;
+
+        if (currentOperation.cancelled) throw new Error('Operación cancelada');
+
+        sendLog(`✅ Quilt Loader ${latestQuiltLoader} encontrado`);
+        sendProgress(10, 'Descargando Quilt Loader...');
+
+        const quiltVersionId = `quilt-loader-${latestQuiltLoader}-${mcVersion}`;
+        const quiltDir = path.join(versionsDir, quiltVersionId);
+        const isQuiltInstalled = fs.existsSync(path.join(quiltDir, `${quiltVersionId}.json`));
+
+        if (!isQuiltInstalled) {
+            let installerVer = '0.13.1';
+            try {
+                const installerList = JSON.parse(await httpsGet('https://meta.quiltmc.org/v3/versions/installer'));
+                if (installerList && installerList.length > 0) {
+                    installerVer = installerList[0].version;
+                }
+            } catch (e) {
+                sendLog(`⚠️ Error obteniendo versión de Quilt Installer: ${e.message}`);
+            }
+
+            const quiltInstallerUrl = `https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-installer/${installerVer}/quilt-installer-${installerVer}.jar`;
+            const quiltInstallerPath = path.join(tempDir, 'quilt-installer.jar');
+
+            await downloadFile(quiltInstallerUrl, quiltInstallerPath, p => {
+                if (currentOperation.cancelled) throw new Error('Operación cancelada');
+                sendProgress(10 + Math.floor(p * 0.3), `Descargando Quilt: ${p}%`);
+            });
+
+            if (currentOperation.cancelled) throw new Error('Operación cancelada');
+
+            // Get Java
+            sendProgress(45, 'Preparando Java...');
+            const javaExe = await ensureJava(mcVersion, s.javaPath);
+
+            if (currentOperation.cancelled) throw new Error('Operación cancelada');
+
+            // Install Quilt
+            ensureLauncherProfiles(mcPath);
+            sendProgress(50, 'Instalando Quilt...');
+            sendLog('🔧 Ejecutando instalador de Quilt...');
+
+            await new Promise((resolve, reject) => {
+                const proc = spawn(javaExe, [
+                    '-jar', quiltInstallerPath,
+                    'install', 'client', mcVersion,
+                    '--loader', latestQuiltLoader,
+                    '--install-dir', mcPath,
+                    '--no-profile'
+                ], { cwd: tempDir });
+
+                currentOperation.process = proc;
+
+                let output = '';
+                proc.stdout.on('data', d => {
+                    const msg = d.toString().trim();
+                    if (msg) {
+                        output += msg + '\n';
+                        sendLog(`  ${msg}`);
+                    }
+                });
+                proc.stderr.on('data', d => {
+                    const msg = d.toString().trim();
+                    if (msg) {
+                        output += msg + '\n';
+                        sendLog(`  ${msg}`);
+                    }
+                });
+                proc.on('close', code => {
+                    if (currentOperation?.cancelled) {
+                        reject(new Error('Operación cancelada'));
+                    } else if (code === 0 || output.toLowerCase().includes('success') || output.toLowerCase().includes('done')) {
+                        resolve();
+                    } else {
+                        reject(new Error(`Instalador de Quilt terminó con código ${code}`));
+                    }
+                });
+
+                setTimeout(() => {
+                    if (proc && !proc.killed) {
+                        try { proc.kill(); } catch { }
+                        resolve();
+                    }
+                }, 120000);
+            });
+            try { fs.unlinkSync(quiltInstallerPath); } catch { }
+        } else {
+            sendLog('✅ Quilt base ya estaba instalado, omitiendo descarga del instalador...');
+            sendProgress(50, 'Quilt ya preparado');
+        }
+
+        if (currentOperation.cancelled) throw new Error('Operación cancelada');
+
+        sendLog(`✅ Quilt validado correctamente`);
+        sendProgress(100, 'Quilt listo ✓');
+
+        currentOperation = null;
+        return {
+            success: true,
+            versionId: quiltVersionId
+        };
+
+    } catch (err) {
+        sendLog(`❌ Error instalando Quilt: ${err.message}`, 'error');
+        sendProgress(0, '');
+        currentOperation = null;
+        return { success: false, error: err.message };
+    }
+});
+
 // ── MODPACKS HELPERS & HANDLERS ────────────────────────────────────
 
 async function ensureFabricLoader(mcVersion, loaderVersion) {
@@ -1842,6 +2008,50 @@ async function ensureFabricLoader(mcVersion, loaderVersion) {
     });
     try { fs.unlinkSync(fabricInstallerPath); } catch {}
     return fabricVersionId;
+}
+
+async function ensureQuiltLoader(mcVersion, loaderVersion) {
+    const s = loadSettings();
+    const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+    const quiltVersionId = `quilt-loader-${loaderVersion}-${mcVersion}`;
+    const quiltDir = path.join(mcPath, 'versions', quiltVersionId);
+    const isQuiltInstalled = fs.existsSync(path.join(quiltDir, `${quiltVersionId}.json`));
+    if (isQuiltInstalled) return quiltVersionId;
+
+    sendLog(`🔧 Instalando Quilt Loader ${loaderVersion} para MC ${mcVersion}...`);
+    const tempDir = path.join(BASE_DATA_DIR, 'temp');
+    fs.mkdirSync(tempDir, { recursive: true });
+
+    let installerVer = '0.13.1'; // fallback
+    try {
+        const installerList = JSON.parse(await httpsGet('https://meta.quiltmc.org/v3/versions/installer'));
+        if (installerList && installerList.length > 0) {
+            installerVer = installerList[0].version;
+        }
+    } catch (e) {
+        sendLog(`⚠️ Error obteniendo versión de Quilt Installer, usando fallback ${installerVer}: ${e.message}`);
+    }
+
+    const quiltInstallerUrl = `https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-installer/${installerVer}/quilt-installer-${installerVer}.jar`;
+    const quiltInstallerPath = path.join(tempDir, 'quilt-installer-tmp.jar');
+    await downloadFile(quiltInstallerUrl, quiltInstallerPath);
+
+    const javaExe = await ensureJava(mcVersion, s.javaPath);
+    await new Promise((resolve, reject) => {
+        const proc = spawn(javaExe, [
+            '-jar', quiltInstallerPath,
+            'install', 'client', mcVersion,
+            '--loader', loaderVersion,
+            '--install-dir', mcPath,
+            '--no-profile'
+        ], { cwd: tempDir });
+        proc.on('close', code => {
+            if (code === 0) resolve();
+            else reject(new Error(`El instalador de Quilt falló con código ${code}`));
+        });
+    });
+    try { fs.unlinkSync(quiltInstallerPath); } catch {}
+    return quiltVersionId;
 }
 
 async function ensureNeoForgeLoader(mcVersion, neoforgeVersion) {
@@ -2103,12 +2313,13 @@ ipcMain.handle('import-modpack', async (event) => {
             // Write instance.json metadata
             const loaderId = manifest.minecraft.modLoaders?.[0]?.id || '';
             const isFabric = loaderId.toLowerCase().includes('fabric');
+            const isQuilt = loaderId.toLowerCase().includes('quilt');
             const isNeoForge = loaderId.toLowerCase().includes('neoforge');
-            const loaderVer = loaderId.replace(/^(forge-|fabric-|neoforge-)/i, '');
+            const loaderVer = loaderId.replace(/^(forge-|fabric-|neoforge-|quilt-)/i, '');
             const metadata = {
                 name: instanceName,
                 mcVersion,
-                loader: isFabric ? 'fabric' : (isNeoForge ? 'neoforge' : (loaderId ? 'forge' : 'vanilla')),
+                loader: isFabric ? 'fabric' : (isQuilt ? 'quilt' : (isNeoForge ? 'neoforge' : (loaderId ? 'forge' : 'vanilla'))),
                 loaderVersion: loaderVer,
                 iconUrl: '',
                 screenshotUrl: '',
@@ -2154,13 +2365,14 @@ ipcMain.handle('import-modpack', async (event) => {
 
             // Write instance.json metadata
             const fabricVer = manifest.dependencies?.['fabric-loader'] || manifest.dependencies?.fabric;
+            const quiltVer = manifest.dependencies?.['quilt-loader'] || manifest.dependencies?.quilt;
             const neoforgeVer = manifest.dependencies?.neoforge;
             const forgeVer = manifest.dependencies?.forge;
             const metadata = {
                 name: instanceName,
                 mcVersion,
-                loader: fabricVer ? 'fabric' : (neoforgeVer ? 'neoforge' : (forgeVer ? 'forge' : 'vanilla')),
-                loaderVersion: fabricVer || neoforgeVer || forgeVer || '',
+                loader: fabricVer ? 'fabric' : (quiltVer ? 'quilt' : (neoforgeVer ? 'neoforge' : (forgeVer ? 'forge' : 'vanilla'))),
+                loaderVersion: fabricVer || quiltVer || neoforgeVer || forgeVer || '',
                 iconUrl: '',
                 screenshotUrl: '',
                 description: 'Importado localmente desde Modrinth.'
@@ -2202,8 +2414,8 @@ ipcMain.handle('get-installed-modpacks', async (event) => {
             const instancePath = path.join(instancesDir, dirName);
             if (!fs.statSync(instancePath).isDirectory()) continue;
 
-            // Skip default loader instances (fabric-* and forge-*) to only show modpacks
-            if (dirName.startsWith('fabric-') || dirName.startsWith('forge-')) continue;
+            // Skip default loader instances (fabric-*, forge-*, neoforge-*, quilt-*) to only show modpacks
+            if (dirName.startsWith('fabric-') || dirName.startsWith('forge-') || dirName.startsWith('neoforge-') || dirName.startsWith('quilt-')) continue;
 
             const instanceJsonPath = path.join(instancePath, 'instance.json');
             if (fs.existsSync(instanceJsonPath)) {
@@ -2402,10 +2614,11 @@ async function installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl
         const mcVersion = manifest.minecraft.version;
         const loaderId = manifest.minecraft.modLoaders?.[0]?.id || '';
         const isFabric = loaderId.toLowerCase().includes('fabric');
+        const isQuilt = loaderId.toLowerCase().includes('quilt');
         const isNeoForge = loaderId.toLowerCase().includes('neoforge');
-        const loaderVer = loaderId.replace(/^(forge-|fabric-|neoforge-)/i, '');
+        const loaderVer = loaderId.replace(/^(forge-|fabric-|neoforge-|quilt-)/i, '');
 
-        sendLog(`Minecraft: ${mcVersion}, Loader: ${isFabric ? 'Fabric ' + loaderVer : (isNeoForge ? 'NeoForge ' + loaderVer : (loaderId ? 'Forge ' + loaderVer : 'Vanilla'))}`);
+        sendLog(`Minecraft: ${mcVersion}, Loader: ${isFabric ? 'Fabric ' + loaderVer : (isQuilt ? 'Quilt ' + loaderVer : (isNeoForge ? 'NeoForge ' + loaderVer : (loaderId ? 'Forge ' + loaderVer : 'Vanilla')))}`);
 
         const overridesPrefix = manifest.overrides || 'overrides';
         zipEntries.forEach(entry => {
@@ -2466,7 +2679,7 @@ async function installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl
         const metadata = {
             name: title,
             mcVersion,
-            loader: isFabric ? 'fabric' : (isNeoForge ? 'neoforge' : (loaderId ? 'forge' : 'vanilla')),
+            loader: isFabric ? 'fabric' : (isQuilt ? 'quilt' : (isNeoForge ? 'neoforge' : (loaderId ? 'forge' : 'vanilla'))),
             loaderVersion: loaderVer,
             iconUrl,
             screenshotUrl,
@@ -2637,8 +2850,9 @@ ipcMain.handle('install-modpack-from-search', async (event, { projectId, title, 
         const neoforgeVersion = manifest.dependencies?.neoforge;
         const forgeVersion = manifest.dependencies?.forge;
         const fabricVersion = manifest.dependencies?.['fabric-loader'] || manifest.dependencies?.fabric;
+        const quiltVersion = manifest.dependencies?.['quilt-loader'] || manifest.dependencies?.quilt;
 
-        sendLog(`Minecraft: ${mcVersion}, Loader: ${fabricVersion ? 'Fabric ' + fabricVersion : (neoforgeVersion ? 'NeoForge ' + neoforgeVersion : (forgeVersion ? 'Forge ' + forgeVersion : 'Vanilla'))}`);
+        sendLog(`Minecraft: ${mcVersion}, Loader: ${fabricVersion ? 'Fabric ' + fabricVersion : (quiltVersion ? 'Quilt ' + quiltVersion : (neoforgeVersion ? 'NeoForge ' + neoforgeVersion : (forgeVersion ? 'Forge ' + forgeVersion : 'Vanilla')))}`);
 
         const modsDir = path.join(instancePath, 'mods');
         fs.mkdirSync(modsDir, { recursive: true });
@@ -2679,8 +2893,8 @@ ipcMain.handle('install-modpack-from-search', async (event, { projectId, title, 
         const metadata = {
             name: title,
             mcVersion,
-            loader: fabricVersion ? 'fabric' : (neoforgeVersion ? 'neoforge' : (forgeVersion ? 'forge' : 'vanilla')),
-            loaderVersion: fabricVersion || neoforgeVersion || forgeVersion || '',
+            loader: fabricVersion ? 'fabric' : (quiltVersion ? 'quilt' : (neoforgeVersion ? 'neoforge' : (forgeVersion ? 'forge' : 'vanilla'))),
+            loaderVersion: fabricVersion || quiltVersion || neoforgeVersion || forgeVersion || '',
             iconUrl,
             screenshotUrl,
             description
@@ -2772,6 +2986,33 @@ ipcMain.handle('get-installed-fabric-versions', () => {
                     loaderVersion = match ? match[1] : '';
                 } catch {
                     const match = d.match(/fabric-loader-([\d.]+)-([\d.]+)/);
+                    loaderVersion = match ? match[1] : '';
+                    mcVersion = match ? match[2] : d;
+                }
+                return { id: d, loaderVersion, mcVersion };
+            });
+    } catch { return []; }
+});
+
+ipcMain.handle('get-installed-quilt-versions', () => {
+    const s = loadSettings();
+    const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+    const versionsDir = path.join(mcPath, 'versions');
+    if (!fs.existsSync(versionsDir)) return [];
+    try {
+        return fs.readdirSync(versionsDir)
+            .filter(d => d.toLowerCase().includes('quilt') && fs.existsSync(path.join(versionsDir, d, `${d}.json`)))
+            .map(d => {
+                const jsonPath = path.join(versionsDir, d, `${d}.json`);
+                let mcVersion = '';
+                let loaderVersion = '';
+                try {
+                    const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+                    mcVersion = data.inheritsFrom || '';
+                    const match = d.match(/quilt-loader-([\d.]+)/);
+                    loaderVersion = match ? match[1] : '';
+                } catch {
+                    const match = d.match(/quilt-loader-([\d.]+)-([\d.]+)/);
                     loaderVersion = match ? match[1] : '';
                     mcVersion = match ? match[2] : d;
                 }
@@ -3166,6 +3407,14 @@ ipcMain.on('launch-game', async (event, data) => {
                     await ensureFabricLoader(mcVer, loaderVer);
                 }
                 launchModId = fabricVersionId;
+            } else if (loader === 'quilt') {
+                const quiltVersionId = `quilt-loader-${loaderVer}-${mcVer}`;
+                const quiltDir = path.join(mcPath, 'versions', quiltVersionId);
+                if (!fs.existsSync(path.join(quiltDir, `${quiltVersionId}.json`))) {
+                    sendLog(`🔧 Instalador: Descargando Quilt Loader ${loaderVer}...`);
+                    await ensureQuiltLoader(mcVer, loaderVer);
+                }
+                launchModId = quiltVersionId;
             } else if (loader === 'neoforge') {
                 const versionsDir = path.join(mcPath, 'versions');
                 let installedNeoForgeVer = null;
@@ -3249,7 +3498,6 @@ ipcMain.on('launch-game', async (event, data) => {
         };
 
         let activeJvmArgs = s.jvmArgs || '';
-        }
         if (activeJvmArgs && activeJvmArgs.trim()) {
             opts.customArgs = activeJvmArgs.trim().split(/\s+/);
         }
@@ -3372,7 +3620,8 @@ ipcMain.on('launch-game', async (event, data) => {
                 : launchModId.toLowerCase().includes('neoforge') ? 'neoforge'
                     : launchModId.toLowerCase().includes('forge') ? 'forge'
                         : launchModId.toLowerCase().includes('fabric') ? 'fabric'
-                            : null)
+                            : launchModId.toLowerCase().includes('quilt') ? 'quilt'
+                                : null)
             : null;
         setRPCPlaying(launchVersion, modType, data.modpackName ? modpackDispName : null);
 
