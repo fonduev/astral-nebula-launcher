@@ -1,10 +1,10 @@
 {
-  "version": "3.0.7",
-  "notes": "• Eliminado el modpack Fussionborn del launcher.\n• Mejoras internas de rendimiento y limpieza de código.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.7/app.asar",
+  "version": "3.0.8",
+  "notes": "• Fix: La ventana CMD ya no aparece al aplicar actualizaciones.\n• Fix: Las actualizaciones ahora se instalan correctamente.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.8/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.7/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.8/app.asar"
     }
   }
 }
