@@ -685,7 +685,7 @@ function loadSettings() {
         updateUrl: 'https://raw.githubusercontent.com/fonduev/astral-nebula-launcher/main/update.json',
         adsUrl: 'https://raw.githubusercontent.com/fonduev/astral-nebula-launcher/main/ads.json',
         personalizedAds: false,
-        fussionbornDownloadUrl: 'https://drive.usercontent.google.com/download?id=1U9PgwXMPTZT-xNoQzKjP8EtXdY7lSGuB&export=download&confirm=t',
+
         socialFirebase: {
             apiKey: "AIzaSyCfka9dpsVQvfsJ883segPzATNDUEuIVwc",
             projectId: "astral-nebula-social",
@@ -711,13 +711,6 @@ function loadSettings() {
             }
         }
 
-        // Migración: Actualizar URL antigua de Fussionborn (R2) a Google Drive
-        const oldR2Url = 'https://pub-d38529ebbdbe4598b4d3d552ffc4246f.r2.dev/FUSSIONBORN.zip';
-        if (data.fussionbornDownloadUrl === oldR2Url) {
-            data.fussionbornDownloadUrl = defaultSettings.fussionbornDownloadUrl;
-            changed = true;
-        }
-        
         if (changed) {
             fs.writeFileSync(SETTINGS_PATH, JSON.stringify(data, null, 2));
         }
@@ -2195,216 +2188,7 @@ ipcMain.handle('import-modpack', async (event) => {
     }
 });
 
-ipcMain.handle('install-fussionborn', async () => {
-    currentOperation = { type: 'fussionborn', cancelled: false };
-
-    try {
-        const s = loadSettings();
-        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
-        const instancesDir = path.join(mcPath, 'instances');
-        const fussionbornDir = path.join(instancesDir, 'Fussionborn');
-
-        fs.mkdirSync(instancesDir, { recursive: true });
-
-        const tempDir = path.join(BASE_DATA_DIR, 'temp');
-        fs.mkdirSync(tempDir, { recursive: true });
-
-        const tempZipPath = path.join(tempDir, 'fussionborn.zip');
-        const downloadUrl = s.fussionbornDownloadUrl || 'https://drive.usercontent.google.com/download?id=1U9PgwXMPTZT-xNoQzKjP8EtXdY7lSGuB&export=download&confirm=t';
-
-        sendLog('📥 Descargando Fussionborn modpack desde la nube…');
-        sendProgress(10, 'Descargando Fussionborn…');
-
-        if (currentOperation.cancelled) throw new Error('Operación cancelada');
-
-        // Timeout de 5 minutos de inactividad para archivos grandes (1.4+ GB desde Google Drive)
-        await downloadFile(downloadUrl, tempZipPath, (p, mb, extra) => {
-            if (currentOperation.cancelled) throw new Error('Operación cancelada');
-            let label = `Descargando Fussionborn: ${p}%`;
-            if (extra && extra.remainingTimeStr) {
-                label += ` (${extra.speedMBps.toFixed(1)} MB/s, restante: ${extra.remainingTimeStr})`;
-            }
-            sendProgress(10 + Math.floor(p * 0.7), label);
-        }, { socketTimeoutMs: 300000 });
-
-        sendLog('✅ Descarga completada');
-
-        sendProgress(80, 'Instalando Fussionborn…');
-
-        if (currentOperation.cancelled) throw new Error('Operación cancelada');
-
-        // Extract using Expand-Archive -Force (supports files > 2 GiB, handles existing files natively on PS 5.1+)
-        sendLog('📦 Extrayendo Fussionborn modpack (esto puede tomar un momento debido a su tamaño)...');
-        const { execFileSync } = require('child_process');
-        fs.mkdirSync(fussionbornDir, { recursive: true });
-        const zipSrc = tempZipPath.replace(/\\/g, '\\\\');
-        const zipDest = fussionbornDir.replace(/\\/g, '\\\\');
-        const psScript = `$ErrorActionPreference='Stop'; Expand-Archive -Path '${zipSrc}' -DestinationPath '${zipDest}' -Force`;
-        const psExe = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
-        try {
-            execFileSync(psExe, ['-NoProfile', '-NonInteractive', '-Command', psScript], { timeout: 1800000 });
-        } catch (psErr) {
-            // Fallback: try powershell from PATH
-            execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', psScript], { timeout: 1800000 });
-        }
-
-        try { fs.unlinkSync(tempZipPath); } catch {}
-
-        // ── MOVE VERSIONS, LIBRARIES AND ASSETS TO THE GLOBAL FOLDERS ────────────────
-        const mergeFolderToRoot = (srcFolder, destFolder) => {
-            if (fs.existsSync(srcFolder)) {
-                sendLog(`📦 Integrando directorio ${path.basename(srcFolder)} al sistema global...`);
-                fs.mkdirSync(destFolder, { recursive: true });
-                try {
-                    fs.cpSync(srcFolder, destFolder, { recursive: true, force: true });
-                    fs.rmSync(srcFolder, { recursive: true, force: true });
-                } catch (e) {
-                    sendLog(`⚠️ Advertencia integrando ${path.basename(srcFolder)}: ${e.message}`, 'warn');
-                }
-            }
-        };
-
-        mergeFolderToRoot(path.join(fussionbornDir, 'versions'), path.join(mcPath, 'versions'));
-        mergeFolderToRoot(path.join(fussionbornDir, 'libraries'), path.join(mcPath, 'libraries'));
-        mergeFolderToRoot(path.join(fussionbornDir, 'assets'), path.join(mcPath, 'assets'));
-
-        // Clean up metadata from other launchers
-        try {
-            const xmclJson = path.join(fussionbornDir, 'xmcl.json');
-            if (fs.existsSync(xmclJson)) fs.unlinkSync(xmclJson);
-        } catch {}
-
-        // Merge overrides folder (config, mods, resourcepacks, kubejs, schematics, etc.) to instance root
-        const overridesDir = path.join(fussionbornDir, 'overrides');
-        if (fs.existsSync(overridesDir)) {
-            sendLog('📦 Integrando overrides (config, mods, resourcepacks, etc.)...');
-            try {
-                fs.cpSync(overridesDir, fussionbornDir, { recursive: true, force: true });
-                fs.rmSync(overridesDir, { recursive: true, force: true });
-                sendLog('✅ Overrides integrados correctamente.');
-            } catch (e) {
-                sendLog(`⚠️ Advertencia integrando overrides: ${e.message}`, 'warn');
-            }
-        }
-
-        // Download mods from CurseForge using the manifest.json
-        // The zip includes a manifest.json listing ALL mods with projectID/fileID
-        // NOTE: mods in overrides/mods/ are removed before downloading to avoid duplicates
-        const manifestJsonPath = path.join(fussionbornDir, 'manifest.json');
-        const modsDir = path.join(fussionbornDir, 'mods');
-        fs.mkdirSync(modsDir, { recursive: true });
-        if (fs.existsSync(manifestJsonPath)) {
-            try {
-                const manifestData = JSON.parse(fs.readFileSync(manifestJsonPath, 'utf8'));
-                const modFiles = manifestData.files || [];
-                if (modFiles.length > 0) {
-                    // Download missing mods from CurseForge
-                    const existingMods = new Set();
-                    try { fs.readdirSync(modsDir).forEach(f => existingMods.add(f.toLowerCase())); } catch {}
-                    const missingMods = modFiles.filter(f => {
-                        const pattern = `mod_${f.fileID}.jar`;
-                        return !existingMods.has(pattern.toLowerCase());
-                    });
-                    if (missingMods.length > 0) {
-                        sendLog(`📥 Descargando ${missingMods.length} mods desde CurseForge...`);
-                        let downloaded = 0;
-                        const startTimeMods = Date.now();
-                        for (const modFile of missingMods) {
-                            if (currentOperation.cancelled) throw new Error('Operación cancelada');
-                            try {
-                                const modPath = path.join(modsDir, `mod_${modFile.fileID}.jar`);
-                                await downloadCurseForgeMod(modFile.projectID, modFile.fileID, modPath);
-                                downloaded++;
-                                
-                                let etaStr = '';
-                                if (downloaded > 2) {
-                                    const elapsed = (Date.now() - startTimeMods) / 1000;
-                                    const avgTimePerMod = elapsed / downloaded;
-                                    const remainingSeconds = Math.round((missingMods.length - downloaded) * avgTimePerMod);
-                                    if (remainingSeconds > 60) {
-                                        etaStr = `, restante: ${Math.floor(remainingSeconds / 60)}m ${remainingSeconds % 60}s`;
-                                    } else {
-                                        etaStr = `, restante: ${remainingSeconds}s`;
-                                    }
-                                }
-                                sendProgress(80 + Math.floor((downloaded / missingMods.length) * 15), `Descargando mods: ${downloaded}/${missingMods.length}${etaStr}`);
-                            } catch (modErr) {
-                                sendLog(`⚠️ Error descargando mod ${modFile.projectID}/${modFile.fileID}: ${modErr.message}`, 'warn');
-                            }
-                        }
-                        sendLog(`✅ ${downloaded}/${missingMods.length} mods descargados correctamente.`);
-                        // Clean up original-named JARs from overrides that are now superseded by mod_*.jar downloads
-                        try {
-                            const allMods = new Set();
-                            for (const mf of modFiles) {
-                                allMods.add(`mod_${mf.fileID}.jar`.toLowerCase());
-                            }
-                            const afterFiles = fs.readdirSync(modsDir);
-                            for (const f of afterFiles) {
-                                if (f.endsWith('.jar') && !f.startsWith('mod_')) {
-                                    fs.unlinkSync(path.join(modsDir, f));
-                                }
-                            }
-                        } catch {}
-                    } else {
-                        sendLog('✅ Todos los mods ya están en la instancia.');
-                    }
-                }
-            } catch (manifestErr) {
-                sendLog(`⚠️ Error procesando manifest.json: ${manifestErr.message}`, 'warn');
-            }
-        }
-
-        // Write instance.json metadata – read version info from manifest.json when available
-        const instanceJsonPath = path.join(fussionbornDir, 'instance.json');
-        let fbMcVersion = "1.21.1";
-        let fbLoader = "neoforge";
-        let fbLoaderVersion = "21.1.233";
-        if (fs.existsSync(manifestJsonPath)) {
-            try {
-                const manifest = JSON.parse(fs.readFileSync(manifestJsonPath, 'utf8'));
-                if (manifest.minecraft && manifest.minecraft.version) {
-                    fbMcVersion = manifest.minecraft.version;
-                }
-                if (manifest.minecraft && manifest.minecraft.modLoaders) {
-                    const primary = manifest.minecraft.modLoaders.find(l => l.primary) || manifest.minecraft.modLoaders[0];
-                    if (primary && primary.id) {
-                        // Format: "neoforge-21.1.233" or "forge-47.3.22"
-                        const parts = primary.id.split('-');
-                        if (parts.length >= 2) {
-                            fbLoader = parts[0];
-                            fbLoaderVersion = parts.slice(1).join('-');
-                        }
-                    }
-                }
-                sendLog(`📋 Detectado: Minecraft ${fbMcVersion} + ${fbLoader} ${fbLoaderVersion}`);
-            } catch (e) {
-                sendLog(`⚠️ Usando versión predeterminada (error leyendo manifest): ${e.message}`, 'warn');
-            }
-        }
-        const instanceMeta = {
-            name: "Fussionborn",
-            mcVersion: fbMcVersion,
-            loader: fbLoader,
-            loaderVersion: fbLoaderVersion,
-            iconUrl: "fussionborn_logo.png",
-            screenshotUrl: "fussionborn_gameplay1.png",
-            description: "Fussionborn official medieval adventure modpack."
-        };
-        fs.writeFileSync(instanceJsonPath, JSON.stringify(instanceMeta, null, 2), 'utf8');
-
-        sendProgress(100, 'Fussionborn listo ✓');
-        sendLog('✅ Fussionborn instalado y configurado correctamente.');
-        currentOperation = null;
-        return { success: true };
-
-    } catch (err) {
-        sendLog(`❌ Error instalando Fussionborn: ${err.message}`, 'error');
-        sendProgress(0, '');
-        currentOperation = null;
-        return { success: false, error: err.message };
-    }
-});
+// [FUSSIONBORN install handler removed — see FUSSIONBORN_CODE_BACKUP.js]
 
 ipcMain.handle('get-installed-modpacks', async (event) => {
     try {
@@ -3466,11 +3250,7 @@ ipcMain.on('launch-game', async (event, data) => {
             ...(instanceDir !== mcPath ? { overrides: { gameDirectory: instanceDir } } : {})
         };
 
-        let activeJvmArgs = '';
-        if (data.modpackName === 'Fussionborn') {
-            activeJvmArgs = s.fussionbornJvmArgs !== undefined ? s.fussionbornJvmArgs : '';
-        } else {
-            activeJvmArgs = s.jvmArgs || '';
+        let activeJvmArgs = s.jvmArgs || '';
         }
         if (activeJvmArgs && activeJvmArgs.trim()) {
             opts.customArgs = activeJvmArgs.trim().split(/\s+/);
@@ -3744,51 +3524,77 @@ ipcMain.on('apply-update', () => {
     const updateAsar = path.join(resourcesDir, 'app.asar.update');
     const currentAsar = path.join(resourcesDir, 'app.asar');
     const currentAppDir = path.join(resourcesDir, 'app');
-    const batPath = path.join(resourcesDir, 'apply_update.bat');
+    const scriptPath = path.join(resourcesDir, 'apply_update.js');
 
-    const batContent = [
-        '@echo off',
-        'taskkill /f /im "Nebula Launcher.exe" 2>nul',
-        'set /a count=0',
-        'ping -n 3 127.0.0.1 >nul',
-        ':retry',
-        'set /a count+=1',
-        'if %count% gtr 10 goto launch',
-        `if exist "${currentAsar}" (`,
-        `  del /f /q "${currentAsar}" 2>nul`,
-        `  if exist "${currentAsar}" (`,
-        `    ping -n 2 127.0.0.1 >nul`,
-        `    goto retry`,
-        `  )`,
-        `)`,
-        `if exist "${currentAppDir}" (`,
-        `  rd /s /q "${currentAppDir}" 2>nul`,
-        `)`,
-        `if exist "${updateAsar}" (`,
-        `  move /y "${updateAsar}" "${currentAsar}"`,
-        `)`,
-        ':launch',
-        `start "" "${exePath}"`,
-        `del "%~f0" 2>nul`,
+    const scriptContent = [
+        'var shell = WScript.CreateObject("WScript.Shell");',
+        'var fso = WScript.CreateObject("Scripting.FileSystemObject");',
+        '',
+        '// Matar el proceso del launcher',
+        'try {',
+        '    shell.Run("taskkill /f /im \\"Nebula Launcher.exe\\"", 0, true);',
+        '} catch(e) {}',
+        'WScript.Sleep(1500);',
+        '',
+        'var currentAsar = WScript.Arguments(0);',
+        'var updateAsar = WScript.Arguments(1);',
+        'var appDir = WScript.Arguments(2);',
+        'var exePath = WScript.Arguments(3);',
+        '',
+        '// Esperar y reemplazar',
+        'var retries = 0;',
+        'var success = false;',
+        'while (retries < 15) {',
+        '    try {',
+        '        if (fso.FileExists(currentAsar)) {',
+        '            fso.DeleteFile(currentAsar, true);',
+        '        }',
+        '        if (fso.FolderExists(appDir)) {',
+        '            fso.DeleteFolder(appDir, true);',
+        '        }',
+        '        fso.MoveFile(updateAsar, currentAsar);',
+        '        success = true;',
+        '        break;',
+        '    } catch(err) {',
+        '        retries++;',
+        '        WScript.Sleep(1000);',
+        '    }',
+        '}',
+        '',
+        '// Relanzar launcher',
+        'if (success) {',
+        '    shell.Run("\\"" + exePath + "\\"");',
+        '}',
+        '',
+        '// Auto-eliminarse',
+        'try {',
+        '    fso.DeleteFile(WScript.ScriptFullName, true);',
+        '} catch(e) {}'
     ].join('\r\n');
 
     try {
-        fs.writeFileSync(batPath, batContent, 'utf8');
-        // Ejecutar cmd.exe /c batPath de forma explícita y detached para evitar problemas de rutas con espacios
-        const child = spawn('cmd.exe', ['/c', batPath], {
+        fs.writeFileSync(scriptPath, scriptContent, 'utf8');
+
+        // Ejecutar con wscript.exe, que es una aplicación GUI (nunca abre consola)
+        const child = spawn('wscript.exe', [
+            '//E:JScript',
+            scriptPath,
+            currentAsar,
+            updateAsar,
+            currentAppDir,
+            exePath
+        ], {
             detached: true,
             stdio: 'ignore',
             windowsHide: true
         });
         child.unref();
     } catch (e) {
-        console.error('[apply-update] bat error:', e);
+        console.error('[apply-update] wscript error:', e);
     }
 
-    // Retrasar 1 segundo la salida para dar tiempo a Windows de registrar e iniciar el proceso secundario
+    // Cerrar inmediatamente el proceso de Electron
     setTimeout(() => {
         app.quit();
-    }, 1000);
+    }, 500);
 });
-
-

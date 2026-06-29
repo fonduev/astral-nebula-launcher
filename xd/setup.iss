@@ -1,10 +1,10 @@
 [Setup]
 AppName=Nebula Launcher
-AppVersion=3.0.6
+AppVersion=3.0.9
 DefaultDirName={localappdata}\Programs\Nebula Launcher
 DefaultGroupName=Nebula Launcher
 OutputDir=C:\Users\renee\Documents\Web
-OutputBaseFilename=Nebula.Launcher.Setup.3.0.6
+OutputBaseFilename=Nebula.Launcher.Setup.3.0.9
 SetupIconFile=C:\Users\renee\Documents\Web\icon.ico
 Compression=lzma
 SolidCompression=yes

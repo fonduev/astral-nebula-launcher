@@ -1,12 +1,12 @@
 {
-  "name": "astral-nebula-launcher",
-  "version": "3.0.6",
-  "description": "Nebula Launcher \u00e2\u20ac\u201d Minecraft Launcher con soporte Premium, Forge y OptiFine",
-  "main": "main.js",
-  "dependencies": {
-    "adm-zip": "^0.5.16",
-    "bytenode": "^1.5.7",
-    "discord-rpc": "^4.0.1",
-    "minecraft-launcher-core": "^3.2.2"
-  }
+    "name":  "astral-nebula-launcher",
+    "version":  "3.0.9",
+    "description":  "Nebula Launcher — Minecraft Launcher con soporte Premium, Forge y OptiFine",
+    "main":  "main.js",
+    "dependencies":  {
+                         "adm-zip":  "^0.5.16",
+                         "bytenode":  "^1.5.7",
+                         "discord-rpc":  "^4.0.1",
+                         "minecraft-launcher-core":  "^3.2.2"
+                     }
 }

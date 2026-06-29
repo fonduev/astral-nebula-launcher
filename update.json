@@ -1,10 +1,10 @@
 {
-  "version": "3.0.8",
-  "notes": "• Fix: La ventana CMD ya no aparece al aplicar actualizaciones.\n• Fix: Las actualizaciones ahora se instalan correctamente.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.8/app.asar",
+  "version": "3.0.9",
+  "notes": "• Renovación visual de marca a Nebula Launcher.\n• Agregado crédito 'made by fondue_x' en la barra lateral del launcher.\n• Actualizaciones completamente invisibles y silenciosas en segundo plano (sin parpadeos de CMD).",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.9/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.8/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.0.9/app.asar"
     }
   }
 }
