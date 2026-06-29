@@ -614,13 +614,43 @@
       function submitSupportForm(event) {
         event.preventDefault();
         
+        const name = document.getElementById('sup-name').value.trim();
+        const email = document.getElementById('sup-email').value.trim();
+        const message = document.getElementById('sup-msg').value.trim();
+
         const submitBtn = event.target.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
         submitBtn.disabled = true;
         submitBtn.textContent = 'Enviando...';
+
+        const webhookUrl = 'https://discord.com/api/webhooks/1521266181439488121/RKiBCXTfB-7wKwBTLNWhhlpefsuxOUMpxQ01BbPa1A_1VxvqAVIArIflUfcuEm_NrvIR';
         
-        // Simular un envío premium con retardo de red
-        setTimeout(() => {
+        const payload = {
+          embeds: [
+            {
+              title: '📧 Nuevo Mensaje de Soporte',
+              color: 10980346, // #a78bfa (Nebula Purple)
+              fields: [
+                { name: '👤 Nombre', value: name, inline: true },
+                { name: '✉️ Correo', value: email, inline: true },
+                { name: '💬 Mensaje', value: message }
+              ],
+              timestamp: new Date().toISOString(),
+              footer: {
+                text: 'Nebula Launcher Website Support'
+              }
+            }
+          ]
+        };
+
+        fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(() => {
           const formContent = document.getElementById('support-form-content');
           const successContent = document.getElementById('support-success-content');
           
@@ -629,7 +659,13 @@
           
           submitBtn.disabled = false;
           submitBtn.textContent = originalText;
-        }, 1200);
+        })
+        .catch(err => {
+          console.error('Error al enviar webhook:', err);
+          alert('Hubo un error al enviar tu consulta. Por favor, inténtalo de nuevo o contáctanos por Discord o GitHub.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        });
       }
     </script>
   </body>
