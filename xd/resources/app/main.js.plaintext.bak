@@ -2398,7 +2398,211 @@ ipcMain.handle('import-modpack', async (event) => {
     }
 });
 
-// [FUSSIONBORN install handler removed — see FUSSIONBORN_CODE_BACKUP.js]
+const SPONSORED_SERVERS = [
+    {
+        id: 'survival-nebula',
+        name: 'Nebula Survival 1.21',
+        ip: 'survival.nebulamc.net:25565',
+        description: 'Servidor RPG Oficial de Nebula. Explora mazmorras, derrota jefes mágicos y construye ciudades con tus amigos.',
+        icon: '🌌',
+        color: '#7c3aed',
+        banner: 'https://pub-d38529ebbdbe4598b4d3d552ffc4246f.r2.dev/nebula_survival_banner.png',
+        tags: ['PVE', 'Survival RPG', 'Economía'],
+        modpackUrl: 'https://drive.usercontent.google.com/download?id=1U9PgwXMPTZT-xNoQzKjP8EtXdY7lSGuB&export=download&confirm=t',
+        mcVersion: '1.21.1',
+        loader: 'neoforge',
+        loaderVersion: '21.1.233'
+    },
+    {
+        id: 'skyblock-nebula',
+        name: 'Nebula Skyblock',
+        ip: 'skyblock.nebulamc.net',
+        description: 'Supervivencia en islas flotantes con automatización industrial. Incluye generadores de minerales mejorados y misiones diarias.',
+        icon: '☁️',
+        color: '#38bdf8',
+        banner: 'https://pub-d38529ebbdbe4598b4d3d552ffc4246f.r2.dev/nebula_skyblock_banner.png',
+        tags: ['Skyblock', 'Tecnología', 'Misiones'],
+        modpackUrl: 'https://drive.usercontent.google.com/download?id=1U9PgwXMPTZT-xNoQzKjP8EtXdY7lSGuB&export=download&confirm=t',
+        mcVersion: '1.21.1',
+        loader: 'neoforge',
+        loaderVersion: '21.1.233'
+    }
+];
+
+ipcMain.handle('get-sponsored-servers', () => SPONSORED_SERVERS);
+
+ipcMain.handle('is-server-installed', async (event, serverId) => {
+    try {
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        const instancePath = path.join(mcPath, 'instances', serverId);
+        const instanceJsonPath = path.join(instancePath, 'instance.json');
+        return fs.existsSync(instanceJsonPath);
+    } catch {
+        return false;
+    }
+});
+
+ipcMain.handle('install-sponsored-server', async (event, serverId) => {
+    const server = SPONSORED_SERVERS.find(s => s.id === serverId);
+    if (!server) throw new Error('Servidor no encontrado');
+
+    currentOperation = { type: 'sponsored-server', cancelled: false };
+
+    try {
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        const instancesDir = path.join(mcPath, 'instances');
+        const serverDir = path.join(instancesDir, serverId);
+
+        fs.mkdirSync(instancesDir, { recursive: true });
+
+        const tempDir = path.join(BASE_DATA_DIR, 'temp');
+        fs.mkdirSync(tempDir, { recursive: true });
+
+        const tempZipPath = path.join(tempDir, `${serverId}.zip`);
+        const downloadUrl = server.modpackUrl;
+
+        sendLog(`📥 Descargando modpack para el servidor ${server.name}…`);
+        sendProgress(10, `Descargando modpack…`);
+
+        if (currentOperation.cancelled) throw new Error('Operación cancelada');
+
+        await downloadFile(downloadUrl, tempZipPath, (p, mb, extra) => {
+            if (currentOperation.cancelled) throw new Error('Operación cancelada');
+            let label = `Descargando modpack: ${p}%`;
+            if (extra && extra.remainingTimeStr) {
+                label += ` (${extra.speedMBps.toFixed(1)} MB/s, restante: ${extra.remainingTimeStr})`;
+            }
+            sendProgress(10 + Math.floor(p * 0.7), label);
+        }, { socketTimeoutMs: 300000 });
+
+        sendLog('✅ Descarga completada');
+        sendProgress(80, 'Instalando archivos del servidor…');
+
+        if (currentOperation.cancelled) throw new Error('Operación cancelada');
+
+        sendLog('📦 Extrayendo archivos del servidor...');
+        const { execFileSync } = require('child_process');
+        fs.mkdirSync(serverDir, { recursive: true });
+        const zipSrc = tempZipPath.replace(/\\/g, '\\\\');
+        const zipDest = serverDir.replace(/\\/g, '\\\\');
+        const psScript = `$ErrorActionPreference='Stop'; Expand-Archive -Path '${zipSrc}' -DestinationPath '${zipDest}' -Force`;
+        const psExe = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
+        try {
+            execFileSync(psExe, ['-NoProfile', '-NonInteractive', '-Command', psScript], { timeout: 1800000 });
+        } catch (psErr) {
+            execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', psScript], { timeout: 1800000 });
+        }
+
+        try { fs.unlinkSync(tempZipPath); } catch {}
+
+        const mergeFolderToRoot = (srcFolder, destFolder) => {
+            if (fs.existsSync(srcFolder)) {
+                sendLog(`📦 Integrando directorio ${path.basename(srcFolder)} al sistema global...`);
+                fs.mkdirSync(destFolder, { recursive: true });
+                try {
+                    fs.cpSync(srcFolder, destFolder, { recursive: true, force: true });
+                    fs.rmSync(srcFolder, { recursive: true, force: true });
+                } catch (e) {
+                    sendLog(`⚠️ Advertencia integrando ${path.basename(srcFolder)}: ${e.message}`, 'warn');
+                }
+            }
+        };
+
+        mergeFolderToRoot(path.join(serverDir, 'versions'), path.join(mcPath, 'versions'));
+        mergeFolderToRoot(path.join(serverDir, 'libraries'), path.join(mcPath, 'libraries'));
+        mergeFolderToRoot(path.join(serverDir, 'assets'), path.join(mcPath, 'assets'));
+
+        try {
+            const xmclJson = path.join(serverDir, 'xmcl.json');
+            if (fs.existsSync(xmclJson)) fs.unlinkSync(xmclJson);
+        } catch {}
+
+        const overridesDir = path.join(serverDir, 'overrides');
+        if (fs.existsSync(overridesDir)) {
+            sendLog('📦 Integrando overrides (config, mods, resourcepacks, etc.)...');
+            try {
+                fs.cpSync(overridesDir, serverDir, { recursive: true, force: true });
+                fs.rmSync(overridesDir, { recursive: true, force: true });
+                sendLog('✅ Overrides integrados correctamente.');
+            } catch (e) {
+                sendLog(`⚠️ Advertencia integrando overrides: ${e.message}`, 'warn');
+            }
+        }
+
+        const manifestJsonPath = path.join(serverDir, 'manifest.json');
+        const modsDir = path.join(serverDir, 'mods');
+        fs.mkdirSync(modsDir, { recursive: true });
+        if (fs.existsSync(manifestJsonPath)) {
+            try {
+                const manifestData = JSON.parse(fs.readFileSync(manifestJsonPath, 'utf8'));
+                const modFiles = manifestData.files || [];
+                if (modFiles.length > 0) {
+                    const existingMods = new Set();
+                    try { fs.readdirSync(modsDir).forEach(f => existingMods.add(f.toLowerCase())); } catch {}
+                    const missingMods = modFiles.filter(f => {
+                        const pattern = `mod_${f.fileID}.jar`;
+                        return !existingMods.has(pattern.toLowerCase());
+                    });
+                    if (missingMods.length > 0) {
+                        sendLog(`📥 Descargando ${missingMods.length} mods desde CurseForge...`);
+                        let downloaded = 0;
+                        const startTimeMods = Date.now();
+                        for (const modFile of missingMods) {
+                            if (currentOperation.cancelled) throw new Error('Operación cancelada');
+                            try {
+                                const modPath = path.join(modsDir, `mod_${modFile.fileID}.jar`);
+                                await downloadCurseForgeMod(modFile.projectID, modFile.fileID, modPath);
+                                downloaded++;
+                                let etaStr = '';
+                                if (downloaded > 2) {
+                                    const elapsed = (Date.now() - startTimeMods) / 1000;
+                                    const avgTimePerMod = elapsed / downloaded;
+                                    const remainingSeconds = Math.round((missingMods.length - downloaded) * avgTimePerMod);
+                                    if (remainingSeconds > 60) {
+                                        etaStr = `, restante: ${Math.floor(remainingSeconds / 60)}m ${remainingSeconds % 60}s`;
+                                    } else {
+                                        etaStr = `, restante: ${remainingSeconds}s`;
+                                    }
+                                }
+                                sendProgress(80 + Math.floor((downloaded / missingMods.length) * 15), `Descargando mods: ${downloaded}/${missingMods.length}${etaStr}`);
+                            } catch (modErr) {
+                                sendLog(`⚠️ Error descargando mod ${modFile.projectID}/${modFile.fileID}: ${modErr.message}`, 'warn');
+                            }
+                        }
+                        sendLog(`✅ ${downloaded}/${missingMods.length} mods descargados correctamente.`);
+                    }
+                }
+            } catch (manifestErr) {
+                sendLog(`⚠️ Error procesando manifest.json: ${manifestErr.message}`, 'warn');
+            }
+        }
+
+        const instanceJsonPath = path.join(serverDir, 'instance.json');
+        const instanceMeta = {
+            name: server.name,
+            mcVersion: server.mcVersion,
+            loader: server.loader,
+            loaderVersion: server.loaderVersion,
+            iconUrl: "",
+            screenshotUrl: "",
+            description: server.description
+        };
+        fs.writeFileSync(instanceJsonPath, JSON.stringify(instanceMeta, null, 2), 'utf8');
+
+        sendProgress(100, 'Servidor listo ✓');
+        sendLog(`✅ Modpack de ${server.name} instalado correctamente.`);
+        currentOperation = null;
+        return { success: true };
+
+    } catch (err) {
+        sendLog(`❌ Error instalando modpack del servidor: ${err.message}`, 'error');
+        sendProgress(0, '');
+        currentOperation = null;
+        return { success: false, error: err.message };
+    }
+});
 
 ipcMain.handle('get-installed-modpacks', async (event) => {
     try {
@@ -3496,6 +3700,18 @@ ipcMain.on('launch-game', async (event, data) => {
             memory: { max: `${data.ram}G`, min: '512M' },
             ...(instanceDir !== mcPath ? { overrides: { gameDirectory: instanceDir } } : {})
         };
+
+        if (data.serverIp) {
+            let host = data.serverIp;
+            let port = 25565;
+            if (host.includes(':')) {
+                const parts = host.split(':');
+                host = parts[0];
+                port = parseInt(parts[1]) || 25565;
+            }
+            opts.connection = { host, port };
+            sendLog(`🔌 Autoconexión programada al servidor: ${host}:${port}`);
+        }
 
         let activeJvmArgs = s.jvmArgs || '';
         if (activeJvmArgs && activeJvmArgs.trim()) {

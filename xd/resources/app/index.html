@@ -675,6 +675,52 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   color:white;
 }
 
+/* ═══════ SPONSORED SERVERS TAB ═══════ */
+.servers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;overflow-y:auto;flex:1;align-content:start;padding-right:4px;}
+.server-card{
+  border-radius:22px;overflow:hidden;
+  background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
+  border:.5px solid var(--border);
+  transition:all .28s cubic-bezier(.4,0,.2,1);position:relative;
+  box-shadow:0 4px 24px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px);
+  cursor:default;
+}
+.server-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--sv-color,var(--accent)),transparent);opacity:.7;z-index:1;}
+.server-card:hover{transform:translateY(-4px);box-shadow:0 16px 50px rgba(0,0,0,.3),0 0 30px color-mix(in srgb,var(--sv-color,var(--accent)) 25%,transparent);border-color:color-mix(in srgb,var(--sv-color,var(--accent)) 40%,transparent);}
+.server-banner{
+  width:100%;height:130px;object-fit:cover;display:block;
+  background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(168,85,247,.1));
+}
+.server-body{padding:18px 20px 20px;}
+.server-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.server-icon{width:46px;height:46px;border-radius:14px;font-size:1.5rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 14px rgba(0,0,0,.35);}
+.server-info-top{flex:1;min-width:0;}
+.server-name{font-size:1rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.server-ip-chip{font-size:.62rem;color:var(--text-dim);background:rgba(255,255,255,.07);padding:2px 8px;border-radius:7px;border:.5px solid var(--border);display:inline-block;margin-top:3px;font-family:monospace;}
+.sponsored-badge{font-size:.58rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;padding:3px 9px;border-radius:7px;margin-left:auto;white-space:nowrap;}
+.server-desc{font-size:.73rem;color:var(--text-dim);line-height:1.6;margin-bottom:14px;}
+.server-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;}
+.server-tag{font-size:.6rem;padding:2px 8px;border-radius:7px;font-weight:600;background:rgba(255,255,255,.07);color:var(--text-dim);border:.5px solid rgba(255,255,255,.1);}
+.server-join-btn{
+  width:100%;padding:11px;border-radius:13px;border:none;cursor:pointer;font-weight:700;font-size:.8rem;letter-spacing:.04em;
+  transition:all .22s;-webkit-app-region:no-drag;color:#fff;
+  background:linear-gradient(135deg,var(--sv-color,var(--accent)),color-mix(in srgb,var(--sv-color,var(--accent)) 60%,#000));
+  box-shadow:0 4px 14px color-mix(in srgb,var(--sv-color,var(--accent)) 40%,transparent);
+}
+.server-join-btn:hover{filter:brightness(1.15);transform:scale(1.02);}
+.server-join-btn:disabled{opacity:.5;cursor:default;transform:none;filter:none;}
+.server-status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;background:#22c55e;box-shadow:0 0 6px #22c55e;animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.5;transform:scale(.9);}}
+.servers-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;color:var(--text-dim);padding:60px 20px;text-align:center;}
+.servers-empty-icon{font-size:3.5rem;opacity:.4;}
+.server-progress-bar{height:3px;border-radius:2px;background:rgba(255,255,255,.1);margin-top:10px;overflow:hidden;display:none;}
+.server-progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--sv-color,var(--accent)),color-mix(in srgb,var(--sv-color,var(--accent)) 60%,#fff));transition:width .3s;width:0%;}
+.nebula-sponsored-header{display:flex;align-items:center;gap:14px;padding:14px 20px;border-radius:16px;background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(79,70,229,.06));border:.5px solid rgba(124,58,237,.25);margin-bottom:20px;}
+.nebula-sponsored-header .ns-icon{font-size:2rem;}
+.nebula-sponsored-header .ns-text h3{font-size:.95rem;font-weight:800;background:linear-gradient(135deg,#c084fc,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:2px;}
+.nebula-sponsored-header .ns-text p{font-size:.72rem;color:var(--text-dim);line-height:1.5;}
+
 /* ═══════ SETTINGS TAB ═══════ */
 .settings-scroll{flex:1;overflow-y:auto;padding-right:6px;}
 .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:780px;align-content:start;padding-bottom:20px;}
@@ -1411,6 +1457,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
           <span class="nav-icon">⚙️</span>
           Configuración
         </button>
+        <button class="nav-item" id="nav-servers" onclick="showTab('servers')">
+          <span class="nav-icon">🌐</span>
+          Servidores
+        </button>
         <button class="nav-item" id="nav-updates" onclick="showTab('updates')">
           <span class="nav-icon">🔄</span>
           Actualizaciones
@@ -2007,6 +2057,23 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
       </div>
 
+      <div class="tab-panel" id="tab-servers">
+        <h1 class="panel-title">Servidores Patrocinados</h1>
+        <p class="panel-sub">Servidores premium recomendados por la comunidad de Nebula Launcher con modpacks pre-instalados.</p>
+
+        <div class="nebula-sponsored-header">
+          <div class="ns-icon">✨</div>
+          <div class="ns-text">
+            <h3>Conexión e Instalación Inteligente en 1-Clic</h3>
+            <p>Al hacer clic en "Entrar al Servidor", Nebula Launcher comprobará automáticamente los mods necesarios, descargará lo que falte y te conectará directamente al juego sin configuraciones manuales.</p>
+          </div>
+        </div>
+
+        <div class="servers-grid" id="sponsored-servers-grid">
+          <!-- Cargado dinámicamente -->
+        </div>
+      </div>
+
       <div class="tab-panel" id="tab-settings">
         <h1 class="panel-title" onclick="handleTitleClick()" style="cursor:pointer;-webkit-app-region:no-drag;user-select:none;">Configuración</h1>
         <p class="panel-sub">Ajusta el launcher a tu gusto.</p>
@@ -2509,7 +2576,7 @@ function setTheme(t) {
 
 // ═══════ TABS ═══════
 // Mapeo de tab-id → texto parcial en el nav-item (para evitar bugs con traducción)
-const NAV_TAB_MAP = { play:'jugar', mods:'mods', modpacks:'modpacks', versiones:'versiones', console:'consola', settings:'config', social:'social' };
+const NAV_TAB_MAP = { play:'jugar', mods:'mods', modpacks:'modpacks', versiones:'versiones', console:'consola', settings:'config', social:'social', servers:'servidores' };
 function showTab(id) {
   document.querySelectorAll('.tab-panel').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
@@ -2520,6 +2587,9 @@ function showTab(id) {
   
   if (id === 'console') {
     document.getElementById('log-box-console').innerHTML = document.getElementById('log-box').innerHTML;
+  }
+  if (id === 'servers') {
+    loadSponsoredServers();
   }
 }
 
@@ -4983,6 +5053,158 @@ function updateMyStatus(status, activity) {
       </div>
     </div>
   </div>
+
+  <script>
+    // --- SPONSORED SERVERS ---
+    async function loadSponsoredServers() {
+      const container = document.getElementById('sponsored-servers-grid');
+      if (!container) return;
+      container.innerHTML = '<p style="padding:20px;color:var(--text-dim);font-size:.85rem;text-align:center;">Cargando servidores patrocinados...</p>';
+      try {
+        const servers = await ipc.invoke('get-sponsored-servers');
+        if (!servers || servers.length === 0) {
+          container.innerHTML = `
+            <div class="servers-empty">
+              <span class="servers-empty-icon">🌐</span>
+              <h3>No hay servidores patrocinados</h3>
+              <p style="font-size:0.75rem;max-width:280px;line-height:1.6;">No hay servidores patrocinados configurados en esta versión del launcher.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        let html = '';
+        for (const server of servers) {
+          const isInstalled = await ipc.invoke('is-server-installed', server.id);
+          const btnText = isInstalled ? '⚡ Entrar al Servidor' : '📥 Descargar e Instalar';
+          const btnClass = isInstalled ? 'server-join-btn' : 'server-join-btn btn-glass';
+          const svColor = server.color || 'var(--accent)';
+          
+          const tagsHtml = (server.tags || []).map(tag => `<span class="server-tag">${tag}</span>`).join('');
+          
+          html += `
+            <div class="server-card" style="--sv-color: ${svColor}">
+              <img src="${server.banner}" class="server-banner" alt="${server.name} Banner" onerror="this.src='https://pub-d38529ebbdbe4598b4d3d552ffc4246f.r2.dev/nebula_survival_banner.png'">
+              <div class="server-body">
+                <div class="server-header">
+                  <div class="server-icon" style="background:rgba(255,255,255,0.05); border:.5px solid rgba(255,255,255,0.1);">${server.icon}</div>
+                  <div class="server-info-top">
+                    <div class="server-name">${server.name}</div>
+                    <div class="server-ip-chip">${server.ip}</div>
+                  </div>
+                  <span class="sponsored-badge">Patrocinado</span>
+                </div>
+                <p class="server-desc">${server.description}</p>
+                <div class="server-tags">
+                  ${tagsHtml}
+                </div>
+                <button class="${btnClass}" id="btn-server-${server.id}" onclick="playSponsoredServer('${server.id}', '${server.ip}')">
+                  ${btnText}
+                </button>
+                <div class="server-progress-bar" id="progress-bar-${server.id}">
+                  <div class="server-progress-fill" id="progress-fill-${server.id}" style="--sv-color: ${svColor}"></div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        container.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = `<p style="padding:20px;color:var(--red);font-size:.85rem;text-align:center;">Error cargando servidores: ${err.message}</p>`;
+      }
+    }
+
+    async function playSponsoredServer(serverId, serverIp) {
+      if (!authUser) {
+        toast('Inicia sesión primero en la pestaña Jugar.', 'error');
+        showTab('play');
+        return;
+      }
+      const btn = document.getElementById(`btn-server-${serverId}`);
+      if (!btn) return;
+      
+      const isInstalled = await ipc.invoke('is-server-installed', serverId);
+      if (!isInstalled) {
+        btn.disabled = true;
+        btn.textContent = '📥 Instalando...';
+        toast('Iniciando descarga del modpack del servidor...', 'info');
+        
+        const progressFill = document.getElementById(`progress-fill-${serverId}`);
+        const progressBar = document.getElementById(`progress-bar-${serverId}`);
+        if (progressBar) progressBar.style.display = 'block';
+        
+        const progressListener = (e, d) => {
+          if (d.percent > 0 && progressFill) {
+            progressFill.style.width = `${d.percent}%`;
+          }
+        };
+        ipc.on('progress', progressListener);
+        
+        try {
+          const res = await ipc.invoke('install-sponsored-server', serverId);
+          ipc.off('progress', progressListener);
+          
+          if (!res.success) {
+            btn.disabled = false;
+            btn.textContent = '📥 Descargar e Instalar';
+            if (progressBar) progressBar.style.display = 'none';
+            toast(`❌ Error instalando modpack: ${res.error}`, 'error');
+            return;
+          }
+          
+          populateInstalledModpacksSelect();
+          toast('¡Instalación de modpack de servidor completada con éxito!', 'success');
+        } catch (err) {
+          ipc.off('progress', progressListener);
+          btn.disabled = false;
+          btn.textContent = '📥 Descargar e Instalar';
+          if (progressBar) progressBar.style.display = 'none';
+          toast(`❌ Error: ${err.message}`, 'error');
+          return;
+        }
+      }
+      
+      btn.disabled = true;
+      btn.textContent = '🚀 Iniciando...';
+      try {
+        await launchSponsoredServer(serverId, serverIp);
+      } catch (err) {
+        toast(`❌ Error al iniciar: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '⚡ Entrar al Servidor';
+        const progressBar = document.getElementById(`progress-bar-${serverId}`);
+        if (progressBar) progressBar.style.display = 'none';
+      }
+    }
+
+    async function launchSponsoredServer(folderName, serverIp) {
+      showTab('play');
+      
+      const displayName = getModpackDisplayName(folderName) || folderName;
+      setLaunchState('loading', displayName);
+
+      const launchBtn = document.getElementById('launchBtn');
+      const ram = document.getElementById('ramSlider').value;
+
+      toast(`🚀 Iniciando preparación del servidor: ${displayName}...`, 'info');
+      showAbortButton('⏹️ Cancelar salto');
+      
+      if (launchBtn) {
+        launchBtn.disabled = true;
+        launchBtn.textContent = '⏳ SALTANDO...';
+      }
+
+      ipc.send('launch-game', {
+        modpackName: folderName,
+        serverIp: serverIp,
+        ram: parseInt(ram),
+        username: authUser,
+        type: authType,
+        auth: authData
+      });
+    }
+  </script>
 
   <!-- Módulo de actualizaciones -->
   <script src="updater.js"></script>
