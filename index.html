@@ -1794,16 +1794,13 @@
             // Actualizar hero active players (en línea en Discord)
             const heroActiveEl = document.getElementById('hero-active-count');
             if (heroActiveEl) {
-              // Si el conteo de discord es muy bajo (servidor nuevo), mostramos un mínimo dinámico para estética
-              const displayActive = onlineCount < 5 ? (12 + onlineCount) : onlineCount;
-              heroActiveEl.textContent = displayActive.toLocaleString('es-ES');
+              heroActiveEl.textContent = onlineCount.toLocaleString('es-ES');
             }
 
             // Actualizar panel de comunidad Discord
             const discordActiveEl = document.getElementById('discord-active-count');
             if (discordActiveEl) {
-              const displayMembers = memberCount < 5 ? (240 + memberCount) : memberCount;
-              discordActiveEl.textContent = `${displayMembers.toLocaleString('es-ES')} miembros en línea`;
+              discordActiveEl.textContent = `${memberCount.toLocaleString('es-ES')} miembros (${onlineCount.toLocaleString('es-ES')} en línea)`;
             }
           }
         } catch (e) {
