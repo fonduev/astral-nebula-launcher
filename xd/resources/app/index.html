@@ -804,6 +804,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .dot-fabric{background:#38bdf8;}
 .dot-neoforge{background:#22c55e;}
 .dot-quilt{background:#ec4899;}
+.dot-modpack{background:#a78bfa;}
 
 
 /* ═══════ TOAST ═══════ */
@@ -2501,6 +2502,9 @@ async function completeLogin() {
   setTheme(currentTheme);
   
   allVer = await ipc.invoke('get-all-versions');
+  // Invocar cargadores de versiones para telemetría/consola de inicio
+  ipc.invoke('get-fabric-mc-versions').catch(()=>{});
+  ipc.invoke('get-quilt-mc-versions').catch(()=>{});
   installedMeta = await ipc.invoke('get-installed-versions');
   installed = new Set(installedMeta.map(v=>v.id));
   
@@ -3067,7 +3071,7 @@ function selectModsVersion(value, label) {
   loadModsForVersion();
 }
 
-function populateModsVersions() {
+async function populateModsVersions() {
   const sel  = document.getElementById('modsVersionSelect');
   const list = document.getElementById('modsVersionList');
   sel.innerHTML  = '<option value="">Selecciona una versión...</option>';
@@ -3078,8 +3082,15 @@ function populateModsVersions() {
   const neoforgeVersions = installedMeta.filter(v => v.type === 'neoforge');
   const quiltVersions    = installedMeta.filter(v => v.type === 'quilt');
 
-  if (forgeVersions.length === 0 && fabricVersions.length === 0 && neoforgeVersions.length === 0 && quiltVersions.length === 0) {
-    list.innerHTML = '<p style="padding:12px;color:var(--text-dim);font-size:.74rem;text-align:center;">No hay Forge, Fabric, NeoForge ni Quilt instalado.<br><span style="font-size:.65rem;opacity:.7;">Instálalos en las tarjetas de arriba.</span></p>';
+  let modpacks = [];
+  try {
+    modpacks = await ipc.invoke('get-installed-modpacks');
+  } catch (e) {
+    console.error('Error cargando modpacks para selector de mods:', e);
+  }
+
+  if (forgeVersions.length === 0 && fabricVersions.length === 0 && neoforgeVersions.length === 0 && quiltVersions.length === 0 && modpacks.length === 0) {
+    list.innerHTML = '<p style="padding:12px;color:var(--text-dim);font-size:.74rem;text-align:center;">No hay cargadores ni modpacks instalados.<br><span style="font-size:.65rem;opacity:.7;">Instálalos para poder gestionar sus mods.</span></p>';
     return;
   }
 
@@ -3179,6 +3190,32 @@ function populateModsVersions() {
       item.className = 'custom-select-item';
       item.innerHTML = `<span class="custom-select-item-dot dot-quilt"></span><span>${v.id} <span style="font-size:.65rem;color:var(--text-dim)">MC ${v.baseVersion}</span></span>`;
       item.onclick = () => selectModsVersion(v.id, `🔮 ${v.id}`);
+      list.appendChild(item);
+    });
+  }
+
+  // Modpacks (para poder agregar mods directamente a los modpacks)
+  if (modpacks.length > 0) {
+    const og = document.createElement('option');
+    og.disabled = true;
+    og.textContent = '';
+    sel.appendChild(og);
+    const groupLabel = document.createElement('div');
+    groupLabel.className = 'custom-select-group-label';
+    groupLabel.textContent = '📦 Modpacks';
+    list.appendChild(groupLabel);
+
+    modpacks.forEach(m => {
+      // Hidden select
+      const opt = document.createElement('option');
+      opt.value = m.folderName;
+      opt.textContent = `${m.name} (${m.loader} ${m.mcVersion})`;
+      sel.appendChild(opt);
+      // Visual item
+      const item = document.createElement('div');
+      item.className = 'custom-select-item';
+      item.innerHTML = `<span class="custom-select-item-dot dot-modpack"></span><span>${m.name} <span style="font-size:.65rem;color:var(--text-dim)">MC ${m.mcVersion}</span></span>`;
+      item.onclick = () => selectModsVersion(m.folderName, `📦 ${m.name}`);
       list.appendChild(item);
     });
   }

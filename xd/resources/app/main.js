@@ -289,8 +289,8 @@ function createWindow() {
 }
 
 // ── SISTEMA DE TELEMETRÍA EN TIEMPO REAL (FIREBASE) ──
-// Reemplaza con la URL de tu base de datos de Firebase si deseas activar telemetría en tiempo real
-const FIREBASE_DB_URL = "https://tu-proyecto-default-rtdb.firebaseio.com";
+// URL real de la base de datos de Firebase para telemetría
+const FIREBASE_DB_URL = "https://astral-nebula-social-default-rtdb.firebaseio.com";
 
 let telemetryInterval = null;
 
@@ -323,7 +323,13 @@ function startTelemetry() {
                 }
             };
 
-            const req = https.request(options);
+            const req = https.request(options, (res) => {
+                let respBody = '';
+                res.on('data', chunk => respBody += chunk);
+                res.on('end', () => {
+                    console.log(`[Telemetry] Ping response: ${res.statusCode} - ${respBody}`);
+                });
+            });
             req.on('error', (e) => {
                 console.error('[Telemetry] Error al enviar ping:', e.message);
             });
@@ -813,6 +819,14 @@ child_process.spawn = function(command, args, options) {
 // Cada loader (Forge / Fabric) tiene su propia carpeta de instancia.
 // Esto evita mezclar mods, configs y mundos entre loaders distintos.
 function getInstanceDir(mcPath, versionId) {
+    if (!versionId) return mcPath;
+
+    // Si existe una carpeta de instancia con este nombre directo (para modpacks)
+    const directInstancePath = path.join(mcPath, 'instances', versionId);
+    if (fs.existsSync(directInstancePath)) {
+        return directInstancePath;
+    }
+
     const lower = versionId.toLowerCase();
     if (lower.includes('neoforge')) {
         const match = versionId.match(/^(\d+\.\d+(?:\.\d+)?)/);
@@ -841,11 +855,42 @@ function getInstanceDir(mcPath, versionId) {
 // ── Versioning ────────────────────────────────────────────────────
 ipcMain.handle('get-all-versions', async () => {
     try {
+        sendLog('🔍 Cargando versiones oficiales de Minecraft (Vanilla)...');
         const data = await httpsGet('https://launchermeta.mojang.com/mc/game/version_manifest.json');
         const manifest = JSON.parse(data);
+        const releases = manifest.versions.filter(v => v.type === 'release');
+        sendLog(`✅ ${manifest.versions.length} versiones oficiales cargadas (${releases.length} estables)`);
         return manifest.versions;
     } catch (err) {
-        sendLog(`❌ Error cargando versiones: ${err.message}`, 'error');
+        sendLog(`❌ Error cargando versiones Vanilla: ${err.message}`, 'error');
+        return [];
+    }
+});
+
+ipcMain.handle('get-fabric-mc-versions', async () => {
+    try {
+        sendLog('🔍 Cargando versiones de Fabric soportadas...');
+        const data = await httpsGet('https://meta.fabricmc.net/v2/versions/game');
+        const list = JSON.parse(data);
+        const stableReleases = list.filter(v => v.stable);
+        sendLog(`✅ ${stableReleases.length} versiones de Minecraft con soporte Fabric`);
+        return list;
+    } catch (err) {
+        sendLog(`❌ Error cargando versiones Fabric: ${err.message}`, 'error');
+        return [];
+    }
+});
+
+ipcMain.handle('get-quilt-mc-versions', async () => {
+    try {
+        sendLog('🔍 Cargando versiones de Quilt soportadas...');
+        const data = await httpsGet('https://meta.quiltmc.org/v3/versions/game');
+        const list = JSON.parse(data);
+        const stableReleases = list.filter(v => v.stable);
+        sendLog(`✅ ${stableReleases.length} versiones de Minecraft con soporte Quilt`);
+        return list;
+    } catch (err) {
+        sendLog(`❌ Error cargando versiones Quilt: ${err.message}`, 'error');
         return [];
     }
 });
