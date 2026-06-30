@@ -4008,8 +4008,13 @@ ipcMain.on('launch-game', async (event, data) => {
 // ── Auto-Updater ──────────────────────────────────────────────────
 ipcMain.handle('check-for-updates', async () => {
     const s = loadSettings();
-    const url = s.updateUrl;
+    let url = s.updateUrl;
     if (!url) return { updateAvailable: false };
+    
+    // Evitar caché de GitHub Raw (CDN de 5 min)
+    if (url.includes('raw.githubusercontent.com')) {
+        url += (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+    }
     
     return new Promise((resolve) => {
         const https = require('https');
