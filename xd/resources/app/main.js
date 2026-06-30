@@ -895,6 +895,15 @@ ipcMain.handle('get-quilt-mc-versions', async () => {
     }
 });
 
+ipcMain.handle('get-offline-uuid', (event, username) => {
+    const hash = crypto.createHash('md5').update('OfflinePlayer:' + username).digest();
+    hash[6] = (hash[6] & 0x0f) | 0x30; // Version 3
+    hash[8] = (hash[8] & 0x3f) | 0x80; // Variant RFC 4122
+    const hex = hash.toString('hex');
+    return `${hex.substr(0, 8)}-${hex.substr(8, 4)}-${hex.substr(12, 4)}-${hex.substr(16, 4)}-${hex.substr(20)}`;
+});
+
+
 ipcMain.handle('get-installed-versions', () => {
     const s = loadSettings();
     const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
@@ -3768,6 +3777,14 @@ ipcMain.on('launch-game', async (event, data) => {
         let auth;
         if (data.type === 'microsoft' && data.auth) {
             auth = { access_token: data.auth.accessToken, client_token: crypto.randomUUID(), uuid: data.auth.uuid, name: data.auth.name, user_properties: '{}' };
+        } else if (data.type === 'nebula' && data.auth) {
+            auth = {
+                access_token: 'nebula-token',
+                client_token: crypto.randomUUID(),
+                uuid: data.auth.uuid,
+                name: data.username,
+                user_properties: '{}'
+            };
         } else {
             auth = Authenticator.getAuth(data.username);
         }
@@ -3813,6 +3830,44 @@ ipcMain.on('launch-game', async (event, data) => {
         let activeJvmArgs = s.jvmArgs || '';
         if (activeJvmArgs && activeJvmArgs.trim()) {
             opts.customArgs = activeJvmArgs.trim().split(/\s+/);
+        } else {
+            opts.customArgs = [];
+        }
+
+        // Inyección del Java Agent para Cuenta Nebula
+        if (data.type === 'nebula') {
+            try {
+                const destAgentPath = path.join(BASE_DATA_DIR, 'nebula-skin-agent.jar');
+                const srcAgentPath = path.join(__dirname, 'nebula-skin-agent.jar');
+                
+                let copyNeeded = true;
+                if (fs.existsSync(destAgentPath)) {
+                    if (fs.existsSync(srcAgentPath)) {
+                        const srcStat = fs.statSync(srcAgentPath);
+                        const destStat = fs.statSync(destAgentPath);
+                        if (srcStat.size === destStat.size) {
+                            copyNeeded = false;
+                        }
+                    } else {
+                        copyNeeded = false;
+                    }
+                }
+                
+                if (copyNeeded && fs.existsSync(srcAgentPath)) {
+                    fs.copyFileSync(srcAgentPath, destAgentPath);
+                    sendLog('[System] Java Agent de skins copiado a almacenamiento externo.');
+                }
+                
+                if (fs.existsSync(destAgentPath)) {
+                    const dbUrl = s.socialFirebase?.databaseURL || 'https://astral-nebula-social-default-rtdb.firebaseio.com';
+                    opts.customArgs.push(`-javaagent:${destAgentPath}=${dbUrl}`);
+                    sendLog(`🌌 Cuenta Nebula activa. Soporte de skins conectado: ${dbUrl}`);
+                } else {
+                    sendLog('⚠️ No se encontró nebula-skin-agent.jar. El soporte de skins no estará activo.', 'warn');
+                }
+            } catch (err) {
+                sendLog(`⚠️ Error al inyectar Java Agent: ${err.message}`, 'warn');
+            }
         }
 
         launcher.on('progress', e => {

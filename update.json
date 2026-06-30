@@ -1,10 +1,12 @@
 {
-  "version": "3.1.2",
-  "notes": "• Agregado soporte completo para el cargador de mods Quilt en el launcher frontend y backend.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.1.2/app.asar",
+  "version": "3.1.3",
+  "notes": "• Agregado soporte completo para Cuentas Nebula y custom skins (skins personalizadas).
+• Previsualización en 3D en la nueva pestaña de perfil en tiempo real.
+• Integración nativa de inyección en el juego a través de un Java Agent personalizado.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.1.3/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.1.2/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v3.1.3/app.asar"
     }
   }
 }
