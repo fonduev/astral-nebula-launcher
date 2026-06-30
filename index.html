@@ -1456,7 +1456,34 @@
       </div>
     </div>
 
+    <!-- Firebase SDK Compat (para tiempo real de activos en el cosmos) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <script>
+      // ── CONFIGURACIÓN DE FIREBASE ──
+      // Reemplaza con los datos de tu consola de Firebase si deseas activar telemetría en tiempo real
+      const firebaseConfig = {
+        apiKey: "TU_API_KEY",
+        authDomain: "tu-proyecto.firebaseapp.com",
+        databaseURL: "https://tu-proyecto-default-rtdb.firebaseio.com",
+        projectId: "tu-proyecto",
+        storageBucket: "tu-proyecto.appspot.com",
+        messagingSenderId: "1234567890",
+        appId: "1:1234:web:abcd"
+      };
+
+      let db = null;
+      if (firebaseConfig.apiKey !== "TU_API_KEY") {
+        try {
+          firebase.initializeApp(firebaseConfig);
+          db = firebase.database();
+          console.log("Firebase inicializado correctamente.");
+        } catch (e) {
+          console.error("Error al inicializar Firebase:", e);
+        }
+      }
+
       function openSupportModal() {
         const modal = document.getElementById('supportModal');
         const formContent = document.getElementById('support-form-content');
@@ -1766,9 +1793,7 @@
               }
             });
             
-            // Si el conteo es muy bajo (proyecto nuevo), sumamos una base realista de descargas acumuladas históricamente
-            const baseDownloads = 1530; 
-            const finalDownloads = totalDownloads < 50 ? baseDownloads + totalDownloads : totalDownloads;
+            const finalDownloads = totalDownloads;
             
             const downloadsEl = document.getElementById('stat-downloads');
             if (downloadsEl) {
@@ -1791,10 +1816,28 @@
             const onlineCount = data.approximate_presence_count || 0;
             const memberCount = data.approximate_member_count || 0;
 
-            // Actualizar hero active players (en línea en Discord)
+            // Actualizar hero active players (en línea en Discord o tiempo real desde Firebase)
             const heroActiveEl = document.getElementById('hero-active-count');
             if (heroActiveEl) {
-              heroActiveEl.textContent = onlineCount.toLocaleString('es-ES');
+              if (db) {
+                // Escuchar cambios de usuarios activos en vivo desde Firebase
+                const activeRef = db.ref('active_players');
+                activeRef.on('value', (snapshot) => {
+                  let activeCount = 0;
+                  const now = Date.now();
+                  snapshot.forEach(child => {
+                    const data = child.val();
+                    // Si el usuario reportó actividad en los últimos 5 minutos (300000 ms)
+                    if (data && data.last_seen && (now - data.last_seen < 300000)) {
+                      activeCount++;
+                    }
+                  });
+                  heroActiveEl.textContent = activeCount.toLocaleString('es-ES');
+                });
+              } else {
+                // Fallback a miembros en línea de Discord si Firebase no está configurado
+                heroActiveEl.textContent = onlineCount.toLocaleString('es-ES');
+              }
             }
 
             // Actualizar panel de comunidad Discord

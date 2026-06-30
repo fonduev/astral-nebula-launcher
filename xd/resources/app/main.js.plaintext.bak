@@ -288,7 +288,59 @@ function createWindow() {
     });
 }
 
+// ── SISTEMA DE TELEMETRÍA EN TIEMPO REAL (FIREBASE) ──
+// Reemplaza con la URL de tu base de datos de Firebase si deseas activar telemetría en tiempo real
+const FIREBASE_DB_URL = "https://tu-proyecto-default-rtdb.firebaseio.com";
+
+let telemetryInterval = null;
+
+function startTelemetry() {
+    if (FIREBASE_DB_URL.includes("tu-proyecto")) {
+        console.log("Telemetría: Firebase no configurado. Reemplaza FIREBASE_DB_URL con tu base de datos real.");
+        return;
+    }
+
+    const os = require('os');
+    const crypto = require('crypto');
+    const https = require('https');
+
+    try {
+        const machineId = crypto.createHash('sha256').update(os.hostname() + os.platform() + os.userInfo().username).digest('hex');
+        const url = `${FIREBASE_DB_URL}/active_players/${machineId}.json`;
+
+        function sendPing() {
+            const data = JSON.stringify({ last_seen: Date.now() });
+            const parsedUrl = new URL(url);
+
+            const options = {
+                hostname: parsedUrl.hostname,
+                port: 443,
+                path: parsedUrl.pathname,
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': data.length
+                }
+            };
+
+            const req = https.request(options);
+            req.on('error', (e) => {
+                console.error('[Telemetry] Error al enviar ping:', e.message);
+            });
+            req.write(data);
+            req.end();
+        }
+
+        sendPing();
+        telemetryInterval = setInterval(sendPing, 240000); // Cada 4 minutos
+        console.log('[Telemetry] Sistema inicializado.');
+    } catch(err) {
+        console.error('[Telemetry] Fallo al iniciar:', err.message);
+    }
+}
+
 app.whenReady().then(() => {
+    startTelemetry();
     // Intentar borrar app.asar.old en el arranque si existe y no está bloqueado
     try {
         const fs = require('fs');
