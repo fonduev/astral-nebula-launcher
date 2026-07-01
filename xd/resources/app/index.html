@@ -1440,6 +1440,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         
         <label class="label">CONTRASEÑA</label>
         <input class="inp" id="nebula-password" type="password" placeholder="••••••••">
+        <div style="text-align: right; margin-top: 4px;">
+          <a href="#" onclick="event.preventDefault(); switchNebulaForm('forgot')" style="color: #a78bfa; font-size: 0.75rem; text-decoration: none;">¿Olvidaste tu contraseña?</a>
+        </div>
         
         <button class="btn btn-primary btn-full" style="margin-top:20px" id="btnNebulaLogin" onclick="startNebulaLogin()">
           ➜ Iniciar Sesión
@@ -1448,6 +1451,28 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <p style="font-size:0.75rem;color:var(--text-dim);text-align:center;margin-top:16px;">
           ¿No tienes una cuenta? <a href="#" onclick="event.preventDefault(); switchNebulaForm('register')" style="color:var(--accent);font-weight:600;">Regístrate aquí</a>
         </p>
+      </div>
+
+      <div id="nebula-forgot-view" style="display:none;">
+        <h2 class="login-step-title">Restablecer Contraseña</h2>
+        <p class="login-step-sub">Ingresa tu correo para recuperar el acceso a tu cuenta.</p>
+        
+        <label class="label">CORREO ELECTRÓNICO</label>
+        <input class="inp" id="nebula-forgot-email" placeholder="ejemplo@correo.com" style="margin-bottom:14px">
+        
+        <button class="btn btn-primary btn-full" style="margin-top:20px" id="btnNebulaForgot" onclick="startNebulaForgot()">
+          Enviar enlace de recuperación
+        </button>
+        
+        <p style="font-size:0.7rem;color:var(--text-dim);text-align:center;margin-top:12px;">
+          Te enviaremos un enlace para restablecer tu contraseña.
+        </p>
+        
+        <div id="nebula-forgot-status" style="margin-top:16px;font-size:.76rem;color:var(--text-dim);min-height:18px;text-align:center;"></div>
+        
+        <button class="btn btn-full" style="margin-top:12px;background:transparent;border:1px solid var(--border);color:var(--text);" onclick="switchNebulaForm('login')">
+          Volver
+        </button>
       </div>
 
       <!-- Vista de Registro -->
@@ -5467,14 +5492,47 @@ function updateMyStatus(status, activity) {
     function switchNebulaForm(view) {
       const loginView = document.getElementById('nebula-login-view');
       const regView = document.getElementById('nebula-register-view');
+      const forgotView = document.getElementById('nebula-forgot-view');
       const status = document.getElementById('nebula-status');
       if (status) status.textContent = '';
+      const forgotStatus = document.getElementById('nebula-forgot-status');
+      if (forgotStatus) forgotStatus.textContent = '';
+
       if (view === 'register') {
         loginView.style.display = 'none';
         regView.style.display = 'block';
+        if (forgotView) forgotView.style.display = 'none';
+      } else if (view === 'forgot') {
+        loginView.style.display = 'none';
+        regView.style.display = 'none';
+        if (forgotView) forgotView.style.display = 'block';
       } else {
         loginView.style.display = 'block';
         regView.style.display = 'none';
+        if (forgotView) forgotView.style.display = 'none';
+      }
+    }
+
+    async function startNebulaForgot() {
+      const email = document.getElementById('nebula-forgot-email').value.trim();
+      const status = document.getElementById('nebula-forgot-status');
+      const btn = document.getElementById('btnNebulaForgot');
+
+      if (!email) {
+        status.textContent = '❌ Por favor ingresa tu correo electrónico.';
+        return;
+      }
+
+      btn.disabled = true;
+      status.innerHTML = '<span class="spinner"></span> Enviando correo...';
+
+      try {
+        await firebase.auth().sendPasswordResetEmail(email);
+        status.innerHTML = '<span style="color:#10b981;">Revisa tu correo electrónico.</span>';
+      } catch (err) {
+        status.textContent = '❌ Error: ' + err.message;
+      } finally {
+        btn.disabled = false;
       }
     }
 

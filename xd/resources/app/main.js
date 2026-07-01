@@ -3878,6 +3878,7 @@ ipcMain.on('launch-game', async (event, data) => {
                 if (fs.existsSync(destAgentPath)) {
                     const dbUrl = s.socialFirebase?.databaseURL || 'https://astral-nebula-social-default-rtdb.firebaseio.com';
                     opts.customArgs.push(`-javaagent:${destAgentPath}=${dbUrl}`);
+                    opts.customArgs.push(`-Dfabric.systemLibraries=${destAgentPath}`);
                     sendLog(`🌌 Cuenta Nebula activa. Soporte de skins conectado: ${dbUrl}`);
                 } else {
                     sendLog('⚠️ No se encontró nebula-skin-agent.jar. El soporte de skins no estará activo.', 'warn');
