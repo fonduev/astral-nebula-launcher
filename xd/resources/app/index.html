@@ -13,13 +13,31 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/skinview3d/3.0.0/skinview3d.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skinview3d@3.0.0/bundles/skinview3d.bundle.js"></script>
 <script>
   if (window.tempModule) {
     module = window.tempModule;
     window.tempModule = undefined;
   }
+  
+  window.onerror = function(message, source, lineno, colno, error) {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const errLog = path.join('C:\\Users\\renee\\Documents\\Web\\xd', 'renderer_error.txt');
+      fs.appendFileSync(errLog, `[${new Date().toISOString()}] Error: ${message} at ${source}:${lineno}:${colno}\nStack: ${error ? error.stack : ''}\n\n`, 'utf8');
+    } catch(e) {}
+  };
+  window.addEventListener('unhandledrejection', function(event) {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const errLog = path.join('C:\\Users\\renee\\Documents\\Web\\xd', 'renderer_error.txt');
+      fs.appendFileSync(errLog, `[${new Date().toISOString()}] Unhandled Promise Rejection: ${event.reason ? (event.reason.stack || event.reason.message || event.reason) : event}\n\n`, 'utf8');
+    } catch(e) {}
+  });
 </script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -2224,7 +2242,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
                   Nebula Launcher es un cliente alternativo de Minecraft independiente no oficial. No está afiliado, asociado ni respaldado por Mojang Studios ni Microsoft Corporation. 
                   Te recomendamos adquirir el juego oficial en <a href="#" onclick="event.preventDefault();require('electron').shell.openExternal('https://www.minecraft.net/')" style="color:var(--accent-p); text-decoration: underline;">minecraft.net</a> para apoyar a los creadores de Minecraft y jugar en todos los servidores premium oficiales.
                 </p>
-              
+              </div>
             </div>
 
             <!-- CARD CONFIGURACION FIREBASE PARA RED SOCIAL -->
@@ -2299,16 +2317,29 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
             <h3 style="margin-bottom:12px; font-weight:600; letter-spacing:0.05em; color:var(--accent);">SUBIR SKIN PERSONALIZADA</h3>
             <p style="font-size:0.75rem; color:var(--text-dim); line-height:1.5; margin-bottom:16px;">
-              Sube una skin clásica de Minecraft en formato <strong>.png</strong> (dimensiones 64x64 o 64x32 píxeles). La skin se actualizará en tiempo real para todos los jugadores que usen Nebula Launcher.
+              Sube una skin de Minecraft en formato <strong>.png</strong>. La skin se actualizará en tiempo real para todos los jugadores que usen Nebula Launcher.
             </p>
 
+            <!-- Selector de Modelo Classic vs Slim -->
+            <div style="margin-bottom:20px; display:flex; flex-direction:column; gap:6px; -webkit-app-region:no-drag;">
+              <span class="label" style="font-size:0.65rem; color:var(--text-dim);">TIPO DE MODELO DE SKIN</span>
+              <select class="inp" id="skin-model-select" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: var(--text); border-radius: 8px; padding: 8px 12px; font-size: 0.82rem; outline: none; width: 100%; transition: border-color 0.2s;" onchange="updateSkinViewerModel(this.value)">
+                <option value="default" style="background: var(--bg-dark); color: var(--text);">Classic (Steve - Brazos de 4px)</option>
+                <option value="slim" style="background: var(--bg-dark); color: var(--text);">Slim (Alex - Brazos de 3px)</option>
+              </select>
+            </div>
+
             <!-- Zona de Carga/Arrastrar archivo -->
-            <div id="skin-drop-zone" class="glass-card" style="border: 2px dashed rgba(139,92,246,0.3); border-radius:18px; padding:32px; text-align:center; cursor:pointer; transition:all 0.2s;" onclick="selectSkinFile()" ondragover="event.preventDefault(); this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor='rgba(139,92,246,0.3)'" ondrop="handleSkinFileDrop(event)">
-              <span style="font-size:2rem; display:block; margin-bottom:10px;">👕</span>
-              <span style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Selecciona o arrastra tu archivo .png</span>
-              <span style="font-size:0.68rem; color:var(--text-dim);">Máx. 50 KB • Formato clásico</span>
+            <div id="skin-drop-zone" class="glass-card" style="border: 2px dashed rgba(139,92,246,0.3); border-radius:18px; padding:32px; text-align:center; cursor:pointer; transition:all 0.2s; margin-bottom:10px;" onclick="selectSkinFile()" ondragover="event.preventDefault(); this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor='rgba(139,92,246,0.3)'" ondrop="handleSkinFileDrop(event)">
+              <span id="skin-drop-zone-icon" style="font-size:2rem; display:block; margin-bottom:10px;">👕</span>
+              <span id="skin-drop-zone-text" style="font-size:0.8rem; font-weight:600; display:block; margin-bottom:4px;">Selecciona o arrastra tu archivo .png</span>
+              <span id="skin-drop-zone-sub" style="font-size:0.68rem; color:var(--text-dim);">Máx. 50 KB • Formato clásico</span>
               <input type="file" id="skin-file-input" style="display:none;" accept="image/png" onchange="handleSkinFileSelect(event)">
             </div>
+            
+            <button class="btn btn-primary" id="skin-upload-confirm-btn" style="margin-top:8px; display:none; justify-content:center; width:100%; height:40px; font-size:0.82rem; font-weight:700; background:linear-gradient(135deg,#a855f7,#6366f1);" onclick="confirmAndUploadSkin()">
+              📤 Subir Skin Seleccionada
+            </button>
             
             <div id="skin-upload-progress-bar-wrap" style="width:100%; height:4px; background:rgba(255,255,255,0.05); border-radius:2px; margin-top:14px; display:none; overflow:hidden;">
               <div id="skin-upload-progress-bar" style="width:0%; height:100%; background:var(--accent); transition:width 0.1s;"></div>
@@ -2621,6 +2652,8 @@ async function completeLogin() {
   
   const isNebula = authType === 'nebula';
   document.getElementById('nav-profile').style.display = isNebula ? 'flex' : 'none';
+  const isOffline = authType === 'offline';
+  document.getElementById('nav-social').style.display = isOffline ? 'none' : 'flex';
   if (isNebula) {
     document.getElementById('user-type').textContent = 'Nebula';
     loadNebulaProfileData();
@@ -4160,9 +4193,32 @@ async function loadSidebarAd() {
   // Sponsor ads removed completely
 }
 
+function ensureFirebaseInitialized() {
+  try {
+    if (typeof firebase !== 'undefined') {
+      const fbConfig = {
+        apiKey: "AIzaSyCfka9dpsVQvfsJ883segPzATNDUEuIVwc",
+        authDomain: "astral-nebula-social.firebaseapp.com",
+        databaseURL: "https://astral-nebula-social-default-rtdb.firebaseio.com",
+        projectId: "astral-nebula-social",
+        storageBucket: "astral-nebula-social.firebasestorage.app",
+        messagingSenderId: "289159955650",
+        appId: "1:289159955650:web:7906ba01ca236ae92ca75b",
+        ...(settings.socialFirebase || {})
+      };
+      if (firebase.apps.length === 0) {
+        firebase.initializeApp(fbConfig);
+      }
+    }
+  } catch (err) {
+    console.error("Error al inicializar Firebase:", err);
+  }
+}
+
 (async () => {
   try {
     settings = await ipc.invoke('get-settings');
+    ensureFirebaseInitialized();
     try {
       const currentVer = await ipc.invoke('get-app-version');
       const verTag = document.getElementById('launcher-version-tag');
@@ -4492,17 +4548,7 @@ function initSocial() {
             } catch(e) {}
             const reloadedUser = firebase.auth().currentUser || user;
 
-            if (!reloadedUser.emailVerified) {
-              window.socialLinkedMcName = null;
-              document.getElementById('social-main-panel').style.display = 'none';
-              document.getElementById('social-auth-panel').style.display = 'flex';
-              document.getElementById('social-login-card').style.display = 'none';
-              document.getElementById('social-verify-card').style.display = 'flex';
-              document.getElementById('verify-email-display').textContent = reloadedUser.email;
-              return;
-            }
-
-            // Usuario autenticado y verificado. Buscar su vinculación en Firestore
+            // Usuario autenticado. Buscar su vinculación en Firestore
             try {
               const snap = await socialDb.collection('users').where('uid', '==', reloadedUser.uid).get();
               if (!snap.empty) {
@@ -4521,12 +4567,36 @@ function initSocial() {
                 
                 setupFirebaseSocial(linkedMcName);
               } else {
-                console.warn("Cuenta de Auth sin documento de usuario en Firestore.");
-                firebase.auth().signOut();
-                showSocialAuthError("Tu cuenta de Nebula Social no tiene vinculado ningún Nickname de Minecraft. Por favor regístrate de nuevo.");
+                // Si está logueado en el launcher con cuenta Nebula, autocrear el documento de Firestore
+                if (authType === 'nebula' && authUser) {
+                  const mcNameLower = authUser.toLowerCase();
+                  await socialDb.collection('users').doc(mcNameLower).set({
+                    uid: reloadedUser.uid,
+                    email: reloadedUser.email || '',
+                    usernameDisplay: authUser,
+                    status: 'online',
+                    activity: 'En el menú principal',
+                    currentVersion: '',
+                    lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                  });
+                  window.socialLinkedMcName = authUser;
+                  document.getElementById('social-auth-panel').style.display = 'none';
+                  document.getElementById('social-verify-card').style.display = 'none';
+                  document.getElementById('social-login-card').style.display = 'flex';
+                  document.getElementById('social-main-panel').style.display = 'flex';
+                  setupFirebaseSocial(authUser);
+                } else {
+                  console.warn("Cuenta de Auth sin documento de usuario en Firestore.");
+                  firebase.auth().signOut();
+                  showSocialAuthError("Tu cuenta de Nebula Social no tiene vinculado ningún Nickname de Minecraft. Por favor regístrate de nuevo.");
+                }
               }
             } catch(err) {
               console.error("Error al buscar vinculación de usuario:", err);
+              try {
+                const fs = require('fs');
+                fs.appendFileSync('C:\\Users\\renee\\Documents\\Web\\xd\\renderer_error.txt', `[${new Date().toISOString()}] Catch Error: ${err.message}\nStack: ${err.stack}\n\n`, 'utf8');
+              } catch(e) {}
               showSocialAuthError("Error al cargar tu perfil social: " + err.message);
             }
           } else {
@@ -5083,6 +5153,8 @@ function getBotReplyText(name, msg) {
 // ── Setup Demo / Simulation Mode ────────────────────────────────────
 function setupDemoSocial() {
   socialMode = 'demo';
+  document.getElementById('social-auth-panel').style.display = 'none';
+  document.getElementById('social-main-panel').style.display = 'flex';
   document.getElementById('social-mode-badge').textContent = 'Modo: Simulación / Demo';
   document.getElementById('social-mode-badge').style.background = 'rgba(251,191,36,0.1)';
   document.getElementById('social-mode-badge').style.color = '#fbbf24';
@@ -5537,13 +5609,15 @@ function updateMyStatus(status, activity) {
         if (snapshot.exists()) {
           const userData = snapshot.val();
           authData.skinUrl = userData.skinUrl || '';
-          // Actualizar en el visor 3D
-          initSkinViewer(authData.skinUrl);
+          const modelType = userData.model || 'default';
+          const modelSelect = document.getElementById('skin-model-select');
+          if (modelSelect) modelSelect.value = modelType;
+          initSkinViewer(authData.skinUrl, modelType);
         }
       });
     }
 
-    function initSkinViewer(skinUrl) {
+    function initSkinViewer(skinUrl, modelType = 'default') {
       const container = document.getElementById('skin-viewer-container');
       if (!container) return;
 
@@ -5559,12 +5633,15 @@ function updateMyStatus(status, activity) {
       try {
         const defaultSkinUrl = 'https://textures.minecraft.net/texture/1a59a23b37996c568ee6919a31a980757a31522a487fa28122d69f06bf368';
         const urlToLoad = skinUrl || defaultSkinUrl;
+        
+        window.currentSkinUrl = urlToLoad;
 
         skinViewer = new skinview3d.SkinViewer({
           canvas: canvas,
           width: container.clientWidth || 280,
           height: container.clientHeight || 320,
-          skin: urlToLoad
+          skin: urlToLoad,
+          model: modelType
         });
 
         skinViewer.camera.position.x = -15;
@@ -5573,8 +5650,13 @@ function updateMyStatus(status, activity) {
         skinViewer.zoom = 0.85;
 
         // Añadir animación por defecto (caminar)
-        skinViewer.animations.add(skinview3d.WalkingAnimation);
-        skinViewer.animations.paused = false;
+        if (skinViewer.animations && typeof skinViewer.animations.add === 'function') {
+          skinViewer.animations.add(skinview3d.WalkingAnimation);
+          skinViewer.animations.paused = false;
+        } else if (skinview3d.WalkingAnimation) {
+          skinViewer.animation = new skinview3d.WalkingAnimation();
+          skinViewer.animation.paused = false;
+        }
 
         // Auto rotar despacio
         skinViewer.autoRotate = true;
@@ -5593,7 +5675,11 @@ function updateMyStatus(status, activity) {
 
     function toggleSkinViewerAnimation() {
       if (skinViewer) {
-        skinViewer.animations.paused = !skinViewer.animations.paused;
+        if (skinViewer.animations) {
+          skinViewer.animations.paused = !skinViewer.animations.paused;
+        } else if (skinViewer.animation) {
+          skinViewer.animation.paused = !skinViewer.animation.paused;
+        }
       }
     }
 
@@ -5601,23 +5687,21 @@ function updateMyStatus(status, activity) {
       document.getElementById('skin-file-input').click();
     }
 
-    function handleSkinFileSelect(event) {
-      const file = event.target.files[0];
-      if (file) uploadSkinFile(file);
-    }
-
     function handleSkinFileDrop(event) {
       event.preventDefault();
       document.getElementById('skin-drop-zone').style.borderColor = 'rgba(139,92,246,0.3)';
       const file = event.dataTransfer.files[0];
-      if (file) uploadSkinFile(file);
+      if (file) stageSkinFile(file);
     }
 
-    async function uploadSkinFile(file) {
-      const status = document.getElementById('skin-upload-status');
-      const progressWrap = document.getElementById('skin-upload-progress-bar-wrap');
-      const progressBar = document.getElementById('skin-upload-progress-bar');
+    function handleSkinFileSelect(event) {
+      const file = event.target.files[0];
+      if (file) stageSkinFile(file);
+    }
 
+    let windowLocalSkinPreviewUrl = null;
+    function stageSkinFile(file) {
+      const status = document.getElementById('skin-upload-status');
       if (!file || file.type !== 'image/png') {
         status.textContent = '❌ Por favor selecciona una imagen válida en formato .png';
         toast('Formato de archivo inválido. Debe ser .png', 'error');
@@ -5632,9 +5716,13 @@ function updateMyStatus(status, activity) {
 
       status.textContent = 'Validando dimensiones...';
       const img = new Image();
-      img.src = URL.createObjectURL(file);
+      if (windowLocalSkinPreviewUrl) {
+        URL.revokeObjectURL(windowLocalSkinPreviewUrl);
+      }
+      windowLocalSkinPreviewUrl = URL.createObjectURL(file);
+      img.src = windowLocalSkinPreviewUrl;
       
-      img.onload = async function() {
+      img.onload = function() {
         const w = img.width;
         const h = img.height;
         if (!((w === 64 && h === 64) || (w === 64 && h === 32))) {
@@ -5643,44 +5731,170 @@ function updateMyStatus(status, activity) {
           return;
         }
 
-        status.textContent = 'Subiendo skin...';
-        progressWrap.style.display = 'block';
-        progressBar.style.width = '0%';
+        window.tempSelectedSkinFile = file;
 
-        try {
-          const uid = authData.uid;
-          const storageRef = firebase.storage().ref(`skins/${uid}.png`);
-          const uploadTask = storageRef.put(file);
+        // Auto-detect model type (slim vs classic)
+        let modelType = 'default';
+        if (w === 64 && h === 64) {
+          try {
+            const checkCanvas = document.createElement('canvas');
+            checkCanvas.width = 64;
+            checkCanvas.height = 64;
+            const checkCtx = checkCanvas.getContext('2d');
+            checkCtx.drawImage(img, 0, 0);
+            const imgData = checkCtx.getImageData(0, 0, 64, 64);
+            const getAlpha = (x, y) => imgData.data[((y * 64) + x) * 4 + 3];
 
-          uploadTask.on('state_changed', 
-            snapshot => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              progressBar.style.width = `${progress}%`;
-            }, 
-            err => {
-              status.textContent = '❌ Error al subir: ' + err.message;
-              progressWrap.style.display = 'none';
-              toast('Error al subir a almacenamiento: ' + err.message, 'error');
-            }, 
-            async () => {
-              const downloadUrl = await storageRef.getDownloadURL();
-              await firebase.database().ref(`users/${uid}/skinUrl`).set(downloadUrl);
-              status.textContent = '✅ Skin actualizada correctamente.';
-              progressWrap.style.display = 'none';
-              toast('¡Skin actualizada correctamente!', 'success');
+            // In a 64x64 slim skin, the right and left arm 4th columns are transparent
+            let isSlim = true;
+            for (let y = 20; y < 32; y++) {
+              if (getAlpha(54, y) !== 0) { isSlim = false; break; }
+              if (getAlpha(55, y) !== 0) { isSlim = false; break; }
             }
-          );
-        } catch (err) {
-          status.textContent = '❌ Error: ' + err.message;
-          progressWrap.style.display = 'none';
-          toast('Error en el proceso de actualización: ' + err.message, 'error');
+            if (isSlim) {
+              for (let y = 52; y < 64; y++) {
+                if (getAlpha(46, y) !== 0) { isSlim = false; break; }
+                if (getAlpha(47, y) !== 0) { isSlim = false; break; }
+              }
+            }
+
+            if (isSlim) {
+              modelType = 'slim';
+              console.log("[Nebula] Auto-detected model: slim");
+            } else {
+              console.log("[Nebula] Auto-detected model: classic");
+            }
+          } catch (e) {
+            console.error("[Nebula] Error auto-detecting model:", e);
+          }
         }
+
+        // Update select element value
+        document.getElementById('skin-model-select').value = modelType;
+
+        if (skinViewer) {
+          window.currentSkinUrl = windowLocalSkinPreviewUrl;
+          skinViewer.loadSkin(windowLocalSkinPreviewUrl, { model: modelType });
+        } else {
+          initSkinViewer(windowLocalSkinPreviewUrl, modelType);
+        }
+
+        document.getElementById('skin-drop-zone-icon').textContent = '🖼️';
+        document.getElementById('skin-drop-zone-text').textContent = 'Archivo: ' + file.name;
+        document.getElementById('skin-drop-zone-sub').textContent = 'Haz clic para cambiarlo o pulsa "Subir Skin Seleccionada"';
+
+        document.getElementById('skin-upload-confirm-btn').style.display = 'flex';
+        status.textContent = '⚡ Vista previa cargada. Haz clic en "Subir Skin Seleccionada" para guardar.';
+        toast('Vista previa de skin cargada con éxito.', 'success');
       };
 
       img.onerror = function() {
         status.textContent = '❌ Error al leer la imagen.';
         toast('No se pudo leer la imagen de skin.', 'error');
       };
+    }
+
+    function updateSkinViewerModel(modelType) {
+      if (skinViewer && window.currentSkinUrl) {
+        skinViewer.loadSkin(window.currentSkinUrl, { model: modelType });
+      }
+    }
+
+    async function confirmAndUploadSkin() {
+      const file = window.tempSelectedSkinFile;
+      if (!file) return;
+
+      const status = document.getElementById('skin-upload-status');
+      const progressWrap = document.getElementById('skin-upload-progress-bar-wrap');
+      const progressBar = document.getElementById('skin-upload-progress-bar');
+
+      status.textContent = 'Subiendo skin...';
+      progressWrap.style.display = 'block';
+      progressBar.style.width = '0%';
+
+      try {
+        const uid = authData.uid;
+        progressBar.style.width = '30%';
+        
+        const uploadToCatbox = async (file) => {
+          try {
+            const formData = new FormData();
+            formData.append('reqtype', 'fileupload');
+            formData.append('fileToUpload', file);
+            const response = await fetch('https://catbox.moe/user/api.php', {
+              method: 'POST',
+              body: formData
+            });
+            if (response.ok) {
+              const url = await response.text();
+              if (url.startsWith('http')) return url.trim();
+            }
+          } catch (e) {
+            console.warn("Fetch upload failed, trying Node.js request...", e);
+          }
+
+          return new Promise((resolve, reject) => {
+            const fs = require('fs');
+            const https = require('https');
+            const boundary = '----WebKitFormBoundary' + Math.random().toString(36).substring(2);
+            const postData = [];
+            postData.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="reqtype"\r\n\r\nfileupload\r\n`));
+            postData.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="fileToUpload"; filename="${file.name}"\r\nContent-Type: image/png\r\n\r\n`));
+            postData.push(fs.readFileSync(file.path));
+            postData.push(Buffer.from(`\r\n--${boundary}--\r\n`));
+            const totalLength = postData.reduce((acc, val) => acc + val.length, 0);
+            
+            const req = https.request('https://catbox.moe/user/api.php', {
+              method: 'POST',
+              headers: {
+                'Content-Type': `multipart/form-data; boundary=${boundary}`,
+                'Content-Length': totalLength
+              }
+            }, (res) => {
+              let data = '';
+              res.on('data', chunk => data += chunk);
+              res.on('end', () => {
+                const url = data.trim();
+                if (url.startsWith('http')) {
+                  resolve(url);
+                } else {
+                  reject(new Error(url || 'Respuesta inválida del servidor'));
+                }
+              });
+            });
+            req.on('error', err => reject(err));
+            postData.forEach(part => req.write(part));
+            req.end();
+          });
+        };
+
+        const downloadUrl = await uploadToCatbox(file);
+        progressBar.style.width = '70%';
+        
+        const modelType = document.getElementById('skin-model-select').value;
+        await firebase.database().ref(`users/${uid}`).update({
+          skinUrl: downloadUrl,
+          model: modelType
+        });
+        progressBar.style.width = '100%';
+        
+        document.getElementById('skin-upload-confirm-btn').style.display = 'none';
+
+        document.getElementById('skin-drop-zone-icon').textContent = '👕';
+        document.getElementById('skin-drop-zone-text').textContent = 'Selecciona o arrastra tu archivo .png';
+        document.getElementById('skin-drop-zone-sub').textContent = 'Máx. 50 KB • Formato clásico';
+        window.tempSelectedSkinFile = null;
+
+        setTimeout(() => {
+          status.textContent = '✅ Skin actualizada correctamente.';
+          progressWrap.style.display = 'none';
+          toast('¡Skin actualizada correctamente!', 'success');
+        }, 500);
+      } catch (err) {
+        status.textContent = '❌ Error al subir: ' + err.message;
+        progressWrap.style.display = 'none';
+        toast('Error al subir a almacenamiento: ' + err.message, 'error');
+      }
     }
 
     async function startNebulaLogout() {

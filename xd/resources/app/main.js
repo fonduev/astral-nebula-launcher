@@ -12,6 +12,23 @@ const { execSync, spawn, exec } = require('child_process');
 const crypto = require('crypto');
 const AdmZip = require('adm-zip');
 
+process.on('uncaughtException', (err) => {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const errLog = 'C:\\Users\\renee\\Documents\\Web\\xd\\main_error.txt';
+    fs.appendFileSync(errLog, `[${new Date().toISOString()}] Uncaught Exception: ${err.stack || err}\n\n`, 'utf8');
+  } catch(e) {}
+});
+process.on('unhandledRejection', (reason, promise) => {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const errLog = 'C:\\Users\\renee\\Documents\\Web\\xd\\main_error.txt';
+    fs.appendFileSync(errLog, `[${new Date().toISOString()}] Unhandled Rejection: ${reason.stack || reason}\n\n`, 'utf8');
+  } catch(e) {}
+});
+
 // Data directory base (evita ENOTDIR escribiendo dentro de app.asar)
 const BASE_DATA_DIR = app.isPackaged ? app.getPath('userData') : __dirname;
 
@@ -268,7 +285,7 @@ function createWindow() {
         }
     });
 
-    // win.webContents.openDevTools();
+    win.webContents.openDevTools();
     win.center();
 
     // 3. Cuando la principal esté cargada, esperar 2.5s y cambiar ventanas
