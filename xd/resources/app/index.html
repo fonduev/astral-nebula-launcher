@@ -2371,6 +2371,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
             </div>
             <div id="skin-upload-status" style="font-size:0.73rem; color:var(--text-dim); margin-top:8px; text-align:center; min-height:16px;"></div>
 
+            <!-- Historial de Skins -->
+            <div style="margin-top:28px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                <h3 style="font-weight:600; letter-spacing:0.05em; color:var(--accent); margin:0;">HISTORIAL DE SKINS</h3>
+                <span style="font-size:0.65rem; color:var(--text-dim);">Últ. 10</span>
+              </div>
+              <div id="skin-history-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(72px,1fr)); gap:10px; min-height:40px;">
+                <div id="skin-history-empty" style="grid-column:1/-1; color:var(--text-dim); font-size:0.72rem; text-align:center; padding:12px;">Sin historial todavía. Sube tu primera skin.</div>
+              </div>
+            </div>
+
             <button class="btn btn-danger" style="margin-top:auto; align-self:flex-start; margin-top: 32px;" onclick="startNebulaLogout()">
               🚪 Cerrar Sesión Nebula
             </button>
@@ -2794,6 +2805,7 @@ function showTab(id) {
     setTimeout(() => {
       const modelType = document.getElementById('skin-model-select') ? document.getElementById('skin-model-select').value : 'default';
       initSkinViewer(authData.skinUrl || '', modelType);
+      loadSkinHistory();
     }, 80);
   }
 }
@@ -5942,13 +5954,41 @@ function updateMyStatus(status, activity) {
         progressBar.style.width = '70%';
         
         const modelType = document.getElementById('skin-model-select').value;
+        const username = authData.username;
+
+        // 1. Actualizar skin actual en /users/{uid}
         await firebase.database().ref(`users/${uid}`).update({
           skinUrl: downloadUrl,
           model: modelType
         });
+
+        // 2. Guardar en /skins/{username} para lookup directo del agente Java (sin orderBy)
+        await firebase.database().ref(`skins/${username}`).set({
+          url: downloadUrl,
+          model: modelType,
+          uid: uid
+        });
+
+        // 3. Agregar al historial (máximo 10 entradas)
+        await firebase.database().ref(`users/${uid}/skinHistory`).push({
+          url: downloadUrl,
+          model: modelType,
+          ts: Date.now()
+        });
+        // Limpiar entradas viejas si hay más de 10
+        const histSnap = await firebase.database().ref(`users/${uid}/skinHistory`).once('value');
+        if (histSnap.exists()) {
+          const entries = Object.entries(histSnap.val()).sort((a,b) => a[1].ts - b[1].ts);
+          if (entries.length > 10) {
+            for (let i = 0; i < entries.length - 10; i++) {
+              await firebase.database().ref(`users/${uid}/skinHistory/${entries[i][0]}`).remove();
+            }
+          }
+        }
+
         progressBar.style.width = '100%';
 
-        // Actualizar authData y preview del visor inmediatamente
+        // 4. Actualizar authData y preview del visor inmediatamente
         authData.skinUrl = downloadUrl;
         window.currentSkinUrl = downloadUrl;
         if (skinViewer) {
@@ -5956,6 +5996,9 @@ function updateMyStatus(status, activity) {
         } else {
           initSkinViewer(downloadUrl, modelType);
         }
+
+        // 5. Refrescar el historial en la UI
+        loadSkinHistory();
         
         document.getElementById('skin-upload-confirm-btn').style.display = 'none';
 
@@ -5973,6 +6016,106 @@ function updateMyStatus(status, activity) {
         status.textContent = '❌ Error al subir: ' + err.message;
         progressWrap.style.display = 'none';
         toast('Error al subir a almacenamiento: ' + err.message, 'error');
+      }
+    }
+
+    async function loadSkinHistory() {
+      if (!authData || !authData.uid) return;
+      const uid = authData.uid;
+      const grid = document.getElementById('skin-history-grid');
+      const empty = document.getElementById('skin-history-empty');
+      if (!grid) return;
+
+      try {
+        const snap = await firebase.database().ref(`users/${uid}/skinHistory`).once('value');
+        if (!snap.exists()) {
+          if (empty) empty.style.display = 'block';
+          // Eliminar cards anteriores excepto el empty
+          Array.from(grid.children).forEach(c => { if (c.id !== 'skin-history-empty') c.remove(); });
+          return;
+        }
+        const entries = Object.entries(snap.val()).sort((a,b) => b[1].ts - a[1].ts); // más nuevo primero
+        if (empty) empty.style.display = 'none';
+        // Limpiar cards anteriores
+        Array.from(grid.children).forEach(c => { if (c.id !== 'skin-history-empty') c.remove(); });
+
+        entries.forEach(([key, entry]) => {
+          const date = new Date(entry.ts).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit' });
+          const isActive = entry.url === authData.skinUrl;
+          const card = document.createElement('div');
+          card.style.cssText = `position:relative; display:flex; flex-direction:column; align-items:center; gap:5px; cursor:pointer;
+            background:${isActive ? 'rgba(139,92,246,0.18)' : 'rgba(255,255,255,0.04)'};
+            border:1px solid ${isActive ? 'var(--accent)' : 'rgba(255,255,255,0.08)'};
+            border-radius:10px; padding:8px 4px; transition:all 0.2s;`;
+          card.title = 'Usar esta skin';
+
+          // Preview de cara (crop CSS del PNG de la skin)
+          const face = document.createElement('div');
+          face.style.cssText = `width:40px; height:40px; border-radius:4px; overflow:hidden;
+            background-image:url('${entry.url}');
+            background-repeat:no-repeat;
+            background-size:800% 800%;
+            background-position: -100px -100px;
+            image-rendering:pixelated;
+            flex-shrink:0;`;
+          // La cara en una skin 64x64 está en x=8,y=8 w=8,h=8
+          // Con background-size:800% el png entero se escala a 512px
+          // Cara original (8px en posición x=8,y=8) → 64px → posición: -64px -64px
+          face.style.backgroundSize = '512px 512px';
+          face.style.backgroundPosition = '-64px -64px';
+          face.style.width = '40px';
+          face.style.height = '40px';
+
+          const dateEl = document.createElement('span');
+          dateEl.style.cssText = 'font-size:0.58rem; color:var(--text-dim); text-align:center; line-height:1.2;';
+          dateEl.textContent = date;
+
+          if (isActive) {
+            const badge = document.createElement('div');
+            badge.style.cssText = 'position:absolute; top:3px; right:3px; width:7px; height:7px; background:var(--accent); border-radius:50%;';
+            card.appendChild(badge);
+          }
+
+          card.appendChild(face);
+          card.appendChild(dateEl);
+
+          card.addEventListener('mouseenter', () => { card.style.background = 'rgba(139,92,246,0.25)'; card.style.borderColor = 'var(--accent)'; });
+          card.addEventListener('mouseleave', () => { card.style.background = isActive ? 'rgba(139,92,246,0.18)' : 'rgba(255,255,255,0.04)'; card.style.borderColor = isActive ? 'var(--accent)' : 'rgba(255,255,255,0.08)'; });
+          card.addEventListener('click', () => useSkinFromHistory(entry.url, entry.model || 'default'));
+
+          grid.appendChild(card);
+        });
+      } catch(e) {
+        console.warn('[SkinHistory] Error cargando historial:', e);
+      }
+    }
+
+    async function useSkinFromHistory(skinUrl, modelType) {
+      if (!authData || !authData.uid) return;
+      const uid = authData.uid;
+      const username = authData.username;
+      try {
+        // Actualizar skin activa en Firebase
+        await firebase.database().ref(`users/${uid}`).update({ skinUrl: skinUrl, model: modelType });
+        // Actualizar /skins/{username} para el agente Java
+        await firebase.database().ref(`skins/${username}`).set({ url: skinUrl, model: modelType, uid: uid });
+
+        authData.skinUrl = skinUrl;
+        window.currentSkinUrl = skinUrl;
+
+        const modelSelect = document.getElementById('skin-model-select');
+        if (modelSelect) modelSelect.value = modelType;
+
+        if (skinViewer) {
+          skinViewer.loadSkin(skinUrl, { model: modelType });
+        } else {
+          initSkinViewer(skinUrl, modelType);
+        }
+
+        loadSkinHistory(); // Refrescar badges activo/inactivo
+        toast('✅ Skin del historial aplicada correctamente', 'success');
+      } catch(e) {
+        toast('❌ Error al aplicar skin: ' + e.message, 'error');
       }
     }
 
