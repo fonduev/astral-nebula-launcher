@@ -5935,6 +5935,15 @@ function updateMyStatus(status, activity) {
           model: modelType
         });
         progressBar.style.width = '100%';
+
+        // Actualizar authData y preview del visor inmediatamente
+        authData.skinUrl = downloadUrl;
+        window.currentSkinUrl = downloadUrl;
+        if (skinViewer) {
+          skinViewer.loadSkin(downloadUrl, { model: modelType });
+        } else {
+          initSkinViewer(downloadUrl, modelType);
+        }
         
         document.getElementById('skin-upload-confirm-btn').style.display = 'none';
 
