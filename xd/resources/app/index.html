@@ -2789,6 +2789,13 @@ function showTab(id) {
   if (id === 'servers') {
     loadSponsoredServers();
   }
+  if (id === 'profile' && authData && authData.skinUrl !== undefined) {
+    // Re-inicializar el visor ahora que el contenedor es visible y tiene dimensiones reales
+    setTimeout(() => {
+      const modelType = document.getElementById('skin-model-select') ? document.getElementById('skin-model-select').value : 'default';
+      initSkinViewer(authData.skinUrl || '', modelType);
+    }, 80);
+  }
 }
 
 // ═══════ TOAST ═══════
@@ -5670,7 +5677,12 @@ function updateMyStatus(status, activity) {
           const modelType = userData.model || 'default';
           const modelSelect = document.getElementById('skin-model-select');
           if (modelSelect) modelSelect.value = modelType;
-          initSkinViewer(authData.skinUrl, modelType);
+          // Solo inicializar el visor si la pestaña de perfil ya es visible
+          const profileTab = document.getElementById('tab-profile');
+          if (profileTab && profileTab.classList.contains('active')) {
+            setTimeout(() => initSkinViewer(authData.skinUrl, modelType), 80);
+          }
+          // Si no es visible, showTab('profile') lo inicializará cuando el usuario haga click
         }
       });
     }
