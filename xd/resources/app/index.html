@@ -6074,6 +6074,40 @@ function updateMyStatus(status, activity) {
             border:1px solid ${isActive?'var(--accent)':'rgba(255,255,255,0.08)'};`;
           card.title = 'Usar esta skin';
 
+          // Botón eliminar ✕
+          const delBtn = document.createElement('button');
+          delBtn.textContent = '✕';
+          delBtn.title = 'Eliminar del historial';
+          delBtn.style.cssText = `position:absolute;top:3px;left:3px;width:16px;height:16px;
+            border:none;border-radius:50%;background:rgba(239,68,68,0.8);color:#fff;
+            font-size:0.55rem;font-weight:700;cursor:pointer;display:flex;align-items:center;
+            justify-content:center;padding:0;line-height:1;opacity:0;transition:opacity 0.15s;z-index:5;`;
+          delBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (!confirm('¿Eliminar esta skin del historial?')) return;
+            await firebase.database().ref(`users/${uid}/skinHistory/${key}`).remove();
+            card.style.opacity = '0';
+            setTimeout(() => { card.remove(); }, 200);
+            // Si era la activa, limpiar skinUrl
+            if (isActive) {
+              await firebase.database().ref(`users/${uid}`).update({ skinUrl: null });
+              if (authData) authData.skinUrl = null;
+            }
+          });
+          card.appendChild(delBtn);
+
+          // Mostrar botón en hover
+          card.addEventListener('mouseenter', () => {
+            delBtn.style.opacity = '1';
+            card.style.background = 'rgba(139,92,246,0.28)';
+            card.style.borderColor = 'var(--accent)';
+          });
+          card.addEventListener('mouseleave', () => {
+            delBtn.style.opacity = '0';
+            card.style.background = isActive?'rgba(139,92,246,0.2)':'rgba(255,255,255,0.04)';
+            card.style.borderColor = isActive?'var(--accent)':'rgba(255,255,255,0.08)';
+          });
+
           // Canvas 2D preview
           const canvas = document.createElement('canvas');
           canvas.style.cssText = 'image-rendering:pixelated;display:block;';
@@ -6090,29 +6124,31 @@ function updateMyStatus(status, activity) {
             card.appendChild(dot);
           }
 
-          // Cargar imagen y dibujar
+          // Cargar imagen: si falla → eliminar de Firebase Y ocultar card
           const img = new Image();
           img.crossOrigin = 'anonymous';
           img.onload = () => {
             drawSkin2D(canvas, img, isSlim);
-            // Escalar canvas CSS para que quepa en la tarjeta
             canvas.style.width  = canvas.width  + 'px';
             canvas.style.height = canvas.height + 'px';
           };
-          img.onerror = () => {
-            // Fallback: cara sola si no carga
-            canvas.width = 32; canvas.height = 32;
-            canvas.style.width = '32px'; canvas.style.height = '32px';
+          img.onerror = async () => {
+            // URL rota → borrar de Firebase y ocultar
+            console.warn('[SkinHistory] URL no disponible, eliminando:', entry.url);
+            await firebase.database().ref(`users/${uid}/skinHistory/${key}`).remove().catch(()=>{});
+            card.remove();
+            // Comprobar si quedan cards
+            const remaining = Array.from(grid.children).filter(c => c.id !== 'skin-history-empty');
+            if (remaining.length === 0 && empty) empty.style.display = 'block';
           };
           img.src = entry.url;
 
-          card.addEventListener('mouseenter', () => { card.style.background='rgba(139,92,246,0.28)'; card.style.borderColor='var(--accent)'; });
-          card.addEventListener('mouseleave', () => { card.style.background=isActive?'rgba(139,92,246,0.2)':'rgba(255,255,255,0.04)'; card.style.borderColor=isActive?'var(--accent)':'rgba(255,255,255,0.08)'; });
           card.addEventListener('click', () => useSkinFromHistory(entry.url, entry.model || 'default'));
           grid.appendChild(card);
         });
       } catch(e) { console.warn('[SkinHistory]', e); }
     }
+
 
 
     async function useSkinFromHistory(skinUrl, modelType) {
