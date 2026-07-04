@@ -1,0 +1,13 @@
+{
+  "theme": "nebula",
+  "ram": 4,
+  "javaPath": "",
+  "lastLoginType": "microsoft",
+  "fussionbornDownloadUrl": "https://pub-d38529ebbdbe4598b4d3d552ffc4246f.r2.dev/FUSSIONBORN.zip",
+  "socialFirebase": {
+    "apiKey": "AIzaSyCfka9dpsVQvfsJ883segPzATNDUEuIVwc",
+    "projectId": "astral-nebula-social",
+    "authDomain": "astral-nebula-social.firebaseapp.com",
+    "appId": "1:289159955650:web:7906ba01ca236ae92ca75b"
+  }
+}

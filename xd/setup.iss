@@ -2,7 +2,7 @@
 AppName=Nebula Launcher
 AppVersion=3.1.6
 AppPublisher=Nebula Studios
-AppPublisherURL=https://nebula-launcher.com
+AppPublisherURL=https://fonduev.github.io/astral-nebula-launcher/
 VersionInfoCompany=Nebula Studios
 VersionInfoDescription=Nebula Launcher
 VersionInfoTextVersion=3.1.6

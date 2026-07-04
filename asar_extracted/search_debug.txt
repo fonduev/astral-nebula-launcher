@@ -1,0 +1,4 @@
+⚠️ Test error: ENOENT: no such file or directory, open 'C:\Users\renee\DocumentsWeb\xd\search_debug.txt'
+Error: ENOENT: no such file or directory, open 'C:\Users\renee\DocumentsWeb\xd\search_debug.txt'
+    at Object.writeFileSync (node:fs:2368:20)
+    at C:\Users\renee\Documents\Web\xd\resources\app\main.js:166:16

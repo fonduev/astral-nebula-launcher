@@ -6019,6 +6019,34 @@ function updateMyStatus(status, activity) {
       }
     }
 
+    // Dibuja el cuerpo completo 2D de una skin Minecraft en un canvas
+    function drawSkin2D(canvas, img, isSlim) {
+      const S = 3; // escala 3x → personaje de 48x96
+      const armW = isSlim ? 3 : 4;
+      const totalW = (armW * 2 + 8) * S;
+      const totalH = 32 * S;
+      canvas.width  = totalW;
+      canvas.height = totalH;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, totalW, totalH);
+      const x0 = armW * S; // donde empieza el cuerpo
+      // Cara
+      ctx.drawImage(img, 8, 8, 8, 8, x0, 0, 8*S, 8*S);
+      // Capa cabeza
+      ctx.drawImage(img, 40, 8, 8, 8, x0, 0, 8*S, 8*S);
+      // Cuerpo
+      ctx.drawImage(img, 20, 20, 8, 12, x0, 8*S, 8*S, 12*S);
+      // Brazo derecho
+      ctx.drawImage(img, 44, 20, armW, 12, 0, 8*S, armW*S, 12*S);
+      // Brazo izquierdo (layout 1.8+)
+      ctx.drawImage(img, 36, 52, armW, 12, x0+8*S, 8*S, armW*S, 12*S);
+      // Pierna derecha
+      ctx.drawImage(img, 4, 20, 4, 12, x0, 20*S, 4*S, 12*S);
+      // Pierna izquierda (layout 1.8+)
+      ctx.drawImage(img, 20, 52, 4, 12, x0+4*S, 20*S, 4*S, 12*S);
+    }
+
     async function loadSkinHistory() {
       if (!authData || !authData.uid) return;
       const uid = authData.uid;
@@ -6028,67 +6056,64 @@ function updateMyStatus(status, activity) {
 
       try {
         const snap = await firebase.database().ref(`users/${uid}/skinHistory`).once('value');
-        if (!snap.exists()) {
-          if (empty) empty.style.display = 'block';
-          // Eliminar cards anteriores excepto el empty
-          Array.from(grid.children).forEach(c => { if (c.id !== 'skin-history-empty') c.remove(); });
-          return;
-        }
-        const entries = Object.entries(snap.val()).sort((a,b) => b[1].ts - a[1].ts); // más nuevo primero
-        if (empty) empty.style.display = 'none';
-        // Limpiar cards anteriores
         Array.from(grid.children).forEach(c => { if (c.id !== 'skin-history-empty') c.remove(); });
+        if (!snap.exists()) { if (empty) empty.style.display = 'block'; return; }
+        if (empty) empty.style.display = 'none';
+
+        const entries = Object.entries(snap.val()).sort((a,b) => b[1].ts - a[1].ts);
 
         entries.forEach(([key, entry]) => {
-          const date = new Date(entry.ts).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit' });
           const isActive = entry.url === authData.skinUrl;
+          const isSlim   = (entry.model === 'slim');
+          const date     = new Date(entry.ts).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit' });
+
           const card = document.createElement('div');
-          card.style.cssText = `position:relative; display:flex; flex-direction:column; align-items:center; gap:5px; cursor:pointer;
-            background:${isActive ? 'rgba(139,92,246,0.18)' : 'rgba(255,255,255,0.04)'};
-            border:1px solid ${isActive ? 'var(--accent)' : 'rgba(255,255,255,0.08)'};
-            border-radius:10px; padding:8px 4px; transition:all 0.2s;`;
+          card.style.cssText = `position:relative;display:flex;flex-direction:column;align-items:center;
+            gap:4px;cursor:pointer;padding:8px 6px 6px;border-radius:12px;transition:all 0.2s;
+            background:${isActive?'rgba(139,92,246,0.2)':'rgba(255,255,255,0.04)'};
+            border:1px solid ${isActive?'var(--accent)':'rgba(255,255,255,0.08)'};`;
           card.title = 'Usar esta skin';
 
-          // Preview de cara (crop CSS del PNG de la skin)
-          const face = document.createElement('div');
-          face.style.cssText = `width:40px; height:40px; border-radius:4px; overflow:hidden;
-            background-image:url('${entry.url}');
-            background-repeat:no-repeat;
-            background-size:800% 800%;
-            background-position: -100px -100px;
-            image-rendering:pixelated;
-            flex-shrink:0;`;
-          // La cara en una skin 64x64 está en x=8,y=8 w=8,h=8
-          // Con background-size:800% el png entero se escala a 512px
-          // Cara original (8px en posición x=8,y=8) → 64px → posición: -64px -64px
-          face.style.backgroundSize = '512px 512px';
-          face.style.backgroundPosition = '-64px -64px';
-          face.style.width = '40px';
-          face.style.height = '40px';
+          // Canvas 2D preview
+          const canvas = document.createElement('canvas');
+          canvas.style.cssText = 'image-rendering:pixelated;display:block;';
+          card.appendChild(canvas);
 
           const dateEl = document.createElement('span');
-          dateEl.style.cssText = 'font-size:0.58rem; color:var(--text-dim); text-align:center; line-height:1.2;';
+          dateEl.style.cssText = 'font-size:0.58rem;color:var(--text-dim);text-align:center;';
           dateEl.textContent = date;
-
-          if (isActive) {
-            const badge = document.createElement('div');
-            badge.style.cssText = 'position:absolute; top:3px; right:3px; width:7px; height:7px; background:var(--accent); border-radius:50%;';
-            card.appendChild(badge);
-          }
-
-          card.appendChild(face);
           card.appendChild(dateEl);
 
-          card.addEventListener('mouseenter', () => { card.style.background = 'rgba(139,92,246,0.25)'; card.style.borderColor = 'var(--accent)'; });
-          card.addEventListener('mouseleave', () => { card.style.background = isActive ? 'rgba(139,92,246,0.18)' : 'rgba(255,255,255,0.04)'; card.style.borderColor = isActive ? 'var(--accent)' : 'rgba(255,255,255,0.08)'; });
-          card.addEventListener('click', () => useSkinFromHistory(entry.url, entry.model || 'default'));
+          if (isActive) {
+            const dot = document.createElement('div');
+            dot.style.cssText = 'position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--accent);border-radius:50%;box-shadow:0 0 6px var(--accent);';
+            card.appendChild(dot);
+          }
 
+          // Cargar imagen y dibujar
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            drawSkin2D(canvas, img, isSlim);
+            // Escalar canvas CSS para que quepa en la tarjeta
+            canvas.style.width  = canvas.width  + 'px';
+            canvas.style.height = canvas.height + 'px';
+          };
+          img.onerror = () => {
+            // Fallback: cara sola si no carga
+            canvas.width = 32; canvas.height = 32;
+            canvas.style.width = '32px'; canvas.style.height = '32px';
+          };
+          img.src = entry.url;
+
+          card.addEventListener('mouseenter', () => { card.style.background='rgba(139,92,246,0.28)'; card.style.borderColor='var(--accent)'; });
+          card.addEventListener('mouseleave', () => { card.style.background=isActive?'rgba(139,92,246,0.2)':'rgba(255,255,255,0.04)'; card.style.borderColor=isActive?'var(--accent)':'rgba(255,255,255,0.08)'; });
+          card.addEventListener('click', () => useSkinFromHistory(entry.url, entry.model || 'default'));
           grid.appendChild(card);
         });
-      } catch(e) {
-        console.warn('[SkinHistory] Error cargando historial:', e);
-      }
+      } catch(e) { console.warn('[SkinHistory]', e); }
     }
+
 
     async function useSkinFromHistory(skinUrl, modelType) {
       if (!authData || !authData.uid) return;
