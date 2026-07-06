@@ -3795,19 +3795,9 @@ ipcMain.on('launch-game', async (event, data) => {
         if (data.type === 'microsoft' && data.auth) {
             auth = { access_token: data.auth.accessToken, client_token: crypto.randomUUID(), uuid: data.auth.uuid, name: data.auth.name, user_properties: '{}' };
         } else if (data.type === 'nebula' && data.auth) {
-            const cleanUuid = data.auth.uuid.replace(/-/g, '');
-            auth = {
-                access_token: cleanUuid,
-                client_token: cleanUuid,
-                uuid: data.auth.uuid,
-                name: data.username,
-                user_properties: '{}',
-                meta: {
-                    type: 'legacy'
-                }
-            };
+            auth = await Authenticator.getAuth(data.username);
         } else {
-            auth = Authenticator.getAuth(data.username);
+            auth = await Authenticator.getAuth(data.username);
         }
 
         let versionOpts;
