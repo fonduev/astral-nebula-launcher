@@ -5813,9 +5813,24 @@ function updateMyStatus(status, activity) {
         authData.username = newUsername;
         authData.uuid = newUuid;
 
-        // Actualizar UI
+        // Actualizar interfaz principal
         document.getElementById('profile-display-username').textContent = newUsername;
+        document.getElementById('username-display').textContent = newUsername;
         cancelNebulaNicknameEdit();
+
+        // Actualizar presencia y UI en la pestaña Social & Amigos
+        if (typeof socialDb !== 'undefined' && socialDb) {
+          // Poner offline al antiguo usuario en Firestore para que no se quede atascado
+          socialDb.collection('users').doc(oldUsername.toLowerCase()).update({
+            status: 'offline',
+            lastActive: firebase.firestore.FieldValue.serverTimestamp()
+          }).catch(e => console.warn("No se pudo poner offline el usuario social anterior:", e));
+
+          // Registrar nuevo usuario en Firestore y refrescar UI
+          setupFirebaseSocial(newUsername);
+        } else if (typeof setupDemoSocial === 'function') {
+          setupDemoSocial();
+        }
 
         // 7. Guardar en settings
         settings.lastAuthUser = newUsername;
