@@ -2331,11 +2331,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
             <h3 style="margin-bottom:16px; font-weight:600; letter-spacing:0.05em; color:var(--accent);">INFORMACIÓN DE LA CUENTA</h3>
             <div class="settings-grid" style="grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:28px;">
               <div class="settings-card" style="padding:16px; display:flex; justify-content:space-between; align-items:center;">
-                <div>
+                <div style="flex:1;">
                   <span class="label" style="font-size:0.65rem;">NICKNAME (EN JUEGO)</span>
                   <div id="profile-display-username" style="font-size:1.1rem; font-weight:600; color:var(--text); margin-top:4px;">Cargando...</div>
+                  <div id="profile-edit-username-container" style="display:none; margin-top:8px; align-items:center; gap:8px;">
+                    <input type="text" id="profile-edit-username-input" class="inp" style="max-width:180px; padding:6px 10px; font-size:0.9rem; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:var(--text); border-radius:6px;" placeholder="Nuevo nickname">
+                    <button class="btn btn-primary btn-sm" style="padding:6px 10px; font-size:0.75rem; border-radius:6px;" onclick="saveNewNebulaNickname()">Guardar</button>
+                    <button class="btn btn-ghost btn-sm" style="padding:6px 10px; font-size:0.75rem; border-radius:6px;" onclick="cancelNebulaNicknameEdit()">Cancelar</button>
+                  </div>
                 </div>
-                <button class="btn btn-ghost btn-sm" style="padding:6px 10px; font-size:0.75rem; border-radius:8px;" onclick="changeNebulaNickname()">✏️ Cambiar</button>
+                <button class="btn btn-ghost btn-sm" id="profile-edit-username-btn" style="padding:6px 10px; font-size:0.75rem; border-radius:8px;" onclick="showNebulaNicknameEdit()">✏️ Cambiar</button>
               </div>
               <div class="settings-card" style="padding:16px;">
                 <span class="label" style="font-size:0.65rem;">CORREO VINCULADO</span>
@@ -5702,82 +5707,127 @@ function updateMyStatus(status, activity) {
       });
     }
 
-    async function changeNebulaNickname() {
-      if (!authData || !authData.uid || !authData.username) {
-        toast('Inicia sesión en Nebula primero.', 'error');
-        return;
-      }
-
-      const oldUsername = authData.username;
-      const newUsername = prompt("Ingresa tu nuevo Nickname de Minecraft (3-16 caracteres, alfanumérico o _):", oldUsername);
-      if (newUsername === null) return; // Cancelado
+    function showNebulaNicknameEdit() {
+      if (!authData || !authData.username) return;
+      document.getElementById('profile-display-username').style.display = 'none';
+      document.getElementById('profile-edit-username-btn').style.display = 'none';
       
-      const cleanNewUsername = newUsername.trim();
-      if (!cleanNewUsername) return;
+      const input = document.getElementById('profile-edit-username-input');
+      input.value = authData.username;
+      document.getElementById('profile-edit-username-container').style.display = 'flex';
+      input.focus();
+    }
 
-      if (cleanNewUsername === oldUsername) {
-        toast('El nickname es idéntico al actual.', 'info');
+    function cancelNebulaNicknameEdit() {
+      document.getElementById('profile-edit-username-container').style.display = 'none';
+      document.getElementById('profile-display-username').style.display = 'block';
+      document.getElementById('profile-edit-username-btn').style.display = 'block';
+    }
+
+    async function saveNewNebulaNickname() {
+      const input = document.getElementById('profile-edit-username-input');
+      const newUsername = input.value.trim();
+      const oldUsername = authData.username;
+
+      if (!newUsername) return;
+
+      if (newUsername === oldUsername) {
+        cancelNebulaNicknameEdit();
         return;
       }
 
       const usernameRegex = /^[a-zA-Z0-9_]{3,16}$/;
-      if (!usernameRegex.test(cleanNewUsername)) {
+      if (!usernameRegex.test(newUsername)) {
         alert('❌ Nickname inválido. Debe tener entre 3 y 16 caracteres alfanuméricos o guiones bajos.');
         return;
       }
 
+      const saveBtn = document.querySelector('#profile-edit-username-container button');
+      saveBtn.disabled = true;
       toast('Verificando disponibilidad...', 'info');
 
       try {
-        const newLower = cleanNewUsername.toLowerCase();
+        const newLower = newUsername.toLowerCase();
         const oldLower = oldUsername.toLowerCase();
         const uid = authData.uid;
 
-        // 1. Verificar si ya existe en /usernames
-        const usernameCheckSnap = await firebase.database().ref(`usernames/${newLower}`).once('value');
+        // 1. Verificar disponibilidad en /usernames
+        let usernameCheckSnap;
+        try {
+          usernameCheckSnap = await firebase.database().ref(`usernames/${newLower}`).once('value');
+        } catch (e) {
+          throw new Error("No se pudo verificar la disponibilidad en Firebase: " + e.message);
+        }
+
         if (usernameCheckSnap.exists()) {
-          throw new Error(`El nickname "${cleanNewUsername}" ya está en uso.`);
+          throw new Error(`El nickname "${newUsername}" ya está en uso.`);
         }
 
         toast('Cambiando nickname...', 'info');
 
-        // 2. Obtener nuevo UUID offline para el nuevo nick
-        const newUuid = await ipc.invoke('get-offline-uuid', cleanNewUsername);
-
-        // 3. Obtener skin actual para moverla si existe
-        const skinSnap = await firebase.database().ref(`skins/${oldUsername}`).once('value');
-        const skinData = skinSnap.exists() ? skinSnap.val() : null;
-
-        // 4. Escribir nuevos nodos en base de datos de forma individual (para evitar problemas de permisos en la raíz)
-        await firebase.database().ref(`usernames/${newLower}`).set(uid);
-        await firebase.database().ref(`users/${uid}/username`).set(cleanNewUsername);
-        await firebase.database().ref(`users/${uid}/uuid`).set(newUuid);
-        
-        if (skinData) {
-          await firebase.database().ref(`skins/${cleanNewUsername}`).set(skinData);
+        // 2. Generar UUID offline en Electron
+        let newUuid;
+        try {
+          newUuid = await ipc.invoke('get-offline-uuid', newUsername);
+        } catch (e) {
+          throw new Error("Error al generar el UUID: " + e.message);
         }
 
-        // 5. Limpiar nodos antiguos
-        await firebase.database().ref(`usernames/${oldLower}`).remove();
-        await firebase.database().ref(`skins/${oldUsername}`).remove();
+        // 3. Obtener datos de la skin antigua
+        let skinData = null;
+        try {
+          const skinSnap = await firebase.database().ref(`skins/${oldUsername}`).once('value');
+          skinData = skinSnap.exists() ? skinSnap.val() : null;
+        } catch (e) {
+          console.warn("No se pudo obtener la skin antigua:", e);
+        }
 
-        // 6. Actualizar variables globales en el launcher
-        authUser = cleanNewUsername;
-        authData.username = cleanNewUsername;
+        // 4. Escribir nuevos registros en Firebase
+        try {
+          await firebase.database().ref(`usernames/${newLower}`).set(uid);
+        } catch (e) {
+          throw new Error("No tienes permisos para registrar el nickname en la base de datos: " + e.message);
+        }
+
+        try {
+          await firebase.database().ref(`users/${uid}/username`).set(newUsername);
+          await firebase.database().ref(`users/${uid}/uuid`).set(newUuid);
+        } catch (e) {
+          throw new Error("No se pudo actualizar los datos del usuario en Firebase: " + e.message);
+        }
+
+        if (skinData) {
+          try {
+            await firebase.database().ref(`skins/${newUsername}`).set(skinData);
+          } catch (e) {
+            console.warn("No se pudo mover la skin al nuevo nickname en Firebase:", e);
+          }
+        }
+
+        // 5. Eliminar registros antiguos (limpieza no crítica)
+        await firebase.database().ref(`usernames/${oldLower}`).remove().catch(e => console.warn("Error al borrar username antiguo:", e));
+        await firebase.database().ref(`skins/${oldUsername}`).remove().catch(e => console.warn("Error al borrar skin antigua:", e));
+
+        // 6. Actualizar sesión local del launcher
+        authUser = newUsername;
+        authData.username = newUsername;
         authData.uuid = newUuid;
 
-        // Actualizar interfaz
-        document.getElementById('profile-display-username').textContent = cleanNewUsername;
+        // Actualizar UI
+        document.getElementById('profile-display-username').textContent = newUsername;
+        cancelNebulaNicknameEdit();
 
-        // 7. Guardar en settings del launcher
-        settings.lastAuthUser = cleanNewUsername;
+        // 7. Guardar en settings
+        settings.lastAuthUser = newUsername;
         settings.lastAuthData = authData;
         ipc.send('save-settings', settings);
 
-        toast(`¡Nickname cambiado con éxito a: ${cleanNewUsername}!`, 'success');
+        toast(`¡Nickname cambiado con éxito a: ${newUsername}!`, 'success');
       } catch (err) {
         alert('❌ Error: ' + err.message);
-        toast('Error al cambiar nickname: ' + err.message, 'error');
+        toast('Error: ' + err.message, 'error');
+      } finally {
+        saveBtn.disabled = false;
       }
     }
 
