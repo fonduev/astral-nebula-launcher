@@ -4629,6 +4629,8 @@ function initSocial() {
                     // Eliminar documento anterior si la ID cambió
                     if (oldDocId !== newDocId) {
                       await socialDb.collection('users').doc(oldDocId).delete().catch(()=>{});
+                      // Migrar amigos y salas de chat a la nueva ID
+                      await migrateFirestoreUserSocialData(oldDocId, authUser);
                     }
                     
                     linkedMcName = authUser;
@@ -4723,6 +4725,80 @@ function initSocial() {
     document.getElementById('social-auth-panel').style.display = 'none';
     document.getElementById('social-main-panel').style.display = 'flex';
     setupDemoSocial();
+  }
+}
+
+// ── Firebase Social Data Migration ──────────────────────────────────
+async function migrateFirestoreUserSocialData(oldUsername, newUsername) {
+  if (typeof socialDb === 'undefined' || !socialDb) return;
+  const oldLower = oldUsername.toLowerCase();
+  const newLower = newUsername.toLowerCase();
+  
+  console.log(`[NebulaSocial] Migrando datos sociales en Firestore de ${oldLower} a ${newLower}`);
+  
+  try {
+    // 1. Consultar relaciones de amistad donde participaba el usuario anterior
+    const q1 = await socialDb.collection('friends').where('user1', '==', oldLower).get();
+    const q2 = await socialDb.collection('friends').where('user2', '==', oldLower).get();
+    
+    const docs = [...q1.docs, ...q2.docs];
+    
+    for (const doc of docs) {
+      const data = doc.data();
+      const oldDocId = doc.id;
+      
+      // Determinar quién es el amigo
+      const friendLower = data.user1 === oldLower ? data.user2 : data.user1;
+      
+      // Calcular el nuevo docId
+      const newDocId = [newLower, friendLower].sort().join('_');
+      
+      // Actualizar campos
+      const newData = { ...data };
+      if (newData.user1 === oldLower) newData.user1 = newLower;
+      if (newData.user2 === oldLower) newData.user2 = newLower;
+      if (newData.sender === oldLower) newData.sender = newLower;
+      if (newData.receiver === oldLower) newData.receiver = newLower;
+      
+      // Si el status contiene el nombre viejo (ej. pending_fondue_x_to_friend)
+      if (newData.status && newData.status.startsWith('pending_')) {
+        newData.status = newData.status
+          .replace(`pending_${oldLower}_to_`, `pending_${newLower}_to_`)
+          .replace(`_to_${oldLower}`, `_to_${newLower}`);
+      }
+      
+      // Guardar el nuevo documento de amistad
+      await socialDb.collection('friends').doc(newDocId).set(newData);
+      
+      // Eliminar el documento anterior de amistad si el docId cambió
+      if (oldDocId !== newDocId) {
+        await socialDb.collection('friends').doc(oldDocId).delete().catch(()=>{});
+      }
+      
+      // 2. Migrar mensajes del chat (si existen)
+      const oldChatRoomId = [oldLower, friendLower].sort().join('_');
+      const newChatRoomId = [newLower, friendLower].sort().join('_');
+      
+      if (oldChatRoomId !== newChatRoomId) {
+        const msgsSnap = await socialDb.collection('chats').doc(oldChatRoomId).collection('messages').get();
+        for (const msgDoc of msgsSnap.docs) {
+          const msgData = msgDoc.data();
+          // Modificar remitente si era el usuario viejo
+          if (msgData.sender && msgData.sender.toLowerCase() === oldLower) {
+            msgData.sender = newUsername; // mantener mayúsculas/minúsculas correctas
+          }
+          // Guardar mensaje en el nuevo chat
+          await socialDb.collection('chats').doc(newChatRoomId).collection('messages').doc(msgDoc.id).set(msgData);
+          // Eliminar del viejo
+          await socialDb.collection('chats').doc(oldChatRoomId).collection('messages').doc(msgDoc.id).delete().catch(()=>{});
+        }
+        // Borrar el documento de chat viejo vacío
+        await socialDb.collection('chats').doc(oldChatRoomId).delete().catch(()=>{});
+      }
+    }
+    console.log(`[NebulaSocial] Migración de amigos y chats completada con éxito.`);
+  } catch (e) {
+    console.error("Error durante la migración de datos de amigos en Firestore:", e);
   }
 }
 
@@ -5899,6 +5975,9 @@ function updateMyStatus(status, activity) {
               });
 
               window.socialLinkedMcName = newUsername;
+
+              // 3. Migrar amigos y salas de chat a la nueva ID
+              await migrateFirestoreUserSocialData(oldUsername, newUsername);
             }
           } catch (e) {
             console.warn("No se pudo migrar el perfil de la pestaña Social en Firestore:", e);
