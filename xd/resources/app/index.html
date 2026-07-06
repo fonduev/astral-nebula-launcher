@@ -5748,17 +5748,14 @@ function updateMyStatus(status, activity) {
         const skinSnap = await firebase.database().ref(`skins/${oldUsername}`).once('value');
         const skinData = skinSnap.exists() ? skinSnap.val() : null;
 
-        // 4. Escribir nuevos nodos en base de datos
-        const updates = {};
-        updates[`usernames/${newLower}`] = uid;
-        updates[`users/${uid}/username`] = cleanNewUsername;
-        updates[`users/${uid}/uuid`] = newUuid;
+        // 4. Escribir nuevos nodos en base de datos de forma individual (para evitar problemas de permisos en la raíz)
+        await firebase.database().ref(`usernames/${newLower}`).set(uid);
+        await firebase.database().ref(`users/${uid}/username`).set(cleanNewUsername);
+        await firebase.database().ref(`users/${uid}/uuid`).set(newUuid);
         
         if (skinData) {
-          updates[`skins/${cleanNewUsername}`] = skinData;
+          await firebase.database().ref(`skins/${cleanNewUsername}`).set(skinData);
         }
-
-        await firebase.database().ref().update(updates);
 
         // 5. Limpiar nodos antiguos
         await firebase.database().ref(`usernames/${oldLower}`).remove();
@@ -6217,14 +6214,14 @@ function updateMyStatus(status, activity) {
             canvas.style.width  = canvas.width  + 'px';
             canvas.style.height = canvas.height + 'px';
           };
-          img.onerror = async () => {
-            // URL rota → borrar de Firebase y ocultar
-            console.warn('[SkinHistory] URL no disponible, eliminando:', entry.url);
-            await firebase.database().ref(`users/${uid}/skinHistory/${key}`).remove().catch(()=>{});
-            card.remove();
-            // Comprobar si quedan cards
-            const remaining = Array.from(grid.children).filter(c => c.id !== 'skin-history-empty');
-            if (remaining.length === 0 && empty) empty.style.display = 'block';
+          img.onerror = () => {
+            console.warn('[SkinHistory] No se pudo renderizar la vista previa para:', entry.url);
+            // Simplemente renderizar un rect gris y continuar
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.fillStyle = 'rgba(255,255,255,0.06)';
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
           };
           img.src = entry.url;
 
