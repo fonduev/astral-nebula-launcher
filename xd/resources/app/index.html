@@ -4606,7 +4606,36 @@ function initSocial() {
               if (!snap.empty) {
                 // Encontrado. Obtener nickname de Minecraft vinculado
                 const userData = snap.docs[0].data();
-                const linkedMcName = userData.usernameDisplay;
+                let linkedMcName = userData.usernameDisplay;
+                
+                // Sincronización automática de Firestore con Cuenta Nebula si no coinciden
+                if (authType === 'nebula' && authUser && authUser !== linkedMcName) {
+                  console.log(`[NebulaSocial] Sincronizando perfil de Firestore: ${linkedMcName} -> ${authUser}`);
+                  try {
+                    const oldDocId = snap.docs[0].id;
+                    const newDocId = authUser.toLowerCase();
+                    
+                    // Crear nuevo documento en Firestore
+                    await socialDb.collection('users').doc(newDocId).set({
+                      uid: reloadedUser.uid,
+                      email: reloadedUser.email || '',
+                      usernameDisplay: authUser,
+                      status: 'online',
+                      activity: 'En el menú principal',
+                      currentVersion: '',
+                      lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    // Eliminar documento anterior si la ID cambió
+                    if (oldDocId !== newDocId) {
+                      await socialDb.collection('users').doc(oldDocId).delete().catch(()=>{});
+                    }
+                    
+                    linkedMcName = authUser;
+                  } catch (e) {
+                    console.error("Error al sincronizar Firestore en inicio:", e);
+                  }
+                }
                 
                 // Guardar nickname vinculado en una variable global
                 window.socialLinkedMcName = linkedMcName;
@@ -5693,6 +5722,37 @@ function updateMyStatus(status, activity) {
       dbRef.on('value', snapshot => {
         if (snapshot.exists()) {
           const userData = snapshot.val();
+          
+          // Sincronizar en tiempo real si el username cambió en Firebase
+          if (userData.username && userData.username !== authData.username) {
+            console.log(`[NebulaProfile] Sincronizando username en tiempo real: ${authData.username} -> ${userData.username}`);
+            const oldUsername = authData.username;
+            
+            authUser = userData.username;
+            authData.username = userData.username;
+            if (userData.uuid) authData.uuid = userData.uuid;
+            
+            // Actualizar interfaz
+            document.getElementById('profile-display-username').textContent = userData.username;
+            document.getElementById('username-display').textContent = userData.username;
+            
+            // Sincronizar modulo social
+            if (typeof socialDb !== 'undefined' && socialDb) {
+              if (oldUsername) {
+                socialDb.collection('users').doc(oldUsername.toLowerCase()).update({
+                  status: 'offline',
+                  lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                }).catch(()=>{});
+              }
+              setupFirebaseSocial(userData.username);
+            }
+            
+            // Guardar settings locales actualizados
+            settings.lastAuthUser = userData.username;
+            settings.lastAuthData = authData;
+            ipc.send('save-settings', settings);
+          }
+
           authData.skinUrl = userData.skinUrl || '';
           const modelType = userData.model || 'default';
           const modelSelect = document.getElementById('skin-model-select');
@@ -5820,13 +5880,31 @@ function updateMyStatus(status, activity) {
 
         // Actualizar presencia y UI en la pestaña Social & Amigos
         if (typeof socialDb !== 'undefined' && socialDb) {
-          // Poner offline al antiguo usuario en Firestore para que no se quede atascado
-          socialDb.collection('users').doc(oldUsername.toLowerCase()).update({
-            status: 'offline',
-            lastActive: firebase.firestore.FieldValue.serverTimestamp()
-          }).catch(e => console.warn("No se pudo poner offline el usuario social anterior:", e));
+          try {
+            const authCurrentUser = firebase.auth().currentUser;
+            if (authCurrentUser) {
+              // 1. Eliminar el documento anterior en Firestore
+              await socialDb.collection('users').doc(oldUsername.toLowerCase()).delete()
+                .catch(e => console.warn("Error al eliminar documento anterior de Firestore:", e));
 
-          // Registrar nuevo usuario en Firestore y refrescar UI
+              // 2. Crear el nuevo documento en Firestore con el nuevo nickname
+              await socialDb.collection('users').doc(newUsername.toLowerCase()).set({
+                uid: authCurrentUser.uid,
+                email: authCurrentUser.email || '',
+                usernameDisplay: newUsername,
+                status: 'online',
+                activity: 'En el menú principal',
+                currentVersion: '',
+                lastActive: firebase.firestore.FieldValue.serverTimestamp()
+              });
+
+              window.socialLinkedMcName = newUsername;
+            }
+          } catch (e) {
+            console.warn("No se pudo migrar el perfil de la pestaña Social en Firestore:", e);
+          }
+          
+          // Registrar presencia social y actualizar UI
           setupFirebaseSocial(newUsername);
         } else if (typeof setupDemoSocial === 'function') {
           setupDemoSocial();
