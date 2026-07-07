@@ -4238,8 +4238,7 @@ ipcMain.on('apply-update', () => {
 });
 
 // ── Nebula Launcher Presence API Tracker ──────────────────────────
-const https = require('https');
-const http = require('http');
+
 
 function sendPresencePing(uuid, username) {
     const data = JSON.stringify({ uuid, username });
