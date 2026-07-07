@@ -1888,6 +1888,7 @@ ipcMain.handle('auto-install-sodium', async (event, mcVersion) => {
             { slug: 'sodium-extra', name: 'Sodium Extra' },
             { slug: 'reeses-sodium-options', name: "Reese's Sodium Options" },
             { slug: 'modmenu', name: 'Mod Menu' }, // ver mods en juego
+            { slug: 'zoomify', name: 'Zoomify (Zoom Mod)' }, // Mod de zoom para Fabric
         ];
 
         let modsInstalled = 0;
@@ -2523,38 +2524,23 @@ ipcMain.handle('import-modpack', async (event) => {
 
 const SPONSORED_SERVERS = [
     {
-        id: 'survival-nebula',
-        name: 'Nebula Survival 1.21',
-        ip: 'survival.nebulamc.net:25565',
-        description: 'Servidor RPG Oficial de Nebula. Explora mazmorras, derrota jefes mágicos y construye ciudades con tus amigos.',
-        icon: '🌌',
-        color: '#7c3aed',
+        id: 'egonetwork',
+        name: 'EgoNetwork',
+        ip: 'mc.egonetwork.online',
+        description: '¡El servidor oficial recomendado de EgoNetwork! Únete a esta comunidad no premium y disfruta de la mejor experiencia survival con tus amigos.',
+        icon: '⚔️',
+        color: '#f59e0b',
         banner: 'https://pub-d38529ebbdbe4598b4d3d552ffc4246f.r2.dev/nebula_survival_banner.png',
-        tags: ['PVE', 'Survival RPG', 'Economía'],
-        modpackUrl: 'https://drive.usercontent.google.com/download?id=1U9PgwXMPTZT-xNoQzKjP8EtXdY7lSGuB&export=download&confirm=t',
-        mcVersion: '1.21.1',
-        loader: 'neoforge',
-        loaderVersion: '21.1.233'
-    },
-    {
-        id: 'skyblock-nebula',
-        name: 'Nebula Skyblock',
-        ip: 'skyblock.nebulamc.net',
-        description: 'Supervivencia en islas flotantes con automatización industrial. Incluye generadores de minerales mejorados y misiones diarias.',
-        icon: '☁️',
-        color: '#38bdf8',
-        banner: 'https://pub-d38529ebbdbe4598b4d3d552ffc4246f.r2.dev/nebula_skyblock_banner.png',
-        tags: ['Skyblock', 'Tecnología', 'Misiones'],
-        modpackUrl: 'https://drive.usercontent.google.com/download?id=1U9PgwXMPTZT-xNoQzKjP8EtXdY7lSGuB&export=download&confirm=t',
-        mcVersion: '1.21.1',
-        loader: 'neoforge',
-        loaderVersion: '21.1.233'
+        tags: ['Survival', 'No Premium', 'Comunidad'],
+        mcVersion: 'Cualquiera',
+        loader: 'vanilla'
     }
 ];
 
 ipcMain.handle('get-sponsored-servers', () => SPONSORED_SERVERS);
 
 ipcMain.handle('is-server-installed', async (event, serverId) => {
+    if (serverId === 'egonetwork') return true;
     try {
         const s = loadSettings();
         const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
@@ -3826,6 +3812,13 @@ ipcMain.on('launch-game', async (event, data) => {
             ...(instanceDir !== mcPath ? { overrides: { gameDirectory: instanceDir } } : {})
         };
 
+        let activeJvmArgs = s.jvmArgs || '';
+        if (activeJvmArgs && activeJvmArgs.trim()) {
+            opts.customArgs = activeJvmArgs.trim().split(/\s+/);
+        } else {
+            opts.customArgs = [];
+        }
+
         if (data.serverIp) {
             let host = data.serverIp;
             let port = 25565;
@@ -3835,14 +3828,11 @@ ipcMain.on('launch-game', async (event, data) => {
                 port = parseInt(parts[1]) || 25565;
             }
             opts.connection = { host, port };
+            opts.customArgs.push('--server', host);
+            if (port && port !== 25565) {
+                opts.customArgs.push('--port', String(port));
+            }
             sendLog(`🔌 Autoconexión programada al servidor: ${host}:${port}`);
-        }
-
-        let activeJvmArgs = s.jvmArgs || '';
-        if (activeJvmArgs && activeJvmArgs.trim()) {
-            opts.customArgs = activeJvmArgs.trim().split(/\s+/);
-        } else {
-            opts.customArgs = [];
         }
 
         // Inyección del Java Agent para Cuenta Nebula
@@ -3889,6 +3879,11 @@ ipcMain.on('launch-game', async (event, data) => {
         launcher.on('debug', e => { const s = String(e); if (s.length < 300) sendLog(s); });
         launcher.on('data', e => sendLog(String(e)));
         launcher.on('close', code => {
+            const inst = runningInstances.get(instanceId);
+            if (inst && inst.presenceInterval) {
+                clearInterval(inst.presenceInterval);
+                sendLog(`[Nebula Presence] Limpiando tracker de presencia para la instancia #${instanceId}.`);
+            }
             runningInstances.delete(instanceId);
             const count = runningInstances.size;
             sendLog(`✅ Instancia #${instanceId} cerrada (código: ${code}).`);
@@ -3991,7 +3986,18 @@ ipcMain.on('launch-game', async (event, data) => {
 
         // Registrar instancia activa
         const instanceDisplayName = data.modpackName ? modpackDispName : `Minecraft ${launchVersion}${launchModId && launchModId !== launchVersion ? ` (${launchModId})` : ''}`;
-        runningInstances.set(instanceId, { launcher, version: launchVersion, displayName: instanceDisplayName });
+        
+        let presenceInterval = null;
+        if (opts.authorization && opts.authorization.uuid) {
+            presenceInterval = startPresenceTracker(opts.authorization.uuid, opts.authorization.name);
+        }
+
+        runningInstances.set(instanceId, { 
+            launcher, 
+            version: launchVersion, 
+            displayName: instanceDisplayName,
+            presenceInterval 
+        });
         win?.webContents.send('instances-update', { count: runningInstances.size, newId: instanceId, displayName: instanceDisplayName });
 
         // Discord RPC
@@ -4230,3 +4236,51 @@ ipcMain.on('apply-update', () => {
         app.quit();
     }, 500);
 });
+
+// ── Nebula Launcher Presence API Tracker ──────────────────────────
+const https = require('https');
+const http = require('http');
+
+function sendPresencePing(uuid, username) {
+    const data = JSON.stringify({ uuid, username });
+    
+    // Cambiar esta URL a la de tu API de presencia final cuando la despliegues.
+    const apiEndpoint = 'https://nebulalauncher.vercel.app/api/presence';
+    
+    try {
+        const url = new URL(apiEndpoint);
+        const client = url.protocol === 'https:' ? https : http;
+        
+        const options = {
+            hostname: url.hostname,
+            port: url.port || (url.protocol === 'https:' ? 443 : 80),
+            path: url.pathname + url.search,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(data)
+            },
+            timeout: 5000
+        };
+
+        const req = client.request(options);
+        req.on('error', (e) => {
+            // Silencioso en producción para evitar spam en consola
+            console.log(`[Nebula Presence] Ping falló para ${username}: ${e.message}`);
+        });
+        req.write(data);
+        req.end();
+    } catch (err) {
+        console.error('[Nebula Presence] Error de URL:', err.message);
+    }
+}
+
+function startPresenceTracker(uuid, username) {
+    // Primer ping al lanzar
+    sendPresencePing(uuid, username);
+    
+    // Ping cada 30 segundos
+    return setInterval(() => {
+        sendPresencePing(uuid, username);
+    }, 30000);
+}

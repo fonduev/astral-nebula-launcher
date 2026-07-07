@@ -2324,6 +2324,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
               <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="rotateSkinViewer(true)">↺ Rotar</button>
               <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="toggleSkinViewerAnimation()">⏸️ Animación</button>
             </div>
+            <!-- Apartado Copiar URL Skin para Servidores No Premium -->
+            <div style="margin-top:20px; width:100%; display:flex; flex-direction:column; gap:6px;">
+              <span class="label" style="font-size:0.65rem; text-align:left; color:var(--text-dim);">URL DE TU SKIN (NO PREMIUM)</span>
+              <div style="display:flex; gap:6px; width:100%;">
+                <input type="text" id="skin-url-copy-input" readonly class="inp" style="flex:1; padding:6px 10px; font-size:0.75rem; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:var(--text-dim); border-radius:8px; pointer-events:all;" placeholder="Sin skin activa">
+                <button class="btn btn-primary btn-sm" style="padding:6px 12px; font-size:0.75rem; border-radius:8px; background:linear-gradient(135deg,#a855f7,#6366f1); font-weight:700;" onclick="copyActiveSkinUrl()">Copiar</button>
+              </div>
+            </div>
           </div>
 
           <!-- Columna Derecha: Detalles & Upload -->
@@ -5493,6 +5501,19 @@ function updateMyStatus(status, activity) {
           
           const tagsHtml = (server.tags || []).map(tag => `<span class="server-tag">${tag}</span>`).join('');
           
+          let versionSelectorHtml = '';
+          if (server.id === 'egonetwork') {
+            versionSelectorHtml = `
+              <div class="server-version-select-wrap" style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 5px; text-align: left; -webkit-app-region: no-drag;">
+                <span class="label" style="font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.5px; font-weight: 600;">VERSIÓN DE JUEGO</span>
+                <select class="inp" id="egonetwork-version-select" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: var(--text); border-radius: 8px; padding: 8px 12px; font-size: 0.82rem; outline: none; width: 100%; cursor: pointer;">
+                  <option value="1.19.4" selected style="background: var(--bg-dark); color: var(--text);">Minecraft 1.19.4 (Recomendado)</option>
+                  <option value="1.21.1" style="background: var(--bg-dark); color: var(--text);">Minecraft 1.21.1</option>
+                </select>
+              </div>
+            `;
+          }
+
           html += `
             <div class="server-card" style="--sv-color: ${svColor}">
               <img src="${server.banner}" class="server-banner" alt="${server.name} Banner" onerror="this.src='https://pub-d38529ebbdbe4598b4d3d552ffc4246f.r2.dev/nebula_survival_banner.png'">
@@ -5509,6 +5530,7 @@ function updateMyStatus(status, activity) {
                 <div class="server-tags">
                   ${tagsHtml}
                 </div>
+                ${versionSelectorHtml}
                 <button class="${btnClass}" id="btn-server-${server.id}" onclick="playSponsoredServer('${server.id}', '${server.ip}')">
                   ${btnText}
                 </button>
@@ -5534,44 +5556,91 @@ function updateMyStatus(status, activity) {
       const btn = document.getElementById(`btn-server-${serverId}`);
       if (!btn) return;
       
-      const isInstalled = await ipc.invoke('is-server-installed', serverId);
-      if (!isInstalled) {
+      if (serverId === 'egonetwork') {
+        const versionSelectEl = document.getElementById('egonetwork-version-select');
+        const mcVersion = versionSelectEl ? versionSelectEl.value : '1.21.1';
+        
         btn.disabled = true;
-        btn.textContent = '📥 Instalando...';
-        toast('Iniciando descarga del modpack del servidor...', 'info');
-        
-        const progressFill = document.getElementById(`progress-fill-${serverId}`);
-        const progressBar = document.getElementById(`progress-bar-${serverId}`);
-        if (progressBar) progressBar.style.display = 'block';
-        
-        const progressListener = (e, d) => {
-          if (d.percent > 0 && progressFill) {
-            progressFill.style.width = `${d.percent}%`;
-          }
-        };
-        ipc.on('progress', progressListener);
+        btn.textContent = '🔍 Buscando Fabric...';
         
         try {
-          const res = await ipc.invoke('install-sponsored-server', serverId);
-          ipc.off('progress', progressListener);
+          const installedFabricList = await ipc.invoke('get-installed-fabric-versions');
+          const isInstalled = installedFabricList.some(v => v.includes(mcVersion));
           
-          if (!res.success) {
+          if (!isInstalled) {
+            btn.textContent = '📥 Instalando mods...';
+            toast(`Instalando Fabric, Sodium y optimizadores para Minecraft ${mcVersion}...`, 'info');
+            
+            const progressFill = document.getElementById(`progress-fill-${serverId}`);
+            const progressBar = document.getElementById(`progress-bar-${serverId}`);
+            if (progressBar) progressBar.style.display = 'block';
+            
+            const progressListener = (e, d) => {
+              if (d.percent > 0 && progressFill) {
+                progressFill.style.width = `${d.percent}%`;
+              }
+            };
+            ipc.on('progress', progressListener);
+            
+            const res = await ipc.invoke('auto-install-sodium', mcVersion);
+            ipc.off('progress', progressListener);
+            
+            if (progressBar) progressBar.style.display = 'none';
+            
+            if (!res.success) {
+              btn.disabled = false;
+              btn.textContent = '⚡ Entrar al Servidor';
+              toast(`❌ Error instalando mods: ${res.error}`, 'error');
+              return;
+            }
+            toast(`¡Fabric, Sodium y mods de optimización instalados con éxito para ${mcVersion}!`, 'success');
+          }
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = '⚡ Entrar al Servidor';
+          toast(`❌ Error al comprobar/instalar mods: ${err.message}`, 'error');
+          return;
+        }
+      } else {
+        const isInstalled = await ipc.invoke('is-server-installed', serverId);
+        if (!isInstalled) {
+          btn.disabled = true;
+          btn.textContent = '📥 Instalando...';
+          toast('Iniciando descarga del modpack del servidor...', 'info');
+          
+          const progressFill = document.getElementById(`progress-fill-${serverId}`);
+          const progressBar = document.getElementById(`progress-bar-${serverId}`);
+          if (progressBar) progressBar.style.display = 'block';
+          
+          const progressListener = (e, d) => {
+            if (d.percent > 0 && progressFill) {
+              progressFill.style.width = `${d.percent}%`;
+            }
+          };
+          ipc.on('progress', progressListener);
+          
+          try {
+            const res = await ipc.invoke('install-sponsored-server', serverId);
+            ipc.off('progress', progressListener);
+            
+            if (!res.success) {
+              btn.disabled = false;
+              btn.textContent = '📥 Descargar e Instalar';
+              if (progressBar) progressBar.style.display = 'none';
+              toast(`❌ Error instalando modpack: ${res.error}`, 'error');
+              return;
+            }
+            
+            populateInstalledModpacksSelect();
+            toast('¡Instalación de modpack de servidor completada con éxito!', 'success');
+          } catch (err) {
+            ipc.off('progress', progressListener);
             btn.disabled = false;
             btn.textContent = '📥 Descargar e Instalar';
             if (progressBar) progressBar.style.display = 'none';
-            toast(`❌ Error instalando modpack: ${res.error}`, 'error');
+            toast(`❌ Error: ${err.message}`, 'error');
             return;
           }
-          
-          populateInstalledModpacksSelect();
-          toast('¡Instalación de modpack de servidor completada con éxito!', 'success');
-        } catch (err) {
-          ipc.off('progress', progressListener);
-          btn.disabled = false;
-          btn.textContent = '📥 Descargar e Instalar';
-          if (progressBar) progressBar.style.display = 'none';
-          toast(`❌ Error: ${err.message}`, 'error');
-          return;
         }
       }
       
@@ -5593,27 +5662,72 @@ function updateMyStatus(status, activity) {
       showTab('play');
       
       const displayName = getModpackDisplayName(folderName) || folderName;
-      setLaunchState('loading', displayName);
-
+      
       const launchBtn = document.getElementById('launchBtn');
       const ram = document.getElementById('ramSlider').value;
 
-      toast(`🚀 Iniciando preparación del servidor: ${displayName}...`, 'info');
-      showAbortButton('⏹️ Cancelar salto');
-      
-      if (launchBtn) {
-        launchBtn.disabled = true;
-        launchBtn.textContent = '⏳ SALTANDO...';
+      if (folderName === 'egonetwork') {
+        const versionSelectEl = document.getElementById('egonetwork-version-select');
+        const ver = versionSelectEl ? versionSelectEl.value : '1.21.1';
+        
+        let launchVersionId = ver;
+        let isFabric = false;
+        
+        try {
+          const installedFabricList = await ipc.invoke('get-installed-fabric-versions');
+          const matchingFabric = installedFabricList.find(v => v.includes(ver));
+          if (matchingFabric) {
+            launchVersionId = matchingFabric;
+            isFabric = true;
+          }
+        } catch (err) {
+          console.error("Error al buscar versión de Fabric:", err);
+        }
+        
+        const fullDisplayName = `EgoNetwork (${ver})`;
+        setLaunchState('loading', fullDisplayName);
+        
+        if (isFabric) {
+          toast(`🚀 Iniciando EgoNetwork con Fabric + Sodium + Zoom (${ver})...`, 'info');
+        } else {
+          toast(`🚀 Iniciando EgoNetwork con Minecraft ${ver}...`, 'info');
+        }
+        showAbortButton('⏹️ Cancelar salto');
+        
+        if (launchBtn) {
+          launchBtn.disabled = true;
+          launchBtn.textContent = '⏳ SALTANDO...';
+        }
+        
+        ipc.send('launch-game', {
+          version: launchVersionId,
+          serverIp: serverIp,
+          ram: parseInt(ram),
+          username: authUser,
+          type: authType,
+          auth: authData,
+          modId: '' // Los mods ya se inyectan solos por Fabric
+        });
+      } else {
+        // Modpack tradicional
+        setLaunchState('loading', displayName);
+        toast(`🚀 Iniciando preparación del servidor: ${displayName}...`, 'info');
+        showAbortButton('⏹️ Cancelar salto');
+        
+        if (launchBtn) {
+          launchBtn.disabled = true;
+          launchBtn.textContent = '⏳ SALTANDO...';
+        }
+        
+        ipc.send('launch-game', {
+          modpackName: folderName,
+          serverIp: serverIp,
+          ram: parseInt(ram),
+          username: authUser,
+          type: authType,
+          auth: authData
+        });
       }
-
-      ipc.send('launch-game', {
-        modpackName: folderName,
-        serverIp: serverIp,
-        ram: parseInt(ram),
-        username: authUser,
-        type: authType,
-        auth: authData
-      });
     }
 
     // ==========================================
@@ -5829,6 +5943,18 @@ function updateMyStatus(status, activity) {
             ipc.send('save-settings', settings);
           }
 
+          if (!userData.skinUrl && userData.skinHistory) {
+            const historyEntries = Object.entries(userData.skinHistory).sort((a,b) => b[1].ts - a[1].ts);
+            if (historyEntries.length > 0) {
+              const latestSkin = historyEntries[0][1];
+              console.log("[NebulaProfile] Auto-activating latest skin from history:", latestSkin.url);
+              setTimeout(() => {
+                useSkinFromHistory(latestSkin.url, latestSkin.model || 'default');
+              }, 50);
+              return;
+            }
+          }
+
           authData.skinUrl = userData.skinUrl || '';
           const modelType = userData.model || 'default';
           const modelSelect = document.getElementById('skin-model-select');
@@ -6003,9 +6129,63 @@ function updateMyStatus(status, activity) {
       }
     }
 
+    function loadSkinImageBypassCors(url, callback) {
+      if (!url) {
+        callback(null);
+        return;
+      }
+      if (url.startsWith('data:') || url.startsWith('blob:')) {
+        callback(url);
+        return;
+      }
+      try {
+        const https = require('https');
+        const http = require('http');
+        const { URL } = require('url');
+        const parsedUrl = new URL(url);
+        const client = parsedUrl.protocol === 'https:' ? https : http;
+        
+        const options = {
+          hostname: parsedUrl.hostname,
+          port: parsedUrl.port || (parsedUrl.protocol === 'https:' ? 443 : 80),
+          path: parsedUrl.pathname + parsedUrl.search,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          }
+        };
+
+        client.get(options, (res) => {
+          if (res.statusCode !== 200) {
+            console.error("[NebulaSocial] Error al descargar skin bypass CORS:", res.statusCode, url);
+            callback(url);
+            return;
+          }
+          const data = [];
+          res.on('data', (chunk) => data.push(chunk));
+          res.on('end', () => {
+            const buffer = Buffer.concat(data);
+            const base64 = buffer.toString('base64');
+            callback(`data:image/png;base64,${base64}`);
+          });
+        }).on('error', (err) => {
+          console.error("[NebulaSocial] Error en cliente HTTP bypass CORS:", err);
+          callback(url);
+        });
+      } catch (e) {
+        console.error("[NebulaSocial] Error al importar Node https:", e);
+        callback(url);
+      }
+    }
+
     function initSkinViewer(skinUrl, modelType = 'default') {
       const container = document.getElementById('skin-viewer-container');
       if (!container) return;
+
+      // Actualizar input de copiar URL
+      const copyInput = document.getElementById('skin-url-copy-input');
+      if (copyInput) {
+        copyInput.value = skinUrl || '';
+      }
 
       // Limpiar contenedor previo
       container.innerHTML = '';
@@ -6022,35 +6202,75 @@ function updateMyStatus(status, activity) {
         
         window.currentSkinUrl = urlToLoad;
 
-        skinViewer = new skinview3d.SkinViewer({
-          canvas: canvas,
-          width: container.clientWidth || 280,
-          height: container.clientHeight || 320,
-          skin: urlToLoad,
-          model: modelType
+        loadSkinImageBypassCors(urlToLoad, (safeUrl) => {
+          try {
+            skinViewer = new skinview3d.SkinViewer({
+              canvas: canvas,
+              width: container.clientWidth || 280,
+              height: container.clientHeight || 320,
+              skin: safeUrl,
+              model: modelType
+            });
+
+            // Sobrescribir loadSkin para interceptar y aplicar bypass CORS automáticamente
+            const originalLoadSkin = skinViewer.loadSkin.bind(skinViewer);
+            skinViewer.loadSkin = function(newUrl, options) {
+              if (typeof newUrl === 'string') {
+                // Actualizar también el input de copiar al cargar del historial
+                const copyInput2 = document.getElementById('skin-url-copy-input');
+                if (copyInput2) {
+                  copyInput2.value = newUrl;
+                }
+                loadSkinImageBypassCors(newUrl, (safeNewUrl) => {
+                  originalLoadSkin(safeNewUrl, options);
+                });
+              } else {
+                originalLoadSkin(newUrl, options);
+              }
+            };
+
+            skinViewer.camera.position.x = -15;
+            skinViewer.camera.position.y = 15;
+            skinViewer.camera.position.z = 24;
+            skinViewer.zoom = 0.85;
+
+            // Añadir animación por defecto (caminar)
+            if (skinViewer.animations && typeof skinViewer.animations.add === 'function') {
+              skinViewer.animations.add(skinview3d.WalkingAnimation);
+              skinViewer.animations.paused = false;
+            } else if (skinview3d.WalkingAnimation) {
+              skinViewer.animation = new skinview3d.WalkingAnimation();
+              skinViewer.animation.paused = false;
+            }
+
+            // Auto rotar despacio
+            skinViewer.autoRotate = true;
+            skinViewer.autoRotateSpeed = 1.0;
+          } catch (err) {
+            console.error('Error al inicializar skinview3d interno:', err);
+            container.innerHTML = `<div style="color:var(--red);font-size:0.75rem;padding:20px;text-align:center;">Error al renderizar 3D: ${err.message}</div>`;
+          }
         });
-
-        skinViewer.camera.position.x = -15;
-        skinViewer.camera.position.y = 15;
-        skinViewer.camera.position.z = 24;
-        skinViewer.zoom = 0.85;
-
-        // Añadir animación por defecto (caminar)
-        if (skinViewer.animations && typeof skinViewer.animations.add === 'function') {
-          skinViewer.animations.add(skinview3d.WalkingAnimation);
-          skinViewer.animations.paused = false;
-        } else if (skinview3d.WalkingAnimation) {
-          skinViewer.animation = new skinview3d.WalkingAnimation();
-          skinViewer.animation.paused = false;
-        }
-
-        // Auto rotar despacio
-        skinViewer.autoRotate = true;
-        skinViewer.autoRotateSpeed = 1.0;
       } catch (err) {
         console.error('Error al inicializar skinview3d:', err);
         container.innerHTML = `<div style="color:var(--red);font-size:0.75rem;padding:20px;text-align:center;">Error al renderizar 3D: ${err.message}</div>`;
       }
+    }
+
+    function copyActiveSkinUrl() {
+      const input = document.getElementById('skin-url-copy-input');
+      if (!input || !input.value) {
+        toast('No hay ninguna skin activa para copiar.', 'error');
+        return;
+      }
+      navigator.clipboard.writeText(input.value).then(() => {
+        toast('¡URL de skin copiada al portapapeles!', 'success');
+      }).catch(err => {
+        console.error('Error al copiar:', err);
+        input.select();
+        document.execCommand('copy');
+        toast('¡URL de skin copiada al portapapeles!', 'success');
+      });
     }
 
     function rotateSkinViewer(auto) {

@@ -115,22 +115,27 @@ if (isDev) {
             'Nebula Launcher — Error de arranque',
             'No se encontró el núcleo de la aplicación (app_core.asar).\n\n' +
             'Esto puede ocurrir si una actualización no se completó correctamente.\n\n' +
-            'Solución: Reinstala Nebula Launcher desde nebula-launcher.com'
+            'Solución: Reinstala Nebula Launcher desde https://fonduev.github.io/astral-nebula-launcher/'
         );
         console.error('[Bootstrap] FATAL: No core asar found at any location.');
         app.quit();
     } else {
         console.log('[Bootstrap] Executing core asar from:', runAsar);
         try {
-            const bytenode = require('bytenode');
-            require(path.join(runAsar, 'main.jsc'));
+            const jsPath = path.join(runAsar, 'main.js');
+            if (fs.existsSync(jsPath)) {
+                require(jsPath);
+            } else {
+                const bytenode = require('bytenode');
+                require(path.join(runAsar, 'main.jsc'));
+            }
         } catch (loadErr) {
             console.error('[Bootstrap] FATAL: Failed to load core asar:', loadErr.message);
             dialog.showErrorBox(
                 'Nebula Launcher — Error de arranque',
                 'No se pudo cargar el núcleo de la aplicación.\n\n' +
                 'El archivo del launcher puede estar dañado.\n\n' +
-                'Solución: Reinstala Nebula Launcher desde nebula-launcher.com\n\n' +
+                'Solución: Reinstala Nebula Launcher desde https://fonduev.github.io/astral-nebula-launcher/\n\n' +
                 'Error: ' + loadErr.message
             );
             app.quit();

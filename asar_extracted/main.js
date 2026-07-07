@@ -3834,14 +3834,11 @@ ipcMain.on('launch-game', async (event, data) => {
                 if (model === 'slim') { texturesPayload.textures.SKIN.metadata = { model: 'slim' }; }
                 userProps = JSON.stringify([{ name: 'textures', value: Buffer.from(JSON.stringify(texturesPayload)).toString('base64') }]);
             }
-            auth = {
-                access_token: '0',
-                client_token: '0',
-                uuid: data.auth.uuid,
-                name: data.username,
-                user_properties: userProps,
-                meta: { type: 'legacy' }  // Fuerza modo offline: MC no llama a Mojang API
-            };
+            // Usar Authenticator.getAuth() como base (formato offline correcto),
+            // luego sobrescribir uuid y user_properties con datos de Nebula
+            auth = Authenticator.getAuth(data.username);
+            auth.uuid = data.auth.uuid;
+            auth.user_properties = userProps;
         } else {
             auth = Authenticator.getAuth(data.username);
         }
