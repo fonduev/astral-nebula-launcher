@@ -285,7 +285,7 @@ function createWindow() {
         }
     });
 
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
     win.center();
 
     // 3. Cuando la principal esté cargada, esperar 2.5s y cambiar ventanas
@@ -1045,7 +1045,60 @@ async function ensureMinecraftBase(mcVersion, mcPath) {
     sendLog(`✅ MC ${mcVersion} listo (JSON + JAR)`);
 }
 
-// ── OPTIFINE (FIXED - Using BMCLAPI mirror like TLauncher) ──────────
+// ── DOWNLOAD VANILLA VERSION (direct from browser) ──────────────────
+ipcMain.handle('download-vanilla-version', async (event, mcVersion) => {
+    currentOperation = { type: 'download-vanilla', cancelled: false };
+    try {
+        sendLog(`⬇️ Descargando Minecraft ${mcVersion} (Vanilla)...`);
+        sendProgress(0, `Iniciando descarga de MC ${mcVersion}...`);
+        await ensureVanillaBase(mcVersion);
+        sendProgress(100, `✅ MC ${mcVersion} instalado`);
+        sendLog(`✅ Minecraft ${mcVersion} descargado correctamente.`);
+        return { success: true };
+    } catch (err) {
+        sendLog(`❌ Error descargando MC ${mcVersion}: ${err.message}`, 'error');
+        return { success: false, error: err.message };
+    }
+});
+
+
+// ── GET OPTIFINE SUPPORTED MC VERSIONS ──────────────────────────────
+ipcMain.handle('get-optifine-mc-versions', async () => {
+    // Known OptiFine supported MC versions (from optifine.net) - used as fallback
+    const fallbackList = [
+        '1.21.4', '1.21.3', '1.21.1', '1.21',
+        '1.20.6', '1.20.4', '1.20.2', '1.20.1',
+        '1.19.4', '1.19.2', '1.19',
+        '1.18.2', '1.18.1', '1.17.1',
+        '1.16.5', '1.16.4', '1.16.3', '1.16.2', '1.16.1',
+        '1.15.2', '1.14.4', '1.13.2',
+        '1.12.2', '1.12.1', '1.12',
+        '1.11.2', '1.11', '1.10.2',
+        '1.9.4', '1.9', '1.8.9', '1.8', '1.7.10', '1.7.2'
+    ];
+    try {
+        // Try to get the unique MC versions from BMCLAPI by querying the index
+        // BMCLAPI doesn't have a "list all versions" endpoint, so we check known releases
+        const checks = await Promise.allSettled(
+            fallbackList.map(v =>
+                httpsGet(`https://bmclapi2.bangbang93.com/optifine/${v}`)
+                    .then(data => ({ v, ok: JSON.parse(data).length > 0 }))
+                    .catch(() => ({ v, ok: false }))
+            )
+        );
+        const supported = checks
+            .filter(r => r.status === 'fulfilled' && r.value.ok)
+            .map(r => r.value.v);
+        if (supported.length > 0) {
+            sendLog(`✅ OptiFine soporta ${supported.length} versiones de MC`);
+            return supported;
+        }
+    } catch (e) {
+        sendLog(`⚠️ No se pudo verificar versiones de OptiFine en línea, usando lista conocida`);
+    }
+    return fallbackList;
+});
+
 // Función interna (NO IPC handler) para verificar y obtener info de OptiFine
 async function getOptiFineInfo(mcVersion) {
     try {
@@ -2791,6 +2844,57 @@ ipcMain.handle('delete-modpack', async (event, folderName) => {
     }
 });
 
+ipcMain.handle('create-custom-modpack', async (event, data) => {
+    try {
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        
+        const folderName = data.name.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+        let finalFolderName = folderName;
+        let counter = 1;
+        while (fs.existsSync(path.join(mcPath, 'instances', finalFolderName))) {
+            finalFolderName = `${folderName}_${counter++}`;
+        }
+        
+        const instancePath = path.join(mcPath, 'instances', finalFolderName);
+        fs.mkdirSync(instancePath, { recursive: true });
+        fs.mkdirSync(path.join(instancePath, 'mods'), { recursive: true });
+        
+        // Write instance.json
+        const metadata = {
+            name: data.name.trim(),
+            mcVersion: data.mcVersion,
+            loader: data.loader,
+            loaderVersion: data.loaderVersion || 'latest',
+            iconUrl: data.iconBase64 || '',
+            screenshotUrl: '',
+            description: data.description.trim()
+        };
+        fs.writeFileSync(path.join(instancePath, 'instance.json'), JSON.stringify(metadata, null, 2));
+        
+        // Download mods
+        if (data.modsToDownload && data.modsToDownload.length > 0) {
+            sendLog(`📦 Creando modpack: Descargando ${data.modsToDownload.length} mod(s)...`);
+            for (let i = 0; i < data.modsToDownload.length; i++) {
+                const mod = data.modsToDownload[i];
+                sendLog(`📥 Descargando mod [${i + 1}/${data.modsToDownload.length}]: ${mod.name}...`);
+                const destPath = path.join(instancePath, 'mods', mod.name);
+                try {
+                    await downloadFile(mod.url, destPath);
+                } catch (err) {
+                    sendLog(`⚠️ Error al descargar mod ${mod.name}: ${err.message}`, 'warn');
+                }
+            }
+        }
+        
+        sendLog(`✅ Modpack "${data.name}" creado con éxito en: ${finalFolderName}`);
+        return { success: true, folderName: finalFolderName };
+    } catch (err) {
+        console.error(err);
+        return { success: false, error: err.message };
+    }
+});
+
 // ── CurseForge mod download with fallback strategies ─────────────────
 const CF_API_KEY = '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm';
 
@@ -3052,7 +3156,10 @@ ipcMain.handle('search-modpacks', async (event, { query, platform = 'all' }) => 
                     iconUrl: h.icon_url || '',
                     screenshotUrl: screenshot,
                     categories: h.categories || [],
-                    versions: h.versions || []
+                    versions: h.versions || [],
+                    downloads: h.downloads || 0,
+                    author: h.author || '',
+                    dateModified: h.date_modified || ''
                 });
             });
         } catch (err) {
@@ -3086,8 +3193,11 @@ ipcMain.handle('search-modpacks', async (event, { query, platform = 'all' }) => 
                         description: h.summary,
                         iconUrl: h.logo ? h.logo.thumbnailUrl : '',
                         screenshotUrl: h.logo ? h.logo.url : '',
-                        categories: ['curseforge'],
-                        versions: cfVersions
+                        categories: h.categories ? h.categories.map(c => c.name.toLowerCase()) : ['curseforge'],
+                        versions: cfVersions,
+                        downloads: h.downloadCount || 0,
+                        author: (h.authors && h.authors.length > 0) ? h.authors[0].name : '',
+                        dateModified: h.dateModified || ''
                     });
                 });
             }
@@ -3569,6 +3679,15 @@ ipcMain.on('window-maximize', () => win?.isMaximized() ? win.unmaximize() : win.
 ipcMain.on('window-close', () => win?.close());
 ipcMain.on('open-url', (e, url) => shell.openExternal(url));
 ipcMain.on('open-client-url', (e, url) => shell.openExternal(url));
+ipcMain.on('open-versions-folder', () => {
+    const s = loadSettings();
+    const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+    const versionsDir = path.join(mcPath, 'versions');
+    if (!fs.existsSync(versionsDir)) {
+        fs.mkdirSync(versionsDir, { recursive: true });
+    }
+    shell.openPath(versionsDir);
+});
 ipcMain.handle('pick-java', async () => {
     const result = await dialog.showOpenDialog(win, { properties: ['openFile'], filters: [{ name: 'Java', extensions: ['exe'] }] });
     return result.filePaths[0] || '';
@@ -3594,15 +3713,96 @@ ipcMain.handle('get-screenshots', () => {
 
 // ── PVP Clients ───────────────────────────────────────────────────
 const PVP_CLIENTS = [
-    { id: 'labymod', name: 'LabyMod', icon: '🔶', color: '#f97316', desc: 'El cliente más popular. HUD modular, emotes, cloaks y cientos de addons oficiales.', url: 'https://laby.net/#download' },
-    { id: 'lunar', name: 'Lunar Client', icon: '🌙', color: '#818cf8', desc: 'Boost de FPS masivo. Waypoints, cosmetics y +100 mods integrados. Compatible 1.7 → 1.21.', url: 'https://lunarclient.com/download' },
-    { id: 'badlion', name: 'Badlion', icon: '🛡️', color: '#ef4444', desc: 'Anti-cheat integrado, ideal para PVP competitivo. Soporte oficial para torneos.', url: 'https://client.badlion.net/' },
-    { id: 'feather', name: 'Feather', icon: '🪶', color: '#22c55e', desc: 'El más ligero y moderno. Diseño renovado, mods optimizados y gestión de perfiles fácil.', url: 'https://feathermc.gg/download' },
-    { id: 'pvplounge', name: 'PVP Lounge', icon: '⚔️', color: '#a855f7', desc: 'Cliente europeo con integración de torneos, ligas y rankings de la comunidad competitiva.', url: 'https://pvplounge.net/download' },
-    { id: 'salwyrr', name: 'Salwyrr', icon: '💎', color: '#06b6d4', desc: 'Excelente para servidores hispanohablantes. Optimización brutal para PCs de gama baja.', url: 'https://www.salwyrr.com/download' }
+    { 
+        id: 'cmpack', 
+        name: 'CM Pack', 
+        icon: '⚔️', 
+        color: '#38bdf8', 
+        desc: 'Cliente optimizado para PVP en versiones 1.8.9 y 1.16.5. Aumenta FPS, cosméticos gratuitos y mods integrados.', 
+        url: 'https://cdn.cmclient.pl/download/CMClient.zip',
+        isJar: true // mantengo para compatibilidad de index.html
+    },
+    { 
+        id: 'nebulapvp', 
+        name: 'Nebula PVP', 
+        icon: '🌌', 
+        color: '#a855f7', 
+        desc: 'El cliente oficial de Nebula. Optimizado al máximo, cosméticos exclusivos y rendimiento sin precedentes.', 
+        url: '',
+        comingSoon: true
+    }
 ];
 
 ipcMain.handle('get-pvp-clients', () => PVP_CLIENTS);
+
+ipcMain.handle('install-jar-client', async (event, url) => {
+    try {
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        const tempDir = path.join(BASE_DATA_DIR, 'temp');
+        fs.mkdirSync(tempDir, { recursive: true });
+        
+        if (url.includes('cmpack') || url.includes('CMClient')) {
+            sendLog(`🔍 Consultando versión actual de CM Pack en la API oficial...`);
+            let version = '2.8.11-beta'; // fallback por seguridad
+            try {
+                const apiRes = await new Promise((resolve, reject) => {
+                    https.get('https://restapi.cmclient.pl:2087/versions/1.8.8', { timeout: 4000 }, (res) => {
+                        let data = '';
+                        res.on('data', chunk => data += chunk);
+                        res.on('end', () => {
+                            try {
+                                resolve(JSON.parse(data));
+                            } catch(e) { reject(e); }
+                        });
+                    }).on('error', reject);
+                });
+                if (apiRes && apiRes.version) {
+                    version = apiRes.version;
+                    sendLog(`✨ Versión detectada: ${version}`);
+                }
+            } catch(e) {
+                sendLog(`⚠️ No se pudo consultar la API de CM Pack (${e.message}), usando versión por defecto (${version})`);
+            }
+
+            const realZipUrl = `https://cdn.cmclient.pl/client/cmpack_1.8.8_${version}.zip`;
+            const zipPath = path.join(tempDir, 'CMClient.zip');
+            sendLog(`📥 Descargando CM Pack (.zip) silenciosamente desde la CDN oficial...`);
+            
+            await downloadFile(realZipUrl, zipPath);
+            
+            sendLog(`🔧 Extrayendo CM Pack en la carpeta de versiones...`);
+            const targetDir = path.join(mcPath, 'versions');
+            fs.mkdirSync(targetDir, { recursive: true });
+            
+            const zip = new AdmZip(zipPath);
+            zip.extractAllTo(targetDir, true);
+            
+            sendLog(`✅ CM Pack instalado correctamente y listo para jugar.`);
+            try { fs.unlinkSync(zipPath); } catch(e) {}
+            return { success: true };
+        } else {
+            const jarName = 'CMClient.jar';
+            const destPath = path.join(tempDir, jarName);
+            
+            sendLog(`📥 Descargando instalador de CM Pack (.jar)...`);
+            await downloadFile(url, destPath);
+            
+            sendLog(`🔧 Iniciando instalador de CM Pack con Java...`);
+            const mcVersion = '1.8.9';
+            const javaExe = await ensureJava(mcVersion, s.javaPath);
+            
+            const proc = spawn(javaExe, ['-jar', destPath], { detached: true, stdio: 'ignore' });
+            proc.unref();
+            
+            sendLog(`✅ Instalador de CM Pack abierto correctamente.`);
+            return { success: true };
+        }
+    } catch (err) {
+        console.error(err);
+        return { success: false, error: err.message };
+    }
+});
 
 // ── Microsoft Auth ────────────────────────────────────────────────
 async function doMicrosoftAuth() {
@@ -3648,7 +3848,8 @@ async function doMicrosoftAuth() {
     });
     const profile = JSON.parse(profileStr);
     if (profile.error) throw new Error('Esta cuenta no tiene Minecraft comprado.');
-    return { name: profile.name, uuid: profile.id, accessToken: mcData.access_token, userType: 'msa' };
+    const xuid = xblData.DisplayClaims?.xui?.[0]?.xid || xstsData.DisplayClaims?.xui?.[0]?.xid;
+    return { name: profile.name, uuid: profile.id, accessToken: mcData.access_token, userType: 'msa', xuid };
 }
 
 ipcMain.on('microsoft-login', async (event) => {
@@ -3779,7 +3980,18 @@ ipcMain.on('launch-game', async (event, data) => {
 
         let auth;
         if (data.type === 'microsoft' && data.auth) {
-            auth = { access_token: data.auth.accessToken, client_token: crypto.randomUUID(), uuid: data.auth.uuid, name: data.auth.name, user_properties: '{}' };
+            auth = {
+                access_token: data.auth.accessToken,
+                client_token: crypto.randomUUID(),
+                uuid: data.auth.uuid,
+                name: data.auth.name,
+                user_properties: '{}',
+                meta: {
+                    type: 'msa',
+                    xuid: data.auth.xuid || data.auth.uuid,
+                    demo: false
+                }
+            };
         } else if (data.type === 'nebula' && data.auth) {
             auth = await Authenticator.getAuth(data.username);
         } else {
@@ -3835,9 +4047,12 @@ ipcMain.on('launch-game', async (event, data) => {
             sendLog(`🔌 Autoconexión programada al servidor: ${host}:${port}`);
         }
 
-        // Inyección del Java Agent para Cuenta Nebula
-        if (data.type === 'nebula') {
-            try {
+        // Inyección del Java Agent para Cuenta Nebula (Soporte global de skins)
+        try {
+            const jv = requiredJavaVersion(launchVersion);
+            if (jv < 17) {
+                sendLog('ℹ️ El soporte de skins de Nebula está desactivado en versiones antiguas (Java 8).');
+            } else {
                 const destAgentPath = path.join(BASE_DATA_DIR, 'nebula-skin-agent.jar');
                 const srcAgentPath = path.join(__dirname, 'nebula-skin-agent.jar');
                 
@@ -3863,13 +4078,13 @@ ipcMain.on('launch-game', async (event, data) => {
                     const dbUrl = s.socialFirebase?.databaseURL || 'https://astral-nebula-social-default-rtdb.firebaseio.com';
                     opts.customArgs.push(`-javaagent:${destAgentPath}=${dbUrl}`);
                     opts.customArgs.push(`-Dfabric.systemLibraries=${destAgentPath}`);
-                    sendLog(`🌌 Cuenta Nebula activa. Soporte de skins conectado: ${dbUrl}`);
+                    sendLog(`🌌 Soporte de skins de Nebula activo: ${dbUrl}`);
                 } else {
                     sendLog('⚠️ No se encontró nebula-skin-agent.jar. El soporte de skins no estará activo.', 'warn');
                 }
-            } catch (err) {
-                sendLog(`⚠️ Error al inyectar Java Agent: ${err.message}`, 'warn');
             }
+        } catch (err) {
+            sendLog(`⚠️ Error al inyectar Java Agent: ${err.message}`, 'warn');
         }
 
         launcher.on('progress', e => {
