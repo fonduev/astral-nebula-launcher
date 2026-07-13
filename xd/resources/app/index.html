@@ -7353,9 +7353,9 @@ function updateMyStatus(status, activity) {
               let color = '#22c55e';
               if (res.latency > 150) color = '#eab308';
               if (res.latency > 300) color = '#ef4444';
-              el.innerHTML = `<span style="color:\${color}; font-weight:700;">📶 \${res.latency} ms</span>`;
+              el.innerHTML = '<span style="color:' + color + '; font-weight:700;">📶 ' + res.latency + ' ms</span>';
             } else {
-              el.innerHTML = `<span style="color:#ef4444; font-weight:700;">❌ Offline</span>`;
+              el.innerHTML = '<span style="color:#ef4444; font-weight:700;">❌ Offline</span>';
             }
           }
         });
@@ -8602,11 +8602,11 @@ function updateMyStatus(status, activity) {
         progressBar.style.width = '70%';
         const username = authData.username;
 
-        await firebase.database().ref(`users/\${uid}`).update({
+        await firebase.database().ref('users/' + uid).update({
           capeUrl: downloadUrl
         });
 
-        await firebase.database().ref(`skins/\${username}`).update({
+        await firebase.database().ref('skins/' + username).update({
           capeUrl: downloadUrl
         });
 
@@ -8651,8 +8651,8 @@ function updateMyStatus(status, activity) {
         
         status.textContent = 'Eliminando capa...';
         
-        await firebase.database().ref(`users/\${uid}/capeUrl`).remove();
-        await firebase.database().ref(`skins/\${username}/capeUrl`).remove();
+        await firebase.database().ref('users/' + uid + '/capeUrl').remove();
+        await firebase.database().ref('skins/' + username + '/capeUrl').remove();
         
         authData.capeUrl = '';
         if (skinViewer) {
@@ -8689,18 +8689,16 @@ function updateMyStatus(status, activity) {
       if (!grid) return;
       
       grid.innerHTML = OFFICIAL_CAPES.map(cape => {
-        return `
-          <div class="glass-card" onclick="selectGalleryCape('\${cape.hash}', '\${cape.name}')" style="padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90px; gap: 4px;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-            <span style="font-size: 1.5rem; display: block; margin-bottom: 2px;">🛡️</span>
-            <div style="font-size: 0.68rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 100%; color: var(--text-bright);">\${cape.name}</div>
-            <div style="font-size: 0.58rem; color: var(--text-dim); text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 100%;">\${cape.label}</div>
-          </div>
-        `;
+        return '<div class="glass-card" onclick="selectGalleryCape(\'' + cape.hash + '\', \'' + cape.name + '\')" style="padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90px; gap: 4px;" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'">' +
+                 '<span style="font-size: 1.5rem; display: block; margin-bottom: 2px;">🛡️</span>' +
+                 '<div style="font-size: 0.68rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 100%; color: var(--text-bright);">' + cape.name + '</div>' +
+                 '<div style="font-size: 0.58rem; color: var(--text-dim); text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 100%;">' + cape.label + '</div>' +
+               '</div>';
       }).join('');
     }
 
     async function selectGalleryCape(hash, name) {
-      const url = `https://textures.minecraft.net/texture/\${hash}`;
+      const url = 'https://textures.minecraft.net/texture/' + hash;
       const status = document.getElementById('cape-upload-status');
       
       if (skinViewer) {
@@ -8719,8 +8717,8 @@ function updateMyStatus(status, activity) {
       document.getElementById('cape-drop-zone-sub').textContent = 'Pulsa "Subir Capa" para guardar';
 
       document.getElementById('cape-upload-confirm-btn').style.display = 'flex';
-      status.textContent = `⚡ Capa "\${name}" seleccionada de la galería. Pulsa "Subir Capa" para guardar.`;
-      toast(`Capa "\${name}" seleccionada.`, 'success');
+      status.textContent = '⚡ Capa "' + name + '" seleccionada de la galería. Pulsa "Subir Capa" para guardar.';
+      toast('Capa "' + name + '" seleccionada.', 'success');
     }
 
     // Dibuja el cuerpo completo 2D de una skin Minecraft en un canvas
