@@ -8329,9 +8329,20 @@ function updateMyStatus(status, activity) {
       };
     }
 
-    function updateSkinViewerModel(modelType) {
+    async function updateSkinViewerModel(modelType) {
       if (skinViewer && window.currentSkinUrl) {
         skinViewer.loadSkin(window.currentSkinUrl, { model: modelType });
+      }
+      if (authData && authData.uid) {
+        try {
+          const uid = authData.uid;
+          const username = authData.username;
+          await firebase.database().ref('users/' + uid).update({ model: modelType });
+          await firebase.database().ref('skins/' + username).update({ model: modelType });
+          toast('Modelo de skin actualizado a: ' + (modelType === 'slim' ? 'Slim (Alex)' : 'Classic (Steve)'), 'success');
+        } catch (e) {
+          console.error("Error al guardar tipo de modelo de skin:", e);
+        }
       }
     }
 
@@ -8689,8 +8700,8 @@ function updateMyStatus(status, activity) {
       if (!grid) return;
       
       grid.innerHTML = OFFICIAL_CAPES.map(cape => {
-        return '<div class="glass-card" onclick="selectGalleryCape(\'' + cape.hash + '\', \'' + cape.name + '\')" style="padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90px; gap: 4px;" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'">' +
-                 '<span style="font-size: 1.5rem; display: block; margin-bottom: 2px;">🛡️</span>' +
+        return '<div class="glass-card" onclick="selectGalleryCape(\'' + cape.hash + '\', \'' + cape.name + '\')" style="padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 105px; gap: 4px;" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'">' +
+                 '<div style="width: 30px; height: 48px; background-image: url(\'https://textures.minecraft.net/texture/\' + cape.hash); background-size: 192px 96px; background-position: -36px -3px; image-rendering: pixelated; margin-bottom: 4px; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); flex-shrink: 0;"></div>' +
                  '<div style="font-size: 0.68rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 100%; color: var(--text-bright);">' + cape.name + '</div>' +
                  '<div style="font-size: 0.58rem; color: var(--text-dim); text-overflow: ellipsis; white-space: nowrap; overflow: hidden; width: 100%;">' + cape.label + '</div>' +
                '</div>';
