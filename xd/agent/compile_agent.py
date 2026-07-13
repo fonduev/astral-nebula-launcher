@@ -5,7 +5,7 @@ import subprocess
 import shutil
 
 # Paths
-SCRATCH_DIR = r"C:\Users\renee\.gemini\antigravity\brain\9696395f-9e94-436a-842e-82cc6f902f93\scratch"
+SCRATCH_DIR = r"C:\Users\renee\.gemini\antigravity-ide\brain\0587c740-eaab-4889-bce1-9edc02c4dbf0\scratch"
 BUILD_DIR = os.path.join(SCRATCH_DIR, "agent_build")
 SRC_DIR = os.path.join(BUILD_DIR, "src", "nebula", "agent")
 BIN_DIR = os.path.join(BUILD_DIR, "bin")
@@ -119,11 +119,29 @@ public class NebulaSkinAgent {
                             "                skinUrl = json.substring(start, end);\\n" +
                             "            }\\n" +
                             "        }\\n" +
-                            "        if (skinUrl == null || skinUrl.trim().isEmpty()) {\\n" +
+                            "        String capeUrl = null;\\n" +
+                            "        String capeUrlKey = q + \\"capeUrl\\" + q + \\":\\" + q;\\n" +
+                            "        int capeUrlIdx = json.indexOf(capeUrlKey);\\n" +
+                            "        if (capeUrlIdx != -1) {\\n" +
+                            "            int start = capeUrlIdx + capeUrlKey.length();\\n" +
+                            "            int end = json.indexOf(q, start);\\n" +
+                            "            if (end != -1) {\\n" +
+                            "                capeUrl = json.substring(start, end);\\n" +
+                            "            }\\n" +
+                            "        }\\n" +
+                            "        if ((skinUrl == null || skinUrl.trim().isEmpty()) && (capeUrl == null || capeUrl.trim().isEmpty())) {\\n" +
                             "            return null;\\n" +
                             "        }\\n" +
+                            "        String finalSkinUrl = skinUrl;\\n" +
+                            "        if (finalSkinUrl == null || finalSkinUrl.trim().isEmpty()) {\\n" +
+                            "            finalSkinUrl = \\"https://textures.minecraft.net/texture/1a59a23b37996c568ee6919a31a980757a31522a487fa28122d69f06bf368\\";\\n" +
+                            "        }\\n" +
                             "        String uuidNoDashes = uuid.toString().replace(\\"-\\", \\"\\");\\n" +
-                            "        String texturesJson = \\"{\\" + q + \\"timestamp\\" + q + \\":\\" + System.currentTimeMillis() + \\",\\" + q + \\"profileId\\" + q + \\":\\" + q + uuidNoDashes + q + \\",\\" + q + \\"profileName\\" + q + \\":\\" + q + name + q + \\",\\" + q + \\"textures\\" + q + \\":{\\" + q + \\"SKIN\\" + q + \\":{\\" + q + \\"url\\" + q + \\":\\" + q + skinUrl + q + \\"}}}\\";\\n" +
+                            "        String texturesJson = \\"{\\" + q + \\"timestamp\\" + q + \\":\\" + System.currentTimeMillis() + \\",\\" + q + \\"profileId\\" + q + \\":\\" + q + uuidNoDashes + q + \\",\\" + q + \\"profileName\\" + q + \\":\\" + q + name + q + \\",\\" + q + \\"textures\\" + q + \\":{\\" + q + \\"SKIN\\" + q + \\":{\\" + q + \\"url\\" + q + \\":\\" + q + finalSkinUrl + q + \\"}\\";\\n" +
+                            "        if (capeUrl != null && !capeUrl.trim().isEmpty()) {\\n" +
+                            "            texturesJson += \\",\\" + q + \\"CAPE\\" + q + \\":{\\" + q + \\"url\\" + q + \\":\\" + q + capeUrl + q + \\"}\\";\\n" +
+                            "        }\\n" +
+                            "        texturesJson += \\"}}}\\";\\n" +
                             "        String texturesBase64 = java.util.Base64.getEncoder().encodeToString(texturesJson.getBytes(\\"UTF-8\\"));\\n" +
                             "        Object properties = gameProfileObj.getClass().getMethod(\\"getProperties\\", null).invoke(gameProfileObj, null);\\n" +
                             "        Class propertyClass = Class.forName(\\"com.mojang.authlib.properties.Property\\");\\n" +
@@ -137,10 +155,10 @@ public class NebulaSkinAgent {
                             "        }\\n" +
                             "        java.lang.reflect.Method putMethod = properties.getClass().getMethod(\\"put\\", new Class[] { Object.class, Object.class });\\n" +
                             "        putMethod.invoke(properties, new Object[] { \\"textures\\", texturesProperty });\\n" +
-                            "        System.out.println(\\"[NebulaAgent] Skin cargada exitosamente para: \\" + name + \\" -> \\" + skinUrl);\\n" +
+                            "        System.out.println(\\"[NebulaAgent] Skin/Capa cargada exitosamente para: \\" + name + \\"\\");\\n" +
                             "        return gameProfileObj;\\n" +
                             "    } catch (Exception e) {\\n" +
-                            "        System.err.println(\\"[NebulaAgent] Error al procesar skin de Nebula: \\" + e.getMessage());\\n" +
+                            "        System.err.println(\\"[NebulaAgent] Error al procesar skin/capa de Nebula: \\" + e.getMessage());\\n" +
                             "        e.printStackTrace();\\n" +
                             "    }\\n" +
                             "    return null;\\n" +
