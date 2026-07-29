@@ -3108,7 +3108,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
             <div class="settings-card" style="grid-column:1/-1;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
                 <h3 style="margin:0;">✨ TEMA PERSONALIZADO</h3>
-                <button class="btn btn-sm btn-glass" onclick="setTheme('custom')">Activar Tema Personalizado</button>
+                <button class="btn btn-sm btn-glass" id="btn-activate-custom-theme" onclick="setTheme('custom')">Activar Tema Personalizado</button>
               </div>
               <p style="font-size:.72rem; color:var(--text-dim); margin-bottom:16px;">
                 Elige tus propios colores para el launcher y sube cualquier imagen de tu computadora para el fondo animado estilo Van Gogh.
@@ -3799,6 +3799,21 @@ function setTheme(t) {
   const swatch = document.querySelector(`.ts-${t}`);
   if (swatch) swatch.classList.add('active');
 
+  const customBtn = document.getElementById('btn-activate-custom-theme');
+  if (customBtn) {
+    if (t === 'custom') {
+      customBtn.style.background = 'linear-gradient(135deg, var(--accent), var(--accent2))';
+      customBtn.style.color = '#fff';
+      customBtn.style.boxShadow = '0 0 16px var(--accent-glow)';
+      customBtn.textContent = '✓ Tema Personalizado Activo';
+    } else {
+      customBtn.style.background = '';
+      customBtn.style.color = '';
+      customBtn.style.boxShadow = '';
+      customBtn.textContent = 'Activar Tema Personalizado';
+    }
+  }
+
   if (settings) {
     settings.theme = t;
     ipc.send('save-settings', settings);
@@ -3810,7 +3825,7 @@ function setTheme(t) {
 
   if (t === 'custom') {
     applyCustomTheme();
-    const customPath = localStorage.getItem('nebula_custom_bg_path') || '';
+    const customPath = localStorage.getItem('nebula_custom_bg_path') || (settings && settings.customTheme && settings.customTheme.bgImage) || '';
     if (typeof applyCustomBgMediaToDOM === 'function') {
       applyCustomBgMediaToDOM(customPath);
     }
@@ -3961,12 +3976,17 @@ function onCustomBgSelected(input) {
 }
 
 function clearCustomBgImage() {
-  if (settings && settings.customTheme) {
-    delete settings.customTheme.bgImage;
-    ipc.send('save-settings', settings);
+  if (typeof window.clearCustomBgImage === 'function' && window.clearCustomBgImage !== clearCustomBgImage) {
+    window.clearCustomBgImage();
+  } else {
+    // Fallback directo
+    if (settings && settings.customTheme) {
+      settings.customTheme.bgImage = null;
+      ipc.send('save-settings', settings);
+    }
+    localStorage.removeItem('nebula_custom_bg_path');
+    if (typeof applyCustomBgMediaToDOM === 'function') applyCustomBgMediaToDOM('');
   }
-  localStorage.removeItem('nebula_custom_bg_path');
-  window.setCustomBgMedia('');
   toast('🗑️ Fondo personalizado eliminado', 'info');
 }
 
@@ -10083,11 +10103,23 @@ function updateMyStatus(status, activity) {
 
       window.setCustomBgMedia = function(path) {
         localStorage.setItem('nebula_custom_bg_path', path || '');
+        // Sincronizar con settings.customTheme.bgImage para persistencia entre sesiones
+        if (typeof settings !== 'undefined' && settings) {
+          if (!settings.customTheme) settings.customTheme = {};
+          settings.customTheme.bgImage = path || null;
+          if (typeof ipc !== 'undefined') ipc.send('save-settings', settings);
+        }
         applyCustomBgMediaToDOM(path || '');
       };
 
       window.clearCustomBgImage = function() {
-        window.setCustomBgMedia('');
+        localStorage.removeItem('nebula_custom_bg_path');
+        if (typeof settings !== 'undefined' && settings) {
+          if (!settings.customTheme) settings.customTheme = {};
+          settings.customTheme.bgImage = null;
+          if (typeof ipc !== 'undefined') ipc.send('save-settings', settings);
+        }
+        applyCustomBgMediaToDOM('');
       };
 
       function applyCustomBgMediaToDOM(path) {
@@ -10196,7 +10228,6 @@ function updateMyStatus(status, activity) {
       }
 
       document.addEventListener('DOMContentLoaded', () => {
-        const savedPath = localStorage.getItem('nebula_custom_bg_path') || '';
         const savedFit = localStorage.getItem('nebula_custom_bg_fit') || 'cover';
         const savedPos = localStorage.getItem('nebula_custom_bg_pos') || 'center center';
         const savedZoom = localStorage.getItem('nebula_custom_bg_zoom') || '100';
@@ -10211,8 +10242,9 @@ function updateMyStatus(status, activity) {
         if (zoomSlider) zoomSlider.value = savedZoom;
         if (zoomValEl) zoomValEl.textContent = savedZoom + '%';
 
-        if (savedPath) applyCustomBgMediaToDOM(savedPath);
-        else applyCustomBgStyleToDOM(savedFit, savedPos, savedZoom);
+        // NO aplicar el fondo multimedia aquí.
+        // Se aplica después del login desde completeLogin() → setTheme() → applyCustomBgMediaToDOM()
+        // Esto evita que el fondo personalizado se muestre detrás de la pantalla de inicio de sesión.
       });
 
       // Estrellas fugaces espectaculares y vivas con corrección de minimizado
