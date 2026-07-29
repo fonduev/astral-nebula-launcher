@@ -811,7 +811,16 @@ function loadSettings() {
     }
 }
 ipcMain.handle('get-settings', () => loadSettings());
-ipcMain.handle('get-app-version', () => app.getVersion());
+ipcMain.handle('get-app-version', () => {
+    try {
+        const pkgPath = path.join(__dirname, 'package.json');
+        if (fs.existsSync(pkgPath)) {
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            if (pkg && pkg.version) return pkg.version;
+        }
+    } catch (e) {}
+    return app.getVersion();
+});
 ipcMain.on('save-settings', (e, s) => {
     fs.writeFileSync(SETTINGS_PATH, JSON.stringify(s, null, 2));
     e.reply('settings-saved');
