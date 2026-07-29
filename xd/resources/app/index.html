@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="nebula">
+<html lang="es" data-theme="vangogh">
 <head>
 <meta charset="UTF-8">
 <title>Nebula Launcher</title>
@@ -47,7 +47,7 @@
   --orb1:#2d1b4d;--orb2:#1a1b4b;--orb3:#4a2b6d;--orb4:#080410;
   --accent:#c084fc;--accent2:#818cf8;--accent3:#38bdf8;
   --accent-glow:rgba(192,132,252,0.2);
-  --glass:rgba(10, 8, 20, 0.94);--glass-light:rgba(255,255,255,0.06);--glass-mid:rgba(255,255,255,0.04);
+  --glass:rgba(10, 8, 20, 0.48);--glass-light:rgba(255,255,255,0.06);--glass-mid:rgba(255,255,255,0.04);
   --border:rgba(255,255,255,0.08);--border-glow:rgba(180,120,255,0.35);
   --btn-glass:rgba(192,132,252,0.12);--btn-border:rgba(192,132,252,0.3);
 }
@@ -55,7 +55,7 @@
   --orb1:#0a1a3d;--orb2:#053a47;--orb3:#1a4f66;--orb4:#020512;
   --accent:#38bdf8;--accent2:#7dd3fc;--accent3:#a5f3fc;
   --accent-glow:rgba(56,189,248,0.2);
-  --glass:rgba(5, 8, 18, 0.94);--glass-light:rgba(56,189,248,0.07);--glass-mid:rgba(56,189,248,0.04);
+  --glass:rgba(5, 8, 18, 0.48);--glass-light:rgba(56,189,248,0.07);--glass-mid:rgba(56,189,248,0.04);
   --border:rgba(56,189,248,0.12);--border-glow:rgba(56,189,248,0.4);
   --btn-glass:rgba(56,189,248,0.12);--btn-border:rgba(56,189,248,0.3);
 }
@@ -63,7 +63,7 @@
   --orb1:#021c15;--orb2:#032221;--orb3:#144a36;--orb4:#010503;
   --accent:#34d399;--accent2:#6ee7b7;--accent3:#a7f3d0;
   --accent-glow:rgba(52,211,153,0.2);
-  --glass:rgba(3, 8, 6, 0.94);--glass-light:rgba(52,211,153,0.07);--glass-mid:rgba(52,211,153,0.04);
+  --glass:rgba(3, 8, 6, 0.48);--glass-light:rgba(52,211,153,0.07);--glass-mid:rgba(52,211,153,0.04);
   --border:rgba(52,211,153,0.12);--border-glow:rgba(52,211,153,0.4);
   --btn-glass:rgba(52,211,153,0.12);--btn-border:rgba(52,211,153,0.3);
 }
@@ -71,7 +71,7 @@
   --orb1:#2a1008;--orb2:#351208;--orb3:#5c3516;--orb4:#080302;
   --accent:#fb923c;--accent2:#fdba74;--accent3:#fef08a;
   --accent-glow:rgba(251,146,60,0.2);
-  --glass:rgba(12, 5, 3, 0.95);--glass-light:rgba(251,146,60,0.07);--glass-mid:rgba(251,146,60,0.04);
+  --glass:rgba(12, 5, 3, 0.48);--glass-light:rgba(251,146,60,0.07);--glass-mid:rgba(251,146,60,0.04);
   --border:rgba(251,146,60,0.12);--border-glow:rgba(251,146,60,0.4);
   --btn-glass:rgba(251,146,60,0.12);--btn-border:rgba(251,146,60,0.3);
 }
@@ -79,7 +79,7 @@
   --orb1:#241406;--orb2:#331f02;--orb3:#5c460d;--orb4:#070401;
   --accent:#fbbf24;--accent2:#fcd34d;--accent3:#fde68a;
   --accent-glow:rgba(251,191,36,0.2);
-  --glass:rgba(10, 8, 3, 0.95);--glass-light:rgba(251,191,36,0.07);--glass-mid:rgba(251,191,36,0.04);
+  --glass:rgba(10, 8, 3, 0.48);--glass-light:rgba(251,191,36,0.07);--glass-mid:rgba(251,191,36,0.04);
   --border:rgba(251,191,36,0.10);--border-glow:rgba(251,191,36,0.4);
   --btn-glass:rgba(251,191,36,0.12);--btn-border:rgba(251,191,36,0.3);
 }
@@ -90,15 +90,104 @@
   --text:rgba(255,255,255,0.90);--text-dim:rgba(255,255,255,0.45);--text-faint:rgba(255,255,255,0.18);
   --sidebar-w:275px;--r:20px;
 }
-html,body{width:100%;height:100%;background:transparent;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',sans-serif;overflow:hidden;user-select:none;}
+html{width:100%;height:100%;background:transparent;overflow:hidden;}
+body{
+  width:100%;height:100%;background:transparent;color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',sans-serif;
+  overflow:hidden;user-select:none;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.16);
+  box-shadow:0 12px 48px rgba(0,0,0,0.6);
+}
 
 /* ═══════ ANIMATED NEBULA BACKGROUND (Atenuado) ═══════ */
 #bg{
   position:fixed;inset:0;z-index:0;
+  border-radius:18px;
+  overflow:hidden;
   background: radial-gradient(circle at center, transparent 0%, #000 100%), 
               linear-gradient(-45deg, var(--orb4), var(--orb1), var(--orb2), #050508);
   background-size: 400% 400%;
   animation: nebulaMove 25s ease infinite, nebulaScale 40s ease-in-out infinite alternate;
+}
+
+[data-theme="vangogh"]{
+  --orb1:#1e1b4b;--orb2:#172554;--orb3:#1e3a8a;--orb4:#030712;
+  --accent:#fef08a;--accent2:#facc15;--accent3:#38bdf8;
+  --accent-glow:rgba(250,204,21,0.4);
+  --glass:rgba(10, 15, 30, 0.45);--glass-light:rgba(254,240,138,0.1);--glass-mid:rgba(254,240,138,0.05);
+  --border:rgba(254,240,138,0.28);--border-glow:rgba(250,204,21,0.65);
+  --btn-glass:rgba(254,240,138,0.16);--btn-border:rgba(250,204,21,0.45);
+}
+
+/* Fondo animado con pintura original de Van Gogh (Noche Estrellada) */
+html[data-theme="vangogh"] #bg, [data-theme="vangogh"] #bg, body[data-theme="vangogh"] #bg {
+  background-image: 
+    radial-gradient(circle at center, rgba(10, 15, 30, 0.1) 0%, rgba(3, 7, 18, 0.5) 100%),
+    url("assets/starry_night.png") !important;
+  background-position: center center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  animation: starryBgMove 35s ease-in-out infinite alternate !important;
+}
+
+[data-theme="nebula"] body, body[data-theme="nebula"] {
+  border: 1px solid rgba(192, 132, 252, 0.38) !important;
+  box-shadow: 0 0 25px rgba(192, 132, 252, 0.30), inset 0 0 15px rgba(192, 132, 252, 0.08) !important;
+}
+[data-theme="galaxy"] body, body[data-theme="galaxy"] {
+  border: 1px solid rgba(56, 189, 248, 0.38) !important;
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.30), inset 0 0 15px rgba(56, 189, 248, 0.08) !important;
+}
+[data-theme="aurora"] body, body[data-theme="aurora"] {
+  border: 1px solid rgba(52, 211, 153, 0.38) !important;
+  box-shadow: 0 0 25px rgba(52, 211, 153, 0.30), inset 0 0 15px rgba(52, 211, 153, 0.08) !important;
+}
+[data-theme="supernova"] body, body[data-theme="supernova"] {
+  border: 1px solid rgba(251, 146, 60, 0.38) !important;
+  box-shadow: 0 0 25px rgba(251, 146, 60, 0.30), inset 0 0 15px rgba(251, 146, 60, 0.08) !important;
+}
+[data-theme="cosmos"] body, body[data-theme="cosmos"] {
+  border: 1px solid rgba(251, 191, 36, 0.38) !important;
+  box-shadow: 0 0 25px rgba(251, 191, 36, 0.30), inset 0 0 15px rgba(251, 191, 36, 0.08) !important;
+}
+[data-theme="vangogh"] body, html[data-theme="vangogh"] body, body[data-theme="vangogh"] {
+  border: 1px solid rgba(254, 240, 138, 0.4) !important;
+  box-shadow: 0 0 25px rgba(250, 204, 21, 0.35), inset 0 0 15px rgba(250, 204, 21, 0.1) !important;
+}
+
+[data-theme="vangogh"] .launcher-shell,
+[data-theme="vangogh"] #main-launcher {
+  background: rgba(8, 12, 26, 0.22) !important;
+  backdrop-filter: blur(2px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(2px) saturate(140%) !important;
+}
+
+[data-theme="vangogh"] .sidebar {
+  background: rgba(8, 12, 26, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+[data-theme="vangogh"] .glass-card,
+[data-theme="vangogh"] .card-option,
+[data-theme="vangogh"] .version-card,
+[data-theme="vangogh"] .ram-card,
+[data-theme="vangogh"] .settings-card {
+  background: rgba(10, 15, 30, 0.42) !important;
+  backdrop-filter: blur(4px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(4px) saturate(130%) !important;
+  border: 1px solid rgba(254, 240, 138, 0.25) !important;
+}
+
+[data-theme="vangogh"] .card-option.active {
+  border-color: #facc15 !important;
+  box-shadow: 0 0 18px rgba(250, 204, 21, 0.5), inset 0 0 12px rgba(250, 204, 21, 0.15) !important;
+}
+
+@keyframes starryBgMove {
+  0% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.05) translate(-1%, -1%); }
+  100% { transform: scale(1.02) translate(1%, 1%); }
 }
 
 @keyframes nebulaMove {
@@ -489,7 +578,20 @@ select.inp option{background:#12121e;color:white;}
 }
 
 /* ═══════ LOGIN ═══════ */
-#login-screen{position:fixed;inset:0;z-index:8000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;}
+[data-theme="vangogh"] {
+  background: url('bg-vangogh.jpg') no-repeat center center fixed;
+  background-size: cover;
+}
+#shooting-stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 99999;
+  pointer-events: none;
+}
+#login-screen{position:fixed;inset:0;z-index:8000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;background:transparent!important;border-radius:18px;overflow:hidden;}
 .login-logo{font-size:.66rem;letter-spacing:.3em;color:var(--text-dim);text-transform:uppercase;margin-bottom:10px;}
 .login-title{font-size:3rem;font-weight:200;letter-spacing:.18em;background:linear-gradient(135deg,#ffffff 0%,var(--accent) 50%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:54px;animation:titleGlow 4s ease-in-out infinite alternate;}
 @keyframes titleGlow{from{filter:drop-shadow(0 0 10px rgba(192,132,252,.2))}to{filter:drop-shadow(0 0 20px rgba(192,132,252,.4))}}
@@ -528,8 +630,8 @@ select.inp option{background:#12121e;color:white;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ═══════ MAIN SHELL ═══════ */
-#main-launcher{position:fixed;inset:0;z-index:7000;display:none;}
-.launcher-shell{width:100%;height:100%;display:flex;background:var(--glass);backdrop-filter:blur(60px) saturate(220%);-webkit-backdrop-filter:blur(60px) saturate(220%);border:.5px solid var(--border);}
+#main-launcher{position:fixed;inset:0;z-index:7000;display:none;border-radius:18px;overflow:hidden;}
+.launcher-shell{width:100%;height:100%;display:flex;border-radius:18px;overflow:hidden;background:var(--glass);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:.5px solid var(--border);}
 
 /* ═══════ SIDEBAR ═══════ */
 .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:rgba(0,0,0,.28);border-right:.5px solid var(--border);display:flex;flex-direction:column;padding:58px 14px 18px;position:relative;}
@@ -1913,12 +2015,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 </head>
 <body>
 <div id="bg">
+  <img id="custom-bg-img" style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center center; z-index:0; pointer-events:none; will-change:transform; transform:translateZ(0); backface-visibility:hidden;" />
+  <video id="custom-bg-video" style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center center; z-index:0; pointer-events:none; will-change:transform; transform:translateZ(0); backface-visibility:hidden;" autoplay loop muted playsinline></video>
   <div class="orb" id="o1"></div>
   <div class="orb" id="o2"></div>
   <div class="orb" id="o3"></div>
   <div class="orb" id="o4"></div>
   <div class="stars"></div>
 </div>
+<canvas id="vanGoghCanvas" style="position:fixed;inset:0;z-index:7500;pointer-events:none;width:100%;height:100%;"></canvas>
 <div id="drag-bar"></div>
 <div id="traffic">
   <button class="light close"    onclick="ipc.send('window-close')"></button>
@@ -2978,14 +3083,128 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
               </label>
             </div>
 
+            <!-- 1. TEMAS CLÁSICOS -->
             <div class="settings-card">
-              <h3>🎨 TEMA</h3>
+              <h3>🎨 TEMAS CLÁSICOS</h3>
               <div class="theme-grid">
-                <div class="theme-swatch ts-nebula active" onclick="setTheme('nebula')"></div>
-                <div class="theme-swatch ts-galaxy" onclick="setTheme('galaxy')"></div>
-                <div class="theme-swatch ts-aurora" onclick="setTheme('aurora')"></div>
-                <div class="theme-swatch ts-supernova" onclick="setTheme('supernova')"></div>
-                <div class="theme-swatch ts-cosmos" onclick="setTheme('cosmos')"></div>
+                <div class="theme-swatch ts-nebula" onclick="setTheme('nebula')" title="Nebula (Morado Neón)"></div>
+                <div class="theme-swatch ts-galaxy" onclick="setTheme('galaxy')" title="Galaxy (Azul Galáctico)"></div>
+                <div class="theme-swatch ts-aurora" onclick="setTheme('aurora')" title="Aurora (Verde Esmeralda)"></div>
+                <div class="theme-swatch ts-supernova" onclick="setTheme('supernova')" title="Supernova (Fuego)"></div>
+                <div class="theme-swatch ts-cosmos" onclick="setTheme('cosmos')" title="Cosmos (Ámbar Dorado)"></div>
+              </div>
+            </div>
+
+            <!-- 2. TEMAS ESPECIALES Y PERSONALIZADO -->
+            <div class="settings-card">
+              <h3>🌟 TEMAS ESPECIALES</h3>
+              <div class="theme-grid">
+                <div class="theme-swatch ts-vangogh" onclick="setTheme('vangogh')" title="Van Gogh (Noche Estrellada)"></div>
+                <div class="theme-swatch ts-custom" onclick="setTheme('custom')" title="Personalizado (Tus colores e imagen)">✨</div>
+              </div>
+            </div>
+
+            <!-- 3. CONFIGURACION DE TEMA PERSONALIZADO -->
+            <div class="settings-card" style="grid-column:1/-1;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+                <h3 style="margin:0;">✨ TEMA PERSONALIZADO</h3>
+                <button class="btn btn-sm btn-glass" onclick="setTheme('custom')">Activar Tema Personalizado</button>
+              </div>
+              <p style="font-size:.72rem; color:var(--text-dim); margin-bottom:16px;">
+                Elige tus propios colores para el launcher y sube cualquier imagen de tu computadora para el fondo animado estilo Van Gogh.
+              </p>
+
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:18px;">
+                <div>
+                  <label class="label">Color Principal (Acento)</label>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="color" id="customAccentInp" value="#c084fc" style="width:38px; height:38px; border-radius:10px; border:1px solid var(--border); cursor:pointer; background:none;" onchange="updateCustomThemeFromUI()">
+                    <span style="font-size:.78rem; color:var(--text-dim); font-family:monospace;" id="customAccentVal">#c084fc</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="label">Color Secundario</label>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="color" id="customAccent2Inp" value="#38bdf8" style="width:38px; height:38px; border-radius:10px; border:1px solid var(--border); cursor:pointer; background:none;" onchange="updateCustomThemeFromUI()">
+                    <span style="font-size:.78rem; color:var(--text-dim); font-family:monospace;" id="customAccent2Val">#38bdf8</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="label">Nébula Fondo 1</label>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="color" id="customOrb1Inp" value="#2d1b4d" style="width:38px; height:38px; border-radius:10px; border:1px solid var(--border); cursor:pointer; background:none;" onchange="updateCustomThemeFromUI()">
+                    <span style="font-size:.78rem; color:var(--text-dim); font-family:monospace;" id="customOrb1Val">#2d1b4d</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="label">Nébula Fondo 2</label>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="color" id="customOrb2Inp" value="#1a1b4b" style="width:38px; height:38px; border-radius:10px; border:1px solid var(--border); cursor:pointer; background:none;" onchange="updateCustomThemeFromUI()">
+                    <span style="font-size:.78rem; color:var(--text-dim); font-family:monospace;" id="customOrb2Val">#1a1b4b</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="border-top: .5px solid var(--border); padding-top: 14px; margin-bottom: 14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <label class="label" style="margin:0;">Desenfoque de Cristal (Glass Blur)</label>
+                  <span style="font-size:.78rem; color:var(--text-dim); font-family:monospace;" id="customBlurVal">16px</span>
+                </div>
+                <input type="range" id="customBlurInp" min="0" max="50" value="16" step="1" style="width:100%; cursor:pointer;" oninput="onCustomBlurSliderInput(this.value)" onchange="saveCustomBlurFromUI(this.value)">
+              </div>
+
+              <div style="border-top: .5px solid var(--border); padding-top: 14px;">
+                <label class="label">Fondo Personalizado (Imágenes, GIFs, Videos)</label>
+                <p style="font-size:.72rem; color:var(--text-dim); margin-bottom:12px;">Sube tu propia imagen, GIF animado o video y decide qué parte se mostrará con los controles de encuadre, posición y zoom.</p>
+                
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:14px;">
+                  <input type="file" id="customBgFileInput" accept="image/*,video/*" style="display:none;" onchange="onCustomBgSelected(this)">
+                  <button class="btn btn-sm btn-primary" onclick="document.getElementById('customBgFileInput').click()">
+                    🖼️ Seleccionar Fondo (Imagen / GIF / Video)
+                  </button>
+                  <button class="btn btn-sm btn-danger" id="clearBgBtn" onclick="clearCustomBgImage()" style="display:none;">
+                    🗑️ Quitar Fondo
+                  </button>
+                  <span id="customBgStatusText" style="font-size:.74rem; color:var(--text-dim);">Sin imagen personalizada</span>
+                </div>
+
+                <!-- CONTROLES DE AJUSTE, POSICIÓN Y ZOOM DE ENCUADRE -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; background:rgba(0,0,0,0.3); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); -webkit-app-region:no-drag;">
+                  <div>
+                    <label class="label" style="font-size:0.63rem; margin-bottom:4px;">MODO DE AJUSTE</label>
+                    <select class="inp" id="customBgFitSelect" onchange="updateCustomBgStyleUI()" style="width:100%; font-size:0.75rem;">
+                      <option value="cover">Rellenar Recortando (Cover)</option>
+                      <option value="contain">Ajustar Completo (Contain)</option>
+                      <option value="fill">Estirar Pantalla (Fill)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="label" style="font-size:0.63rem; margin-bottom:4px;">POSICIÓN DE ENCUADRE</label>
+                    <select class="inp" id="customBgPosSelect" onchange="updateCustomBgStyleUI()" style="width:100%; font-size:0.75rem;">
+                      <option value="center center">Centro (Predeterminado)</option>
+                      <option value="top center">Parte Superior (Arriba)</option>
+                      <option value="bottom center">Parte Inferior (Abajo)</option>
+                      <option value="center left">Lado Izquierdo</option>
+                      <option value="center right">Lado Derecho</option>
+                      <option value="top left">Esquina Sup. Izquierda</option>
+                      <option value="top right">Esquina Sup. Derecha</option>
+                      <option value="bottom left">Esquina Inf. Izquierda</option>
+                      <option value="bottom right">Esquina Inf. Derecha</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                      <label class="label" style="margin:0; font-size:0.63rem;">ZOOM DEL FONDO</label>
+                      <span id="customBgZoomVal" style="font-size:0.75rem; font-weight:700; color:var(--accent);">100%</span>
+                    </div>
+                    <input type="range" id="customBgZoomSlider" min="100" max="250" value="100" oninput="updateCustomBgZoomUI(this.value)" style="width:100%; cursor:pointer;">
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -3477,6 +3696,7 @@ function onModpackSelectChange() {
 }
 
 async function completeLogin() {
+  ipc.send('renderer-ready-step', { text: 'Iniciando interfaz y perfil...', progress: 40 });
   document.getElementById('login-screen').style.display='none';
   document.getElementById('main-launcher').style.display='block';
   document.getElementById('username-display').textContent=authUser;
@@ -3492,6 +3712,7 @@ async function completeLogin() {
     document.getElementById('user-type').textContent = authType==='microsoft'?'Microsoft':'Offline';
   }
   
+  ipc.send('renderer-ready-step', { text: 'Cargando ajustes y preferencias...', progress: 55 });
   settings = await ipc.invoke('get-settings');
   settings.lastAuthUser = authUser;
   settings.lastAuthType = authType;
@@ -3499,15 +3720,17 @@ async function completeLogin() {
   ipc.send('save-settings', settings);
 
   currentTheme = settings.theme || 'nebula';
+  applyCustomTheme();
   setTheme(currentTheme);
   
+  ipc.send('renderer-ready-step', { text: 'Verificando versiones de Minecraft con Mojang...', progress: 75 });
   allVer = await ipc.invoke('get-all-versions');
-  // Invocar cargadores de versiones para telemetría/consola de inicio
   ipc.invoke('get-fabric-mc-versions').catch(()=>{});
   ipc.invoke('get-quilt-mc-versions').catch(()=>{});
   installedMeta = await ipc.invoke('get-installed-versions');
   installed = new Set(installedMeta.map(v=>v.id));
   
+  ipc.send('renderer-ready-step', { text: 'Cargando clasificadores y modpacks...', progress: 90 });
   populateVersions();
   populateOptiFineVersions();
   populateSodiumVersions();
@@ -3544,9 +3767,6 @@ async function completeLogin() {
   if (document.getElementById('sAdsUrl')) document.getElementById('sAdsUrl').value = settings.adsUrl || '';
   if (document.getElementById('personalizedAdsToggle')) document.getElementById('personalizedAdsToggle').checked = !!settings.personalizedAds;
   
-  // v2.2.4: Firebase card removed — config lives in code defaults only.
-  // No need to populate UI fields since they no longer exist.
-
   if (document.getElementById('sPrependCommand')) document.getElementById('sPrependCommand').value = settings.prependCommand || '';
   if (document.getElementById('sJvmArgs')) document.getElementById('sJvmArgs').value = settings.jvmArgs || '';
   updateDevSettingsVisibility();
@@ -3554,6 +3774,7 @@ async function completeLogin() {
   loadSidebarAd();
   initSocial();
   
+  ipc.send('renderer-ready-step', { text: '¡Todo listo! Abriendo Launcher...', progress: 100 });
   toast(`Launcher cargado. ${allVer.length} versiones disponibles.`,'success');
 }
 
@@ -3575,7 +3796,153 @@ function setTheme(t) {
   currentTheme=t;
   document.documentElement.setAttribute('data-theme',t);
   document.querySelectorAll('.theme-swatch').forEach(s=>s.classList.remove('active'));
-  document.querySelector(`.ts-${t}`).classList.add('active');
+  const swatch = document.querySelector(`.ts-${t}`);
+  if (swatch) swatch.classList.add('active');
+
+  if (settings) {
+    settings.theme = t;
+    ipc.send('save-settings', settings);
+  }
+  if (t === 'custom') {
+    applyCustomTheme();
+  }
+}
+
+function applyCustomTheme() {
+  const ct = (settings && settings.customTheme) ? settings.customTheme : {
+    accent: '#c084fc',
+    accent2: '#38bdf8',
+    orb1: '#2d1b4d',
+    orb2: '#1a1b4b',
+    blur: 16,
+    bgImage: null
+  };
+
+  const blurPx = ct.blur !== undefined ? ct.blur : 16;
+  const root = document.documentElement;
+  root.style.setProperty('--custom-accent', ct.accent || '#c084fc');
+  root.style.setProperty('--custom-accent2', ct.accent2 || '#38bdf8');
+  root.style.setProperty('--custom-blur', `${blurPx}px`);
+
+  let styleEl = document.getElementById('custom-theme-style');
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = 'custom-theme-style';
+    document.head.appendChild(styleEl);
+  }
+
+  const hexAccent = ct.accent || '#c084fc';
+  styleEl.innerHTML = `
+    [data-theme="custom"] {
+      --orb1: ${ct.orb1 || '#2d1b4d'};
+      --orb2: ${ct.orb2 || '#1a1b4b'};
+      --orb3: ${ct.orb1 || '#2d1b4d'};
+      --orb4: #080410;
+      --accent: ${hexAccent};
+      --accent2: ${ct.accent2 || '#38bdf8'};
+      --accent3: ${ct.accent2 || '#38bdf8'};
+      --accent-glow: ${hexAccent}66;
+      --glass: rgba(10, 8, 20, 0.48);
+      --glass-light: rgba(255,255,255,0.08);
+      --glass-mid: rgba(255,255,255,0.04);
+      --border: ${hexAccent}44;
+      --border-glow: ${hexAccent}aa;
+      --btn-glass: ${hexAccent}22;
+      --btn-border: ${hexAccent}66;
+    }
+    [data-theme="custom"] .launcher-shell,
+    [data-theme="custom"] .sidebar,
+    [data-theme="custom"] .version-card,
+    [data-theme="custom"] .ram-card,
+    [data-theme="custom"] .settings-card,
+    [data-theme="custom"] .mod-card,
+    [data-theme="custom"] .serv-card,
+    [data-theme="custom"] .modpack-card,
+    [data-theme="custom"] .modal-content,
+    [data-theme="custom"] .glass-panel {
+      backdrop-filter: blur(var(--custom-blur, 16px)) saturate(160%) !important;
+      -webkit-backdrop-filter: blur(var(--custom-blur, 16px)) saturate(160%) !important;
+    }
+    [data-theme="custom"] body, html[data-theme="custom"] body, body[data-theme="custom"] {
+      border: 1px solid ${hexAccent}66 !important;
+      box-shadow: 0 0 25px ${hexAccent}44, inset 0 0 15px ${hexAccent}15 !important;
+    }
+  `;
+
+  populateCustomThemeUI();
+}
+
+function populateCustomThemeUI() {
+  const ct = (settings && settings.customTheme) ? settings.customTheme : {
+    accent: '#c084fc',
+    accent2: '#38bdf8',
+    orb1: '#2d1b4d',
+    orb2: '#1a1b4b',
+    blur: 16,
+    bgImage: null
+  };
+
+  const aInp = document.getElementById('customAccentInp');
+  const a2Inp = document.getElementById('customAccent2Inp');
+  const o1Inp = document.getElementById('customOrb1Inp');
+  const o2Inp = document.getElementById('customOrb2Inp');
+  const bInp = document.getElementById('customBlurInp');
+
+  if (aInp) aInp.value = ct.accent || '#c084fc';
+  if (a2Inp) a2Inp.value = ct.accent2 || '#38bdf8';
+  if (o1Inp) o1Inp.value = ct.orb1 || '#2d1b4d';
+  if (o2Inp) o2Inp.value = ct.orb2 || '#1a1b4b';
+  const blurVal = ct.blur !== undefined ? ct.blur : 16;
+  if (bInp) bInp.value = blurVal;
+
+  if (document.getElementById('customAccentVal')) document.getElementById('customAccentVal').textContent = ct.accent || '#c084fc';
+  if (document.getElementById('customAccent2Val')) document.getElementById('customAccent2Val').textContent = ct.accent2 || '#38bdf8';
+  if (document.getElementById('customOrb1Val')) document.getElementById('customOrb1Val').textContent = ct.orb1 || '#2d1b4d';
+  if (document.getElementById('customOrb2Val')) document.getElementById('customOrb2Val').textContent = ct.orb2 || '#1a1b4b';
+  if (document.getElementById('customBlurVal')) document.getElementById('customBlurVal').textContent = `${blurVal}px`;
+
+  const clearBtn = document.getElementById('clearBgBtn');
+  const statusText = document.getElementById('customBgStatusText');
+  if (ct.bgImage) {
+    if (clearBtn) clearBtn.style.display = 'inline-flex';
+    if (statusText) statusText.textContent = '🖼️ Imagen personal activa';
+  } else {
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (statusText) statusText.textContent = 'Sin imagen personalizada';
+  }
+}
+
+function updateCustomThemeFromUI() {
+  if (!settings.customTheme) settings.customTheme = {};
+  settings.customTheme.accent = document.getElementById('customAccentInp').value;
+  settings.customTheme.accent2 = document.getElementById('customAccent2Inp').value;
+  settings.customTheme.orb1 = document.getElementById('customOrb1Inp').value;
+  settings.customTheme.orb2 = document.getElementById('customOrb2Inp').value;
+  settings.customTheme.blur = parseInt(document.getElementById('customBlurInp').value, 10);
+
+  ipc.send('save-settings', settings);
+  applyCustomTheme();
+  if (currentTheme !== 'custom') {
+    setTheme('custom');
+  }
+}
+
+function onCustomBgSelected(input) {
+  if (input && input.files && input.files[0]) {
+    const file = input.files[0];
+    const filePath = file.path || URL.createObjectURL(file);
+    window.setCustomBgMedia(filePath);
+    toast('🖼️ Fondo personalizado aplicado', 'success');
+  }
+}
+
+function clearCustomBgImage() {
+  if (settings && settings.customTheme) {
+    delete settings.customTheme.bgImage;
+    ipc.send('save-settings', settings);
+  }
+  window.setCustomBgMedia('');
+  toast('🗑️ Fondo personalizado eliminado', 'info');
 }
 
 // ═══════ TABS ═══════
@@ -9553,6 +9920,485 @@ function updateMyStatus(status, activity) {
       }
       openModpackEditor(versionId, displayName);
     }
+  </script>
+
+  <!-- ═══ CANVAS ANIMADO ESTELAR (SE ADAPTA A CADA TEMA ACTIVADO) ═══ -->
+  <script>
+    (function initUniversalThemeCanvasAnimation() {
+      const canvas = document.getElementById('vanGoghCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      function getActiveTheme() {
+        return document.documentElement.getAttribute('data-theme') || 
+               (document.body && document.body.getAttribute('data-theme')) || 
+               'nebula';
+      }
+
+      function getThemeColors() {
+        const theme = getActiveTheme();
+        switch(theme) {
+          case 'custom': {
+            const ct = (window.settings && window.settings.customTheme) || {};
+            const acc1 = ct.accent || '#c084fc';
+            const acc2 = ct.accent2 || '#38bdf8';
+            return {
+              shooting: [
+                { head: '#ffffff', mid: acc1, tail: 'rgba(255, 255, 255, 0)' },
+                { head: '#ffffff', mid: acc2, tail: 'rgba(255, 255, 255, 0)' },
+                { head: '#ffffff', mid: '#fef08a', tail: 'rgba(254, 240, 138, 0)' }
+              ],
+              stars: ['#ffffff', acc1, acc2, '#fef08a']
+            };
+          }
+          case 'galaxy':
+            return {
+              shooting: [
+                { head: '#ffffff', mid: '#38bdf8', tail: 'rgba(56, 189, 248, 0)' },
+                { head: '#ffffff', mid: '#7dd3fc', tail: 'rgba(125, 211, 252, 0)' },
+                { head: '#ffffff', mid: '#a5f3fc', tail: 'rgba(165, 243, 252, 0)' },
+                { head: '#ffffff', mid: '#60a5fa', tail: 'rgba(96, 165, 250, 0)' }
+              ],
+              stars: ['#ffffff', '#38bdf8', '#7dd3fc', '#a5f3fc', '#93c5fd']
+            };
+          case 'aurora':
+            return {
+              shooting: [
+                { head: '#ffffff', mid: '#34d399', tail: 'rgba(52, 211, 153, 0)' },
+                { head: '#ffffff', mid: '#6ee7b7', tail: 'rgba(110, 231, 183, 0)' },
+                { head: '#ffffff', mid: '#a7f3d0', tail: 'rgba(167, 243, 208, 0)' },
+                { head: '#ffffff', mid: '#38bdf8', tail: 'rgba(56, 189, 248, 0)' }
+              ],
+              stars: ['#ffffff', '#34d399', '#6ee7b7', '#a7f3d0', '#7dd3fc']
+            };
+          case 'supernova':
+            return {
+              shooting: [
+                { head: '#ffffff', mid: '#fb923c', tail: 'rgba(251, 146, 60, 0)' },
+                { head: '#ffffff', mid: '#fdba74', tail: 'rgba(253, 186, 116, 0)' },
+                { head: '#ffffff', mid: '#fef08a', tail: 'rgba(254, 240, 138, 0)' },
+                { head: '#ffffff', mid: '#f87171', tail: 'rgba(248, 113, 113, 0)' }
+              ],
+              stars: ['#ffffff', '#fb923c', '#fdba74', '#fef08a', '#facc15']
+            };
+          case 'cosmos':
+            return {
+              shooting: [
+                { head: '#ffffff', mid: '#fbbf24', tail: 'rgba(251, 191, 36, 0)' },
+                { head: '#ffffff', mid: '#fcd34d', tail: 'rgba(252, 211, 77, 0)' },
+                { head: '#ffffff', mid: '#fde68a', tail: 'rgba(253, 230, 138, 0)' },
+                { head: '#ffffff', mid: '#fef08a', tail: 'rgba(254, 240, 138, 0)' }
+              ],
+              stars: ['#ffffff', '#fbbf24', '#fcd34d', '#fde68a', '#fef08a']
+            };
+          case 'vangogh':
+            return {
+              shooting: [
+                { head: '#ffffff', mid: '#facc15', tail: 'rgba(250, 204, 21, 0)' },
+                { head: '#ffffff', mid: '#fef08a', tail: 'rgba(254, 240, 138, 0)' },
+                { head: '#ffffff', mid: '#38bdf8', tail: 'rgba(56, 189, 248, 0)' },
+                { head: '#ffffff', mid: '#e0e7ff', tail: 'rgba(224, 231, 255, 0)' }
+              ],
+              stars: ['#ffffff', '#fef08a', '#facc15', '#38bdf8', '#e0e7ff']
+            };
+          case 'nebula':
+          default:
+            return {
+              shooting: [
+                { head: '#ffffff', mid: '#c084fc', tail: 'rgba(192, 132, 252, 0)' },
+                { head: '#ffffff', mid: '#818cf8', tail: 'rgba(129, 140, 248, 0)' },
+                { head: '#ffffff', mid: '#38bdf8', tail: 'rgba(56, 189, 248, 0)' },
+                { head: '#ffffff', mid: '#e0e7ff', tail: 'rgba(224, 231, 255, 0)' }
+              ],
+              stars: ['#ffffff', '#c084fc', '#818cf8', '#38bdf8', '#e0e7ff']
+            };
+        }
+      }
+
+      // 160 Estrellas pequeñas y suaves
+      const stars = Array.from({ length: 160 }, (_, idx) => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() * 1.1 + 0.4,
+        alpha: Math.random() * 0.35 + 0.08,
+        speed: Math.random() * 0.012 + 0.004,
+        twinkleDir: Math.random() > 0.5 ? 1 : -1,
+        colorIndex: idx
+      }));
+
+      // Throttling suave para el slider de Blur (Desenfoque de Cristal) sin lag
+      let customBlurRaf = null;
+      window.onCustomBlurSliderInput = function(val) {
+        const display = document.getElementById('customBlurVal');
+        if (display) display.textContent = val + 'px';
+
+        if (customBlurRaf) cancelAnimationFrame(customBlurRaf);
+        customBlurRaf = requestAnimationFrame(() => {
+          if (typeof updateCustomThemeFromUI === 'function') {
+            updateCustomThemeFromUI();
+          }
+        });
+      };
+
+      // Manejadores de Selección, Ajuste, Posición y Zoom del Fondo
+      window.onCustomBgSelected = function(input) {
+        if (!input || !input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const filePath = file.path || URL.createObjectURL(file);
+        window.setCustomBgMedia(filePath);
+      };
+
+      window.setCustomBgMedia = function(path) {
+        localStorage.setItem('nebula_custom_bg_path', path || '');
+        applyCustomBgMediaToDOM(path || '');
+      };
+
+      window.clearCustomBgImage = function() {
+        window.setCustomBgMedia('');
+      };
+
+      function applyCustomBgMediaToDOM(path) {
+        const imgEl = document.getElementById('custom-bg-img');
+        const videoEl = document.getElementById('custom-bg-video');
+        const bgDiv = document.getElementById('bg');
+        const clearBtn = document.getElementById('clearBgBtn');
+        const statusText = document.getElementById('customBgStatusText');
+
+        // LIMPIEZA ABSOLUTA DEL FONDO ANTERIOR PARA EVITAR ENCIMADO
+        if (bgDiv) bgDiv.style.backgroundImage = 'none';
+        if (imgEl) { imgEl.style.display = 'none'; imgEl.src = ''; }
+        if (videoEl) { videoEl.style.display = 'none'; videoEl.pause(); videoEl.src = ''; }
+
+        const fit = localStorage.getItem('nebula_custom_bg_fit') || 'cover';
+        const pos = localStorage.getItem('nebula_custom_bg_pos') || 'center center';
+        const zoom = localStorage.getItem('nebula_custom_bg_zoom') || '100';
+
+        if (!path || path.trim() === '') {
+          if (typeof settings !== 'undefined' && settings.customTheme && settings.customTheme.bgImage) {
+            delete settings.customTheme.bgImage;
+            if (typeof ipc !== 'undefined') ipc.send('save-settings', settings);
+          }
+          if (clearBtn) clearBtn.style.display = 'none';
+          if (statusText) statusText.textContent = 'Sin imagen personalizada';
+          if (bgDiv) bgDiv.style.backgroundImage = '';
+          return;
+        }
+
+        if (clearBtn) clearBtn.style.display = 'inline-block';
+        if (statusText) statusText.textContent = 'Fondo activo: ' + path.split('\\').pop().split('/').pop();
+
+        const ext = path.split('.').pop().toLowerCase();
+        let fileUrl = path;
+        if (!path.startsWith('file://') && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('blob:')) {
+          fileUrl = 'file:///' + path.replace(/\\/g, '/');
+        }
+
+        const scale = (parseFloat(zoom || 100) / 100).toFixed(2);
+        const transformStyle = `translateZ(0) scale(${scale})`;
+
+        if (['mp4', 'webm', 'mkv', 'mov'].includes(ext)) {
+          if (imgEl) { imgEl.style.display = 'none'; imgEl.src = ''; }
+          if (videoEl) {
+            videoEl.src = fileUrl;
+            videoEl.style.display = 'block';
+            videoEl.style.objectFit = fit;
+            videoEl.style.objectPosition = pos;
+            videoEl.style.transform = transformStyle;
+            videoEl.play().catch(e => console.warn(e));
+          }
+        } else {
+          if (videoEl) { videoEl.style.display = 'none'; videoEl.pause(); videoEl.src = ''; }
+          if (imgEl) {
+            imgEl.src = fileUrl;
+            imgEl.style.display = 'block';
+            imgEl.style.objectFit = fit;
+            imgEl.style.objectPosition = pos;
+            imgEl.style.transform = transformStyle;
+          }
+        }
+      }
+
+      window.updateCustomBgStyleUI = function() {
+        const fitSelect = document.getElementById('customBgFitSelect');
+        const posSelect = document.getElementById('customBgPosSelect');
+        const zoomSlider = document.getElementById('customBgZoomSlider');
+
+        const fit = fitSelect ? fitSelect.value : 'cover';
+        const pos = posSelect ? posSelect.value : 'center center';
+        const zoom = zoomSlider ? zoomSlider.value : '100';
+
+        localStorage.setItem('nebula_custom_bg_fit', fit);
+        localStorage.setItem('nebula_custom_bg_pos', pos);
+
+        applyCustomBgStyleToDOM(fit, pos, zoom);
+      };
+
+      window.updateCustomBgZoomUI = function(val) {
+        const zoomValEl = document.getElementById('customBgZoomVal');
+        if (zoomValEl) zoomValEl.textContent = val + '%';
+        localStorage.setItem('nebula_custom_bg_zoom', val);
+
+        const fitSelect = document.getElementById('customBgFitSelect');
+        const posSelect = document.getElementById('customBgPosSelect');
+        const fit = fitSelect ? fitSelect.value : 'cover';
+        const pos = posSelect ? posSelect.value : 'center center';
+
+        applyCustomBgStyleToDOM(fit, pos, val);
+      };
+
+      function applyCustomBgStyleToDOM(fit, pos, zoom) {
+        const scale = (parseFloat(zoom || 100) / 100).toFixed(2);
+        const transformStyle = `translateZ(0) scale(${scale})`;
+
+        const targets = [
+          document.getElementById('custom-bg-img'),
+          document.getElementById('custom-bg-video')
+        ];
+
+        targets.forEach(el => {
+          if (!el) return;
+          el.style.objectFit = fit;
+          el.style.objectPosition = pos;
+          el.style.transform = transformStyle;
+          el.style.willChange = 'transform';
+          el.style.backfaceVisibility = 'hidden';
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const savedPath = localStorage.getItem('nebula_custom_bg_path') || '';
+        const savedFit = localStorage.getItem('nebula_custom_bg_fit') || 'cover';
+        const savedPos = localStorage.getItem('nebula_custom_bg_pos') || 'center center';
+        const savedZoom = localStorage.getItem('nebula_custom_bg_zoom') || '100';
+
+        const fitSelect = document.getElementById('customBgFitSelect');
+        const posSelect = document.getElementById('customBgPosSelect');
+        const zoomSlider = document.getElementById('customBgZoomSlider');
+        const zoomValEl = document.getElementById('customBgZoomVal');
+
+        if (fitSelect) fitSelect.value = savedFit;
+        if (posSelect) posSelect.value = savedPos;
+        if (zoomSlider) zoomSlider.value = savedZoom;
+        if (zoomValEl) zoomValEl.textContent = savedZoom + '%';
+
+        if (savedPath) applyCustomBgMediaToDOM(savedPath);
+        else applyCustomBgStyleToDOM(savedFit, savedPos, savedZoom);
+      });
+
+      // Estrellas fugaces espectaculares y vivas con corrección de minimizado
+      const shootingStars = [];
+      let isCanvasWindowMinimized = false;
+
+      function checkIsWindowMinimized() {
+        return document.hidden || isCanvasWindowMinimized;
+      }
+
+      function resetCanvasShootingStars() {
+        shootingStars.length = 0; // Vaciar cola acumulada al minimizarse o restaurarse
+      }
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          isCanvasWindowMinimized = true;
+          resetCanvasShootingStars();
+        } else {
+          isCanvasWindowMinimized = false;
+          resetCanvasShootingStars();
+        }
+      });
+
+      window.addEventListener('blur', () => {
+        isCanvasWindowMinimized = true;
+        resetCanvasShootingStars();
+      });
+
+      window.addEventListener('focus', () => {
+        isCanvasWindowMinimized = false;
+        resetCanvasShootingStars();
+      });
+
+      try {
+        const { ipcRenderer } = require('electron');
+        ipcRenderer.on('window-minimize', () => {
+          isCanvasWindowMinimized = true;
+          resetCanvasShootingStars();
+        });
+        ipcRenderer.on('window-restore', () => {
+          isCanvasWindowMinimized = false;
+          resetCanvasShootingStars();
+        });
+      } catch(e) {}
+
+      function spawnShootingStar() {
+        if (checkIsWindowMinimized()) return; // No generar estrellas en segundo plano
+        if (shootingStars.length >= 6) return; // Limitar a máximo 6 simultáneas
+
+        const fromRight = Math.random() > 0.25;
+        const angle = fromRight 
+          ? Math.PI * 0.72 + (Math.random() - 0.5) * 0.25
+          : Math.PI * 0.28 + (Math.random() - 0.5) * 0.25;
+
+        const startX = fromRight 
+          ? Math.random() * (width * 0.8) + width * 0.35 
+          : Math.random() * (width * 0.4);
+        const startY = Math.random() * (height * 0.45);
+
+        const themeConfig = getThemeColors();
+        const colors = themeConfig.shooting;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+
+        shootingStars.push({
+          x: startX,
+          y: startY,
+          length: Math.random() * 150 + 110,
+          speed: Math.random() * 16 + 12,
+          size: Math.random() * 1.8 + 1.2,
+          alpha: 1.0,
+          angle: angle,
+          color: color,
+          particles: []
+        });
+      }
+
+      function scheduleNextShootingStar() {
+        if (!checkIsWindowMinimized()) {
+          spawnShootingStar();
+          if (Math.random() < 0.4) {
+            setTimeout(() => { if (!checkIsWindowMinimized()) spawnShootingStar(); }, 150 + Math.random() * 250);
+          }
+        }
+        setTimeout(scheduleNextShootingStar, 800 + Math.random() * 900);
+      }
+      scheduleNextShootingStar();
+
+      let mouseX = 0, mouseY = 0;
+      window.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / width - 0.5) * 12;
+        mouseY = (e.clientY / height - 0.5) * 12;
+      });
+
+      let time = 0;
+      let lastFrameTime = performance.now();
+
+      function render(now) {
+        requestAnimationFrame(render);
+
+        if (checkIsWindowMinimized()) return;
+
+        const currentNow = now || performance.now();
+        const delta = Math.min(currentNow - lastFrameTime, 100);
+        lastFrameTime = currentNow;
+        const deltaFactor = delta / 16.666; // Compensación delta-time para velocidad constante a 60 FPS
+
+        ctx.clearRect(0, 0, width, height);
+        time += 0.01 * deltaFactor;
+
+        const themeConfig = getThemeColors();
+        const starColors = themeConfig.stars;
+
+        // Renderizar Estrellas parpadeantes
+        for (let s of stars) {
+          s.alpha += s.speed * s.twinkleDir * deltaFactor;
+          if (s.alpha >= 0.45) { s.alpha = 0.45; s.twinkleDir = -1; }
+          else if (s.alpha <= 0.08) { s.alpha = 0.08; s.twinkleDir = 1; }
+
+          ctx.save();
+          ctx.globalAlpha = s.alpha;
+          ctx.fillStyle = starColors[s.colorIndex % starColors.length];
+          ctx.beginPath();
+          ctx.arc(s.x + mouseX * (s.size * 0.2), s.y + mouseY * (s.size * 0.2), s.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // Renderizar Estrellas Fugaces independientes de caídas de FPS
+        for (let i = shootingStars.length - 1; i >= 0; i--) {
+          let st = shootingStars[i];
+
+          const dx = Math.cos(st.angle) * st.speed * deltaFactor;
+          const dy = Math.sin(st.angle) * st.speed * deltaFactor;
+
+          st.x += dx;
+          st.y += dy;
+          st.alpha -= 0.012 * deltaFactor;
+
+          if (Math.random() < 0.65 * deltaFactor) {
+            st.particles.push({
+              x: st.x + (Math.random() - 0.5) * 4,
+              y: st.y + (Math.random() - 0.5) * 4,
+              size: Math.random() * 1.6 + 0.6,
+              alpha: st.alpha * 0.85,
+              color: st.color.mid
+            });
+          }
+
+          for (let pIdx = st.particles.length - 1; pIdx >= 0; pIdx--) {
+            let p = st.particles[pIdx];
+            p.alpha -= 0.035 * deltaFactor;
+            if (p.alpha <= 0) {
+              st.particles.splice(pIdx, 1);
+              continue;
+            }
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, p.alpha);
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+
+          if (st.alpha <= 0 || st.x < -250 || st.x > width + 250 || st.y > height + 250) {
+            shootingStars.splice(i, 1);
+            continue;
+          }
+
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, st.alpha);
+
+          const tailLen = st.length;
+          const tailX = st.x - Math.cos(st.angle) * tailLen;
+          const tailY = st.y - Math.sin(st.angle) * tailLen;
+
+          const gradient = ctx.createLinearGradient(st.x, st.y, tailX, tailY);
+          gradient.addColorStop(0, st.color.head);
+          gradient.addColorStop(0.2, st.color.mid);
+          gradient.addColorStop(1, st.color.tail);
+
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = st.size;
+          ctx.lineCap = 'round';
+
+          ctx.beginPath();
+          ctx.moveTo(st.x, st.y);
+          ctx.lineTo(tailX, tailY);
+          ctx.stroke();
+
+          // Resplandor optimizado de la cabeza (sin ralentizar con shadowBlur)
+          ctx.fillStyle = st.color.mid;
+          ctx.beginPath();
+          ctx.arc(st.x, st.y, st.size * 2.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = st.color.head;
+          ctx.beginPath();
+          ctx.arc(st.x, st.y, st.size * 1.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.restore();
+        }
+      }
+
+      requestAnimationFrame(render);
+    })();
   </script>
 </body>
 </html>

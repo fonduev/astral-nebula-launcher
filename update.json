@@ -1,10 +1,10 @@
 {
-  "version": "4.0.2",
-  "notes": "• Corrección en la descarga e instalación de CM Pack desde la API oficial.\n• Solucionado bug en la carga de dependencias nativas que impedía el arranque de CM Pack.\n• Soporte para inyectar versiones e instancias Forge/Fabric personalizadas directamente en la lista.\n• Desactivada la inyección de nebula-skin-agent en Java 8 para prevenir errores de JVM.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.2/app.asar",
+  "version": "4.0.3",
+  "notes": "• Fondo Personalizado: Soporte completo para Imágenes (.png, .jpg), GIFs (.gif) y Videos (.mp4, .webm).\n• Controles de Encuadre, Posición y Zoom: Elige la orientación, ajuste (Cover, Contain, Fill) y zoom (100% - 250%).\n• Optimización de Desenfoque de Cristal: Slider de Glass Blur 100% fluido a 60+ FPS sin congelamientos.\n• Fix Estrellas Fugaces: Detención absoluta al minimizarse para evitar ráfagas masivas al restaurar.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.3/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.2/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.3/app.asar"
     }
   }
 }

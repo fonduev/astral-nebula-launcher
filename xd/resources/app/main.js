@@ -288,20 +288,30 @@ function createWindow() {
     // win.webContents.openDevTools();
     win.center();
 
-    // 3. Cuando la principal esté cargada, esperar 2.5s y cambiar ventanas
+    function sendSplashProgress(text, progress) {
+        try {
+            if (splash && !splash.isDestroyed() && splash.webContents) {
+                splash.webContents.send('splash-progress', { text, progress });
+            }
+        } catch(e) {}
+    }
+
+    ipcMain.removeAllListeners('renderer-ready-step');
+    ipcMain.on('renderer-ready-step', (event, { text, progress }) => {
+        sendSplashProgress(text, progress);
+        if (progress >= 100) {
+            setTimeout(() => {
+                if (splash && !splash.isDestroyed()) splash.close();
+                if (win && !win.isDestroyed()) {
+                    win.setOpacity(1);
+                    win.focus();
+                }
+            }, 300);
+        }
+    });
+
     win.once('ready-to-show', () => {
-        console.log('[DEBUG] ready-to-show disparado en ventana principal!');
-        setTimeout(() => {
-            console.log('[DEBUG] 2.5s pasaron. Cerrando splash y mostrando win.');
-            if (splash && !splash.isDestroyed()) {
-                splash.close();
-            }
-            if (win && !win.isDestroyed()) {
-                win.setOpacity(1);
-                win.focus();
-                console.log('[DEBUG] win.setOpacity(1) ejecutado');
-            }
-        }, 2500); // 2.5 segundos de carga
+        sendSplashProgress('Verificando módulos y entorno...', 30);
     });
 }
 
@@ -871,17 +881,27 @@ function getInstanceDir(mcPath, versionId) {
 
 // ── Versioning ────────────────────────────────────────────────────
 ipcMain.handle('get-all-versions', async () => {
-    try {
-        sendLog('🔍 Cargando versiones oficiales de Minecraft (Vanilla)...');
-        const data = await httpsGet('https://launchermeta.mojang.com/mc/game/version_manifest.json');
-        const manifest = JSON.parse(data);
-        const releases = manifest.versions.filter(v => v.type === 'release');
-        sendLog(`✅ ${manifest.versions.length} versiones oficiales cargadas (${releases.length} estables)`);
-        return manifest.versions;
-    } catch (err) {
-        sendLog(`❌ Error cargando versiones Vanilla: ${err.message}`, 'error');
-        return [];
+    const urls = [
+        'https://launchermeta.mojang.com/mc/game/version_manifest.json',
+        'https://piston-meta.mojang.com/mc/game/version_manifest.json',
+        'https://bmclapi2.bangbang93.com/mc/game/version_manifest.json'
+    ];
+    for (const url of urls) {
+        try {
+            sendLog(`🔍 Cargando versiones oficiales de Minecraft (${url})...`);
+            const data = await httpsGet(url);
+            const manifest = JSON.parse(data);
+            if (manifest && Array.isArray(manifest.versions) && manifest.versions.length > 0) {
+                const releases = manifest.versions.filter(v => v.type === 'release');
+                sendLog(`✅ ${manifest.versions.length} versiones oficiales cargadas (${releases.length} estables)`);
+                return manifest.versions;
+            }
+        } catch (err) {
+            sendLog(`⚠️ Error cargando desde ${url}: ${err.message}`, 'error');
+        }
     }
+    sendLog(`❌ No se pudieron cargar las versiones de Minecraft desde ninguna fuente`, 'error');
+    return [];
 });
 
 ipcMain.handle('get-fabric-mc-versions', async () => {
@@ -4375,7 +4395,8 @@ ipcMain.on('download-update', (event, { url }) => {
 ipcMain.on('apply-update', () => {
     const exePath = process.execPath;
     const updateAsar = path.join(resourcesDir, 'app.asar.update');
-    const currentAsar = path.join(resourcesDir, 'app.asar');
+    const sourceAsar = path.join(resourcesDir, 'app_core.asar');
+    const activeAsar = path.join(resourcesDir, 'app_core_active.asar');
     const currentAppDir = path.join(resourcesDir, 'app');
     const scriptPath = path.join(resourcesDir, 'apply_update.js');
 
@@ -4389,23 +4410,29 @@ ipcMain.on('apply-update', () => {
         '} catch(e) {}',
         'WScript.Sleep(1500);',
         '',
-        'var currentAsar = WScript.Arguments(0);',
-        'var updateAsar = WScript.Arguments(1);',
-        'var appDir = WScript.Arguments(2);',
-        'var exePath = WScript.Arguments(3);',
+        'var updateAsar = WScript.Arguments(0);',
+        'var sourceAsar = WScript.Arguments(1);',
+        'var activeAsar = WScript.Arguments(2);',
+        'var appDir = WScript.Arguments(3);',
+        'var exePath = WScript.Arguments(4);',
         '',
         '// Esperar y reemplazar',
         'var retries = 0;',
         'var success = false;',
         'while (retries < 15) {',
         '    try {',
-        '        if (fso.FileExists(currentAsar)) {',
-        '            fso.DeleteFile(currentAsar, true);',
+        '        if (fso.FileExists(sourceAsar)) {',
+        '            try { fso.DeleteFile(sourceAsar, true); } catch(e) {}',
+        '        }',
+        '        if (fso.FileExists(activeAsar)) {',
+        '            try { fso.DeleteFile(activeAsar, true); } catch(e) {}',
         '        }',
         '        if (fso.FolderExists(appDir)) {',
-        '            fso.DeleteFolder(appDir, true);',
+        '            try { fso.DeleteFolder(appDir, true); } catch(e) {}',
         '        }',
-        '        fso.MoveFile(updateAsar, currentAsar);',
+        '        fso.CopyFile(updateAsar, sourceAsar, true);',
+        '        fso.CopyFile(updateAsar, activeAsar, true);',
+        '        try { fso.DeleteFile(updateAsar, true); } catch(e) {}',
         '        success = true;',
         '        break;',
         '    } catch(err) {',
@@ -4432,8 +4459,9 @@ ipcMain.on('apply-update', () => {
         const child = spawn('wscript.exe', [
             '//E:JScript',
             scriptPath,
-            currentAsar,
             updateAsar,
+            sourceAsar,
+            activeAsar,
             currentAppDir,
             exePath
         ], {

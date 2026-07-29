@@ -123,9 +123,10 @@ if (isDev) {
         console.log('[Bootstrap] Executing core asar from:', runAsar);
         try {
             const jsPath = path.join(runAsar, 'main.js');
-            if (fs.existsSync(jsPath)) {
+            try {
                 require(jsPath);
-            } else {
+            } catch (jsErr) {
+                console.log('[Bootstrap] Could not load main.js, trying main.jsc:', jsErr.message);
                 const bytenode = require('bytenode');
                 require(path.join(runAsar, 'main.jsc'));
             }
