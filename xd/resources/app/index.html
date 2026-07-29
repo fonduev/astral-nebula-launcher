@@ -3803,8 +3803,22 @@ function setTheme(t) {
     settings.theme = t;
     ipc.send('save-settings', settings);
   }
+
+  const imgEl = document.getElementById('custom-bg-img');
+  const videoEl = document.getElementById('custom-bg-video');
+  const bgDiv = document.getElementById('bg');
+
   if (t === 'custom') {
     applyCustomTheme();
+    const customPath = localStorage.getItem('nebula_custom_bg_path') || '';
+    if (typeof applyCustomBgMediaToDOM === 'function') {
+      applyCustomBgMediaToDOM(customPath);
+    }
+  } else {
+    // Si el usuario cambia a un tema preestablecido (Van Gogh, Nébula, etc.), ocultar el fondo personalizado
+    if (imgEl) imgEl.style.display = 'none';
+    if (videoEl) { videoEl.style.display = 'none'; videoEl.pause(); }
+    if (bgDiv) bgDiv.style.backgroundImage = '';
   }
 }
 
