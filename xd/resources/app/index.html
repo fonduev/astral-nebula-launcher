@@ -2237,6 +2237,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         </button>
       </div>
 
+      <div class="sidebar-ad-container" id="sidebarAdBox" style="margin-top:auto;margin-bottom:12px;"><div class="ad-tag" style="font-size:0.55rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;font-weight:700;opacity:0.6;margin-bottom:4px;">Anuncio / Patrocinador</div><div id="adContentArea" style="width:100%;text-align:center;"></div></div>
       <div class="sidebar-bottom">
         <div class="progress-wrap" id="progressWrap">
           <div class="progress-label" id="progressLabel">Descargando...</div>
@@ -3792,6 +3793,100 @@ async function logout() {
 }
 
 // ═══════ THEME ═══════
+// CÓDIGO OFICIAL DE ANUNCIOS DEL PROPIETARIO (ADSTERRA / MONETAG / CUSTOM)
+const NEBULA_OFFICIAL_AD_CODE = 'https://www.effectivecpmnetwork.com/ntn49ib5ah?key=9796f188c763c70c10480ac0acfa5b09'; // <- Aquí insertaremos tu código de anuncio de la plataforma
+
+function initAdPlacement() {
+  const container = document.getElementById('adContentArea');
+  if (!container) return;
+
+  if (NEBULA_OFFICIAL_AD_CODE && NEBULA_OFFICIAL_AD_CODE.trim()) {
+    renderAdScript(NEBULA_OFFICIAL_AD_CODE);
+  } else {
+    renderDefaultAdCard();
+  }
+}
+
+function openSponsorAd(e) {
+  if (e) e.preventDefault();
+  const url = 'https://www.effectivecpmnetwork.com/ntn49ib5ah?key=9796f188c763c70c10480ac0acfa5b09';
+  try {
+    if (window.require) {
+      const { shell } = window.require('electron');
+      shell.openExternal(url);
+    } else {
+      window.open(url, '_blank');
+    }
+  } catch(err) {
+    window.open(url, '_blank');
+  }
+}
+
+function renderDefaultAdCard() {
+  const container = document.getElementById('adContentArea');
+  if (!container) return;
+  container.innerHTML = `
+    <div onclick="openSponsorAd(event)" style="padding:10px 8px;background:linear-gradient(135deg, rgba(192,132,252,0.14), rgba(129,140,248,0.08));border:1px solid rgba(192,132,252,0.35);border-radius:10px;cursor:pointer;transition:all 0.2s ease;box-shadow:0 4px 14px rgba(0,0,0,0.3);" onmouseover="this.style.borderColor='rgba(192,132,252,0.7)';this.style.transform='translateY(-1px)'" onmouseout="this.style.borderColor='rgba(192,132,252,0.35)';this.style.transform='none'">
+      <div style="font-size:0.72rem;font-weight:800;color:var(--accent);margin-bottom:3px;display:flex;align-items:center;justify-content:center;gap:5px;">
+        <span>✨</span> Patrocinador Oficial
+      </div>
+      <div style="font-size:0.63rem;color:var(--text-dim);line-height:1.3;margin-bottom:6px;padding:0 2px;">
+        ¡Ofertas exclusivas de patrocinadores para apoyar Nebula Launcher!
+      </div>
+      <div style="font-size:0.62rem;color:#000;font-weight:800;background:linear-gradient(90deg, #c084fc, #818cf8);padding:4px 10px;border-radius:6px;display:inline-block;letter-spacing:0.02em;box-shadow:0 2px 8px rgba(192,132,252,0.4);">
+        VER OFERTA ↗
+      </div>
+    </div>
+  `;
+}
+
+function renderAdScript(code) {
+  const container = document.getElementById('adContentArea');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  if (code.includes('<iframe') || code.includes('<a ') || code.includes('<img')) {
+    container.innerHTML = code;
+  } else {
+    const iframe = document.createElement('iframe');
+    iframe.style.width = '100%';
+    iframe.style.height = '140px';
+    iframe.style.border = 'none';
+    iframe.style.overflow = 'hidden';
+    iframe.style.borderRadius = '6px';
+    container.appendChild(iframe);
+    
+    try {
+      const doc = iframe.contentWindow.document;
+      doc.open();
+      doc.write('<!DOCTYPE html><html><head><base target="_blank"><style>body{margin:0;padding:0;background:transparent;color:#fff;font-family:sans-serif;display:flex;justify-content:center;align-items:center;}</style></head><body>' + code + '</body></html>');
+      doc.close();
+    } catch(e) {
+      container.innerHTML = code;
+    }
+  }
+}
+
+function saveAdScript(val) {
+  localStorage.setItem('nebula_ad_code', val);
+}
+
+function applyAdScript() {
+  const val = document.getElementById('adScriptInput') ? document.getElementById('adScriptInput').value : '';
+  localStorage.setItem('nebula_ad_code', val);
+  initAdPlacement();
+}
+
+function resetAdScript() {
+  localStorage.removeItem('nebula_ad_code');
+  if (document.getElementById('adScriptInput')) document.getElementById('adScriptInput').value = '';
+  renderDefaultAdCard();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(initAdPlacement, 300);
+});
+
 function setTheme(t) {
   currentTheme=t;
   document.documentElement.setAttribute('data-theme',t);

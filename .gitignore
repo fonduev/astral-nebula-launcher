@@ -20,3 +20,8 @@ upload_r2_s3.py
 # Temporary / junk files
 historial.db
 nul
+
+*.exe
+*.zip
+app_core.asar
+.env
