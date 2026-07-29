@@ -3814,6 +3814,9 @@ function setTheme(t) {
     }
   }
 
+  // Guardar tema en localStorage para sincronizar con la pantalla de login
+  localStorage.setItem('nebula_saved_theme', t);
+
   if (settings) {
     settings.theme = t;
     ipc.send('save-settings', settings);
@@ -3852,6 +3855,12 @@ function applyCustomTheme() {
   root.style.setProperty('--custom-accent', ct.accent || '#c084fc');
   root.style.setProperty('--custom-accent2', ct.accent2 || '#38bdf8');
   root.style.setProperty('--custom-blur', `${blurPx}px`);
+
+  // Guardar colores personalizados en localStorage para sincronizar con login screen
+  localStorage.setItem('nebula_custom_accent', ct.accent || '#c084fc');
+  localStorage.setItem('nebula_custom_accent2', ct.accent2 || '#38bdf8');
+  localStorage.setItem('nebula_custom_orb1', ct.orb1 || '#2d1b4d');
+  localStorage.setItem('nebula_custom_orb2', ct.orb2 || '#1a1b4b');
 
   let styleEl = document.getElementById('custom-theme-style');
   if (!styleEl) {
@@ -10242,9 +10251,29 @@ function updateMyStatus(status, activity) {
         if (zoomSlider) zoomSlider.value = savedZoom;
         if (zoomValEl) zoomValEl.textContent = savedZoom + '%';
 
-        // NO aplicar el fondo multimedia aquí.
-        // Se aplica después del login desde completeLogin() → setTheme() → applyCustomBgMediaToDOM()
-        // Esto evita que el fondo personalizado se muestre detrás de la pantalla de inicio de sesión.
+        // Aplicar el fondo multimedia guardado para que la pantalla de login
+        // también muestre el mismo fondo personalizado del launcher.
+        const savedPath = localStorage.getItem('nebula_custom_bg_path') || '';
+        if (savedPath) applyCustomBgMediaToDOM(savedPath);
+        else applyCustomBgStyleToDOM(savedFit, savedPos, savedZoom);
+
+        // Aplicar el tema de colores guardado desde localStorage para que
+        // la pantalla de login tenga los mismos colores personalizados.
+        const savedTheme = localStorage.getItem('nebula_saved_theme') || '';
+        if (savedTheme === 'custom') {
+          document.documentElement.setAttribute('data-theme', 'custom');
+          // Aplicar colores personalizados desde localStorage
+          const savedAccent = localStorage.getItem('nebula_custom_accent') || '';
+          const savedAccent2 = localStorage.getItem('nebula_custom_accent2') || '';
+          const savedOrb1 = localStorage.getItem('nebula_custom_orb1') || '';
+          const savedOrb2 = localStorage.getItem('nebula_custom_orb2') || '';
+          if (savedAccent) document.documentElement.style.setProperty('--accent', savedAccent);
+          if (savedAccent2) document.documentElement.style.setProperty('--accent2', savedAccent2);
+          if (savedOrb1) document.documentElement.style.setProperty('--orb1', savedOrb1);
+          if (savedOrb2) document.documentElement.style.setProperty('--orb2', savedOrb2);
+        } else if (savedTheme) {
+          document.documentElement.setAttribute('data-theme', savedTheme);
+        }
       });
 
       // Estrellas fugaces espectaculares y vivas con corrección de minimizado
