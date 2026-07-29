@@ -3944,9 +3944,19 @@ function updateCustomThemeFromUI() {
 function onCustomBgSelected(input) {
   if (input && input.files && input.files[0]) {
     const file = input.files[0];
-    const filePath = file.path || URL.createObjectURL(file);
-    window.setCustomBgMedia(filePath);
-    toast('🖼️ Fondo personalizado aplicado', 'success');
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const mediaData = file.path || e.target.result;
+      if (!settings.customTheme) settings.customTheme = {};
+      settings.customTheme.bgImage = mediaData;
+      ipc.send('save-settings', settings);
+      window.setCustomBgMedia(mediaData);
+      if (currentTheme !== 'custom') {
+        setTheme('custom');
+      }
+      toast('🖼️ Fondo personalizado aplicado', 'success');
+    };
+    reader.readAsDataURL(file);
   }
 }
 
@@ -3955,6 +3965,7 @@ function clearCustomBgImage() {
     delete settings.customTheme.bgImage;
     ipc.send('save-settings', settings);
   }
+  localStorage.removeItem('nebula_custom_bg_path');
   window.setCustomBgMedia('');
   toast('🗑️ Fondo personalizado eliminado', 'info');
 }
@@ -10086,42 +10097,39 @@ function updateMyStatus(status, activity) {
         const clearBtn = document.getElementById('clearBgBtn');
         const statusText = document.getElementById('customBgStatusText');
 
-        // LIMPIEZA ABSOLUTA DEL FONDO ANTERIOR PARA EVITAR ENCIMADO
-        if (bgDiv) bgDiv.style.backgroundImage = 'none';
-        if (imgEl) { imgEl.style.display = 'none'; imgEl.src = ''; }
-        if (videoEl) { videoEl.style.display = 'none'; videoEl.pause(); videoEl.src = ''; }
+        const activeMedia = path || (typeof settings !== 'undefined' && settings.customTheme && settings.customTheme.bgImage) || '';
 
-        const fit = localStorage.getItem('nebula_custom_bg_fit') || 'cover';
-        const pos = localStorage.getItem('nebula_custom_bg_pos') || 'center center';
-        const zoom = localStorage.getItem('nebula_custom_bg_zoom') || '100';
-
-        if (!path || path.trim() === '') {
-          if (typeof settings !== 'undefined' && settings.customTheme && settings.customTheme.bgImage) {
-            delete settings.customTheme.bgImage;
-            if (typeof ipc !== 'undefined') ipc.send('save-settings', settings);
-          }
+        if (!activeMedia || activeMedia.trim() === '') {
+          if (imgEl) { imgEl.style.display = 'none'; imgEl.src = ''; }
+          if (videoEl) { videoEl.style.display = 'none'; videoEl.pause(); videoEl.src = ''; }
           if (clearBtn) clearBtn.style.display = 'none';
           if (statusText) statusText.textContent = 'Sin imagen personalizada';
           if (bgDiv) bgDiv.style.backgroundImage = '';
           return;
         }
 
+        if (bgDiv) bgDiv.style.backgroundImage = 'none';
         if (clearBtn) clearBtn.style.display = 'inline-block';
-        if (statusText) statusText.textContent = 'Fondo activo: ' + path.split('\\').pop().split('/').pop();
+        if (statusText) statusText.textContent = 'Fondo personalizado activo';
 
-        const ext = path.split('.').pop().toLowerCase();
-        let fileUrl = path;
-        if (!path.startsWith('file://') && !path.startsWith('http://') && !path.startsWith('https://') && !path.startsWith('blob:')) {
-          fileUrl = 'file:///' + path.replace(/\\/g, '/');
+        const fit = localStorage.getItem('nebula_custom_bg_fit') || 'cover';
+        const pos = localStorage.getItem('nebula_custom_bg_pos') || 'center center';
+        const zoom = localStorage.getItem('nebula_custom_bg_zoom') || '100';
+
+        let fileUrl = activeMedia;
+        if (!activeMedia.startsWith('file://') && !activeMedia.startsWith('http://') && !activeMedia.startsWith('https://') && !activeMedia.startsWith('blob:') && !activeMedia.startsWith('data:')) {
+          fileUrl = 'file:///' + activeMedia.replace(/\\/g, '/');
         }
 
         const scale = (parseFloat(zoom || 100) / 100).toFixed(2);
         const transformStyle = `translateZ(0) scale(${scale})`;
 
-        if (['mp4', 'webm', 'mkv', 'mov'].includes(ext)) {
+        const isVideo = activeMedia.startsWith('data:video') || ['mp4', 'webm', 'mkv', 'mov'].some(ext => activeMedia.toLowerCase().split('?')[0].endsWith('.' + ext));
+
+        if (isVideo) {
           if (imgEl) { imgEl.style.display = 'none'; imgEl.src = ''; }
           if (videoEl) {
-            videoEl.src = fileUrl;
+            if (videoEl.src !== fileUrl) videoEl.src = fileUrl;
             videoEl.style.display = 'block';
             videoEl.style.objectFit = fit;
             videoEl.style.objectPosition = pos;
@@ -10131,7 +10139,7 @@ function updateMyStatus(status, activity) {
         } else {
           if (videoEl) { videoEl.style.display = 'none'; videoEl.pause(); videoEl.src = ''; }
           if (imgEl) {
-            imgEl.src = fileUrl;
+            if (imgEl.src !== fileUrl) imgEl.src = fileUrl;
             imgEl.style.display = 'block';
             imgEl.style.objectFit = fit;
             imgEl.style.objectPosition = pos;
