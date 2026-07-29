@@ -19,43 +19,16 @@ if (isDev) {
     // bundledAsar is the ultimate fallback — shipped inside app.asar itself
     const bundledAsar = path.join(__dirname, 'app_core.pak');
 
-    // 1. Extraer el app_core.asar inicial si viene empaquetado en el bootstrap
-    //    Esto asegura que sourceAsar siempre exista aunque el updater lo haya borrado
-    if (fs.existsSync(bundledAsar)) {
+    // 1. Extraer el app_core.asar inicial solo si NO existe sourceAsar
+    if (fs.existsSync(bundledAsar) && !originalFs.existsSync(sourceAsar)) {
         try {
-            let shouldCopy = true;
-            if (originalFs.existsSync(sourceAsar)) {
-                try {
-                    const srcStat = fs.statSync(bundledAsar);
-                    const destStat = originalFs.statSync(sourceAsar);
-                    if (srcStat.size === destStat.size && srcStat.mtimeMs === destStat.mtimeMs) {
-                        shouldCopy = false;
-                    }
-                } catch (statErr) {
-                    console.error('[Bootstrap] Stat error comparing asars:', statErr.message);
-                }
-            }
-            if (shouldCopy) {
-                console.log('[Bootstrap] Extracting/updating bundled app_core.asar...');
-                if (originalFs.existsSync(sourceAsar)) {
-                    try { originalFs.unlinkSync(sourceAsar); } catch(e) {
-                        console.error('[Bootstrap] Warning: could not delete old sourceAsar:', e.message);
-                    }
-                }
-                try {
-                    originalFs.mkdirSync(path.dirname(sourceAsar), { recursive: true });
-                    const content = fs.readFileSync(bundledAsar);
-                    originalFs.writeFileSync(sourceAsar, content);
-                    const srcStat = fs.statSync(bundledAsar);
-                    try { originalFs.utimesSync(sourceAsar, srcStat.atime, srcStat.mtime); } catch(e) {}
-                    console.log('[Bootstrap] Bundled app_core.asar extracted successfully.');
-                } catch (writeErr) {
-                    console.error('[Bootstrap] Could not write sourceAsar (permissions?):', writeErr.message);
-                    // Continue — we'll fall back to bundledAsar later if needed
-                }
-            }
+            console.log('[Bootstrap] Extracting initial app_core.asar...');
+            originalFs.mkdirSync(path.dirname(sourceAsar), { recursive: true });
+            const content = fs.readFileSync(bundledAsar);
+            originalFs.writeFileSync(sourceAsar, content);
+            console.log('[Bootstrap] Bundled app_core.asar extracted successfully.');
         } catch (e) {
-            console.error('[Bootstrap] Failed to extract/update bundled app_core.asar:', e);
+            console.error('[Bootstrap] Failed to extract bundled app_core.asar:', e);
         }
     }
 
