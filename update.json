@@ -1,11 +1,10 @@
 {
-  "version": "4.0.3",
-  "notes": "• Fondo Personalizado: Soporte completo para Imágenes (.png, .jpg), GIFs (.gif) y Videos (.mp4, .webm).\n• Controles de Encuadre, Posición y Zoom: Elige la orientación, ajuste (Cover, Contain, Fill) y zoom (100% - 250%).\n• Optimización de Desenfoque de Cristal: Slider de Glass Blur 100% fluido a 60+ FPS sin congelamientos.\n• Fix Estrellas Fugaces: Detención absoluta al minimizarse para evitar ráfagas masivas al restaurar.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.3/app.asar",
+  "version": "4.0.4",
+  "notes": "• Sincronización de Fondo en Login: El fondo personalizado y la paleta de colores ahora se muestran correctamente desde la pantalla de inicio de sesión.\n• Corrección de Persistencia: La ruta del fondo personalizado ahora se guarda de forma segura en las preferencias de la aplicación.\n• Mejoras de Estabilidad: Corrección en el cargador Bootstrap y en la restauración del tema de color personalizado.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.4/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.3/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.4/app.asar"
     }
   }
 }
-

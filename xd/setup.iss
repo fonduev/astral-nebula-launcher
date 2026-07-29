@@ -1,15 +1,15 @@
 [Setup]
 AppName=Nebula Launcher
-AppVersion=4.0.3
+AppVersion=4.0.4
 AppPublisher=Nebula Studios
 AppPublisherURL=https://fonduev.github.io/astral-nebula-launcher/
 VersionInfoCompany=Nebula Studios
 VersionInfoDescription=Nebula Launcher
-VersionInfoTextVersion=4.0.3
+VersionInfoTextVersion=4.0.4
 DefaultDirName={localappdata}\Programs\Nebula Launcher
 DefaultGroupName=Nebula Launcher
 OutputDir=C:\Users\renee\Documents\Web
-OutputBaseFilename=Nebula.Launcher.Setup.4.0.3
+OutputBaseFilename=Nebula.Launcher.Setup.4.0.4
 SetupIconFile=C:\Users\renee\Documents\Web\icon.ico
 Compression=lzma
 SolidCompression=yes
