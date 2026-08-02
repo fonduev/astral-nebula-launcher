@@ -296,22 +296,33 @@ function createWindow() {
         } catch(e) {}
     }
 
+    const showMainWindow = () => {
+        try {
+            if (splash && !splash.isDestroyed()) splash.close();
+            if (win && !win.isDestroyed()) {
+                win.setOpacity(1);
+                win.focus();
+            }
+        } catch(e) {}
+    };
+
+    win.webContents.once('did-finish-load', () => {
+        showMainWindow();
+    });
+
+    win.once('ready-to-show', () => {
+        showMainWindow();
+    });
+
+    // Apertura instantánea de seguridad sin esperas ni congelamientos
+    setTimeout(showMainWindow, 200);
+
     ipcMain.removeAllListeners('renderer-ready-step');
     ipcMain.on('renderer-ready-step', (event, { text, progress }) => {
         sendSplashProgress(text, progress);
         if (progress >= 100) {
-            setTimeout(() => {
-                if (splash && !splash.isDestroyed()) splash.close();
-                if (win && !win.isDestroyed()) {
-                    win.setOpacity(1);
-                    win.focus();
-                }
-            }, 300);
+            showMainWindow();
         }
-    });
-
-    win.once('ready-to-show', () => {
-        sendSplashProgress('Verificando módulos y entorno...', 30);
     });
 }
 

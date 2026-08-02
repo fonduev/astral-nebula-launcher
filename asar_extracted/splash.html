@@ -146,7 +146,11 @@
   <div class="splash-container">
     <div class="glow-orb"></div>
     <div class="logo-container">
-      <div class="spinner-ring"></div>
+        <span class="status-text" id="status-text">Iniciando aplicación instantánea...</span>
+        <span class="status-pct" id="status-pct">100%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill" style="width: 100%;"></div>
       <!-- Usamos icon.ico pero si falla el src, mostramos un fallback bonito en CSS -->
       <img src="icon.ico" alt="Logo" class="logo-img" onerror="this.style.display='none'">
     </div>

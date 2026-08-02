@@ -288,21 +288,26 @@ function createWindow() {
     win.webContents.openDevTools();
     win.center();
 
-    // 3. Cuando la principal esté cargada, esperar 2.5s y cambiar ventanas
-    win.once('ready-to-show', () => {
-        console.log('[DEBUG] ready-to-show disparado en ventana principal!');
-        setTimeout(() => {
-            console.log('[DEBUG] 2.5s pasaron. Cerrando splash y mostrando win.');
-            if (splash && !splash.isDestroyed()) {
-                splash.close();
-            }
+    const showMainWindow = () => {
+        try {
+            if (splash && !splash.isDestroyed()) splash.close();
             if (win && !win.isDestroyed()) {
                 win.setOpacity(1);
                 win.focus();
-                console.log('[DEBUG] win.setOpacity(1) ejecutado');
             }
-        }, 2500); // 2.5 segundos de carga
+        } catch(e) {}
+    };
+
+    win.webContents.once('did-finish-load', () => {
+        showMainWindow();
     });
+
+    win.once('ready-to-show', () => {
+        showMainWindow();
+    });
+
+    // Apertura instantánea sin esperas (max 200ms)
+    setTimeout(showMainWindow, 200);
 }
 
 // ── SISTEMA DE TELEMETRÍA EN TIEMPO REAL (FIREBASE) ──
