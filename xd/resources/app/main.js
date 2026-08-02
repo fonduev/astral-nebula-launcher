@@ -2356,24 +2356,42 @@ async function ensureForgeLoader(mcVersion, forgeVersion) {
     fs.mkdirSync(tempDir, { recursive: true });
     const installerPath = path.join(tempDir, `forge-${mcVersion}-${forgeVersion}-installer.jar`);
     
-    const versionString = forgeVersion.includes(mcVersion) ? forgeVersion : `${mcVersion}-${forgeVersion}`;
+    let versionString = forgeVersion.includes(mcVersion) ? forgeVersion : `${mcVersion}-${forgeVersion}`;
+    if (mcVersion === '1.8.9' && !versionString.endsWith('-1.8.9')) {
+        versionString = `${versionString}-1.8.9`;
+    }
     const downloadUrl = `https://maven.minecraftforge.net/net/minecraftforge/forge/${versionString}/forge-${versionString}-installer.jar`;
     
     await downloadFile(downloadUrl, installerPath);
     const javaExe = await ensureJava(mcVersion, s.javaPath);
     await new Promise((resolve, reject) => {
-        const proc = spawn(javaExe, [
-            '-jar', installerPath,
-            '--installClient', mcPath
-        ], { cwd: tempDir });
+        const args = (mcVersion === '1.8.9') ? ['-jar', installerPath, '--extract'] : ['-jar', installerPath, '--installClient', mcPath];
+        const proc = spawn(javaExe, args, { cwd: tempDir });
         let output = '';
         proc.stdout.on('data', d => { output += d.toString(); });
         proc.stderr.on('data', d => { output += d.toString(); });
         proc.on('close', code => {
-            if (code === 0 || output.toLowerCase().includes('success')) resolve();
+            if (code === 0 || output.toLowerCase().includes('success') || output.toLowerCase().includes('extracted successfully')) resolve();
             else reject(new Error(`El instalador de Forge falló con código ${code}`));
         });
     });
+
+    if (mcVersion === '1.8.9') {
+        const extractedJar = path.join(tempDir, `forge-${versionString}-universal.jar`);
+        const libDir = path.join(mcPath, 'libraries', 'net', 'minecraftforge', 'forge', versionString);
+        fs.mkdirSync(libDir, { recursive: true });
+        if (fs.existsSync(extractedJar)) {
+            try { fs.copyFileSync(extractedJar, path.join(libDir, `forge-${versionString}.jar`)); } catch(e){}
+        }
+        const asmDir = path.join(mcPath, 'libraries', 'org', 'ow2', 'asm', 'asm-all', '5.0.3');
+        const asmJar = path.join(asmDir, 'asm-all-5.0.3.jar');
+        if (!fs.existsSync(asmJar)) {
+            try {
+                fs.mkdirSync(asmDir, { recursive: true });
+                await downloadFile('https://repo1.maven.org/maven2/org/ow2/asm/asm-all/5.0.3/asm-all-5.0.3.jar', asmJar);
+            } catch(e){}
+        }
+    }
     try { fs.unlinkSync(installerPath); } catch {}
     
     if (fs.existsSync(versionsDir)) {
@@ -2390,6 +2408,7 @@ async function ensureForgeLoader(mcVersion, forgeVersion) {
 function ensureCriticalNeoForgeJvmArgs(jsonPath) {
     try {
         if (!fs.existsSync(jsonPath)) return false;
+        if (jsonPath.includes('1.8.9') || jsonPath.includes('1.12.2')) return false;
         const vJson = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
         // Handle both modern format (arguments object) and legacy format (arguments array)
         if (!vJson.arguments || Array.isArray(vJson.arguments)) {
@@ -3756,9 +3775,14 @@ const PVP_CLIENTS = [
         name: 'Nebula PVP', 
         icon: '🌌', 
         color: '#a855f7', 
-        desc: 'El cliente oficial de Nebula. Optimizado al máximo, cosméticos exclusivos y rendimiento sin precedentes.', 
-        url: '',
-        comingSoon: true
+        desc: 'El cliente oficial de Nebula (base CheatBreakerX). Alto rendimiento y mods PVP integrados.', 
+        hasVersionSelect: true,
+        versions: [
+            { id: '1.8.9', name: 'Minecraft 1.8.9' },
+            { id: '1.16.5', name: 'Minecraft 1.16.5' },
+            { id: '1.17.1', name: 'Minecraft 1.17.1' },
+            { id: '1.19.4', name: 'Minecraft 1.19.4' }
+        ]
     }
 ];
 
@@ -3878,7 +3902,40 @@ async function doMicrosoftAuth() {
     const profile = JSON.parse(profileStr);
     if (profile.error) throw new Error('Esta cuenta no tiene Minecraft comprado.');
     const xuid = xblData.DisplayClaims?.xui?.[0]?.xid || xstsData.DisplayClaims?.xui?.[0]?.xid;
-    return { name: profile.name, uuid: profile.id, accessToken: mcData.access_token, userType: 'msa', xuid };
+    return { name: profile.name, uuid: profile.id, accessToken: mcData.access_token, refreshToken: tokenRes.refresh_token, userType: 'msa', xuid };
+}
+
+async function refreshMicrosoftToken(refreshToken) {
+    if (!refreshToken) return null;
+    const CLIENT_ID = '00000000402b5328';
+    const REDIRECT = 'https://login.live.com/oauth20_desktop.srf';
+    try {
+        sendLog('🔄 Renovando token de sesión de Microsoft...');
+        const tokenRes = await new Promise((resolve, reject) => {
+            const body = `client_id=${CLIENT_ID}&refresh_token=${encodeURIComponent(refreshToken)}&grant_type=refresh_token&redirect_uri=${encodeURIComponent(REDIRECT)}`;
+            const req = https.request({ hostname: 'login.live.com', path: '/oauth20_token.srf', method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
+                (res) => { let d = ''; res.on('data', c => d += c); res.on('end', () => resolve(JSON.parse(d))); });
+            req.on('error', reject); req.write(body); req.end();
+        });
+        if (!tokenRes.access_token) return null;
+        const xblData = JSON.parse((await httpsPost('https://user.auth.xboxlive.com/user/authenticate', { Properties: { AuthMethod: 'RPS', SiteName: 'user.auth.xboxlive.com', RpsTicket: `d=${tokenRes.access_token}` }, RelyingParty: 'http://auth.xboxlive.com', TokenType: 'JWT' })).data);
+        const xstsData = JSON.parse((await httpsPost('https://xsts.auth.xboxlive.com/xsts/authorize', { Properties: { SandboxId: 'RETAIL', UserTokens: [xblData.Token] }, RelyingParty: 'rp://api.minecraftservices.com/', TokenType: 'JWT' })).data);
+        if (xstsData.XErr) return null;
+        const mcData = JSON.parse((await httpsPost('https://api.minecraftservices.com/authentication/login_with_xbox', { identityToken: `XBL3.0 x=${xblData.DisplayClaims.xui[0].uhs};${xstsData.Token}` })).data);
+        if (!mcData.access_token) return null;
+        const profileStr = await new Promise((resolve, reject) => {
+            https.get({ hostname: 'api.minecraftservices.com', path: '/minecraft/profile', headers: { Authorization: `Bearer ${mcData.access_token}` } },
+                (res) => { let d = ''; res.on('data', c => d += c); res.on('end', () => resolve(d)); }).on('error', reject);
+        });
+        const profile = JSON.parse(profileStr);
+        if (profile.error) return null;
+        const xuid = xblData.DisplayClaims?.xui?.[0]?.xid || xstsData.DisplayClaims?.xui?.[0]?.xid;
+        sendLog('✅ Sesión de Microsoft renovada correctamente.');
+        return { name: profile.name, uuid: profile.id, accessToken: mcData.access_token, refreshToken: tokenRes.refresh_token || refreshToken, userType: 'msa', xuid };
+    } catch(err) {
+        sendLog(`⚠️ No se pudo auto-renovar sesión de Microsoft: ${err.message}`, 'warn');
+        return null;
+    }
 }
 
 ipcMain.on('microsoft-login', async (event) => {
@@ -3926,6 +3983,24 @@ ipcMain.on('launch-game', async (event, data) => {
         let launchVersion = data.version;
         let launchModId = data.modId;
         let modpackDispName = '';
+        let extraJvmArgs = [];
+
+        // Manejo de versiones de Nebula PVP (Nebula Client Engine)
+        if (launchModId && (launchModId.startsWith('nebulapvp_') || launchModId === 'nebulapvp')) {
+            if (launchVersion === '1.8.9') {
+                sendLog(`✨ Preparando cliente personalizado Nebula Client 1.8.9...`);
+                launchModId = 'nebula_client_1.8.9';
+            } else {
+                sendLog(`🔧 Preparando Nebula Client (Fabric ${launchVersion})...`);
+                const fabricVersionId = `fabric-loader-0.15.11-${launchVersion}`;
+                const fabricDir = path.join(mcPath, 'versions', fabricVersionId);
+                if (!fs.existsSync(path.join(fabricDir, `${fabricVersionId}.json`))) {
+                    sendLog(`⬇ Descargando e instalando Fabric Loader 0.15.11 para MC ${launchVersion}...`);
+                    await ensureFabricLoader(launchVersion, '0.15.11');
+                }
+                launchModId = fabricVersionId;
+            }
+        }
 
         // Si se lanza un modpack, resolver su loader e instalarlo si es necesario
         if (data.modpackName) {
@@ -4009,21 +4084,32 @@ ipcMain.on('launch-game', async (event, data) => {
 
         let auth;
         if (data.type === 'microsoft' && data.auth) {
+            let freshAuth = null;
+            if (data.auth.refreshToken) {
+                freshAuth = await refreshMicrosoftToken(data.auth.refreshToken);
+            }
+            const activeToken = freshAuth ? freshAuth.accessToken : data.auth.accessToken;
+            const activeUuid = freshAuth ? freshAuth.uuid : data.auth.uuid;
+            const activeName = freshAuth ? freshAuth.name : data.auth.name;
+            const activeXuid = freshAuth ? freshAuth.xuid : (data.auth.xuid || data.auth.uuid);
+
             auth = {
-                access_token: data.auth.accessToken,
-                client_token: crypto.randomUUID(),
-                uuid: data.auth.uuid,
-                name: data.auth.name,
+                access_token: activeToken,
+                client_token: activeUuid,
+                uuid: activeUuid,
+                name: activeName,
                 user_properties: '{}',
                 meta: {
                     type: 'msa',
-                    xuid: data.auth.xuid || data.auth.uuid,
+                    xuid: activeXuid,
                     demo: false
                 }
             };
         } else if (data.type === 'nebula' && data.auth) {
+            sendLog('ℹ️ Modo No-Premium (Cuenta Nebula) activo. Servidores No-Premium y Nebula PVP funcionan al 100%.');
             auth = await Authenticator.getAuth(data.username);
         } else {
+            sendLog('ℹ️ Modo No-Premium (Offline) activo. Servidores No-Premium y Nebula PVP funcionan al 100%.');
             auth = await Authenticator.getAuth(data.username);
         }
 
@@ -4058,6 +4144,10 @@ ipcMain.on('launch-game', async (event, data) => {
             opts.customArgs = activeJvmArgs.trim().split(/\s+/);
         } else {
             opts.customArgs = [];
+        }
+
+        if (extraJvmArgs && extraJvmArgs.length > 0) {
+            opts.customArgs.push(...extraJvmArgs);
         }
 
         if (data.serverIp) {
@@ -4207,16 +4297,19 @@ ipcMain.on('launch-game', async (event, data) => {
                     
                     collectJvmArgs(vJson.arguments?.jvm);
                     
-                    // Also ensure critical JVM args in version JSON on disk + opts.customArgs (safety layer)
-                    if (ensureCriticalNeoForgeJvmArgs(vJsonPath)) {
-                        sendLog('📝 JVM args críticos inyectados en version JSON (--add-opens, --add-modules, etc.)');
-                    }
-                    // Also ensure critical args are in opts.customArgs (MCLC reads from there)
-                    const criticalArgsForMCLC = NEOFORGE_CRITICAL_JVM_ARGS;
-                    for (const arg of criticalArgsForMCLC) {
-                        if (!opts.customArgs.includes(arg)) {
-                            opts.customArgs.push(arg);
+                    const isLegacyJava = launchVersion === '1.8.9' || launchVersion === '1.12.2';
+                    if (!isLegacyJava) {
+                        if (ensureCriticalNeoForgeJvmArgs(vJsonPath)) {
+                            sendLog('📝 JVM args críticos inyectados en version JSON (--add-opens, --add-modules, etc.)');
                         }
+                        const criticalArgsForMCLC = NEOFORGE_CRITICAL_JVM_ARGS;
+                        for (const arg of criticalArgsForMCLC) {
+                            if (!opts.customArgs.includes(arg)) {
+                                opts.customArgs.push(arg);
+                            }
+                        }
+                    } else {
+                        opts.customArgs = opts.customArgs.filter(arg => typeof arg === 'string' && !arg.startsWith('--add-modules') && !arg.startsWith('--add-opens') && !arg.startsWith('--add-exports'));
                     }
                     
                     sendLog(`🔧 Custom JVM Arguments (${opts.customArgs.length} args): ${opts.customArgs.join(' ')}`);

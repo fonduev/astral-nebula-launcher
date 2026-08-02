@@ -1278,7 +1278,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   transform: scale(1.1);
 }
 
-/* ═══════ NUEVA VISTA DE MODPACKS ESTILO LUNAR / MODRINTH ═══════ */
+/* ═══════ NUEVA VISTA DE MODPACKS ESTILO NEBULA / MODRINTH ═══════ */
 .modpack-browser-container {
   display: flex;
   gap: 16px;
@@ -2237,8 +2237,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         </button>
       </div>
 
-      <div class="sidebar-ad-container" id="sidebarAdBox" style="margin-top:auto;margin-bottom:12px;"><div class="ad-tag" style="font-size:0.55rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;font-weight:700;opacity:0.6;margin-bottom:4px;">Anuncio / Patrocinador</div><div id="adContentArea" style="width:100%;text-align:center;"></div></div>
       <div class="sidebar-bottom">
+
         <div class="progress-wrap" id="progressWrap">
           <div class="progress-label" id="progressLabel">Descargando...</div>
           <div class="progress-bar-outer">
@@ -3452,7 +3452,9 @@ function toggleMultiInstance(enabled) {
   const knob   = slider?.querySelector('span');
   if (slider) slider.style.background = enabled ? 'var(--accent)' : 'rgba(255,255,255,.12)';
   if (knob)   knob.style.left = enabled ? '23px' : '3px';
+  ipc.send('save-settings', settings);
   if (enabled) toast('📦 Múltiples instancias activadas (máx. 3)', 'info');
+  else toast('🔒 Múltiples instancias desactivadas', 'info');
 }
 
 function resetAllButtons() {
@@ -3793,85 +3795,31 @@ async function logout() {
 }
 
 // ═══════ THEME ═══════
-// CÓDIGO OFICIAL DE ANUNCIOS DEL PROPIETARIO (ADSTERRA / MONETAG / CUSTOM)
-const NEBULA_OFFICIAL_AD_CODE = 'https://www.effectivecpmnetwork.com/ntn49ib5ah?key=9796f188c763c70c10480ac0acfa5b09';
-
-function openSponsorAd(e) {
-  if (e) e.preventDefault();
-  const url = NEBULA_OFFICIAL_AD_CODE && NEBULA_OFFICIAL_AD_CODE.startsWith('http') ? NEBULA_OFFICIAL_AD_CODE : 'https://www.effectivecpmnetwork.com/ntn49ib5ah?key=9796f188c763c70c10480ac0acfa5b09';
-  try {
-    if (window.require) {
-      const { shell } = window.require('electron');
-      shell.openExternal(url);
-    } else {
-      window.open(url, '_blank');
-    }
-  } catch(err) {
-    window.open(url, '_blank');
-  }
-}
-
-function initAdPlacement() {
-  const container = document.getElementById('adContentArea');
-  if (!container) return;
-
-  const code = NEBULA_OFFICIAL_AD_CODE.trim();
-
-  if (!code || code.startsWith('http://') || code.startsWith('https://')) {
-    renderSponsorCard(container, code || 'https://www.effectivecpmnetwork.com/ntn49ib5ah?key=9796f188c763c70c10480ac0acfa5b09');
-  } else {
-    renderAdScriptHTML(container, code);
-  }
-}
-
-function renderSponsorCard(container, targetUrl) {
-  container.innerHTML = `
-    <div onclick="openSponsorAd(event)" style="padding:12px 10px;background:linear-gradient(135deg, rgba(192,132,252,0.18), rgba(129,140,248,0.1));border:1px solid rgba(192,132,252,0.45);border-radius:12px;cursor:pointer;transition:all 0.25s ease;box-shadow:0 6px 20px rgba(0,0,0,0.4);" onmouseover="this.style.borderColor='rgba(192,132,252,0.85)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(192,132,252,0.45)';this.style.transform='none'">
-      <div style="font-size:0.75rem;font-weight:800;color:var(--accent);margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:0.02em;">
-        <span style="font-size:0.85rem;">✨</span> PATROCINADOR OFICIAL
-      </div>
-      <div style="font-size:0.65rem;color:var(--text);opacity:0.85;line-height:1.35;margin-bottom:8px;padding:0 2px;">
-        ¡Accede a las ofertas exclusivas y apoya a mantener Nebula Launcher activo!
-      </div>
-      <div style="font-size:0.65rem;color:#000;font-weight:800;background:linear-gradient(90deg, #c084fc, #818cf8);padding:5px 12px;border-radius:8px;display:inline-block;letter-spacing:0.04em;box-shadow:0 3px 10px rgba(192,132,252,0.5);">
-        VER PATROCINADOR ↗
-      </div>
-    </div>
-  `;
-}
-
-function renderAdScriptHTML(container, code) {
-  container.innerHTML = '';
-  if (code.includes('<iframe') || code.includes('<a ') || code.includes('<img')) {
-    container.innerHTML = code;
-  } else {
-    const iframe = document.createElement('iframe');
-    iframe.style.width = '100%';
-    iframe.style.height = '140px';
-    iframe.style.border = 'none';
-    iframe.style.overflow = 'hidden';
-    iframe.style.borderRadius = '6px';
-    container.appendChild(iframe);
-    
-    try {
-      const doc = iframe.contentWindow.document;
-      doc.open();
-      doc.write(`<!DOCTYPE html><html><head><base target="_blank"><style>body{margin:0;padding:0;background:transparent;color:#fff;font-family:sans-serif;display:flex;justify-content:center;align-items:center;}</style></head><body>${code}</body></html>`);
-      doc.close();
-    } catch(e) {
-      container.innerHTML = code;
-    }
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(initAdPlacement, 100);
-});
-
 function setTheme(t) {
-  currentTheme=t;
-  document.documentElement.setAttribute('data-theme',t);
-  document.querySelectorAll('.theme-swatch').forEach(s=>s.classList.remove('active'));
+  currentTheme = t;
+
+  // Si se cambia a un tema predefinido (no 'custom'), limpiar estilos inline y la etiqueta de estilos personalizada
+  if (t !== 'custom') {
+    const customStyleEl = document.getElementById('custom-theme-style');
+    if (customStyleEl) customStyleEl.remove();
+
+    const root = document.documentElement;
+    const customVars = [
+      '--accent', '--accent2', '--accent3', '--accent-glow',
+      '--border-glow', '--btn-glass', '--btn-border',
+      '--orb1', '--orb2', '--orb3', '--orb4',
+      '--custom-accent', '--custom-accent2', '--custom-blur'
+    ];
+    customVars.forEach(v => {
+      root.style.removeProperty(v);
+      document.body.style.removeProperty(v);
+      const bgEl = document.getElementById('bg');
+      if (bgEl) bgEl.style.removeProperty(v);
+    });
+  }
+
+  document.documentElement.setAttribute('data-theme', t);
+  document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
   const swatch = document.querySelector(`.ts-${t}`);
   if (swatch) swatch.classList.add('active');
 
@@ -3912,7 +3860,10 @@ function setTheme(t) {
     // Si el usuario cambia a un tema preestablecido (Van Gogh, Nébula, etc.), ocultar el fondo personalizado
     if (imgEl) imgEl.style.display = 'none';
     if (videoEl) { videoEl.style.display = 'none'; videoEl.pause(); }
-    if (bgDiv) bgDiv.style.backgroundImage = '';
+    if (bgDiv) {
+      bgDiv.style.backgroundImage = '';
+      bgDiv.style.background = '';
+    }
   }
 }
 
@@ -5524,6 +5475,19 @@ async function deleteInstalledVersion(versionId) {
 
 
 async function launchGame() {
+  if (runningInstanceIds.size > 0 && !multiInstanceEnabled) {
+    toast('⚠️ Múltiples instancias desactivadas. Actívalas en Configuración.', 'warn');
+    return;
+  }
+  if (runningInstanceIds.size >= 3) {
+    toast('⚠️ Límite máximo de 3 instancias simultáneas alcanzado.', 'warn');
+    return;
+  }
+
+  if (authType !== 'microsoft') {
+    toast('ℹ️ Modo No-Premium activo. Para Hypixel / servidores Premium se requiere Cuenta Microsoft.', 'info');
+  }
+
   const modpackVal = document.getElementById('modpackSelect').value;
   if (modpackVal) {
     launchModpack(modpackVal);
@@ -9521,7 +9485,20 @@ function updateMyStatus(status, activity) {
           const badgeStyle = isInstalled ? 'background:rgba(16,185,129,0.15);color:#10b981;border-color:rgba(16,185,129,0.3);' : '';
 
           let btnHtml = '';
-          if (c.comingSoon) {
+          if (c.hasVersionSelect) {
+            const versionOpts = (c.versions || []).map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+            btnHtml = `
+              <div style="display:flex; flex-direction:column; gap:8px; width:100%; margin-top:8px;">
+                <label style="font-size:0.72rem; color:var(--text-dim); font-weight:600;">Seleccionar Versión:</label>
+                <select id="${c.id}-version-select" class="inp" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.4); color: white; border-radius: 8px; border: 1px solid rgba(168,85,247,0.3); height: 36px; outline: none; padding: 0 10px; font-size: 0.82rem;">
+                  ${versionOpts}
+                </select>
+                <button class="client-install-btn" style="background: linear-gradient(135deg, #a855f7aa, #7e22ce66); border: 0.5px solid #a855f7; color: white; font-weight:700; cursor:pointer;" onclick="playNebulaPvpClient('${c.id}')">
+                  ▶ Jugar ${c.name}
+                </button>
+              </div>
+            `;
+          } else if (c.comingSoon) {
             btnHtml = `
               <button class="client-install-btn" style="background: rgba(255,255,255,0.02); border: 0.5px solid rgba(255,255,255,0.05); color: var(--text-dim); cursor: not-allowed;" disabled>
                 🌌 Próximamente
@@ -9565,6 +9542,27 @@ function updateMyStatus(status, activity) {
         console.error("Error loading PVP clients:", err);
         pvpGrid.innerHTML = `<p style="color:var(--red); text-align:center; padding: 40px; grid-column: 1/-1;">Error: ${err.message}</p>`;
       }
+    }
+
+    async function playNebulaPvpClient(clientId) {
+      const versionSelect = document.getElementById(clientId + '-version-select');
+      const selectedVersion = versionSelect ? versionSelect.value : '1.8.9';
+      if (!authUser) {
+        toast('Inicia sesión primero en la pestaña Jugar.', 'error');
+        showTab('play');
+        return;
+      }
+      const ram = parseInt(document.getElementById('ramSlider')?.value || 4);
+      toast(`🚀 Iniciando Nebula PVP (${selectedVersion})...`, 'info');
+      showAbortButton('⏹️ Cancelar');
+      ipc.send('launch-game', {
+        version: selectedVersion,
+        modId: 'nebulapvp_' + selectedVersion,
+        ram,
+        username: authUser,
+        type: authType,
+        auth: authData
+      });
     }
 
     function openPvpClientUrl(url) {

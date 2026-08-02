@@ -3636,7 +3636,7 @@ ipcMain.handle('get-screenshots', () => {
 // ── PVP Clients ───────────────────────────────────────────────────
 const PVP_CLIENTS = [
     { id: 'labymod', name: 'LabyMod', icon: '🔶', color: '#f97316', desc: 'El cliente más popular. HUD modular, emotes, cloaks y cientos de addons oficiales.', url: 'https://laby.net/#download' },
-    { id: 'lunar', name: 'Lunar Client', icon: '🌙', color: '#818cf8', desc: 'Boost de FPS masivo. Waypoints, cosmetics y +100 mods integrados. Compatible 1.7 → 1.21.', url: 'https://lunarclient.com/download' },
+    { id: 'lunar', name: 'Nebula Client', icon: '🌙', color: '#818cf8', desc: 'Boost de FPS masivo. Waypoints, cosmetics y +100 mods integrados. Compatible 1.7 → 1.21.', url: 'https://lunarclient.com/download' },
     { id: 'badlion', name: 'Badlion', icon: '🛡️', color: '#ef4444', desc: 'Anti-cheat integrado, ideal para PVP competitivo. Soporte oficial para torneos.', url: 'https://client.badlion.net/' },
     { id: 'feather', name: 'Feather', icon: '🪶', color: '#22c55e', desc: 'El más ligero y moderno. Diseño renovado, mods optimizados y gestión de perfiles fácil.', url: 'https://feathermc.gg/download' },
     { id: 'pvplounge', name: 'PVP Lounge', icon: '⚔️', color: '#a855f7', desc: 'Cliente europeo con integración de torneos, ligas y rankings de la comunidad competitiva.', url: 'https://pvplounge.net/download' },
@@ -3883,10 +3883,13 @@ ipcMain.on('launch-game', async (event, data) => {
         }
 
         let activeJvmArgs = s.jvmArgs || '';
+        if (!activeJvmArgs.includes('-noverify')) {
+            activeJvmArgs = (activeJvmArgs + ' -noverify').trim();
+        }
         if (activeJvmArgs && activeJvmArgs.trim()) {
             opts.customArgs = activeJvmArgs.trim().split(/\s+/);
         } else {
-            opts.customArgs = [];
+            opts.customArgs = ['-noverify'];
         }
 
         // Inyección del Java Agent para Cuenta Nebula
