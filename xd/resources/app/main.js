@@ -156,28 +156,20 @@ let currentOperation = null;
 
 // ── Window ───────────────────────────────────────────────────────
 function createWindow() {
-    // 1. Crear ventana Splash
-    splash = new BrowserWindow({
-        width: 320, height: 420,
-        frame: false, transparent: true,
-        alwaysOnTop: true, resizable: false,
-        icon: path.join(__dirname, 'icon.ico'),
-        webPreferences: { nodeIntegration: false, contextIsolation: true }
-    });
-    splash.loadFile(path.join(__dirname, 'splash.html'));
-    splash.center();
-
-    // 2. Crear ventana principal oculta
+    // Crear ventana principal instantánea y directamente visible
     win = new BrowserWindow({
         width: 1360, height: 800,
         minWidth: 1080, minHeight: 680,
         frame: false, transparent: true,
         resizable: true, hasShadow: true,
-        opacity: 0, // En lugar de show: false para evitar el bug de renderizado en Windows
+        show: true,
+        opacity: 1,
         backgroundColor: '#00000000',
         webPreferences: { nodeIntegration: true, contextIsolation: false }
     });
     win.loadFile(path.join(__dirname, 'index.html'));
+    win.center();
+    win.focus();
     
     // AUTOMATION TEST HARNESS
     win.webContents.on('did-finish-load', () => {
@@ -285,45 +277,7 @@ function createWindow() {
         }
     });
 
-    // win.webContents.openDevTools();
     win.center();
-
-    function sendSplashProgress(text, progress) {
-        try {
-            if (splash && !splash.isDestroyed() && splash.webContents) {
-                splash.webContents.send('splash-progress', { text, progress });
-            }
-        } catch(e) {}
-    }
-
-    const showMainWindow = () => {
-        try {
-            if (splash && !splash.isDestroyed()) splash.close();
-            if (win && !win.isDestroyed()) {
-                win.setOpacity(1);
-                win.focus();
-            }
-        } catch(e) {}
-    };
-
-    win.webContents.once('did-finish-load', () => {
-        showMainWindow();
-    });
-
-    win.once('ready-to-show', () => {
-        showMainWindow();
-    });
-
-    // Apertura instantánea de seguridad sin esperas ni congelamientos
-    setTimeout(showMainWindow, 200);
-
-    ipcMain.removeAllListeners('renderer-ready-step');
-    ipcMain.on('renderer-ready-step', (event, { text, progress }) => {
-        sendSplashProgress(text, progress);
-        if (progress >= 100) {
-            showMainWindow();
-        }
-    });
 }
 
 // ── SISTEMA DE TELEMETRÍA EN TIEMPO REAL (FIREBASE) ──
