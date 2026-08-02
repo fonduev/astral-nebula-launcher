@@ -1,10 +1,10 @@
 {
-  "version": "4.0.4",
-  "notes": "• Sincronización de Fondo en Login: El fondo personalizado y la paleta de colores ahora se muestran correctamente desde la pantalla de inicio de sesión.\n• Corrección de Persistencia: La ruta del fondo personalizado ahora se guarda de forma segura en las preferencias de la aplicación.\n• Mejoras de Estabilidad: Corrección en el cargador Bootstrap y en la restauración del tema de color personalizado.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.4/app.asar",
+  "version": "4.0.5",
+  "notes": "• Eliminación completa de publicidad (experiencia 100% limpia para la comunidad).\n• Apertura instantánea sin esperas ni congelamientos en la pantalla de inicio.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.5/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.4/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.5/app.asar"
     }
   }
 }

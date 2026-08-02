@@ -2,7 +2,7 @@ import os
 import zipfile
 
 src_dir = r"c:\Users\renee\Documents\Web\xd"
-zip_path = r"c:\Users\renee\Documents\Web\Nebula-Launcher-v4.0.4-Portable.zip"
+zip_path = r"c:\Users\renee\Documents\Web\Nebula-Launcher-v4.0.5-Portable.zip"
 
 files_to_include = [
     "Nebula Launcher.exe",

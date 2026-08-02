@@ -16,6 +16,7 @@ FUSSIONBORN.zip
 upload_r2.py
 upload_r2_v2.py
 upload_r2_s3.py
+upload_release_clean.py
 
 # Temporary / junk files
 historial.db
