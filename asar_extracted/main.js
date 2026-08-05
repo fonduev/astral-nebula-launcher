@@ -1115,6 +1115,28 @@ ipcMain.handle('get-optifine-versions', async (event, mcVersion) => {
 
 ipcMain.handle('get-optifine-mc-versions', async () => {
     try {
+        const html = await new Promise((resolve, reject) => {
+            const req = https.get('https://optifine.net/downloads', { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } }, res => {
+                let d = '';
+                res.on('data', c => d += c);
+                res.on('end', () => resolve(d));
+            });
+            req.on('error', reject);
+        });
+        const regex = /Minecraft\s+([\d\.]+)/gi;
+        const versions = new Set();
+        let match;
+        while ((match = regex.exec(html)) !== null) {
+            if (match[1]) versions.add(match[1]);
+        }
+        if (versions.size > 0) {
+            return Array.from(versions);
+        }
+    } catch (e) {
+        sendLog(`⚠️ Error obteniendo versiones OptiFine de optifine.net: ${e.message}`, 'warn');
+    }
+
+    try {
         const data = await httpsGet('https://bmclapi2.bangbang93.com/optifine/versionList');
         const list = JSON.parse(data);
         if (Array.isArray(list)) {
@@ -1122,7 +1144,6 @@ ipcMain.handle('get-optifine-mc-versions', async () => {
         }
         return [];
     } catch (e) {
-        sendLog(`⚠️ Error obteniendo versiones de OptiFine: ${e.message}`, 'warn');
         return [];
     }
 });
