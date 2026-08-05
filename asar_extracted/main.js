@@ -4307,8 +4307,8 @@ ipcMain.on('launch-game', async (event, data) => {
             if (count === 0) {
                 sendProgress(0, '');
                 setRPCLauncher();
-                const s = loadSettings();
-                if (s.minimizeToTrayOnGameLaunch !== false && win) {
+                const traySettings = loadSettings();
+                if (traySettings.minimizeToTrayOnGameLaunch !== false && win) {
                     if (win.isMinimized()) win.restore();
                     win.show();
                     win.focus();
@@ -4426,7 +4426,6 @@ ipcMain.on('launch-game', async (event, data) => {
         } catch (e) { /* ignorar: el juego se lanza igual */ }
         launcher.launch(opts);
 
-        const s = loadSettings();
         if (s.minimizeToTrayOnGameLaunch !== false && win && win.isVisible()) {
             win.hide();
             if (tray) {
