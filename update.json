@@ -1,10 +1,10 @@
 {
-  "version": "4.0.10",
-  "notes": "• Fix Filtros: Las pestañas de Fabric, Forge, OptiFine y Quilt muestran exclusivamente versiones de ese tipo sin incluir versiones Vanilla.\n• Fix UI: Nombres limpios '1.21.4 (Fabric)' en el gestor de mods y selectores.\n• Fix RLCraft y cuentas Premium (auto-renovación de token MS).",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.10/app.asar",
+  "version": "4.0.11",
+  "notes": "• Nombres limpios '26.2 (Fabric)' y '1.19.2 (OptiFine)' sin IDs crudos ni duplicados.\n• Lista de versiones de OptiFine completa conectada a BMCLAPI.\n• Filtros limpios sin mostrar versiones Vanilla.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.11/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.10/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.11/app.asar"
     }
   }
 }

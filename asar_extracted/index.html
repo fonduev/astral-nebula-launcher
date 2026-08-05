@@ -4282,82 +4282,106 @@ async function vbRenderList() {
 
   const supportedSet = await vbGetSupportedVersions(modifier);
 
-  let versions = allVer.filter(v => {
-    // Snapshot filter
-    if (!vbShowSnapshots && v.type !== 'release') return false;
-    // Loader support filter (null = show all)
-    if (supportedSet !== null && !supportedSet.includes(v.id)) return false;
-    // Search filter
-    if (search && !v.id.toLowerCase().includes(search)) return false;
-    return true;
-  });
+  const loaderNameMap = { fabric: 'Fabric', forge: 'Forge', neoforge: 'NeoForge', optifine: 'OptiFine', quilt: 'Quilt' };
+  const loaderName = loaderNameMap[modifier] || modifier;
 
-  // Also include installed versions from installedMeta that match (e.g. custom loader builds)
-  if (modifier !== 'vanilla') {
-    const installedForModifier = installedMeta.filter(m => {
-      const type = modifier === 'fabric' ? (m.type === 'fabric' || m.type === 'sodium') : m.type === modifier;
-      return type && m.baseVersion && !versions.some(v => v.id === m.baseVersion);
-    });
-    installedForModifier.forEach(m => {
-      if (!search || m.baseVersion.includes(search)) {
-        versions.push({ id: m.baseVersion, type: 'release', releaseTime: '' });
+  let itemsToRender = [];
+
+  if (modifier === 'vanilla') {
+    itemsToRender = allVer.filter(v => {
+      if (!vbShowSnapshots && v.type !== 'release') return false;
+      if (search && !v.id.toLowerCase().includes(search)) return false;
+      return true;
+    }).map(v => ({
+      mcVersion: v.id,
+      displayName: v.id,
+      isInstalled: installed.has(v.id),
+      badgeHtml: v.type === 'snapshot' ? '<span class="vb-badge vb-badge-snap">SNAP</span>' : ''
+    }));
+  } else {
+    // Modifier (Fabric, OptiFine, Forge, NeoForge, Quilt)
+    const installedMap = new Map();
+    installedMeta.forEach(m => {
+      const isMatch = modifier === 'fabric' ? (m.type === 'fabric' || m.type === 'sodium') : m.type === modifier;
+      if (isMatch && m.baseVersion) {
+        installedMap.set(m.baseVersion, m);
       }
     });
-  }
 
-  // Prepend custom/external versions with their exact name/ID
-  let customVersions = [];
-  if (modifier !== 'vanilla') {
-    customVersions = installedMeta.filter(m => {
-      const type = modifier === 'fabric' ? (m.type === 'fabric' || m.type === 'sodium') : m.type === modifier;
-      // We want to list it as custom if it doesn't match the standard base version exactly
-      return type && m.id !== m.baseVersion;
-    });
-  }
-
-  customVersions.forEach(m => {
-    if (!search || m.id.toLowerCase().includes(search)) {
-      if (!versions.some(v => v.id === m.id)) {
-        // Prepend so that installed/custom clients appear first!
-        versions.unshift({ id: m.id, type: m.type, releaseTime: m.releaseTime || '' });
-      }
+    let baseList = [];
+    if (Array.isArray(supportedSet)) {
+      baseList = supportedSet;
+    } else {
+      baseList = allVer.filter(v => vbShowSnapshots || v.type === 'release').map(v => v.id);
     }
-  });
 
-  if (versions.length === 0) {
+    const seenMc = new Set();
+
+    baseList.forEach(mcVer => {
+      if (seenMc.has(mcVer)) return;
+      if (search && !mcVer.toLowerCase().includes(search)) return;
+
+      const instMeta = installedMap.get(mcVer);
+      const isInst = !!instMeta || installed.has(mcVer);
+      seenMc.add(mcVer);
+
+      let badgeHtml = '';
+      if (modifier === 'forge') badgeHtml = '<span class="vb-badge vb-badge-forge" style="background:rgba(249,115,22,0.15);color:#fb923c;">FORGE</span>';
+      else if (modifier === 'fabric') badgeHtml = '<span class="vb-badge vb-badge-fabric" style="background:rgba(59,130,246,0.15);color:#60a5fa;">FABRIC</span>';
+      else if (modifier === 'neoforge') badgeHtml = '<span class="vb-badge vb-badge-neoforge" style="background:rgba(34,197,94,0.15);color:#4ade80;">NEOFORGE</span>';
+      else if (modifier === 'quilt') badgeHtml = '<span class="vb-badge vb-badge-quilt" style="background:rgba(236,72,153,0.15);color:#f472b6;">QUILT</span>';
+      else if (modifier === 'optifine') badgeHtml = '<span class="vb-badge vb-badge-opti" style="background:rgba(14,165,233,0.15);color:#38bdf8;">OPTIFINE</span>';
+
+      itemsToRender.push({
+        mcVersion: mcVer,
+        displayName: isInst ? `${mcVer} (${loaderName})` : mcVer,
+        isInstalled: isInst,
+        badgeHtml
+      });
+    });
+
+    // Add any installed loader version that wasn't in baseList
+    installedMeta.forEach(m => {
+      const isMatch = modifier === 'fabric' ? (m.type === 'fabric' || m.type === 'sodium') : m.type === modifier;
+      if (isMatch && m.baseVersion && !seenMc.has(m.baseVersion)) {
+        if (!search || m.baseVersion.toLowerCase().includes(search)) {
+          seenMc.add(m.baseVersion);
+          let badgeHtml = '';
+          if (m.type === 'forge') badgeHtml = '<span class="vb-badge vb-badge-forge" style="background:rgba(249,115,22,0.15);color:#fb923c;">FORGE</span>';
+          else if (m.type === 'fabric' || m.type === 'sodium') badgeHtml = '<span class="vb-badge vb-badge-fabric" style="background:rgba(59,130,246,0.15);color:#60a5fa;">FABRIC</span>';
+          else if (m.type === 'neoforge') badgeHtml = '<span class="vb-badge vb-badge-neoforge" style="background:rgba(34,197,94,0.15);color:#4ade80;">NEOFORGE</span>';
+          else if (m.type === 'quilt') badgeHtml = '<span class="vb-badge vb-badge-quilt" style="background:rgba(236,72,153,0.15);color:#f472b6;">QUILT</span>';
+          else if (m.type === 'optifine') badgeHtml = '<span class="vb-badge vb-badge-opti" style="background:rgba(14,165,233,0.15);color:#38bdf8;">OPTIFINE</span>';
+
+          itemsToRender.push({
+            mcVersion: m.baseVersion,
+            displayName: `${m.baseVersion} (${loaderName})`,
+            isInstalled: true,
+            badgeHtml
+          });
+        }
+      }
+    });
+  }
+
+  if (itemsToRender.length === 0) {
     list.innerHTML = '<div style="color:var(--text-dim);font-size:.72rem;text-align:center;padding:20px 8px;">No hay versiones compatibles disponibles.</div>';
     return;
   }
 
-  list.innerHTML = versions.map(v => {
-    const isInstalled = vbIsInstalled(v.id, modifier);
-    const isSnap = v.type === 'snapshot';
-    const isOfficial = allVer.some(a => a.id === v.id);
-    const safeId = v.id.replace(/[^a-zA-Z0-9-_]/g, '_');
-
-    let badgeHtml = '';
-    if (!isOfficial) {
-      if (v.type === 'forge') badgeHtml = '<span class="vb-badge vb-badge-forge" style="background:rgba(249,115,22,0.15);color:#fb923c;">FORGE</span>';
-      else if (v.type === 'fabric') badgeHtml = '<span class="vb-badge vb-badge-fabric" style="background:rgba(59,130,246,0.15);color:#60a5fa;">FABRIC</span>';
-      else if (v.type === 'neoforge') badgeHtml = '<span class="vb-badge vb-badge-neoforge" style="background:rgba(34,197,94,0.15);color:#4ade80;">NEOFORGE</span>';
-      else if (v.type === 'quilt') badgeHtml = '<span class="vb-badge vb-badge-quilt" style="background:rgba(236,72,153,0.15);color:#f472b6;">QUILT</span>';
-      else if (v.type === 'optifine') badgeHtml = '<span class="vb-badge vb-badge-opti" style="background:rgba(14,165,233,0.15);color:#38bdf8;">OPTIFINE</span>';
-      else badgeHtml = '<span class="vb-badge vb-badge-custom" style="background:rgba(234,179,8,0.15);color:#facc15;">CLIENTE</span>';
-    } else if (isSnap) {
-      badgeHtml = '<span class="vb-badge vb-badge-snap">SNAP</span>';
-    }
-
-    return `<div class="vb-item ${isInstalled ? 'installed' : ''}"
+  list.innerHTML = itemsToRender.map(v => {
+    const safeId = v.mcVersion.replace(/[^a-zA-Z0-9-_]/g, '_');
+    return `<div class="vb-item ${v.isInstalled ? 'installed' : ''}"
               id="vbi-${safeId}"
-              onclick="vbSelectVersion('${v.id}')">
-      <span class="vb-item-name">${v.id}</span>
+              onclick="vbSelectVersion('${v.mcVersion}')">
+      <span class="vb-item-name">${v.displayName}</span>
       <span class="vb-item-badges">
-        ${badgeHtml}
-        ${isInstalled ? '<span class="vb-badge vb-badge-installed">✓</span>' : ''}
+        ${v.badgeHtml}
+        ${v.isInstalled ? '<span class="vb-badge vb-badge-installed">✓</span>' : ''}
       </span>
-      ${isInstalled
-        ? `<button class="vb-action-btn vb-play-btn" onclick="event.stopPropagation();vbPlay('${v.id}')">▶ Jugar</button>`
-        : `<button class="vb-action-btn vb-install-btn" onclick="event.stopPropagation();vbInstall('${v.id}')">⬇</button>`
+      ${v.isInstalled
+        ? `<button class="vb-action-btn vb-play-btn" onclick="event.stopPropagation();vbPlay('${v.mcVersion}')">▶ Jugar</button>`
+        : `<button class="vb-action-btn vb-install-btn" onclick="event.stopPropagation();vbInstall('${v.mcVersion}')">⬇</button>`
       }
     </div>`;
   }).join('');

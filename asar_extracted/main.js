@@ -1113,6 +1113,20 @@ ipcMain.handle('get-optifine-versions', async (event, mcVersion) => {
     return info.versions || [];
 });
 
+ipcMain.handle('get-optifine-mc-versions', async () => {
+    try {
+        const data = await httpsGet('https://bmclapi2.bangbang93.com/optifine/versionList');
+        const list = JSON.parse(data);
+        if (Array.isArray(list)) {
+            return [...new Set(list.map(item => item.mcversion))].filter(Boolean);
+        }
+        return [];
+    } catch (e) {
+        sendLog(`⚠️ Error obteniendo versiones de OptiFine: ${e.message}`, 'warn');
+        return [];
+    }
+});
+
 ipcMain.handle('auto-install-optifine', async (event, mcVersion) => {
     currentOperation = { type: 'optifine', cancelled: false };
 
