@@ -165,7 +165,12 @@ function createWindow() {
         show: true,
         opacity: 1,
         backgroundColor: '#00000000',
-        webPreferences: { nodeIntegration: true, contextIsolation: false }
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
+            autoplayPolicy: 'no-user-gesture-required',
+            webSecurity: false
+        }
     });
     win.loadFile(path.join(__dirname, 'index.html'));
     win.center();
@@ -600,14 +605,20 @@ function downloadFile(url, dest, onProgress, opts = {}) {
     });
 }
 
-function httpsGet(url, timeoutMs = 15000) {
+function httpsGet(url, customHeaders = {}, timeoutMs = 15000) {
+    if (typeof customHeaders === 'number') {
+        timeoutMs = customHeaders;
+        customHeaders = {};
+    }
     return new Promise((resolve, reject) => {
         const attempt = (reqUrl, redirectCount = 0) => {
             if (redirectCount > 10) return reject(new Error('Demasiados redirects'));
             const lib = reqUrl.startsWith('https') ? https : http;
-            const req = lib.get(reqUrl, {
-                headers: { 'User-Agent': 'Mozilla/5.0 NebulaLauncher/1.0' }
-            }, (res) => {
+            const headers = Object.assign({
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
+            }, customHeaders);
+            const req = lib.get(reqUrl, { headers }, (res) => {
                 if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
                     res.resume();
                     return attempt(res.headers.location, redirectCount + 1);
@@ -1046,6 +1057,29 @@ async function ensureMinecraftBase(mcVersion, mcPath) {
 
     sendLog(`✅ MC ${mcVersion} listo (JSON + JAR)`);
 }
+
+async function ensureVanillaBase(mcVersion, customMcPath) {
+    const s = loadSettings();
+    const mcPath = customMcPath || s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+    return await ensureMinecraftBase(mcVersion, mcPath);
+}
+
+ipcMain.handle('download-vanilla-version', async (event, mcVersion) => {
+    currentOperation = { type: 'download-vanilla', cancelled: false };
+    try {
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        sendLog(`⬇️ Descargando Minecraft ${mcVersion} (Vanilla)...`);
+        sendProgress(0, `Iniciando descarga de MC ${mcVersion}...`);
+        await ensureMinecraftBase(mcVersion, mcPath);
+        sendProgress(100, `✅ MC ${mcVersion} instalado`);
+        sendLog(`✅ Minecraft ${mcVersion} descargado correctamente.`);
+        return { success: true };
+    } catch (err) {
+        sendLog(`❌ Error descargando MC ${mcVersion}: ${err.message}`, 'error');
+        return { success: false, error: err.message };
+    }
+});
 
 // ── OPTIFINE (FIXED - Using BMCLAPI mirror like TLauncher) ──────────
 // Función interna (NO IPC handler) para verificar y obtener info de OptiFine
@@ -4269,3 +4303,5 @@ ipcMain.on('apply-update', () => {
         app.quit();
     }, 500);
 });
+
+

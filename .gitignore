@@ -1,28 +1,33 @@
 # Ignore the launcher binaries folder (exceeds GitHub's 100MB file limit)
 xd/
+Client-master/
+Flight Client for Cracked/
+Nebula-Launcher-v4.0-Portable/
+Nebula-Launcher-v4.0/
+nebula_client_extract/
+temp_backup_extract/
+temp_check_405_asar/
+temp_check_asar/
+temp_check_asar_fixed/
+temp_test_portable/
 
-# Ignore logs, temp files and compiled executables
+# Ignore python scripts and local tools
+*.py
 *.log
 *.temp
 *.bak
 *.exe
+*.zip
+*.jar
+*.class
 test_run.txt
 
 # Modpack files (large, hosted on Cloudflare R2)
 FUSSIONBORN/
 FUSSIONBORN.zip
 
-# Upload scripts (contain sensitive config)
-upload_r2.py
-upload_r2_v2.py
-upload_r2_s3.py
-upload_release_clean.py
-
 # Temporary / junk files
 historial.db
 nul
-
-*.exe
-*.zip
 app_core.asar
 .env
