@@ -1078,14 +1078,14 @@ ipcMain.handle('get-installed-versions', () => {
                     else if (dir.toLowerCase().includes('fabric')) {
                         type = 'fabric';
                         if (!versionData.inheritsFrom) {
-                            const match = dir.match(/fabric-loader-[\d\.]+-(\d+\.\d+(?:\.\d+)?)/);
+                            const match = dir.match(/fabric-loader-[^\-]+-(.+)/);
                             if (match) baseVersion = match[1];
                         }
                     }
                     else if (dir.toLowerCase().includes('quilt')) {
                         type = 'quilt';
                         if (!versionData.inheritsFrom) {
-                            const match = dir.match(/quilt-loader-[\d\.]+-(\d+\.\d+(?:\.\d+)?)/);
+                            const match = dir.match(/quilt-loader-[^\-]+-(.+)/);
                             if (match) baseVersion = match[1];
                         }
                     }
@@ -2052,12 +2052,20 @@ ipcMain.handle('auto-install-sodium', async (event, mcVersion) => {
         sendLog(`📂 Instancia Fabric: ${fabricInstanceDir}`);
         sendLog(`📂 Mods Fabric en: ${modsDir}`);
 
-        // Download Sodium and complementary mods from Modrinth
-        const modsToInstall = [
+        // Para snapshots 26.x (versiones preview): usar mods de optimización estables (Lithium, ImmediatelyFast, etc.)
+        // Para versiones estables (1.20.1, 1.21.1, etc.): Sodium + Iris Shaders + Indium + Lithium
+        const isSnapshot26 = mcVersion && mcVersion.startsWith('26.');
+        const modsToInstall = isSnapshot26 ? [
+            { slug: 'fabric-api', name: 'Fabric API' },
+            { slug: 'lithium', name: 'Lithium (Optimización Ticks)' },
+            { slug: 'immediatelyfast', name: 'ImmediatelyFast (FPS & Rendering)' },
+            { slug: 'modmenu', name: 'Mod Menu' }
+        ] : [
             { slug: 'fabric-api', name: 'Fabric API' },
             { slug: 'sodium', name: 'Sodium' },
             { slug: 'indium', name: 'Indium' },
             { slug: 'iris', name: 'Iris Shaders' },
+            { slug: 'lithium', name: 'Lithium' },
             { slug: 'modmenu', name: 'Mod Menu' }
         ];
 

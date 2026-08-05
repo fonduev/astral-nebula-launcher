@@ -1,10 +1,10 @@
 {
-  "version": "4.0.21",
-  "notes": "• FIX INCOMPATIBLE MODS POPUP: Resuelto el fallo 'Mod Iris requires any 0.9.x version of Sodium' en 26.1 / 26.2. El launcher inactiva automáticamente Iris e Indium si Sodium no está presente o es una versión inestable en versiones 26.x.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.21/app.asar",
+  "version": "4.0.23",
+  "notes": "• MODS DE OPTIMIZACIÓN EN SNAPSHOTS (26.x): Instalación de Lithium + ImmediatelyFast en versiones 26.1 / 26.2 para ofrecer máximo rendimiento en FPS sin crasheos.\n• En versiones oficiales (1.20.1, 1.21.1, etc.): Sodium + Iris Shaders + Lithium + Indium completos e integrados.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.23/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.21/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.23/app.asar"
     }
   }
 }

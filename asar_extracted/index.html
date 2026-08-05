@@ -4718,13 +4718,14 @@ function populateVersions() {
 function refreshModSelect() {
   const v = document.getElementById('versionSelect').value;
   const modSel = document.getElementById('modSelect');
+  const oldVal = modSel.value;
   modSel.innerHTML = '<option value="">Vanilla (sin mods)</option>';
   if (!v) return;
 
   // Mods instalados para esta versión
   const mods = installedMeta.filter(m =>
-    (m.type === 'optifine' || m.type === 'forge' || m.type === 'fabric' || m.type === 'neoforge') &&
-    m.baseVersion === v
+    (m.type === 'optifine' || m.type === 'forge' || m.type === 'fabric' || m.type === 'neoforge' || m.type === 'quilt') &&
+    (m.baseVersion === v || m.id === v)
   );
 
   // Agregar versiones instaladas
@@ -4742,10 +4743,18 @@ function refreshModSelect() {
     modSel.appendChild(opt);
   });
 
+  // Auto-seleccionar el loader instalado si existe para esta versión
+  if (mods.length > 0) {
+    if (oldVal && Array.from(modSel.options).some(o => o.value === oldVal)) {
+      modSel.value = oldVal;
+    } else {
+      modSel.value = mods[0].id;
+    }
+  }
+
   // OptiFine: siempre mostrar opción (instalada o no)
   const hasOptiFine = mods.some(m => m.type === 'optifine');
   if (!hasOptiFine) {
-    // No instalada → ofrecer instalación automática
     const opt = document.createElement('option');
     opt.value = '__auto_optifine__';
     opt.textContent = '✨ OptiFine (instalar y lanzar)';
