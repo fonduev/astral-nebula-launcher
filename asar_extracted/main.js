@@ -4255,13 +4255,8 @@ ipcMain.on('launch-game', async (event, data) => {
         }
 
         let activeJvmArgs = s.jvmArgs || '';
-        if (!activeJvmArgs.includes('-noverify')) {
-            activeJvmArgs = (activeJvmArgs + ' -noverify').trim();
-        }
         if (activeJvmArgs && activeJvmArgs.trim()) {
             opts.customArgs = activeJvmArgs.trim().split(/\s+/);
-        } else {
-            opts.customArgs = ['-noverify'];
         }
 
         // Inyección del Java Agent para Cuenta Nebula

@@ -1,10 +1,10 @@
 {
-  "version": "4.0.16",
-  "notes": "• Fix de nitidez visual: Eliminado el efecto borroso en selectores de versión y tarjetas al pasar el mouse.\n• Sección Clientes PVP limpia: Lista ajustada a CMPack (instalable) y Nebula PVP (Próximamente).\n• Fix de Modpacks: Verificación y filtrado estricto de archivos .jar (cabecera ZIP PK) y particionado correcto de CDN de CurseForge para evitar mods corruptos y crashes.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.16/app.asar",
+  "version": "4.0.17",
+  "notes": "• CRITICAL FIX: Eliminado el argumento JVM forzado '-noverify' que causaba cierres inmediatos (VerifyError: Expecting a stack map frame) al entrar a un mundo en Vanilla, OptiFine, Fabric, Forge y Modpacks.\n• Carga de mundos 100% estable en todas las versiones.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.17/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.16/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.17/app.asar"
     }
   }
 }
