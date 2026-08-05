@@ -4717,6 +4717,7 @@ function loadVersionsList() {
   if (currentVersionFilter !== 'all') {
     filtered = combined.filter(v=>{
       if (currentVersionFilter === 'installed') return v.isInstalled || installedMeta.some(i=>i.id===v.id);
+      if (currentVersionFilter === 'fabric') return v.type === 'fabric' || v.type === 'sodium';
       return v.type === currentVersionFilter;
     });
   }
@@ -5179,16 +5180,17 @@ async function populateModsVersions() {
     list.appendChild(groupLabel);
 
     forgeVersions.forEach(v => {
+      const displayStr = v.baseVersion ? `${v.baseVersion} (Forge)` : v.id;
       // Hidden select
       const opt = document.createElement('option');
       opt.value = v.id;
-      opt.textContent = `${v.id} (MC ${v.baseVersion})`;
+      opt.textContent = displayStr;
       sel.appendChild(opt);
       // Visual item
       const item = document.createElement('div');
       item.className = 'custom-select-item';
-      item.innerHTML = `<span class="custom-select-item-dot dot-forge"></span><span>${v.id} <span style="font-size:.65rem;color:var(--text-dim)">MC ${v.baseVersion}</span></span>`;
-      item.onclick = () => selectModsVersion(v.id, `🔥 ${v.id}`);
+      item.innerHTML = `<span class="custom-select-item-dot dot-forge"></span><span>${displayStr}</span>`;
+      item.onclick = () => selectModsVersion(v.id, `🔥 ${displayStr}`);
       list.appendChild(item);
     });
   }
@@ -5205,16 +5207,17 @@ async function populateModsVersions() {
     list.appendChild(groupLabel);
 
     neoforgeVersions.forEach(v => {
+      const displayStr = v.baseVersion ? `${v.baseVersion} (NeoForge)` : v.id;
       // Hidden select
       const opt = document.createElement('option');
       opt.value = v.id;
-      opt.textContent = `${v.id} (MC ${v.baseVersion})`;
+      opt.textContent = displayStr;
       sel.appendChild(opt);
       // Visual item
       const item = document.createElement('div');
       item.className = 'custom-select-item';
-      item.innerHTML = `<span class="custom-select-item-dot dot-neoforge"></span><span>${v.id} <span style="font-size:.65rem;color:var(--text-dim)">MC ${v.baseVersion}</span></span>`;
-      item.onclick = () => selectModsVersion(v.id, `🌿 ${v.id}`);
+      item.innerHTML = `<span class="custom-select-item-dot dot-neoforge"></span><span>${displayStr}</span>`;
+      item.onclick = () => selectModsVersion(v.id, `🌿 ${displayStr}`);
       list.appendChild(item);
     });
   }
@@ -5231,14 +5234,15 @@ async function populateModsVersions() {
     list.appendChild(groupLabel);
 
     fabricVersions.forEach(v => {
+      const displayStr = v.baseVersion ? `${v.baseVersion} (Fabric)` : v.id;
       const opt = document.createElement('option');
       opt.value = v.id;
-      opt.textContent = `${v.id} (MC ${v.baseVersion})`;
+      opt.textContent = displayStr;
       sel.appendChild(opt);
       const item = document.createElement('div');
       item.className = 'custom-select-item';
-      item.innerHTML = `<span class="custom-select-item-dot dot-fabric"></span><span>${v.id} <span style="font-size:.65rem;color:var(--text-dim)">MC ${v.baseVersion}</span></span>`;
-      item.onclick = () => selectModsVersion(v.id, `💎 ${v.id}`);
+      item.innerHTML = `<span class="custom-select-item-dot dot-fabric"></span><span>${displayStr}</span>`;
+      item.onclick = () => selectModsVersion(v.id, `💎 ${displayStr}`);
       list.appendChild(item);
     });
   }
@@ -5255,14 +5259,15 @@ async function populateModsVersions() {
     list.appendChild(groupLabel);
 
     quiltVersions.forEach(v => {
+      const displayStr = v.baseVersion ? `${v.baseVersion} (Quilt)` : v.id;
       const opt = document.createElement('option');
       opt.value = v.id;
-      opt.textContent = `${v.id} (MC ${v.baseVersion})`;
+      opt.textContent = displayStr;
       sel.appendChild(opt);
       const item = document.createElement('div');
       item.className = 'custom-select-item';
-      item.innerHTML = `<span class="custom-select-item-dot dot-quilt"></span><span>${v.id} <span style="font-size:.65rem;color:var(--text-dim)">MC ${v.baseVersion}</span></span>`;
-      item.onclick = () => selectModsVersion(v.id, `🔮 ${v.id}`);
+      item.innerHTML = `<span class="custom-select-item-dot dot-quilt"></span><span>${displayStr}</span>`;
+      item.onclick = () => selectModsVersion(v.id, `🔮 ${displayStr}`);
       list.appendChild(item);
     });
   }

@@ -1,10 +1,10 @@
 {
-  "version": "4.0.9",
-  "notes": "• Fix RLCraft: Modpacks legacy Forge (MC ≤1.12.2) abren 100% perfecto sin error 'unrecognized option'.\n• Fix Premium: Renovación automática de sesión de Microsoft al entrar a servidores sin pedir 'reiniciar el launcher'.\n• Auto-limpieza de JSONs de versiones legacy.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.9/app.asar",
+  "version": "4.0.10",
+  "notes": "• Fix Filtros: Las pestañas de Fabric, Forge, OptiFine y Quilt muestran exclusivamente versiones de ese tipo sin incluir versiones Vanilla.\n• Fix UI: Nombres limpios '1.21.4 (Fabric)' en el gestor de mods y selectores.\n• Fix RLCraft y cuentas Premium (auto-renovación de token MS).",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.10/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.9/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.10/app.asar"
     }
   }
 }
