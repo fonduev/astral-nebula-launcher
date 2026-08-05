@@ -1,10 +1,10 @@
 {
-  "version": "4.0.8",
-  "notes": "• Fix: Fabric/Quilt/Forge ya inician correctamente (antes abría vanilla).\n• Fix: Versiones muestran formato limpio: \"1.21.4 (Fabric)\" en lugar del ID crudo.\n• Fix: RLCraft y modpacks legacy (MC ≤1.12) ya no dan 'unrecognized option'.\n• Fix: Selector de versiones al instalar modpacks ya funciona.\n• Eliminación completa del reproductor de música y copias de seguridad.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.8/app.asar",
+  "version": "4.0.9",
+  "notes": "• Fix RLCraft: Modpacks legacy Forge (MC ≤1.12.2) abren 100% perfecto sin error 'unrecognized option'.\n• Fix Premium: Renovación automática de sesión de Microsoft al entrar a servidores sin pedir 'reiniciar el launcher'.\n• Auto-limpieza de JSONs de versiones legacy.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.9/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.8/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.9/app.asar"
     }
   }
 }

@@ -3566,6 +3566,16 @@ ipc.on('microsoft-error', (e,msg) => {
   toast('Error en Microsoft: '+msg,'error');
 });
 
+ipc.on('update-auth-data', (e, freshAuth) => {
+  if (freshAuth) {
+    authData = freshAuth;
+    if (settings) {
+      settings.lastAuthData = freshAuth;
+      ipc.send('save-settings', settings);
+    }
+  }
+});
+
 let currentLaunchName = '';
 
 function setLaunchState(state, displayName) {

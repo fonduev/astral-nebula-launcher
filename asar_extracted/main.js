@@ -2340,15 +2340,39 @@ async function ensureForgeLoader(mcVersion, forgeVersion) {
 }
 
 // ── Helper: ensure critical NeoForge/Forge JVM args are in a version JSON ──
+function isLegacyVersionJson(vJson) {
+    if (!vJson) return false;
+    if (vJson.minecraftArguments) return true;
+    const ver = vJson.inheritsFrom || vJson.id || '';
+    const match = ver.match(/^(\d+)\.(\d+)/);
+    if (match) {
+        const minor = parseInt(match[2]);
+        if (minor <= 12) return true;
+    }
+    return false;
+}
+
 function ensureCriticalNeoForgeJvmArgs(jsonPath) {
     try {
         if (!fs.existsSync(jsonPath)) return false;
         const vJson = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-        // Handle both modern format (arguments object) and legacy format (arguments array)
+
+        // If legacy MC version (<=1.12.2), REMOVE modern JVM args if present to fix Java 8 launch (RLCraft, etc.)
+        if (isLegacyVersionJson(vJson)) {
+            if (vJson.arguments && vJson.arguments.jvm) {
+                delete vJson.arguments.jvm;
+                if (Object.keys(vJson.arguments).length === 0) delete vJson.arguments;
+                fs.writeFileSync(jsonPath, JSON.stringify(vJson, null, 2), 'utf8');
+                sendLog(`🏛️ Limpiados JVM args modernos de versión legacy: ${path.basename(jsonPath)}`);
+                return true;
+            }
+            return false;
+        }
+
+        // Modern NeoForge/Forge (>=1.13)
         if (!vJson.arguments || Array.isArray(vJson.arguments)) {
             vJson.arguments = {};
         }
-        // Guard: if jvm exists but is not an array, log warning and return (prevent data loss)
         if (vJson.arguments.jvm && !Array.isArray(vJson.arguments.jvm)) {
             sendLog('⚠️ Version JSON tiene arguments.jvm no-array, no se modifica', 'warn');
             return false;
@@ -3744,7 +3768,86 @@ async function doMicrosoftAuth() {
     });
     const profile = JSON.parse(profileStr);
     if (profile.error) throw new Error('Esta cuenta no tiene Minecraft comprado.');
-    return { name: profile.name, uuid: profile.id, accessToken: mcData.access_token, userType: 'msa' };
+    return { name: profile.name, uuid: profile.id, accessToken: mcData.access_token, refreshToken: tokenRes.refresh_token, userType: 'msa' };
+}
+
+async function refreshMicrosoftAuth(refreshToken) {
+    if (!refreshToken) throw new Error('Sin refresh token de Microsoft');
+    const CLIENT_ID = '00000000402b5328';
+    const REDIRECT = 'https://login.live.com/oauth20_desktop.srf';
+
+    sendLog('🔄 Renovando token de Microsoft...');
+    const tokenRes = await new Promise((resolve, reject) => {
+        const body = `client_id=${CLIENT_ID}&refresh_token=${encodeURIComponent(refreshToken)}&grant_type=refresh_token&redirect_uri=${encodeURIComponent(REDIRECT)}`;
+        const req = https.request({ hostname: 'login.live.com', path: '/oauth20_token.srf', method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
+            (res) => { let d = ''; res.on('data', c => d += c); res.on('end', () => resolve(JSON.parse(d))); });
+        req.on('error', reject); req.write(body); req.end();
+    });
+
+    if (tokenRes.error || !tokenRes.access_token) {
+        throw new Error(tokenRes.error_description || tokenRes.error || 'Fallo al renovar token de Microsoft');
+    }
+
+    sendLog('Autenticando con Xbox Live…');
+    const xblData = JSON.parse((await httpsPost('https://user.auth.xboxlive.com/user/authenticate', { Properties: { AuthMethod: 'RPS', SiteName: 'user.auth.xboxlive.com', RpsTicket: `d=${tokenRes.access_token}` }, RelyingParty: 'http://auth.xboxlive.com', TokenType: 'JWT' })).data);
+
+    sendLog('Validando XSTS…');
+    const xstsData = JSON.parse((await httpsPost('https://xsts.auth.xboxlive.com/xsts/authorize', { Properties: { SandboxId: 'RETAIL', UserTokens: [xblData.Token] }, RelyingParty: 'rp://api.minecraftservices.com/', TokenType: 'JWT' })).data);
+    if (xstsData.XErr) throw new Error({ 2148916238: 'Sin Xbox Live. Ve a xbox.com.', 2148916235: 'Xbox no disponible en tu región.' }[xstsData.XErr] ?? `Xbox error ${xstsData.XErr}`);
+
+    sendLog('Obteniendo acceso a Minecraft…');
+    const mcData = JSON.parse((await httpsPost('https://api.minecraftservices.com/authentication/login_with_xbox', { identityToken: `XBL3.0 x=${xblData.DisplayClaims.xui[0].uhs};${xstsData.Token}` })).data);
+    if (!mcData.access_token) throw new Error('Sin token de Minecraft');
+
+    sendLog('Cargando perfil…');
+    const profileStr = await new Promise((resolve, reject) => {
+        https.get({ hostname: 'api.minecraftservices.com', path: '/minecraft/profile', headers: { Authorization: `Bearer ${mcData.access_token}` } },
+            (res) => { let d = ''; res.on('data', c => d += c); res.on('end', () => resolve(d)); }).on('error', reject);
+    });
+    const profile = JSON.parse(profileStr);
+    if (profile.error) throw new Error('Esta cuenta no tiene Minecraft comprado.');
+    return { name: profile.name, uuid: profile.id, accessToken: mcData.access_token, refreshToken: tokenRes.refresh_token || refreshToken, userType: 'msa' };
+}
+
+async function validateOrRefreshMicrosoftAuth(auth) {
+    if (!auth || !auth.accessToken) return auth;
+    
+    // Test if current accessToken is valid with Mojang API
+    try {
+        const check = await new Promise((resolve) => {
+            const req = https.get({
+                hostname: 'api.minecraftservices.com',
+                path: '/minecraft/profile',
+                headers: { Authorization: `Bearer ${auth.accessToken}` }
+            }, (res) => {
+                let d = '';
+                res.on('data', c => d += c);
+                res.on('end', () => resolve({ status: res.statusCode, body: d }));
+            });
+            req.on('error', () => resolve({ status: 0 }));
+        });
+        
+        if (check.status === 200) {
+            return auth; // Active & valid token
+        }
+        sendLog(`🔑 Token de Microsoft caducado o inválido (status ${check.status}). Renovando sesión...`, 'warn');
+    } catch (e) {
+        sendLog(`⚠️ Error verificando token de Microsoft: ${e.message}`, 'warn');
+    }
+
+    if (auth.refreshToken) {
+        try {
+            const refreshed = await refreshMicrosoftAuth(auth.refreshToken);
+            sendLog(`✅ Sesión de Microsoft renovada exitosamente para ${refreshed.name}!`);
+            return refreshed;
+        } catch (err) {
+            sendLog(`❌ Error renovando sesión de Microsoft: ${err.message}.`, 'error');
+            throw new Error(`Tu sesión de Microsoft ha expirado (${err.message}). Por favor vuelve a iniciar sesión con tu cuenta de Microsoft en el launcher.`);
+        }
+    } else {
+        sendLog(`⚠️ Cuenta de Microsoft sin refresh token. Si los servidores marcan error de sesión, vuelve a iniciar sesión en el launcher.`, 'warn');
+        return auth;
+    }
 }
 
 ipcMain.on('microsoft-login', async (event) => {
@@ -3786,6 +3889,23 @@ ipcMain.on('launch-game', async (event, data) => {
     win?.webContents.send('instance-launching', { instanceId });
 
     try {
+        // Auto-refresh Microsoft Auth if expired
+        if ((data.type === 'microsoft' || data.auth?.userType === 'msa') && data.auth) {
+            try {
+                const freshAuth = await validateOrRefreshMicrosoftAuth(data.auth);
+                if (freshAuth && freshAuth.accessToken !== data.auth.accessToken) {
+                    data.auth = freshAuth;
+                    win?.webContents.send('update-auth-data', freshAuth);
+                }
+            } catch (authErr) {
+                sendLog(`❌ ${authErr.message}`, 'error');
+                currentOperation = null;
+                win?.webContents.send('instance-cancelled', { instanceId });
+                win?.webContents.send('launch-blocked');
+                return;
+            }
+        }
+
         ensureLauncherProfiles(mcPath);
         cleanCorruptedLibs(mcPath);
 
