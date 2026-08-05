@@ -1,10 +1,10 @@
 {
-  "version": "4.0.23",
-  "notes": "• MODS DE OPTIMIZACIÓN EN SNAPSHOTS (26.x): Instalación de Lithium + ImmediatelyFast en versiones 26.1 / 26.2 para ofrecer máximo rendimiento en FPS sin crasheos.\n• En versiones oficiales (1.20.1, 1.21.1, etc.): Sodium + Iris Shaders + Lithium + Indium completos e integrados.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.23/app.asar",
+  "version": "4.0.24",
+  "notes": "• FIX DETECCIÓN DE MODIFIERS (Fabric/Quilt/Forge): Corregido el bug donde la lista de versiones mostraba Fabric/Quilt/Forge como 'Instalado ▶ Jugar' cuando solo Vanilla estaba descargado. Ahora muestra correctamente el botón de Descarga ⬇ si el modloader no está realmente instalado.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.24/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.23/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.24/app.asar"
     }
   }
 }

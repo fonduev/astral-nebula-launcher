@@ -4415,15 +4415,13 @@ async function vbRenderList() {
 }
 
 function vbIsInstalled(mcId, modifier) {
-  // If it's a specific installed version ID, it's installed
-  if (installed.has(mcId)) return true;
-
-  if (modifier === 'vanilla') return installed.has(mcId);
-  if (modifier === 'optifine') return installedMeta.some(m => m.type === 'optifine' && m.baseVersion === mcId);
-  if (modifier === 'forge')    return installedMeta.some(m => m.type === 'forge'    && m.baseVersion === mcId);
-  if (modifier === 'fabric')   return installedMeta.some(m => (m.type === 'fabric' || m.type === 'sodium') && m.baseVersion === mcId);
-  if (modifier === 'neoforge') return installedMeta.some(m => m.type === 'neoforge' && m.baseVersion === mcId);
-  if (modifier === 'quilt')    return installedMeta.some(m => m.type === 'quilt'    && m.baseVersion === mcId);
+  const mod = modifier || currentPlayModifier;
+  if (!mod || mod === 'vanilla') return installed.has(mcId);
+  if (mod === 'optifine') return installedMeta.some(m => m.type === 'optifine' && (m.baseVersion === mcId || m.id === mcId));
+  if (mod === 'forge')    return installedMeta.some(m => m.type === 'forge'    && (m.baseVersion === mcId || m.id === mcId));
+  if (mod === 'fabric')   return installedMeta.some(m => (m.type === 'fabric' || m.type === 'sodium') && (m.baseVersion === mcId || m.id === mcId));
+  if (mod === 'neoforge') return installedMeta.some(m => m.type === 'neoforge' && (m.baseVersion === mcId || m.id === mcId));
+  if (mod === 'quilt')    return installedMeta.some(m => m.type === 'quilt'    && (m.baseVersion === mcId || m.id === mcId));
   return false;
 }
 
