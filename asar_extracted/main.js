@@ -2054,14 +2054,11 @@ ipcMain.handle('auto-install-sodium', async (event, mcVersion) => {
 
         // Download Sodium and complementary mods from Modrinth
         const modsToInstall = [
-            { slug: 'fabric-api', name: 'Fabric API' }, // requerido por todos
+            { slug: 'fabric-api', name: 'Fabric API' },
             { slug: 'sodium', name: 'Sodium' },
-            { slug: 'indium', name: 'Indium' }, // compatibilidad Sodium+Iris
+            { slug: 'indium', name: 'Indium' },
             { slug: 'iris', name: 'Iris Shaders' },
-            { slug: 'lithium', name: 'Lithium' },
-            { slug: 'sodium-extra', name: 'Sodium Extra' },
-            { slug: 'reeses-sodium-options', name: "Reese's Sodium Options" },
-            { slug: 'modmenu', name: 'Mod Menu' }, // ver mods en juego
+            { slug: 'modmenu', name: 'Mod Menu' }
         ];
 
         let modsInstalled = 0;
@@ -4227,6 +4224,29 @@ ipcMain.on('launch-game', async (event, data) => {
         const instanceDir = data.modpackName
             ? path.join(mcPath, 'instances', data.modpackName)
             : (launchModId && launchModId !== launchVersion ? getInstanceDir(mcPath, launchModId) : mcPath);
+
+        const cleanIncompatibleMods = (mDir) => {
+            if (!fs.existsSync(mDir)) return;
+            try {
+                const files = fs.readdirSync(mDir);
+                for (const f of files) {
+                    const fLow = f.toLowerCase();
+                    if ((fLow.includes('sodium-extra') || fLow.includes('sodiumextra') || fLow.includes('reeses-sodium') || fLow.includes('reesessodium')) && !fLow.endsWith('.disabled')) {
+                        try {
+                            fs.unlinkSync(path.join(mDir, f));
+                            sendLog(`🧹 Mod inestable autolimpiado: ${f}`);
+                        } catch {
+                            try { fs.renameSync(path.join(mDir, f), path.join(mDir, f + '.disabled')); } catch {}
+                        }
+                    }
+                }
+            } catch {}
+        };
+
+        cleanIncompatibleMods(path.join(instanceDir, 'mods'));
+        if (instanceDir !== mcPath) {
+            cleanIncompatibleMods(path.join(mcPath, 'mods'));
+        }
 
         if (instanceDir !== mcPath) {
             fs.mkdirSync(path.join(instanceDir, 'mods'), { recursive: true });

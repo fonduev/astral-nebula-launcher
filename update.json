@@ -1,10 +1,10 @@
 {
-  "version": "4.0.17",
-  "notes": "• CRITICAL FIX: Eliminado el argumento JVM forzado '-noverify' que causaba cierres inmediatos (VerifyError: Expecting a stack map frame) al entrar a un mundo en Vanilla, OptiFine, Fabric, Forge y Modpacks.\n• Carga de mundos 100% estable en todas las versiones.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.17/app.asar",
+  "version": "4.0.18",
+  "notes": "• AUTO-CLEANUP DE MODS INCOMPATIBLES: El launcher detecta y limpia automáticamente los mods inestables de Sodium (sodium-extra y reeses-sodium-options) de cualquier carpeta de mods al iniciar el juego.\n• Solucionado el crash 'Cannot invoke net.minecraft.world.level.Level.tickRateManager() because this.level is null' en mundos locales y servidores.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.18/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.17/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.18/app.asar"
     }
   }
 }
