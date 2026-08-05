@@ -1,10 +1,10 @@
 {
-  "version": "4.0.12",
-  "notes": "• Carga completa de las 53+ versiones de OptiFine desde optifine.net (26.1.2, 1.21.11, 1.21.4, 1.20.1, 1.19.2, etc.).\n• Nombres limpios '26.2 (Fabric)' y '1.19.2 (OptiFine)' sin duplicados.\n• Filtros de cargadores sin versiones Vanilla.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.12/app.asar",
+  "version": "4.0.13",
+  "notes": "• Corrección: Al seleccionar y lanzar versiones con Fabric/Sodium (ej. 26.2), ejecuta directamente Fabric+Sodium en lugar de Vanilla.\n• Resolución dinámica de versiones instaladas por cargador.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.13/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.12/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.13/app.asar"
     }
   }
 }

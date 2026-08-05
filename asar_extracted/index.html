@@ -4427,19 +4427,31 @@ function vbSelectVersion(mcId) {
   vbOpenLoaderPanel(mcId, modifier);
 }
 
-function vbSetHiddenSelect(versionId) {
+function vbSetHiddenSelect(versionId, modifier) {
+  const mod = modifier || currentPlayModifier;
+  let targetId = versionId;
+
+  if (mod && mod !== 'vanilla') {
+    const match = installedMeta.find(m => {
+      const typeMatch = mod === 'fabric' ? (m.type === 'fabric' || m.type === 'sodium') : m.type === mod;
+      return typeMatch && (m.baseVersion === versionId || m.id === versionId);
+    });
+    if (match) targetId = match.id;
+  } else if (installedMeta.some(m => m.id === versionId)) {
+    targetId = versionId;
+  }
+
   const sel = document.getElementById('versionSelect');
   if (!sel) return;
-  // Ensure option exists
   let found = false;
-  for (const opt of sel.options) { if (opt.value === versionId) { found = true; break; } }
+  for (const opt of sel.options) { if (opt.value === targetId) { found = true; break; } }
   if (!found) {
     const opt = document.createElement('option');
-    opt.value = versionId;
-    opt.textContent = versionId;
+    opt.value = targetId;
+    opt.textContent = targetId;
     sel.appendChild(opt);
   }
-  sel.value = versionId;
+  sel.value = targetId;
   onVersionSelectChange();
 }
 
@@ -4457,7 +4469,7 @@ async function vbOpenLoaderPanel(mcId, modifier) {
     sel.style.display = 'none';
     btn.textContent = '▶ Jugar';
     btn.onclick = () => { vbPlay(mcId); };
-    vbSetHiddenSelect(mcId);
+    vbSetHiddenSelect(mcId, modifier);
     return;
   }
 
@@ -4578,7 +4590,7 @@ async function vbInstallLoader() {
       populateVersions();
       loadVersionsList();
       // Auto-select and play
-      vbSetHiddenSelect(mcId);
+      vbSetHiddenSelect(mcId, modifier);
       vbOpenLoaderPanel(mcId, modifier);
     } else {
       toast(`❌ ${result?.error || 'Error desconocido'}`, 'error');
@@ -4620,28 +4632,8 @@ async function vbInstall(mcId) {
 }
 
 function vbPlay(mcId) {
-  // If mcId is already a specific installed version ID (custom/third-party client)
-  if (installedMeta.some(m => m.id === mcId)) {
-    vbSetHiddenSelect(mcId);
-    launchGame();
-    return;
-  }
-
   const modifier = currentPlayModifier;
-  // For loaders, find the specific installed version ID
-  if (modifier !== 'vanilla' && modifier !== 'optifine') {
-    let match = null;
-    if (modifier === 'forge')    match = installedMeta.find(m => m.type==='forge'    && m.baseVersion===mcId);
-    if (modifier === 'fabric')   match = installedMeta.find(m => (m.type==='fabric'||m.type==='sodium') && m.baseVersion===mcId);
-    if (modifier === 'neoforge') match = installedMeta.find(m => m.type==='neoforge' && m.baseVersion===mcId);
-    if (modifier === 'quilt')    match = installedMeta.find(m => m.type==='quilt'    && m.baseVersion===mcId);
-    if (match) { vbSetHiddenSelect(match.id); launchGame(); return; }
-  }
-  if (modifier === 'optifine') {
-    const match = installedMeta.find(m => m.type==='optifine' && m.baseVersion===mcId);
-    if (match) { vbSetHiddenSelect(match.id); launchGame(); return; }
-  }
-  vbSetHiddenSelect(mcId);
+  vbSetHiddenSelect(mcId, modifier);
   launchGame();
 }
 
