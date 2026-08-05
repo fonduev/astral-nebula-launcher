@@ -3151,6 +3151,52 @@ ipcMain.handle('search-modpacks', async (event, { query, platform = 'all' }) => 
     return results;
 });
 
+// ── Get available online versions for a modpack project ──
+ipcMain.handle('get-modpack-online-versions', async (event, { projectId, source }) => {
+    try {
+        if (source === 'curseforge') {
+            // CurseForge: fetch files for this mod
+            const url = `https://api.curseforge.com/v1/mods/${projectId}/files?pageSize=20&sortField=5&sortOrder=desc`;
+            const headers = { 'x-api-key': '$2a$10$bL4bIL5pUWqfcO7KwqnNkuKpxoV6K1HM6wqKMm7q1VfHn6eOiM2Mi', 'Accept': 'application/json' };
+            try {
+                const raw = await httpsGet(url, headers);
+                const data = JSON.parse(raw);
+                const files = data.data || [];
+                const versions = files.slice(0, 15).map(f => ({
+                    id: String(f.id),
+                    versionNumber: f.displayName || f.fileName,
+                    name: f.displayName || f.fileName,
+                    date: f.fileDate ? f.fileDate.split('T')[0] : '',
+                    gameVersions: f.gameVersions || [],
+                    mcVersion: (f.gameVersions || []).find(v => /^\d+\.\d+/.test(v)) || ''
+                }));
+                return { onlineVersions: versions };
+            } catch (e) {
+                return { onlineVersions: [] };
+            }
+        }
+
+        // Default: Modrinth
+        const url = `https://api.modrinth.com/v2/project/${projectId}/version`;
+        const raw = await httpsGet(url);
+        const versionsData = JSON.parse(raw);
+        if (!versionsData || versionsData.length === 0) return { onlineVersions: [] };
+
+        const versions = versionsData.slice(0, 20).map(v => ({
+            id: v.id,
+            versionNumber: v.version_number || v.name,
+            name: v.name,
+            date: v.date_published ? v.date_published.split('T')[0] : '',
+            gameVersions: v.game_versions || [],
+            mcVersion: (v.game_versions || [])[0] || ''
+        }));
+        return { onlineVersions: versions };
+    } catch (err) {
+        sendLog(`❌ Error obteniendo versiones del modpack: ${err.message}`, 'error');
+        return { onlineVersions: [], error: err.message };
+    }
+});
+
 ipcMain.handle('install-modpack-from-search', async (event, { projectId, title, iconUrl, screenshotUrl, description, source }) => {
     if (source === 'curseforge') {
         return await installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl, description);
@@ -3746,6 +3792,38 @@ ipcMain.on('launch-game', async (event, data) => {
         let launchVersion = data.version;
         let launchModId = data.modId;
         let modpackDispName = '';
+
+        // Auto-detect: si la versión enviada ES un ID de loader (fabric-loader-x-MC, etc.),
+        // extraer correctamente la versión base de MC y el custom mod ID.
+        if (!launchModId && launchVersion) {
+            const vLow = launchVersion.toLowerCase();
+            let extractedMc = null;
+            if (vLow.startsWith('fabric-loader-')) {
+                const m = launchVersion.match(/^fabric-loader-[\d.]+-(\d+\.\d+(?:\.\d+)?)$/);
+                if (m) { extractedMc = m[1]; }
+            } else if (vLow.startsWith('quilt-loader-')) {
+                const m = launchVersion.match(/^quilt-loader-[\d.]+-(\d+\.\d+(?:\.\d+)?)$/);
+                if (m) { extractedMc = m[1]; }
+            } else if (vLow.includes('forge') || vLow.includes('neoforge') || vLow.includes('optifine')) {
+                // For forge/neoforge/optifine: the JSON's inheritsFrom is the base version
+                const verJsonPath = path.join(mcPath, 'versions', launchVersion, launchVersion + '.json');
+                if (fs.existsSync(verJsonPath)) {
+                    try {
+                        const vData = JSON.parse(fs.readFileSync(verJsonPath, 'utf8'));
+                        if (vData.inheritsFrom) extractedMc = vData.inheritsFrom;
+                    } catch(e) {}
+                }
+                if (!extractedMc) {
+                    const m = launchVersion.match(/^(\d+\.\d+(?:\.\d+)?)/);
+                    if (m) extractedMc = m[1];
+                }
+            }
+            if (extractedMc) {
+                sendLog(`🔧 Auto-detect: versión loader "${launchVersion}" → MC ${extractedMc} + custom`);
+                launchModId = launchVersion;
+                launchVersion = extractedMc;
+            }
+        }
 
         // Si se lanza un modpack, resolver su loader e instalarlo si es necesario
         if (data.modpackName) {

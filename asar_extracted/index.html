@@ -4678,11 +4678,14 @@ function refreshModSelect() {
   mods.forEach(m => {
     const opt = document.createElement('option');
     opt.value = m.id;
-    const label = m.type === 'optifine' ? '✨ OptiFine'
-                : m.type === 'forge'    ? '🔥 Forge'
-                : m.type === 'fabric'   ? '💎 Fabric'
-                :                         '🌿 NeoForge';
-    opt.textContent = `${label}: ${m.id}`;
+    const loaderName = m.type === 'optifine' ? 'OptiFine'
+                     : m.type === 'forge'    ? 'Forge'
+                     : m.type === 'fabric'   ? 'Fabric'
+                     : m.type === 'neoforge' ? 'NeoForge'
+                     : m.type === 'quilt'    ? 'Quilt'
+                     :                         m.type;
+    const baseVer = m.baseVersion || m.id;
+    opt.textContent = `${baseVer} (${loaderName})`;
     modSel.appendChild(opt);
   });
 
@@ -4708,10 +4711,14 @@ function loadVersionsList() {
     });
   }
   container.innerHTML = filtered.map(v=>{
-    const badgeClass = {release:'badge-release',snapshot:'badge-snapshot',optifine:'badge-optifine',forge:'badge-forge',fabric:'badge-fabric',neoforge:'badge-neoforge'}[v.type] || 'badge-release';
-    const typeLabel = {release:'OFICIAL',snapshot:'SNAPSHOT',optifine:'OPTIFINE',forge:'FORGE',fabric:'FABRIC',neoforge:'NEOFORGE'}[v.type] || v.type.toUpperCase();
+    const badgeClass = {release:'badge-release',snapshot:'badge-snapshot',optifine:'badge-optifine',forge:'badge-forge',fabric:'badge-fabric',neoforge:'badge-neoforge',quilt:'badge-fabric'}[v.type] || 'badge-release';
+    const typeLabel = {release:'OFICIAL',snapshot:'SNAPSHOT',optifine:'OPTIFINE',forge:'FORGE',fabric:'FABRIC',neoforge:'NEOFORGE',quilt:'QUILT'}[v.type] || v.type.toUpperCase();
     const isInstalled = v.isInstalled || installedMeta.some(i=>i.id===v.id);
-    return `<div class="version-item"><div class="version-info"><div class="version-id">${v.id} <span class="version-type-badge ${badgeClass}">${typeLabel}</span> ${isInstalled?'<span class="version-type-badge badge-release">✓ INSTALADA</span>':''}</div><div class="version-date">${new Date(v.releaseTime).toLocaleDateString()}</div></div></div>`;
+    // For loader versions, show clean display: "1.21.4 (Fabric)" instead of raw ID
+    const isLoader = ['fabric','forge','neoforge','optifine','quilt'].includes(v.type);
+    const loaderNameMap = {fabric:'Fabric',forge:'Forge',neoforge:'NeoForge',optifine:'OptiFine',quilt:'Quilt'};
+    const displayId = isLoader && v.baseVersion ? `${v.baseVersion} (${loaderNameMap[v.type] || v.type})` : v.id;
+    return `<div class="version-item"><div class="version-info"><div class="version-id">${displayId} <span class="version-type-badge ${badgeClass}">${typeLabel}</span> ${isInstalled?'<span class="version-type-badge badge-release">✓ INSTALADA</span>':''}</div><div class="version-date">${new Date(v.releaseTime).toLocaleDateString()}</div></div></div>`;
   }).join('');
 }
 
