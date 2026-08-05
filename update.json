@@ -1,10 +1,10 @@
 {
-  "version": "4.0.13",
-  "notes": "• Corrección: Al seleccionar y lanzar versiones con Fabric/Sodium (ej. 26.2), ejecuta directamente Fabric+Sodium en lugar de Vanilla.\n• Resolución dinámica de versiones instaladas por cargador.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.13/app.asar",
+  "version": "4.0.14",
+  "notes": "• Fix Crash en Mundos: Eliminados mods accesorios de Sodium (sodium-extra y reeses-sodium-options) para garantizar 100% estabilidad al cargar mundos en versiones recientes o preview.\n• Instalación ultra estable y optimizada de Sodium + Iris + Fabric API + Indium.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.14/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.13/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.14/app.asar"
     }
   }
 }
