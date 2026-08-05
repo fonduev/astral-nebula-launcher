@@ -2,7 +2,7 @@
 // ║         NEBULA LAUNCHER — main.js v5.0                      ║
 // ║              Proceso principal de Electron                  ║
 // ╚══════════════════════════════════════════════════════════════╝
-const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu } = require('electron');
 const { Client, Authenticator } = require('minecraft-launcher-core');
 const path = require('path');
 const fs = require('fs');
@@ -149,9 +149,95 @@ function setRPCPlaying(mcVersion, modType = null, modpackName = null) {
 
 let win;
 let splash;
+let tray = null;
 const runningInstances = new Map(); // id → { launcher, version }
 let instanceCounter = 0;
 let currentOperation = null;
+
+function initSystemTray() {
+    if (tray) return;
+    try {
+        const iconPath = path.join(__dirname, 'icon.ico');
+        if (!fs.existsSync(iconPath)) return;
+        tray = new Tray(iconPath);
+        tray.setToolTip('Nebula Launcher — El Cosmos de Minecraft');
+
+        const updateTrayContextMenu = () => {
+            const s = loadSettings();
+            const contextMenu = Menu.buildFromTemplate([
+                {
+                    label: '🌌 Mostrar Nebula Launcher',
+                    click: () => {
+                        if (win) {
+                            if (win.isMinimized()) win.restore();
+                            win.show();
+                            win.focus();
+                        }
+                    }
+                },
+                { type: 'separator' },
+                {
+                    label: '⚡ Minimizar a la bandeja al Jugar',
+                    type: 'checkbox',
+                    checked: s.minimizeToTrayOnGameLaunch !== false,
+                    click: (item) => {
+                        const current = loadSettings();
+                        current.minimizeToTrayOnGameLaunch = item.checked;
+                        fs.writeFileSync(SETTINGS_PATH, JSON.stringify(current, null, 2));
+                        updateTrayContextMenu();
+                    }
+                },
+                {
+                    label: '📌 Ocultar al minimizar ventana',
+                    type: 'checkbox',
+                    checked: !!s.hideToTrayOnMinimize,
+                    click: (item) => {
+                        const current = loadSettings();
+                        current.hideToTrayOnMinimize = item.checked;
+                        fs.writeFileSync(SETTINGS_PATH, JSON.stringify(current, null, 2));
+                        updateTrayContextMenu();
+                    }
+                },
+                { type: 'separator' },
+                {
+                    label: '❌ Salir de Nebula Launcher',
+                    click: () => {
+                        app.isQuitting = true;
+                        app.quit();
+                    }
+                }
+            ]);
+            tray.setContextMenu(contextMenu);
+        };
+
+        updateTrayContextMenu();
+
+        tray.on('click', () => {
+            if (!win) return;
+            if (win.isVisible()) {
+                if (win.isFocused()) {
+                    win.hide();
+                } else {
+                    win.focus();
+                }
+            } else {
+                if (win.isMinimized()) win.restore();
+                win.show();
+                win.focus();
+            }
+        });
+
+        tray.on('double-click', () => {
+            if (win) {
+                if (win.isMinimized()) win.restore();
+                win.show();
+                win.focus();
+            }
+        });
+    } catch (e) {
+        console.error('[Tray] Error al crear icono de bandeja:', e.message);
+    }
+}
 
 
 // ── Window ───────────────────────────────────────────────────────
@@ -175,6 +261,22 @@ function createWindow() {
     win.loadFile(path.join(__dirname, 'index.html'));
     win.center();
     win.focus();
+
+    win.on('minimize', (event) => {
+        const s = loadSettings();
+        if (s.hideToTrayOnMinimize && tray) {
+            event.preventDefault();
+            win.hide();
+        }
+    });
+
+    win.on('close', (event) => {
+        const s = loadSettings();
+        if (!app.isQuitting && s.closeToTray && tray) {
+            event.preventDefault();
+            win.hide();
+        }
+    });
     
     // AUTOMATION TEST HARNESS
     win.webContents.on('did-finish-load', () => {
@@ -358,6 +460,7 @@ app.whenReady().then(() => {
     }
     
         createWindow();
+        initSystemTray();
     initDiscordRPC();
 });
 app.on('window-all-closed', () => {
@@ -3161,7 +3264,11 @@ ipcMain.handle('search-modpacks', async (event, { query, platform = 'all' }) => 
                     iconUrl: h.icon_url || '',
                     screenshotUrl: screenshot,
                     categories: h.categories || [],
-                    versions: h.versions || []
+                    versions: h.versions || [],
+                    downloads: h.downloads || 0,
+                    follows: h.follows || 0,
+                    author: h.author || '',
+                    dateModified: h.date_modified || h.date_created || ''
                 });
             });
         } catch (err) {
@@ -3196,7 +3303,11 @@ ipcMain.handle('search-modpacks', async (event, { query, platform = 'all' }) => 
                         iconUrl: h.logo ? h.logo.thumbnailUrl : '',
                         screenshotUrl: h.logo ? h.logo.url : '',
                         categories: ['curseforge'],
-                        versions: cfVersions
+                        versions: cfVersions,
+                        downloads: h.downloadCount || 0,
+                        follows: 0,
+                        author: (h.authors && h.authors[0]) ? h.authors[0].name : '',
+                        dateModified: h.dateModified || h.dateReleased || ''
                     });
                 });
             }
@@ -4196,6 +4307,12 @@ ipcMain.on('launch-game', async (event, data) => {
             if (count === 0) {
                 sendProgress(0, '');
                 setRPCLauncher();
+                const s = loadSettings();
+                if (s.minimizeToTrayOnGameLaunch !== false && win) {
+                    if (win.isMinimized()) win.restore();
+                    win.show();
+                    win.focus();
+                }
             }
         });
 
@@ -4308,6 +4425,19 @@ ipcMain.on('launch-game', async (event, data) => {
             enrichVersionJsonWithUserProperties(verJsonPath);
         } catch (e) { /* ignorar: el juego se lanza igual */ }
         launcher.launch(opts);
+
+        const s = loadSettings();
+        if (s.minimizeToTrayOnGameLaunch !== false && win && win.isVisible()) {
+            win.hide();
+            if (tray) {
+                try {
+                    tray.displayBalloon({
+                        title: 'Nebula Launcher',
+                        content: '⚡ Minimizado a la bandeja del sistema para ahorrar memoria RAM y CPU.'
+                    });
+                } catch (e) {}
+            }
+        }
 
         // Registrar instancia activa
         const instanceDisplayName = data.modpackName ? modpackDispName : `Minecraft ${launchVersion}${launchModId && launchModId !== launchVersion ? ` (${launchModId})` : ''}`;

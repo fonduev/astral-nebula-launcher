@@ -3083,7 +3083,31 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
                     <span style="position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.25s;box-shadow:0 2px 4px rgba(0,0,0,.4);"></span>
                   </span>
                 </div>
-                <span style="font-size:.78rem;color:var(--text);">Permitir múltiples instancias</span>
+            </div>
+
+            <!-- SYSTEM TRAY & AHORRO DE RECURSOS -->
+            <div class="settings-card">
+              <h3>📌 BANDEJA DEL SISTEMA (AHORRO DE RECURSOS)</h3>
+              <p style="font-size:.72rem;color:var(--text-dim);margin-bottom:14px;line-height:1.5;">Minimiza el launcher a la bandeja del reloj para liberar memoria RAM y CPU mientras juegas.</p>
+              
+              <label style="display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:12px;">
+                <div style="position:relative;width:44px;height:24px;flex-shrink:0;">
+                  <input type="checkbox" id="minimizeToTrayOnGameLaunchToggle" onchange="toggleMinimizeToTrayOnGameLaunch(this.checked)" style="opacity:0;width:0;height:0;position:absolute;">
+                  <span id="minimizeToTrayOnGameLaunchSlider" style="position:absolute;inset:0;border-radius:12px;background:rgba(255,255,255,.12);border:.5px solid var(--border);transition:.25s;cursor:pointer;">
+                    <span style="position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.25s;box-shadow:0 2px 4px rgba(0,0,0,.4);"></span>
+                  </span>
+                </div>
+                <span style="font-size:.78rem;color:var(--text);">Minimizar a la bandeja al iniciar juego (Ahorro de RAM)</span>
+              </label>
+
+              <label style="display:flex;align-items:center;gap:12px;cursor:pointer;">
+                <div style="position:relative;width:44px;height:24px;flex-shrink:0;">
+                  <input type="checkbox" id="hideToTrayOnMinimizeToggle" onchange="toggleHideToTrayOnMinimize(this.checked)" style="opacity:0;width:0;height:0;position:absolute;">
+                  <span id="hideToTrayOnMinimizeSlider" style="position:absolute;inset:0;border-radius:12px;background:rgba(255,255,255,.12);border:.5px solid var(--border);transition:.25s;cursor:pointer;">
+                    <span style="position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.25s;box-shadow:0 2px 4px rgba(0,0,0,.4);"></span>
+                  </span>
+                </div>
+                <span style="font-size:.78rem;color:var(--text);">Ocultar a la bandeja al minimizar ventana</span>
               </label>
             </div>
 
@@ -5587,14 +5611,34 @@ async function pickJava() { const p=await ipc.invoke('pick-java'); if(p){documen
 function clearJava() { document.getElementById('javaPathDisp').textContent='Auto'; settings.javaPath=''; }
 async function pickGameDir() { const p=await ipc.invoke('pick-gamedir'); if(p){document.getElementById('gameDirDisp').textContent=p; settings.gameDir=p;} }
 function clearGameDir() { document.getElementById('gameDirDisp').textContent='Por defecto'; settings.gameDir=''; }
+function toggleMinimizeToTrayOnGameLaunch(checked) {
+  settings.minimizeToTrayOnGameLaunch = checked;
+  const slider = document.getElementById('minimizeToTrayOnGameLaunchSlider');
+  if (slider) {
+    slider.style.background = checked ? 'var(--accent-p)' : 'rgba(255,255,255,.12)';
+    slider.firstElementChild.style.transform = checked ? 'translateX(20px)' : 'translateX(0)';
+  }
+}
+
+function toggleHideToTrayOnMinimize(checked) {
+  settings.hideToTrayOnMinimize = checked;
+  const slider = document.getElementById('hideToTrayOnMinimizeSlider');
+  if (slider) {
+    slider.style.background = checked ? 'var(--accent-p)' : 'rgba(255,255,255,.12)';
+    slider.firstElementChild.style.transform = checked ? 'translateX(20px)' : 'translateX(0)';
+  }
+}
+
 function saveSettings() {
   settings.ram = parseInt(document.getElementById('sRamSlider').value);
   settings.theme = currentTheme;
   settings.updateUrl = document.getElementById('sUpdateUrl').value.trim();
   
-  // v2.2.4: Firebase config now lives only in code defaults (main.js).
-  // No UI elements exist anymore — token stays private.
-  // Only save socialFirebase if the legacy card elements exist (dev mode).
+  const minimizeTog = document.getElementById('minimizeToTrayOnGameLaunchToggle');
+  if (minimizeTog) settings.minimizeToTrayOnGameLaunch = minimizeTog.checked;
+  const hideTog = document.getElementById('hideToTrayOnMinimizeToggle');
+  if (hideTog) settings.hideToTrayOnMinimize = hideTog.checked;
+
   const sFbApiKey = document.getElementById('sFbApiKey');
   if (sFbApiKey) {
     settings.socialFirebase = {
@@ -6354,6 +6398,20 @@ function ensureFirebaseInitialized() {
       const tog = document.getElementById('multiInstanceToggle');
       if (tog) tog.checked = true;
       toggleMultiInstance(true);
+    }
+
+    // Restaurar toggles de System Tray
+    const minTog = document.getElementById('minimizeToTrayOnGameLaunchToggle');
+    if (minTog) {
+      const isMin = settings.minimizeToTrayOnGameLaunch !== false; // default ON
+      minTog.checked = isMin;
+      toggleMinimizeToTrayOnGameLaunch(isMin);
+    }
+    const hideTog = document.getElementById('hideToTrayOnMinimizeToggle');
+    if (hideTog) {
+      const isHide = !!settings.hideToTrayOnMinimize;
+      hideTog.checked = isHide;
+      toggleHideToTrayOnMinimize(isHide);
     }
     // Cargar modpacks instalados
     loadInstalledModpacks();
