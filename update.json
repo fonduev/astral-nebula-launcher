@@ -1,10 +1,10 @@
 {
-  "version": "4.0.18",
-  "notes": "• AUTO-CLEANUP DE MODS INCOMPATIBLES: El launcher detecta y limpia automáticamente los mods inestables de Sodium (sodium-extra y reeses-sodium-options) de cualquier carpeta de mods al iniciar el juego.\n• Solucionado el crash 'Cannot invoke net.minecraft.world.level.Level.tickRateManager() because this.level is null' en mundos locales y servidores.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.18/app.asar",
+  "version": "4.0.19",
+  "notes": "• COMPATIBILIDAD SNAPSHOTS (26.x): Auto-limpieza automática de Sodium Alpha inestable en versiones 26.1 / 26.2. El launcher inactiva el build alpha roto de Sodium en snapshots para que Fabric cargue mundos al 100% sin crashear.\n• En versiones oficiales estables (1.20.1, 1.21.1, etc.), Sodium funciona de manera habitual.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.19/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.18/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.19/app.asar"
     }
   }
 }

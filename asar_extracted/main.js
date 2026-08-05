@@ -4229,12 +4229,15 @@ ipcMain.on('launch-game', async (event, data) => {
             if (!fs.existsSync(mDir)) return;
             try {
                 const files = fs.readdirSync(mDir);
+                const isSnapshot26 = launchVersion && launchVersion.startsWith('26.');
                 for (const f of files) {
                     const fLow = f.toLowerCase();
-                    if ((fLow.includes('sodium-extra') || fLow.includes('sodiumextra') || fLow.includes('reeses-sodium') || fLow.includes('reesessodium')) && !fLow.endsWith('.disabled')) {
+                    const isExtra = fLow.includes('sodium-extra') || fLow.includes('sodiumextra') || fLow.includes('reeses-sodium') || fLow.includes('reesessodium');
+                    const isUnstableSodiumOn26 = isSnapshot26 && fLow.includes('sodium');
+                    if ((isExtra || isUnstableSodiumOn26) && !fLow.endsWith('.disabled')) {
                         try {
                             fs.unlinkSync(path.join(mDir, f));
-                            sendLog(`🧹 Mod inestable autolimpiado: ${f}`);
+                            sendLog(`🧹 Mod inestable autolimpiado (${launchVersion}): ${f}`);
                         } catch {
                             try { fs.renameSync(path.join(mDir, f), path.join(mDir, f + '.disabled')); } catch {}
                         }
