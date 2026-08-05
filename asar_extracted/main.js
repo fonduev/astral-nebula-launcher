@@ -4229,15 +4229,16 @@ ipcMain.on('launch-game', async (event, data) => {
             if (!fs.existsSync(mDir)) return;
             try {
                 const files = fs.readdirSync(mDir);
-                const isSnapshot26 = launchVersion && launchVersion.startsWith('26.');
+                const verStr = `${launchVersion || ''} ${launchModId || ''} ${data.version || ''}`;
+                const isSnapshot26 = verStr.includes('26.');
                 for (const f of files) {
                     const fLow = f.toLowerCase();
                     const isExtra = fLow.includes('sodium-extra') || fLow.includes('sodiumextra') || fLow.includes('reeses-sodium') || fLow.includes('reesessodium');
-                    const isUnstableSodiumOn26 = isSnapshot26 && fLow.includes('sodium');
-                    if ((isExtra || isUnstableSodiumOn26) && !fLow.endsWith('.disabled')) {
+                    const isUnstableSodiumFamilyOn26 = isSnapshot26 && (fLow.includes('sodium') || fLow.includes('iris') || fLow.includes('indium'));
+                    if ((isExtra || isUnstableSodiumFamilyOn26) && !fLow.endsWith('.disabled')) {
                         try {
                             fs.unlinkSync(path.join(mDir, f));
-                            sendLog(`🧹 Mod inestable autolimpiado (${launchVersion}): ${f}`);
+                            sendLog(`🧹 Mod inestable/incompatible autolimpiado (${verStr.trim()}): ${f}`);
                         } catch {
                             try { fs.renameSync(path.join(mDir, f), path.join(mDir, f + '.disabled')); } catch {}
                         }
@@ -4249,6 +4250,15 @@ ipcMain.on('launch-game', async (event, data) => {
         cleanIncompatibleMods(path.join(instanceDir, 'mods'));
         if (instanceDir !== mcPath) {
             cleanIncompatibleMods(path.join(mcPath, 'mods'));
+        }
+        const instancesParent = path.join(mcPath, 'instances');
+        if (fs.existsSync(instancesParent)) {
+            try {
+                const instDirs = fs.readdirSync(instancesParent);
+                for (const d of instDirs) {
+                    cleanIncompatibleMods(path.join(instancesParent, d, 'mods'));
+                }
+            } catch {}
         }
 
         if (instanceDir !== mcPath) {
