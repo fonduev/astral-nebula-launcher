@@ -1,10 +1,10 @@
 {
-  "version": "4.0.15",
-  "notes": "• System Tray: El launcher se minimiza automáticamente a la bandeja al iniciar Minecraft, liberando RAM y CPU.\n• Clic en el icono de la bandeja para restaurar el launcher cuando el juego esté abierto.\n• Nuevas opciones en Configuración: 'Minimizar a la bandeja al jugar' y 'Ocultar al minimizar'.\n• Fix Crash en Mundos (v4.0.14): Mods extras de Sodium eliminados para garantizar estabilidad total.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.15/app.asar",
+  "version": "4.0.16",
+  "notes": "• Fix de nitidez visual: Eliminado el efecto borroso en selectores de versión y tarjetas al pasar el mouse.\n• Sección Clientes PVP limpia: Lista ajustada a CMPack (instalable) y Nebula PVP (Próximamente).\n• Fix de Modpacks: Verificación y filtrado estricto de archivos .jar (cabecera ZIP PK) y particionado correcto de CDN de CurseForge para evitar mods corruptos y crashes.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.16/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.15/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.16/app.asar"
     }
   }
 }

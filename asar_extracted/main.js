@@ -3007,47 +3007,70 @@ ipcMain.handle('delete-modpack', async (event, folderName) => {
 const CF_API_KEY = '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm';
 
 async function downloadCurseForgeMod(projectID, fileID, destPath) {
-    // Strategy 1: Public API endpoint (works for most mods)
+    const isJarValid = (filePath) => {
+        try {
+            if (!fs.existsSync(filePath)) return false;
+            const stat = fs.statSync(filePath);
+            if (stat.size < 200) return false;
+            const buf = Buffer.alloc(10);
+            const fd = fs.openSync(filePath, 'r');
+            fs.readSync(fd, buf, 0, 10, 0);
+            fs.closeSync(fd);
+            // Validar magia ZIP PK (50 4B 03 04)
+            if (buf[0] === 0x50 && buf[1] === 0x4B && buf[2] === 0x03 && buf[3] === 0x04) {
+                return true;
+            }
+            const text = buf.toString('utf8').toLowerCase();
+            if (text.includes('<html') || text.includes('<!doc')) {
+                return false;
+            }
+            return true;
+        } catch { return false; }
+    };
+
+    // Strategy 1: Official API con API Key para obtener la URL de descarga directa
+    try {
+        const apiUrl = `https://api.curseforge.com/v1/mods/${projectID}/files/${fileID}`;
+        const fileData = JSON.parse(await httpsGetWithHeaders(apiUrl, { 'x-api-key': CF_API_KEY }));
+        const realUrl = fileData?.data?.downloadUrl;
+        if (realUrl) {
+            await downloadFile(realUrl, destPath);
+            if (isJarValid(destPath)) return true;
+            try { fs.unlinkSync(destPath); } catch {}
+        }
+
+        // Strategy 2: CDN fallback con particionado correcto de IDs de archivo
+        const fileName = fileData?.data?.fileName;
+        if (fileName) {
+            const idStr = String(fileID);
+            const splitIdx = idStr.length > 3 ? idStr.length - 3 : 0;
+            const firstPart = idStr.substring(0, splitIdx);
+            const lastPart = idStr.substring(splitIdx);
+
+            const cdnUrls = [
+                `https://edge.forgecdn.net/files/${firstPart}/${lastPart}/${encodeURIComponent(fileName)}`,
+                `https://mediafilez.forgecdn.net/files/${firstPart}/${lastPart}/${encodeURIComponent(fileName)}`
+            ];
+
+            for (const cdnUrl of cdnUrls) {
+                try {
+                    await downloadFile(cdnUrl, destPath);
+                    if (isJarValid(destPath)) return true;
+                    try { fs.unlinkSync(destPath); } catch {}
+                } catch {}
+            }
+        }
+    } catch (e1) {}
+
+    // Strategy 3: Public endpoint fallback
     const publicUrl = `https://www.curseforge.com/api/v1/mods/${projectID}/files/${fileID}/download`;
     try {
         await downloadFile(publicUrl, destPath);
-        return true;
-    } catch (err1) {
-        // Strategy 2: Official CurseForge API with API key to get real download URL
-        try {
-            const apiUrl = `https://api.curseforge.com/v1/mods/${projectID}/files/${fileID}`;
-            const fileData = JSON.parse(await httpsGetWithHeaders(apiUrl, { 'x-api-key': CF_API_KEY }));
-            const realUrl = fileData?.data?.downloadUrl;
-            if (realUrl) {
-                await downloadFile(realUrl, destPath);
-                return true;
-            }
-            // If downloadUrl is null (mod author disabled 3rd-party distribution),
-            // try constructing the CDN URL manually
-            const fileName = fileData?.data?.fileName;
-            if (fileName) {
-                // CurseForge CDN pattern: https://edge.forgecdn.net/files/{first4}/{last3}/{filename}
-                const idStr = String(fileID);
-                const first4 = idStr.substring(0, 4);
-                const last3 = idStr.substring(4);
-                const cdnUrl = `https://edge.forgecdn.net/files/${first4}/${last3}/${encodeURIComponent(fileName)}`;
-                try {
-                    await downloadFile(cdnUrl, destPath);
-                    return true;
-                } catch (cdnErr) {
-                    // CDN also failed
-                }
-                // Also try mediafilez.forgecdn.net
-                const cdnUrl2 = `https://mediafilez.forgecdn.net/files/${first4}/${last3}/${encodeURIComponent(fileName)}`;
-                await downloadFile(cdnUrl2, destPath);
-                return true;
-            }
-            throw new Error(`Mod ${projectID}/${fileID}: descarga no disponible (distribución restringida por el autor)`);
-        } catch (err2) {
-            // Both strategies failed - throw the combined error
-            throw new Error(`No se pudo descargar mod ${projectID}/${fileID}: ${err1.message} | Fallback: ${err2.message}`);
-        }
-    }
+        if (isJarValid(destPath)) return true;
+        try { fs.unlinkSync(destPath); } catch {}
+    } catch (e2) {}
+
+    throw new Error(`Mod ${projectID}/${fileID} no disponible para descarga automática`);
 }
 
 function httpsGetWithHeaders(url, headers = {}, timeoutMs = 15000) {
@@ -3860,12 +3883,8 @@ ipcMain.handle('get-screenshots', () => {
 
 // ── PVP Clients ───────────────────────────────────────────────────
 const PVP_CLIENTS = [
-    { id: 'labymod', name: 'LabyMod', icon: '🔶', color: '#f97316', desc: 'El cliente más popular. HUD modular, emotes, cloaks y cientos de addons oficiales.', url: 'https://laby.net/#download' },
-    { id: 'lunar', name: 'Nebula Client', icon: '🌙', color: '#818cf8', desc: 'Boost de FPS masivo. Waypoints, cosmetics y +100 mods integrados. Compatible 1.7 → 1.21.', url: 'https://lunarclient.com/download' },
-    { id: 'badlion', name: 'Badlion', icon: '🛡️', color: '#ef4444', desc: 'Anti-cheat integrado, ideal para PVP competitivo. Soporte oficial para torneos.', url: 'https://client.badlion.net/' },
-    { id: 'feather', name: 'Feather', icon: '🪶', color: '#22c55e', desc: 'El más ligero y moderno. Diseño renovado, mods optimizados y gestión de perfiles fácil.', url: 'https://feathermc.gg/download' },
-    { id: 'pvplounge', name: 'PVP Lounge', icon: '⚔️', color: '#a855f7', desc: 'Cliente europeo con integración de torneos, ligas y rankings de la comunidad competitiva.', url: 'https://pvplounge.net/download' },
-    { id: 'salwyrr', name: 'Salwyrr', icon: '💎', color: '#06b6d4', desc: 'Excelente para servidores hispanohablantes. Optimización brutal para PCs de gama baja.', url: 'https://www.salwyrr.com/download' }
+    { id: 'cmpack', name: 'CMPack', icon: '⚡', color: '#a855f7', desc: 'El mejor cliente PVP optimizado con mods integrados, HUD personalizable y rendimiento máximo en FPS para 1.8.8.', url: 'https://cmpack.pl/' },
+    { id: 'nebulapvp', name: 'Nebula PVP', icon: '🌌', color: '#c084fc', desc: 'Cliente PVP propio de Nebula Launcher con optimizaciones exclusivas, HUD modular y cosméticos sincronizados. En desarrollo.', comingSoon: true }
 ];
 
 ipcMain.handle('get-pvp-clients', () => PVP_CLIENTS);
@@ -4297,8 +4316,26 @@ ipcMain.on('launch-game', async (event, data) => {
             const p = Math.floor((e.task / e.total) * 100);
             sendProgress(p, `${e.type}: ${e.task}/${e.total}`);
         });
-        launcher.on('debug', e => { const s = String(e); if (s.length < 300) sendLog(s); });
-        launcher.on('data', e => sendLog(String(e)));
+        launcher.on('debug', e => { const dbgStr = String(e); if (dbgStr.length < 300) sendLog(dbgStr); });
+
+        // Ocultar launcher a la bandeja SOLO cuando Minecraft ya esté corriendo
+        // (primer output de datos del proceso Java = juego iniciado)
+        let trayHiddenThisInstance = false;
+        launcher.on('data', e => {
+            sendLog(String(e));
+            if (!trayHiddenThisInstance && s.minimizeToTrayOnGameLaunch !== false && win && win.isVisible()) {
+                trayHiddenThisInstance = true;
+                win.hide();
+                if (tray) {
+                    try {
+                        tray.displayBalloon({
+                            title: 'Nebula Launcher',
+                            content: '⚡ Minecraft abierto — Launcher minimizado a la bandeja para dar el 100% al juego.'
+                        });
+                    } catch (e) {}
+                }
+            }
+        });
         launcher.on('close', code => {
             runningInstances.delete(instanceId);
             const count = runningInstances.size;
@@ -4425,18 +4462,6 @@ ipcMain.on('launch-game', async (event, data) => {
             enrichVersionJsonWithUserProperties(verJsonPath);
         } catch (e) { /* ignorar: el juego se lanza igual */ }
         launcher.launch(opts);
-
-        if (s.minimizeToTrayOnGameLaunch !== false && win && win.isVisible()) {
-            win.hide();
-            if (tray) {
-                try {
-                    tray.displayBalloon({
-                        title: 'Nebula Launcher',
-                        content: '⚡ Minimizado a la bandeja del sistema para ahorrar memoria RAM y CPU.'
-                    });
-                } catch (e) {}
-            }
-        }
 
         // Registrar instancia activa
         const instanceDisplayName = data.modpackName ? modpackDispName : `Minecraft ${launchVersion}${launchModId && launchModId !== launchVersion ? ` (${launchModId})` : ''}`;

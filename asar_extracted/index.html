@@ -240,8 +240,12 @@ animation:starDrift 120s linear infinite;}
 .light.maximize{background:#27c93f;box-shadow:0 0 7px rgba(39,201,63,.6);}
 
 /* ═══════ LIQUID GLASS INPUTS ═══════ */
-.inp{width:100%;padding:11px 13px;border-radius:12px;background:rgba(255,255,255,0.03);border:.5px solid var(--border);color:var(--text);font-size:.84rem;outline:none;transition:border-color .2s,background .2s,box-shadow .2s;-webkit-app-region:no-drag;}
-.inp:focus{border-color:var(--border-glow);background:rgba(255,255,255,.06);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);}
+*, *::before, *::after {
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+.inp{width:100%;padding:11px 13px;border-radius:12px;background:rgba(20,18,35,0.7);border:.5px solid var(--border);color:var(--text);font-size:.84rem;outline:none;transition:border-color .2s,background .2s,box-shadow .2s;-webkit-app-region:no-drag;-webkit-font-smoothing:antialiased;}
+.inp:focus,.inp:hover{border-color:var(--border-glow);background:rgba(30,26,50,0.85);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);filter:none!important;}
 .inp::placeholder{color:var(--text-faint);}
 select.inp{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.4)' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;}
 select.inp option{background:#12121e;color:white;}
@@ -753,10 +757,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   backdrop-filter: blur(26px) saturate(180%); -webkit-backdrop-filter: blur(26px) saturate(180%);
 }
 .mod-card:hover{
-  transform:translateY(-4px) scale(1.01);
   border-color: var(--border-glow);
-  background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.015));
-  box-shadow: 0 20px 48px rgba(0,0,0,.45), 0 0 25px color-mix(in srgb, var(--mg) 45%, transparent);
+  background: linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
+  box-shadow: 0 16px 40px rgba(0,0,0,.45), 0 0 25px color-mix(in srgb, var(--mg) 45%, transparent);
 }
 .mod-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,var(--mg) 0%,transparent 70%);opacity:.6;pointer-events:none;}
 .forge-card{--mg:rgba(251,146,60,.1);}
@@ -845,7 +848,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
 }
 .client-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--client-color,var(--accent)),transparent);opacity:.6;}
-.client-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.25),0 0 25px color-mix(in srgb, var(--client-color,var(--accent)) 30%, transparent);border-color:color-mix(in srgb, var(--client-color,var(--accent)) 40%, transparent);}
+.client-card:hover{box-shadow:0 12px 40px rgba(0,0,0,.25),0 0 25px color-mix(in srgb, var(--client-color,var(--accent)) 30%, transparent);border-color:color-mix(in srgb, var(--client-color,var(--accent)) 40%, transparent);}
 .client-header{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
 .client-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:0 4px 14px rgba(0,0,0,.3);}
 .client-name{font-size:1.05rem;font-weight:700;margin-bottom:2px;}
