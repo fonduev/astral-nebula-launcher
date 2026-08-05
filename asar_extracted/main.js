@@ -4050,7 +4050,21 @@ ipcMain.on('launch-game', async (event, data) => {
         // Inject NeoForge/Forge JVM args from version JSON into opts.customArgs
         // MCLC v3.18.2 getJVM() only returns one OS flag, doesn't read arguments.jvm
         // But opts.customArgs ARE appended to JVM args (launcher.js line ~85)
-        if (launchModId && (launchModId.toLowerCase().includes('neoforge') || launchModId.toLowerCase().includes('forge'))) {
+
+        // Detect legacy MC versions (<=1.12.x) that need Java 8 and CANNOT use --add-opens etc.
+        const isLegacyMc = (() => {
+            try {
+                const parts = launchVersion.split('.').map(Number);
+                const major = parts[1] || 0; // e.g. "1.12.2" → 12
+                return major <= 12;
+            } catch { return false; }
+        })();
+
+        if (isLegacyMc) {
+            sendLog(`🏛️ Versión legacy (${launchVersion}) — omitiendo JVM args modernos (--add-opens, etc.) para compatibilidad con Java 8`);
+        }
+
+        if (!isLegacyMc && launchModId && (launchModId.toLowerCase().includes('neoforge') || launchModId.toLowerCase().includes('forge'))) {
             try {
                 const vJsonPath = path.join(mcPath, 'versions', launchModId, `${launchModId}.json`);
                 if (fs.existsSync(vJsonPath)) {
