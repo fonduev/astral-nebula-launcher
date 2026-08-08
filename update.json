@@ -1,10 +1,10 @@
 {
-  "version": "4.1.2",
-  "notes": "• FIX GLITCH MODPACK EDITOR: Corregido el cuadro negro de renderizado GPU en el modal del Gestor de Mods de modpacks.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.1.2/app.asar",
+  "version": "4.1.3",
+  "notes": "• SECTOR DE IDIOMA EN CONFIGURACIÓN: Tarjeta dedicada en Ajustes para seleccionar Español (🇪🇸), Inglés (🇺🇸) o Portugués (🇧🇷) en 1-clic.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.1.3/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.1.2/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.1.3/app.asar"
     }
   }
 }

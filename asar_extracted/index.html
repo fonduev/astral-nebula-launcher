@@ -3067,6 +3067,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
         <div class="settings-scroll">
           <div class="settings-grid">
+            <!-- 🌐 IDIOMA DEL LAUNCHER -->
+            <div class="settings-card" id="settings-lang-card" style="border: 1px solid rgba(192, 132, 252, 0.3); background: rgba(192, 132, 252, 0.05); grid-column: 1 / -1;">
+              <h3 id="lbl-lang-title">🌐 IDIOMA DE LA INTERFAZ / LANGUAGE</h3>
+              <p id="lbl-lang-desc" style="font-size:.75rem;color:var(--text-dim);margin-bottom:14px;line-height:1.5;">
+                Selecciona el idioma preferido para la interfaz del launcher:
+              </p>
+              <div style="display:flex; gap:10px; flex-wrap:wrap; -webkit-app-region: no-drag;">
+                <button class="btn btn-ghost btn-sm lang-btn" id="lang-btn-es" onclick="changeAppLanguage('es')" style="padding: 8px 16px; font-weight: 700; border-radius: 10px;">🇪🇸 Español</button>
+                <button class="btn btn-ghost btn-sm lang-btn" id="lang-btn-en" onclick="changeAppLanguage('en')" style="padding: 8px 16px; font-weight: 700; border-radius: 10px;">🇺🇸 English</button>
+                <button class="btn btn-ghost btn-sm lang-btn" id="lang-btn-pt" onclick="changeAppLanguage('pt')" style="padding: 8px 16px; font-weight: 700; border-radius: 10px;">🇧🇷 Português</button>
+              </div>
+            </div>
             <div class="settings-card">
               <h3>☕ JAVA</h3>
               <p style="font-size:.72rem;color:var(--text-dim);margin-bottom:12px;">Ruta personalizada (opcional):</p>
@@ -11254,6 +11266,90 @@ function updateMyStatus(status, activity) {
 
     // No-op for claimGamerPassAchievement
     function claimGamerPassAchievement() {}
+  </script>
+
+  <!-- ── MOTOR DE IDIOMA Y TRADUCCIÓN DEL LAUNCHER (ES / EN / PT) ── -->
+  <script>
+    const LAUNCHER_I18N = {
+      es: {
+        lang_title: "🌐 IDIOMA DE LA INTERFAZ",
+        lang_desc: "Selecciona el idioma preferido para la interfaz del launcher:",
+        play_title: "Iniciar Minecraft",
+        play_sub: "Minecraft cargado y listo.",
+        launch_btn: "⚡ INICIAR SALTO",
+        settings_title: "Configuración",
+        settings_sub: "Ajusta la memoria RAM, Java y preferencias del cliente."
+      },
+      en: {
+        lang_title: "🌐 INTERFACE LANGUAGE",
+        lang_desc: "Select display language for the launcher interface:",
+        play_title: "Launch Minecraft",
+        play_sub: "Minecraft loaded and ready.",
+        launch_btn: "⚡ LAUNCH GAME",
+        settings_title: "Settings",
+        settings_sub: "Adjust RAM memory allocation, Java, and options."
+      },
+      pt: {
+        lang_title: "🌐 IDIOMA DA INTERFACE",
+        lang_desc: "Selecione o idioma de exibição para a interface do launcher:",
+        play_title: "Iniciar Minecraft",
+        play_sub: "Minecraft carregado e pronto.",
+        launch_btn: "⚡ INICIAR JOGO",
+        settings_title: "Configurações",
+        settings_sub: "Ajuste memória RAM, Java e opções do cliente."
+      }
+    };
+
+    function applyAppLanguage(lang) {
+      if (!lang || !LAUNCHER_I18N[lang]) lang = 'es';
+      const dict = LAUNCHER_I18N[lang];
+
+      // Actualizar botones de idioma en Ajustes
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.style.background = 'none';
+        btn.style.borderColor = 'rgba(255,255,255,0.12)';
+        btn.style.color = 'var(--text-muted)';
+      });
+
+      const activeBtn = document.getElementById('lang-btn-' + lang);
+      if (activeBtn) {
+        activeBtn.style.background = 'linear-gradient(135deg, rgba(192,132,252,0.3), rgba(129,140,248,0.3))';
+        activeBtn.style.borderColor = 'rgba(192,132,252,0.6)';
+        activeBtn.style.color = '#ffffff';
+      }
+
+      // Actualizar textos traducibles
+      const titleEl = document.getElementById('lbl-lang-title');
+      if (titleEl) titleEl.textContent = dict.lang_title;
+
+      const descEl = document.getElementById('lbl-lang-desc');
+      if (descEl) descEl.textContent = dict.lang_desc;
+
+      const playTitle = document.getElementById('play-title');
+      if (playTitle) playTitle.textContent = dict.play_title;
+
+      const playSub = document.getElementById('play-subtitle');
+      if (playSub) playSub.textContent = dict.play_sub;
+
+      const launchBtn = document.getElementById('launchBtn');
+      if (launchBtn && !launchBtn.disabled) launchBtn.textContent = dict.launch_btn;
+    }
+
+    function changeAppLanguage(lang) {
+      settings.language = lang;
+      ipc.send('save-settings', settings);
+      applyAppLanguage(lang);
+      toast(`🌐 Idioma cambiado a ${lang.toUpperCase()}`, 'success');
+    }
+
+    // Al cargar la ventana, aplicar el idioma de la configuración
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        if (typeof settings !== 'undefined' && settings.language) {
+          applyAppLanguage(settings.language);
+        }
+      }, 500);
+    });
   </script>
 </body>
 </html>
