@@ -7832,7 +7832,7 @@ function updateMyStatus(status, activity) {
       <div style="display: flex; gap: 20px; flex: 1; min-height: 0; overflow: hidden;">
         
         <!-- Panel Izquierdo: Mods Instalados -->
-        <div style="width: 35%; display: flex; flex-direction: column; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 15px; overflow: hidden; min-width: 0;">
+        <div style="width: 35%; display: flex; flex-direction: column; background: #130f28; transform: translateZ(0); contain: paint layout; border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 15px; overflow: hidden; min-width: 0;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-shrink: 0;">
             <span class="label" style="font-size: 0.8rem; letter-spacing: 0.05em;">📂 Mods Instalados</span>
             <span id="mpe-mods-count" style="font-size: 0.7rem; color: var(--text-dim);">0 mods</span>
@@ -7842,7 +7842,7 @@ function updateMyStatus(status, activity) {
           <input type="text" class="inp" id="mpe-local-search" placeholder="Filtrar instalados..." style="width: 100%; font-size: 0.78rem; margin-bottom: 12px; box-sizing: border-box;" oninput="filterLocalMods()">
 
           <!-- Lista de Mods Instalados -->
-          <div id="mpe-local-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; min-width: 0; overflow-x: hidden; width: 100%; box-sizing: border-box;">
+          <div id="mpe-local-list" style="flex: 1; overflow-y: auto; transform: translateZ(0); contain: paint layout; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; min-width: 0; overflow-x: hidden; width: 100%; box-sizing: border-box;">
             <!-- Renderizado dinámico -->
           </div>
 
@@ -7869,7 +7869,7 @@ function updateMyStatus(status, activity) {
         </div>
 
         <!-- Panel Derecho: Explorador de Modrinth (Online) -->
-        <div style="width: 65%; display: flex; flex-direction: column; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 15px; overflow: hidden; min-width: 0;">
+        <div style="width: 65%; display: flex; flex-direction: column; background: #130f28; transform: translateZ(0); contain: paint layout; border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 15px; overflow: hidden; min-width: 0;">
           
           <!-- Controles de Búsqueda -->
           <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-shrink: 0; align-items: center;">
@@ -7888,7 +7888,7 @@ function updateMyStatus(status, activity) {
           </div>
 
           <!-- Lista de Resultados de Modrinth -->
-          <div id="mpe-search-results" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; min-width: 0; overflow-x: hidden;">
+          <div id="mpe-search-results" style="flex: 1; overflow-y: auto; transform: translateZ(0); contain: paint layout; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; min-width: 0; overflow-x: hidden;">
             <div style="color: var(--text-dim); text-align: center; padding: 60px; font-size: 0.85rem;">
               Escribe algo arriba para buscar mods en Modrinth compatibles con tu versión de Minecraft y Mod Loader.
             </div>
