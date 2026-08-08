@@ -773,7 +773,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .mod-name{font-size:.95rem;font-weight:700;}
 .mod-desc{font-size:.72rem;color:var(--text-dim);margin-bottom:14px;}
 .mod-ver-select{margin-bottom:14px;}
-.forge-ver-list,.mods-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;}
+.forge-ver-list,.mods-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;transform:translateZ(0);contain:paint layout;}
 .forge-ver-item,.mod-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:10px;background:rgba(0,0,0,.25);border:.5px solid var(--border);}
 .forge-ver-tag{font-size:.6rem;color:#fb923c;background:rgba(251,146,60,.15);padding:2px 8px;border-radius:6px;font-weight:600;}
 .mod-item-name{font-size:.75rem;flex:1;}
@@ -2314,6 +2314,26 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <p style="font-size:.68rem;color:var(--text-dim);margin-top:18px;">
           Las actualizaciones se aplican automáticamente en segundo plano. Si hay una nueva versión disponible, se te notificará en la esquina superior de la ventana.
         </p>
+      </div>
+
+      
+      <!-- ═══════ TEXTURAS & SHADERS TAB ═══════ -->
+      <div class="tab-panel" id="tab-resourcepacks">
+        <h1 class="panel-title">🎨 Texturas & Shaders</h1>
+        <p class="panel-sub">Descarga Resource Packs y Shaders en 1-clic directamente a tu juego.</p>
+
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+          <input type="text" class="inp" id="rpSearchInp" placeholder="Buscar textura o shader..." style="max-width:320px;" onkeyup="if(event.key==='Enter') searchResourcepacks()">
+          <select class="inp" id="rpTypeSel" style="max-width:180px;" onchange="searchResourcepacks()">
+            <option value="resourcepack">🎨 Texturas (Resourcepacks)</option>
+            <option value="shader">✨ Shaders (Shaderpacks)</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="searchResourcepacks()">🔍 Buscar</button>
+        </div>
+
+        <div id="rpResultsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;overflow-y:auto;max-height:calc(100vh - 220px);padding-right:4px;">
+          <!-- Se llena dinámicamente -->
+        </div>
       </div>
 
       <div class="tab-panel" id="tab-modpacks">
@@ -4478,6 +4498,11 @@ function vbSetHiddenSelect(versionId, modifier) {
   }
   sel.value = targetId;
   onVersionSelectChange();
+
+  const modSel = document.getElementById('modSelect');
+  if (modSel && mod === 'vanilla') {
+    modSel.value = '';
+  }
 }
 
 async function vbOpenLoaderPanel(mcId, modifier) {
@@ -4741,13 +4766,16 @@ function refreshModSelect() {
     modSel.appendChild(opt);
   });
 
-  // Auto-seleccionar el loader instalado si existe para esta versión
-  if (mods.length > 0) {
+  // Auto-seleccionar el loader instalado si existe para esta versión,
+  // A MENOS QUE el modificador seleccionado en la UI sea Vanilla
+  if (mods.length > 0 && currentPlayModifier !== 'vanilla') {
     if (oldVal && Array.from(modSel.options).some(o => o.value === oldVal)) {
       modSel.value = oldVal;
     } else {
       modSel.value = mods[0].id;
     }
+  } else if (currentPlayModifier === 'vanilla') {
+    modSel.value = '';
   }
 
   // OptiFine: siempre mostrar opción (instalada o no)

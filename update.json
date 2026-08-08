@@ -1,10 +1,10 @@
 {
-  "version": "4.0.24",
-  "notes": "• FIX DETECCIÓN DE MODIFIERS (Fabric/Quilt/Forge): Corregido el bug donde la lista de versiones mostraba Fabric/Quilt/Forge como 'Instalado ▶ Jugar' cuando solo Vanilla estaba descargado. Ahora muestra correctamente el botón de Descarga ⬇ si el modloader no está realmente instalado.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.24/app.asar",
+  "version": "4.1.0",
+  "notes": "• FIX LANZAMIENTO VANILLA: Resuelto el problema por el cual abrir versiones Vanilla lanzaba OptiFine. Ahora Vanilla abre 100% puro.\n• SECCIÓN TEXTURAS & SHADERS: Nuevo apartado para buscar e instalar Resourcepacks y Shaderpacks en 1-clic desde Modrinth y CurseForge.\n• FIX GLITCHES EN TALLER DE MODS: Aislamiento de capas GPU para eliminar artifacts visuales y parpadeos al cambiar mods.\n• SOPORTE TRI-IDIOMA (ES / EN / PT): Selección de idioma en Ajustes y auto-traducción de la interfaz.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.1.0/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.0.24/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.1.0/app.asar"
     }
   }
 }

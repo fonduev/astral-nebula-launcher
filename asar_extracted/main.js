@@ -4090,10 +4090,10 @@ ipcMain.on('launch-game', async (event, data) => {
             const vLow = launchVersion.toLowerCase();
             let extractedMc = null;
             if (vLow.startsWith('fabric-loader-')) {
-                const m = launchVersion.match(/^fabric-loader-[\d.]+-(\d+\.\d+(?:\.\d+)?)$/);
+                const m = launchVersion.match(/^fabric-loader-[^\-]+-(.+)$/);
                 if (m) { extractedMc = m[1]; }
             } else if (vLow.startsWith('quilt-loader-')) {
-                const m = launchVersion.match(/^quilt-loader-[\d.]+-(\d+\.\d+(?:\.\d+)?)$/);
+                const m = launchVersion.match(/^quilt-loader-[^\-]+-(.+)$/);
                 if (m) { extractedMc = m[1]; }
             } else if (vLow.includes('forge') || vLow.includes('neoforge') || vLow.includes('optifine')) {
                 // For forge/neoforge/optifine: the JSON's inheritsFrom is the base version
@@ -4743,3 +4743,59 @@ ipcMain.on('apply-update', () => {
 });
 
 
+
+
+ipcMain.handle('search-resourcepacks', async (event, { query = '', type = 'resourcepack' }) => {
+    const results = [];
+    try {
+        const projectType = type === 'shader' ? 'shader' : 'resourcepack';
+        const limit = 24;
+        const url = `https://api.modrinth.com/v2/search?query=${encodeURIComponent(query)}&facets=[["project_type:${projectType}"]]&limit=${limit}&index=downloads`;
+        const resData = await httpsGet(url);
+        const searchResult = JSON.parse(resData);
+        searchResult.hits.forEach(h => {
+            results.push({
+                source: 'modrinth',
+                projectId: h.project_id,
+                title: h.title,
+                description: h.description,
+                iconUrl: h.icon_url || '',
+                categories: h.categories || [],
+                downloads: h.downloads || 0,
+                author: h.author || ''
+            });
+        });
+    } catch (err) {
+        sendLog(`⚠️ Error buscando ${type}: ${err.message}`);
+    }
+    return results;
+});
+
+ipcMain.handle('download-resourcepack', async (event, { projectId, type = 'resourcepack' }) => {
+    try {
+        const s = loadSettings();
+        const mcPath = getMcPath(s.gameDir);
+        const targetSubDir = type === 'shader' ? 'shaderpacks' : 'resourcepacks';
+        const targetDir = path.join(mcPath, targetSubDir);
+        fs.mkdirSync(targetDir, { recursive: true });
+
+        sendLog(`🔍 Obteniendo archivo de ${type} (${projectId})...`);
+        const versionsUrl = `https://api.modrinth.com/v2/project/${projectId}/version`;
+        const versionsData = await httpsGet(versionsUrl);
+        const versions = JSON.parse(versionsData);
+        if (!versions || versions.length === 0) throw new Error('No hay versiones disponibles.');
+
+        const primaryVersion = versions[0];
+        const primaryFile = primaryVersion.files.find(f => f.primary) || primaryVersion.files[0];
+        if (!primaryFile) throw new Error('No se encontró archivo de descarga.');
+
+        const destPath = path.join(targetDir, primaryFile.filename);
+        sendLog(`📥 Descargando ${primaryFile.filename} en ${targetSubDir}...`);
+        await downloadFile(primaryFile.url, destPath);
+        sendLog(`✅ ${type === 'shader' ? 'Shader' : 'Textura'} instalada: ${primaryFile.filename}`);
+        return { success: true, filename: primaryFile.filename };
+    } catch (err) {
+        sendLog(`❌ Error descargando ${type}: ${err.message}`, 'error');
+        return { success: false, error: err.message };
+    }
+});
