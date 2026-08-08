@@ -873,6 +873,7 @@ function loadSettings() {
         javaPath: '', 
         gameDir: '', 
         theme: 'nebula', 
+        language: 'es',
         lastLoginType: 'offline',
         updateUrl: 'https://raw.githubusercontent.com/fonduev/astral-nebula-launcher/main/update.json',
 
