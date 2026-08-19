@@ -1,10 +1,10 @@
 {
-  "version": "4.2.6",
-  "notes": "🚀 Nebula Launcher v4.2.6: Instalador 1-Clic de TerraMythic 1.20.1, soporte completo para Sinytra Connector en Forge y aislamiento seguro de modpacks.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.2.6/app.asar",
+  "version": "4.2.7",
+  "notes": "\ud83d\ude80 Nebula Launcher v4.2.7: Descargador nativo de Google Drive 100% en Node.js, progreso en vivo y soporte completo de TerraMythic.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.2.7/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.2.6/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.2.7/app.asar"
     }
   }
 }
