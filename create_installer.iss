@@ -1,6 +1,6 @@
-; Script de Instalación de Inno Setup para Nebula Launcher v4.1.0 (Multilenguaje)
+; Script de Instalación de Inno Setup para Nebula Launcher v4.1.2 (Multilenguaje)
 #define MyAppName "Nebula Launcher"
-#define MyAppVersion "4.1.0"
+#define MyAppVersion "4.3.0"
 #define MyAppPublisher "Nebula Studios"
 #define MyAppURL "https://nebuladevstudios.com"
 #define MyAppExeName "Nebula Launcher.exe"
@@ -15,7 +15,8 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
-OutputBaseFilename=Nebula.Launcher.Setup.4.1.0
+OutputBaseFilename=Nebula.Launcher.Setup.4.3.0
+OutputDir=C:\Users\renee\Documents\Web
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -30,7 +31,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "C:\Users\renee\AppData\Local\Programs\Nebula Launcher\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\renee\AppData\Local\Programs\Nebula Launcher\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\renee\AppData\Local\Programs\Nebula Launcher\*"; Excludes: "*nul*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

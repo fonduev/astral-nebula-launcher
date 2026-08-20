@@ -9,6 +9,7 @@
     window.tempModule = module;
     module = undefined;
   }
+
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -2210,6 +2211,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
           <span class="nav-icon">🎒</span>
           Modpacks
         </button>
+
+        <button class="nav-item" onclick="showTab('resourcepacks')">
+          <span class="nav-icon">🎨</span>
+          Texturas & Shaders
+        </button>
+
         <button class="nav-item" onclick="showTab('versiones')">
           <span class="nav-icon">📋</span>
           Versiones
@@ -2323,11 +2330,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <p class="panel-sub">Descarga Resource Packs y Shaders en 1-clic directamente a tu juego.</p>
 
         <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
-          <input type="text" class="inp" id="rpSearchInp" placeholder="Buscar textura o shader..." style="max-width:320px;" onkeyup="if(event.key==='Enter') searchResourcepacks()">
-          <select class="inp" id="rpTypeSel" style="max-width:180px;" onchange="searchResourcepacks()">
+          <input type="text" class="inp" id="rpSearchInp" placeholder="Buscar textura o shader..." style="flex:1;min-width:200px;max-width:280px;" onkeyup="if(event.key==='Enter') searchResourcepacks()">
+          
+          <select class="inp" id="rpTypeSel" style="width:160px;" onchange="searchResourcepacks()">
             <option value="resourcepack">🎨 Texturas (Resourcepacks)</option>
             <option value="shader">✨ Shaders (Shaderpacks)</option>
           </select>
+
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:0.75rem;color:var(--text-dim);font-weight:600;">Instalar en:</span>
+            <select class="inp" id="rpInstanceSel" style="width:230px;background:rgba(0,0,0,0.4);border:1px solid rgba(192,132,252,0.3);color:var(--text);border-radius:8px;padding:8px 12px;font-size:0.82rem;outline:none;">
+              <option value="global">🌐 .minecraft (Global / Por defecto)</option>
+            </select>
+          </div>
+
           <button class="btn btn-primary btn-sm" onclick="searchResourcepacks()">🔍 Buscar</button>
         </div>
 
@@ -3456,7 +3472,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
 
 
-<div id="launcher-version-tag" style="position: fixed; right: 16px; bottom: 14px; font-size: 0.68rem; color: rgba(255, 255, 255, 0.22); font-family: 'Outfit', sans-serif; font-weight: 700; pointer-events: none; z-index: 99999; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.6);">v4.0.6</div>
+<div id="launcher-version-tag" style="position: fixed; right: 16px; bottom: 14px; font-size: 0.68rem; color: rgba(255, 255, 255, 0.22); font-family: 'Outfit', sans-serif; font-weight: 700; pointer-events: none; z-index: 99999; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.6);">v4.3.0</div>
 
 <script>
 const { ipcRenderer: ipc } = require('electron');
@@ -5764,6 +5780,7 @@ function clearConsole() {
 }
 
 ipc.on('log', (e,d) => addLog(d.msg, d.type));
+
 ipc.on('progress', (e,d) => {
   const w=document.getElementById('progressWrap'); const b=document.getElementById('progressBar'); const l=document.getElementById('progressLabel');
   const steveProgressBar = document.getElementById('steve-progress-bar');
@@ -7846,25 +7863,13 @@ function updateMyStatus(status, activity) {
             <!-- Renderizado dinámico -->
           </div>
 
-          <!-- Botones de Acción de Mods -->
-          <div style="margin-top: 12px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px;">
-            <button class="btn btn-primary btn-full btn-sm" style="font-size: 0.75rem; height: 34px; background: linear-gradient(135deg, rgba(192, 132, 252, 0.25), rgba(129, 140, 248, 0.25)); border: 1px solid rgba(192, 132, 252, 0.4); font-weight: 600; color: #fff;" onclick="checkModUpdatesForActiveModpack()">
-              ⚡ Buscar Actualizaciones de Mods
-            </button>
-
-            <div style="display: flex; gap: 6px;">
-              <button class="btn btn-glass btn-full btn-sm" style="font-size: 0.72rem; height: 32px; flex: 1;" onclick="translateActiveModpackSpanish()">
-                🌍 Traducir al Español
-              </button>
-              <button class="btn btn-glass btn-full btn-sm" style="font-size: 0.72rem; height: 32px; flex: 1;" onclick="scanActiveModpackShield()">
-                🛡️ Escanear Malware
-              </button>
-            </div>
-
-            <button class="btn btn-glass btn-full btn-sm" style="font-size: 0.75rem; height: 34px;" onclick="document.getElementById('mpe-jar-input').click()">
-              ➕ Instalar Mod desde .jar local
+                    <!-- Botones de Acción de Mods -->
+          <div style="margin-top: 12px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn btn-primary btn-full" style="font-size: 0.82rem; height: 40px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(59, 130, 246, 0.4)); border: 1px solid rgba(168, 85, 247, 0.5); font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 10px;" onclick="document.getElementById('mpe-jar-input').click()">
+              <span>➕</span> Instalar Mod desde .jar local
             </button>
             <input type="file" id="mpe-jar-input" accept=".jar" onchange="uploadModToActiveModpack(this.files[0])" style="display:none;">
+          </div>
           </div>
         </div>
 
@@ -7874,7 +7879,7 @@ function updateMyStatus(status, activity) {
           <!-- Controles de Búsqueda -->
           <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-shrink: 0; align-items: center;">
             <div style="flex: 1; position: relative;">
-              <input type="text" class="inp" id="mpe-search-input" placeholder="Buscar mods compatibles en Modrinth (Sodium, JEI...)" style="width: 100%; font-size: 0.82rem; padding-right: 35px; box-sizing: border-box;" onkeydown="if(event.key==='Enter') searchMpeModrinth()">
+              <input type="text" class="inp" id="mpe-search-input" placeholder="Buscar mods compatibles en Modrinth (Sodium, JEI...)" style="width: 100%; font-size: 0.82rem; padding-right: 35px; box-sizing: border-box;" onkeydown="if(event.key==='Enter') searchMpeModrinth()" oninput="if(this.value.trim()==='') searchMpeModrinth()">
               <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.6; font-size: 0.9rem;" onclick="searchMpeModrinth()">🔍</span>
             </div>
 
@@ -8598,8 +8603,8 @@ function updateMyStatus(status, activity) {
     }
 
     async function startNebulaLogin() {
-      const email = document.getElementById('nebula-email').value.trim();
-      const password = document.getElementById('nebula-password').value;
+      const email = document.getElementById('nebula-login-email').value.trim();
+      const password = document.getElementById('nebula-login-password').value;
       const status = document.getElementById('nebula-status');
       const btn = document.getElementById('btnNebulaLogin');
 
@@ -8613,7 +8618,24 @@ function updateMyStatus(status, activity) {
 
       try {
         const credentials = await firebase.auth().signInWithEmailAndPassword(email, password);
-        const uid = credentials.user.uid;
+        const user = credentials.user;
+        const uid = user.uid;
+
+        // Comprobación de Verificación de Correo Electrónico
+        if (!user.emailVerified) {
+          status.innerHTML = `
+            <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 10px; margin-top: 8px;">
+              <span style="color:#f87171; font-weight:600;">⚠️ Correo no verificado</span><br>
+              <span style="font-size:0.75rem; color:var(--text-muted);">Debes confirmar el enlace enviado a <b>${email}</b> antes de ingresar.</span><br>
+              <button class="btn btn-ghost btn-sm" style="margin-top:8px; font-size:0.75rem;" onclick="resendNebulaVerification()">
+                ✉️ Reenviar enlace de verificación
+              </button>
+            </div>
+          `;
+          toast('Por favor verifica tu correo electrónico antes de ingresar.', 'warning');
+          await firebase.auth().signOut();
+          return;
+        }
         
         // Fetch user data from Realtime Database
         const dbRef = firebase.database().ref(`users/${uid}`);
@@ -8637,12 +8659,36 @@ function updateMyStatus(status, activity) {
         toast(`¡Sesión Nebula iniciada, ${authUser}!`, 'success');
         completeLogin();
       } catch (err) {
-        status.textContent = '❌ Error: ' + err.message;
-        toast('Error al iniciar sesión: ' + err.message, 'error');
+        let msg = err.message;
+        if (msg.includes('auth/invalid-credential') || msg.includes('auth/wrong-password') || msg.includes('auth/user-not-found')) {
+          msg = 'Correo o contraseña incorrectos.';
+        }
+        status.textContent = '❌ Error: ' + msg;
+        toast('Error al iniciar sesión: ' + msg, 'error');
       } finally {
         btn.disabled = false;
       }
     }
+
+    window.resendNebulaVerification = async function() {
+      const email = document.getElementById('nebula-login-email').value.trim();
+      const password = document.getElementById('nebula-login-password').value;
+      const status = document.getElementById('nebula-status');
+      if (!email || !password) {
+        status.textContent = '❌ Ingresa tu correo y contraseña para reenviar el enlace.';
+        return;
+      }
+      try {
+        status.innerHTML = '<span class="spinner"></span> Reenviando enlace de verificación...';
+        const credentials = await firebase.auth().signInWithEmailAndPassword(email, password);
+        await credentials.user.sendEmailVerification();
+        await firebase.auth().signOut();
+        status.innerHTML = `<span style="color:#4ade80;">✅ Enlace reenviado a <b>${email}</b>. Revisa tu bandeja de entrada o spam.</span>`;
+        toast('Enlace de verificación enviado.', 'success');
+      } catch (err) {
+        status.textContent = '❌ Error al reenviar: ' + err.message;
+      }
+    };
 
     async function startNebulaRegister() {
       const rawUsername = document.getElementById('nebula-reg-username').value.trim();
@@ -8651,7 +8697,6 @@ function updateMyStatus(status, activity) {
       const status = document.getElementById('nebula-status');
       const btn = document.getElementById('btnNebulaRegister');
 
-      // Validar nickname de Minecraft
       const usernameRegex = /^[a-zA-Z0-9_]{3,16}$/;
       if (!usernameRegex.test(rawUsername)) {
         status.textContent = '❌ Nickname inválido. Debe tener entre 3 y 16 caracteres alfanuméricos o guiones bajos.';
@@ -8670,48 +8715,60 @@ function updateMyStatus(status, activity) {
       status.innerHTML = '<span class="spinner"></span> Creando tu cuenta...';
 
       try {
-        // Verificar si el username ya existe en /usernames
+        // 1. Crear usuario en Firebase Auth primero
+        const credentials = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        const user = credentials.user;
+        const uid = user.uid;
+        
+        // 2. Verificar disponibilidad de nickname con permisos autenticados
         const usernameLower = rawUsername.toLowerCase();
         const usernameCheckRef = firebase.database().ref(`usernames/${usernameLower}`);
         const usernameSnap = await usernameCheckRef.once('value');
-        if (usernameSnap.exists()) {
-          throw new Error(`El nickname "${rawUsername}" ya está en uso.`);
+        if (usernameSnap.exists() && usernameSnap.val() !== uid) {
+          await user.delete();
+          throw new Error(`El nickname "${rawUsername}" ya está registrado por otro jugador.`);
         }
 
-        // Crear usuario en Firebase Auth
-        const credentials = await firebase.auth().createUserWithEmailAndPassword(email, password);
-        const uid = credentials.user.uid;
-        
-        // Generar UUID offline compatible con Java/Minecraft
+        // 3. Generar UUID offline compatible con Minecraft
         const generatedUuid = await ipc.invoke('get-offline-uuid', rawUsername);
 
-        // Guardar datos del perfil en Realtime Database
+        // 4. Guardar datos del perfil en Realtime Database
         const userData = {
           username: rawUsername,
           email: email,
-          uuid: generatedUuid,
-          skinUrl: '' // Por defecto sin skin (usa Steve/Alex)
-        };
-
-        await firebase.database().ref(`users/${uid}`).set(userData);
-        await usernameCheckRef.set(uid);
-
-        authUser = rawUsername;
-        authType = 'nebula';
-        authData = {
-          uid: uid,
-          email: email,
-          username: rawUsername,
           uuid: generatedUuid,
           skinUrl: '',
           capeUrl: ''
         };
 
-        toast(`¡Cuenta Nebula creada con éxito! Bienvenido, ${authUser}.`, 'success');
-        completeLogin();
+        await firebase.database().ref(`users/${uid}`).set(userData);
+        await usernameCheckRef.set(uid);
+
+        // 5. Enviar correo de verificación oficial de Firebase
+        await user.sendEmailVerification();
+        await firebase.auth().signOut();
+
+        toast('¡Cuenta creada! Hemos enviado un correo de verificación.', 'success');
+        status.innerHTML = `
+          <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 12px; margin-top: 8px;">
+            <span style="color:#4ade80; font-weight:700;">✉️ ¡Verificación enviada!</span><br>
+            <span style="font-size:0.78rem; color:var(--text-muted);">Hemos enviado un enlace de confirmación a <b>${email}</b>.<br>Abre tu correo y haz clic en el enlace para activar tu cuenta.</span>
+          </div>
+        `;
+
+        setTimeout(() => {
+          switchNebulaForm('login');
+          const logEmail = document.getElementById('nebula-login-email');
+          if (logEmail) logEmail.value = email;
+        }, 4000);
       } catch (err) {
-        status.textContent = '❌ Error: ' + err.message;
-        toast('Error al registrar cuenta: ' + err.message, 'error');
+        let msg = err.message;
+        if (msg.includes('auth/email-already-in-use')) msg = 'Este correo electrónico ya está registrado.';
+        else if (msg.includes('auth/weak-password')) msg = 'La contraseña es muy débil (mínimo 6 caracteres).';
+        else if (msg.includes('auth/invalid-email')) msg = 'El correo electrónico no es válido.';
+
+        status.textContent = '❌ Error: ' + msg;
+        toast('Error al registrar cuenta: ' + msg, 'error');
       } finally {
         btn.disabled = false;
       }
@@ -10049,39 +10106,7 @@ function updateMyStatus(status, activity) {
     }
 
     // ⚡ Buscar Actualizaciones Inteligentes para Mods Instalados
-    async function checkModUpdatesForActiveModpack() {
-      if (!activeEditorVersionId) return;
-      toast('⚡ Escaneando actualizaciones para mods instalados...', 'info');
-      
-      try {
-        const res = await ipc.invoke('check-installed-mods-updates', {
-          folderName: activeEditorVersionId,
-          mcVersion: activeEditorMcVersion,
-          loader: activeEditorLoader
-        });
-
-        if (res.success && res.updates && res.updates.length > 0) {
-          toast(`✨ Se encontraron ${res.updates.length} actualización(es) disponible(s)!`, 'success');
-          if (confirm(`✨ Hay ${res.updates.length} mod(s) con actualizaciones disponibles.\n\n${res.updates.map(u => `• ${u.modTitle} → ${u.newVersionNumber}`).join('\n')}\n\n¿Deseas actualizarlos ahora automáticamente?`)) {
-            toast('📥 Descargando actualizaciones...', 'info');
-            const applyRes = await ipc.invoke('apply-mod-updates', {
-              folderName: activeEditorVersionId,
-              updates: res.updates
-            });
-            if (applyRes.success) {
-              toast(`✅ ${applyRes.updatedCount} mod(s) actualizados a la última versión!`, 'success');
-              await loadModpackEditorMods();
-            } else {
-              toast(`❌ Error actualizando: ${applyRes.error}`, 'error');
-            }
-          }
-        } else {
-          toast('✅ Todos tus mods están en la versión más reciente.', 'success');
-        }
-      } catch (err) {
-        toast(`❌ Error buscando actualizaciones: ${err.message}`, 'error');
-      }
-    }
+    
 
     // ✨ Inyectar Combo de Rendimiento IA (Sodium + Lithium + FerriteCore)
     async function injectSmartPerformanceCombo() {
@@ -10393,14 +10418,19 @@ function updateMyStatus(status, activity) {
       document.getElementById('mpe-subtitle').textContent = `Minecraft ${mcVersion} • Loader: ${loader.toUpperCase()}`;
       document.getElementById('mpe-search-input').value = '';
       document.getElementById('mpe-local-search').value = '';
+            document.getElementById('mpe-subtitle').textContent = `Minecraft ${mcVersion} • Loader: ${loader.toUpperCase()}`;
+      document.getElementById('mpe-search-input').value = '';
+      document.getElementById('mpe-local-search').value = '';
       document.getElementById('mpe-search-results').innerHTML = `
-        <div style="color: var(--text-dim); text-align: center; padding: 60px; font-size: 0.85rem;">
-          Escribe algo arriba para buscar mods compatibles con Minecraft ${mcVersion} (${loader.toUpperCase()}).
+        <div style="color: var(--text-dim); text-align: center; padding: 40px; font-size: 0.85rem;">
+          <span class="spinner" style="margin: 0 auto 12px auto; display: block;"></span>
+          Cargando mods populares compatibles para Minecraft ${mcVersion}...
         </div>
       `;
       
       document.getElementById('modpack-editor-modal').style.display = 'flex';
       await loadModpackEditorMods();
+      searchMpeModrinth();
     }
 
     function closeModpackEditor() {
@@ -10504,36 +10534,36 @@ function updateMyStatus(status, activity) {
       }
     }
 
-    async function searchMpeModrinth() {
+        async function searchMpeModrinth() {
       const query = document.getElementById('mpe-search-input').value.trim();
+      const sortSelect = document.getElementById('mpe-sort-select');
+      const sortValue = sortSelect ? sortSelect.value : (query ? 'relevance' : 'downloads');
       const resultsDiv = document.getElementById('mpe-search-results');
-      if (!query) {
-        resultsDiv.innerHTML = `
-          <div style="color: var(--text-dim); text-align: center; padding: 60px; font-size: 0.85rem;">
-            Escribe algo arriba para buscar mods compatibles con Minecraft ${activeEditorMcVersion} (${activeEditorLoader.toUpperCase()}).
-          </div>
-        `;
-        return;
-      }
       
-      resultsDiv.innerHTML = '<p style="color:var(--text-dim); text-align:center; padding:40px; font-size:0.8rem;">🔍 Buscando mods compatibles en Modrinth...</p>';
+      const isPopularPreview = !query;
+      resultsDiv.innerHTML = isPopularPreview
+        ? '<p style="color:var(--text-dim); text-align:center; padding:30px; font-size:0.82rem;"><span class="spinner" style="margin:0 auto 8px auto; display:block;"></span>✨ Obteniendo los mods más populares y recomendados de Modrinth...</p>'
+        : `<p style="color:var(--text-dim); text-align:center; padding:30px; font-size:0.82rem;">🔍 Buscando "${query}" en Modrinth...</p>`;
       
       try {
+        const loaderMapped = activeEditorLoader === 'forge' ? 'forge' : (activeEditorLoader === 'neoforge' ? 'neoforge' : 'fabric');
         const res = await ipc.invoke('search-modrinth', {
-          query,
+          query: query || '',
           mcVersion: activeEditorMcVersion,
-          loader: activeEditorLoader === 'forge' ? 'forge' : (activeEditorLoader === 'neoforge' ? 'neoforge' : 'fabric')
+          loader: loaderMapped,
+          index: sortValue,
+          limit: 30
         });
         
-        if (res.success && res.hits) {
+        if (res && res.success && res.hits) {
           activeEditorSearchHits = res.hits;
           renderMpeSearchResults();
         } else {
-          resultsDiv.innerHTML = `<p style="color:var(--red); text-align:center; padding:40px; font-size:0.8rem;">Error: ${res.error}</p>`;
+          resultsDiv.innerHTML = `<p style="color:var(--text-dim); text-align:center; padding:40px; font-size:0.82rem;">No se encontraron mods disponibles para esta versión.</p>`;
         }
       } catch (err) {
-        console.error(err);
-        resultsDiv.innerHTML = `<p style="color:var(--red); text-align:center; padding:40px; font-size:0.8rem;">Error: ${err.message}</p>`;
+        console.error('Error buscando en Modrinth:', err);
+        resultsDiv.innerHTML = `<p style="color:var(--text-dim); text-align:center; padding:40px; font-size:0.82rem;">No se pudo conectar con Modrinth en este momento.</p>`;
       }
     }
 
@@ -11149,98 +11179,10 @@ function updateMyStatus(status, activity) {
 
 
     // ═══════ 🌍 MODPACK TRANSLATOR JS ═══════
-    async function translateActiveModpackSpanish() {
-      const resultsEl = document.getElementById('mpe-online-results');
-      if (resultsEl) {
-        resultsEl.innerHTML = `
-          <div style="text-align: center; color: var(--accent); padding: 50px 20px;">
-            <div class="spinner" style="margin: 0 auto 15px auto;"></div>
-            <div style="font-weight: 700; font-size: 0.95rem;">🌍 Traductor Nebula Modpack en proceso...</div>
-            <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 6px;">Analizando archivos .jar y diccionarios de mods...</div>
-          </div>
-        `;
-      }
-      toast('🌍 Traduciendo modpack al español...', 'info');
-
-      try {
-        const res = await ipc.invoke('translate-modpack', { folderName: activeEditorVersionId });
-        if (res.success && resultsEl) {
-          resultsEl.innerHTML = `
-            <div style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.35); border-radius: 16px; padding: 30px 20px; text-align: center; color: #c084fc; margin: 20px 0;">
-              <div style="font-size: 3rem; margin-bottom: 12px;">🌍✨</div>
-              <h3 style="font-weight: 800; font-size: 1.1rem; color: #fff; margin-bottom: 8px;">Traducción al Español Generada</h3>
-              <p style="font-size: 0.85rem; color: #cbd5e1; margin: 0 auto; max-width: 400px; line-height: 1.5;">
-                Se tradujeron <b>${res.translatedModsCount} mods</b> y <b>${res.translatedKeysCount} textos</b>.<br><br>
-                Se generó el paquete de recursos <b>"${res.packName}"</b> y se activó en tus opciones.
-              </p>
-              <div style="margin-top: 18px; display: inline-block; padding: 6px 14px; background: rgba(168,85,247,0.2); border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: #e9d5ff;">
-                🎉 Parche en Español Instalado Exitosamente
-              </div>
-            </div>
-          `;
-          toast(`✨ ¡Traducción completada! ${res.translatedModsCount} mods traducidos.`, 'success');
-          claimGamerPassAchievement('translator_pro', 250);
-        }
-      } catch(err) {
-        if (resultsEl) resultsEl.innerHTML = `<div style="color:var(--red); padding:30px; text-align:center;">❌ Error: ${err.message}</div>`;
-        toast(`❌ Error: ${err.message}`, 'error');
-      }
-    }
+    
 
     // ═══════ 🛡️ NEBULA SHIELD ANTI-MALWARE JS ═══════
-    async function scanActiveModpackShield() {
-      const resultsEl = document.getElementById('mpe-online-results');
-      if (resultsEl) {
-        resultsEl.innerHTML = `
-          <div style="text-align: center; color: var(--accent); padding: 50px 20px;">
-            <div class="spinner" style="margin: 0 auto 15px auto;"></div>
-            <div style="font-weight: 700; font-size: 0.95rem;">🛡️ Nebula Shield: Escaneando archivos .jar...</div>
-            <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 6px;">Inspeccionando firmas bytecode, scripts y ejecutable ocultos...</div>
-          </div>
-        `;
-      }
-      toast('🛡️ Escaneando mods en busca de virus...', 'info');
-
-      try {
-        const res = await ipc.invoke('scan-modpack-shield', { folderName: activeEditorVersionId });
-        if (res.success && resultsEl) {
-          if (res.clean) {
-            resultsEl.innerHTML = `
-              <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 16px; padding: 30px 20px; text-align: center; color: #34d399; margin: 20px 0;">
-                <div style="font-size: 3rem; margin-bottom: 12px;">🛡️✨</div>
-                <h3 style="font-weight: 800; font-size: 1.1rem; color: #fff; margin-bottom: 8px;">Modpack 100% Seguro</h3>
-                <p style="font-size: 0.85rem; color: #cbd5e1; margin: 0 auto; max-width: 400px; line-height: 1.5;">
-                  Se inspeccionaron <b>${res.scannedCount} mods</b>. No se detectó código malicioso, scripts troyanos ni accesos no autorizados.
-                </p>
-              </div>
-            `;
-            toast(`✅ Escaneo completado: ${res.scannedCount} mods seguros.`, 'success');
-            claimGamerPassAchievement('shield_activated', 250);
-          } else {
-            const flaggedList = res.flagged.map(f => `
-              <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 10px; padding: 10px; margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
-                <div style="text-align: left;">
-                  <div style="font-weight: 700; color: #fff; font-size: 0.8rem;">⚠️ ${f.filename}</div>
-                  <div style="font-size: 0.7rem; color: #fca5a5;">${f.reason}</div>
-                </div>
-                <button class="btn btn-danger btn-sm" onclick="quarantineMod('${f.filename}')">🗑️ Quarantinar Mod</button>
-              </div>
-            `).join('');
-            resultsEl.innerHTML = `
-              <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 16px; padding: 24px; text-align: center;">
-                <div style="font-size: 2.5rem; margin-bottom: 8px;">⚠️</div>
-                <h3 style="font-weight: 800; font-size: 1.1rem; color: #fff; margin-bottom: 8px;">¡Alertas de Malware Detectadas!</h3>
-                ${flaggedList}
-              </div>
-            `;
-            toast(`⚠️ Alerta: Se detectaron ${res.flagged.length} archivo(s) sospechoso(s)!`, 'error');
-          }
-        }
-      } catch(err) {
-        if (resultsEl) resultsEl.innerHTML = `<div style="color:var(--red); padding:30px; text-align:center;">❌ Error: ${err.message}</div>`;
-        toast(`❌ Error en escaneo: ${err.message}`, 'error');
-      }
-    }
+    
 
     async function quarantineMod(filename) {
       try {
@@ -11255,5 +11197,151 @@ function updateMyStatus(status, activity) {
     // No-op for claimGamerPassAchievement
     function claimGamerPassAchievement() {}
   </script>
+
+  
+  
+  <script id="rp-controller-script">
+    let pendingRPInstall = null;
+
+    async function loadResourcepackModalDestinations() {
+      const sel = document.getElementById('rp-modal-dest-select');
+      if (!sel) return;
+      try {
+        const dests = await ipc.invoke('get-installation-destinations');
+        if (dests && dests.length > 0) {
+          sel.innerHTML = dests.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+        }
+      } catch (e) {
+        console.warn('Error cargando destinos:', e);
+      }
+    }
+
+    async function searchResourcepacks() {
+      const queryInp = document.getElementById('rpSearchInp');
+      const typeSel = document.getElementById('rpTypeSel');
+      const grid = document.getElementById('rpResultsGrid');
+      if (!grid) return;
+
+      const query = queryInp ? queryInp.value.trim() : '';
+      const type = typeSel ? typeSel.value : 'resourcepack';
+
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-dim);">⏳ Buscando ${type === 'shader' ? 'shaders' : 'texturas'}...</div>`;
+
+      try {
+        const results = await ipc.invoke('search-resourcepacks', { query, type });
+        if (!results || results.length === 0) {
+          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-dim);">🔍 No se encontraron resultados.</div>`;
+          return;
+        }
+
+        const labelName = type === 'shader' ? 'Shader' : 'Textura';
+
+        grid.innerHTML = results.map(item => `
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;transition:transform 0.2s, border-color 0.2s;" onmouseenter="this.style.transform='translateY(-2px)';this.style.borderColor='rgba(192,132,252,0.4)'" onmouseleave="this.style.transform='none';this.style.borderColor='rgba(255,255,255,0.08)'">
+            <div style="display:flex;gap:12px;align-items:center;">
+              <img src="${item.iconUrl || 'https://modrinth.com/assets/logo.svg'}" style="width:48px;height:48px;border-radius:12px;object-fit:cover;background:rgba(0,0,0,0.3);" onerror="this.src='https://modrinth.com/assets/logo.svg'" />
+              <div style="flex:1;overflow:hidden;">
+                <div style="font-weight:700;font-size:0.95rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.title}</div>
+                <div style="font-size:0.72rem;color:var(--text-dim);">👤 ${item.author || 'Modrinth'} • 📥 ${(item.downloads || 0).toLocaleString()}</div>
+              </div>
+            </div>
+            <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.4;height:36px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0;">
+              ${item.description || 'Sin descripción disponible.'}
+            </p>
+            <button class="btn btn-primary btn-full btn-sm" onclick="openResourcepackDestModal('${item.projectId}', '${type}', '${item.title.replace(/'/g, "\'")}')">
+              ⬇️ Instalar ${labelName} (1-Clic)
+            </button>
+          </div>
+        `).join('');
+      } catch (err) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--red);">❌ Error: ${err.message}</div>`;
+      }
+    }
+
+    async function openResourcepackDestModal(projectId, type, title) {
+      pendingRPInstall = { projectId, type, title };
+      const modal = document.getElementById('rp-dest-modal');
+      const titleEl = document.getElementById('rp-modal-title');
+      const subEl = document.getElementById('rp-modal-sub');
+
+      const label = type === 'shader' ? 'Shader' : 'Textura';
+      if (titleEl) titleEl.textContent = `Instalar ${label}: ${title}`;
+      if (subEl) subEl.textContent = `¿En cuál versión o modpack deseas instalar esta ${label.toLowerCase()}?`;
+
+      await loadResourcepackModalDestinations();
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeResourcepackDestModal() {
+      const modal = document.getElementById('rp-dest-modal');
+      if (modal) modal.style.display = 'none';
+      pendingRPInstall = null;
+    }
+
+    async function confirmResourcepackInstall() {
+      if (!pendingRPInstall) return;
+      const { projectId, type, title } = pendingRPInstall;
+      const instSel = document.getElementById('rp-modal-dest-select');
+      const targetInstance = instSel ? instSel.value : 'global';
+      const instName = (instSel && instSel.options[instSel.selectedIndex]) ? instSel.options[instSel.selectedIndex].text : '.minecraft';
+
+      closeResourcepackDestModal();
+
+      const label = type === 'shader' ? 'Shader' : 'Textura';
+      toast(`⏳ Descargando e instalando ${label} "${title}" en ${instName}...`, 'info');
+
+      try {
+        const res = await ipc.invoke('download-resourcepack', { projectId, type, targetInstance });
+        if (res.success) {
+          toast(`✅ ¡${label} "${title}" instalada en ${res.destLabel || instName}!`, 'success');
+        } else {
+          toast(`❌ Error: ${res.error}`, 'error');
+        }
+      } catch (e) {
+        toast(`❌ Error: ${e.message}`, 'error');
+      }
+    }
+
+    // Compatibilidad retroactiva
+    function downloadResourcepackItem(projectId, type, title) {
+      openResourcepackDestModal(projectId, type, title);
+    }
+
+    const prevShowTabRP = window.showTab;
+    window.showTab = function(tabId) {
+      if (typeof prevShowTabRP === 'function') prevShowTabRP(tabId);
+      if (tabId === 'resourcepacks') {
+        setTimeout(searchResourcepacks, 100);
+      }
+    };
+  </script>
+
+
+
+
+<!-- ═══ MODAL SELECCIONAR DESTINO DE INSTALACIÓN (TEXTURAS & SHADERS) ═══ -->
+<div class="modal-overlay" id="rp-dest-modal" style="display:none;">
+  <div class="modal-content" style="max-width:440px;-webkit-app-region:no-drag;">
+    <div style="font-size:2rem;margin-bottom:-6px;">📥</div>
+    <h3 style="font-size:1.1rem;font-weight:700;color:#fff;margin:0;" id="rp-modal-title">Elegir destino de instalación</h3>
+    
+    <p style="font-size:0.78rem;color:var(--text-dim);margin:0;line-height:1.4;" id="rp-modal-sub">
+      ¿En qué versión o modpack deseas instalar este paquete?
+    </p>
+
+    <div style="width:100%;display:flex;flex-direction:column;gap:6px;text-align:left;">
+      <label class="label" style="font-size:0.72rem;color:var(--text-dim);margin:0;">Versión o Modpack de Destino:</label>
+      <select class="inp" id="rp-modal-dest-select" style="width:100%;background:rgba(0,0,0,0.5);border:1px solid rgba(192,132,252,0.3);color:var(--text);border-radius:10px;padding:10px 14px;font-size:0.85rem;outline:none;">
+        <option value="global">🌐 .minecraft (Global / Por defecto)</option>
+      </select>
+    </div>
+
+    <div style="display:flex;gap:12px;width:100%;margin-top:6px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeResourcepackDestModal()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1;" id="rp-modal-confirm-btn" onclick="confirmResourcepackInstall()">⬇️ Instalar ahora</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

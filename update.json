@@ -1,10 +1,14 @@
 {
-  "version": "4.2.9",
-  "notes": "\ud83d\ude80 Nebula Launcher v4.2.9: Verificaci\u00f3n obligatoria de correo para cuentas Nebula y protecci\u00f3n antispam de Firebase.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.2.9/app.asar",
-  "platforms": {
-    "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.2.9/app.asar"
-    }
-  }
+  "version": "4.3.0",
+  "name": "Nebula Launcher v4.3.0",
+  "releaseDate": "2026-08-20",
+  "url": "https://github.com/fonduexdd/nebula-launcher/releases/download/v4.3.0/app.asar",
+  "installerUrl": "https://github.com/fonduexdd/nebula-launcher/releases/download/v4.3.0/Nebula.Launcher.Setup.4.3.0.exe",
+  "portableUrl": "https://github.com/fonduexdd/nebula-launcher/releases/download/v4.3.0/Nebula-Launcher-v4.3.0-Portable.zip",
+  "mandatory": false,
+  "changelog": [
+    "🌌 Vista previa automática de mods populares y recomendados de Modrinth sin necesidad de buscar.",
+    "✨ Gestor de mods simplificado y optimizado con instalación rápida.",
+    "🔒 Eliminación completa de módulos en desuso."
+  ]
 }

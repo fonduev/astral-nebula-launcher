@@ -32,6 +32,11 @@ process.on('unhandledRejection', (reason, promise) => {
 // Data directory base (evita ENOTDIR escribiendo dentro de app.asar)
 const BASE_DATA_DIR = app.isPackaged ? app.getPath('userData') : __dirname;
 
+function getMcPath(customDir) {
+    return customDir || path.join(BASE_DATA_DIR, '.minecraft');
+}
+
+
 // Resources directory for update operations
 const resourcesDir = app.isPackaged
     ? path.join(path.dirname(process.execPath), 'resources')
@@ -3726,16 +3731,18 @@ ipcMain.handle('delete-mod', async (event, modPath) => {
 });
 
 // ── MODRINTH SEARCH & INSTALL ─────────────────────────────────────
-ipcMain.handle('search-modrinth', async (event, { query, mcVersion, loader }) => {
+ipcMain.handle('search-modrinth', async (event, { query, mcVersion, loader, index, limit }) => {
     try {
-        // Construir facets dinámicamente según los filtros disponibles
         const facets = [];
         facets.push('["project_type:mod"]');
         if (mcVersion) facets.push(`["versions:${mcVersion}"]`);
         if (loader) facets.push(`["categories:${loader}"]`);
 
         const facetsStr = `[${facets.join(',')}]`;
-        const url = `https://api.modrinth.com/v2/search?query=${encodeURIComponent(query)}&facets=${encodeURIComponent(facetsStr)}&limit=12`;
+        const sortIndex = index || (query ? 'relevance' : 'downloads');
+        const searchLimit = limit || 30;
+        const q = query ? encodeURIComponent(query) : '';
+        const url = `https://api.modrinth.com/v2/search?query=${q}&facets=${encodeURIComponent(facetsStr)}&index=${sortIndex}&limit=${searchLimit}`;
         const data = JSON.parse(await httpsGet(url));
         return { success: true, hits: data.hits || [] };
     } catch (err) {
@@ -4229,11 +4236,18 @@ ipcMain.on('launch-game', async (event, data) => {
             versionOpts = { number: launchVersion, type: data.versionType || 'release' };
         }
 
+        const modIdStr = String(launchModId || '').toLowerCase();
+        const isForge = modIdStr.includes('forge') && !modIdStr.includes('neoforge');
+        const isNeoForge = modIdStr.includes('neoforge');
+        const isFabric = modIdStr.includes('fabric');
+        const isQuilt = modIdStr.includes('quilt');
+
         // Directorio de instancia separado
         const instanceDir = data.modpackName
             ? path.join(mcPath, 'instances', data.modpackName)
             : (launchModId && launchModId !== launchVersion ? getInstanceDir(mcPath, launchModId) : mcPath);
 
+        // Limpieza segura: NUNCA tocar otras instancias
         const cleanIncompatibleMods = (mDir) => {
             if (!fs.existsSync(mDir)) return;
             try {
@@ -4247,27 +4261,15 @@ ipcMain.on('launch-game', async (event, data) => {
                     if ((isExtra || isUnstableSodiumFamilyOn26) && !fLow.endsWith('.disabled')) {
                         try {
                             fs.unlinkSync(path.join(mDir, f));
-                            sendLog(`🧹 Mod inestable/incompatible autolimpiado (${verStr.trim()}): ${f}`);
-                        } catch {
-                            try { fs.renameSync(path.join(mDir, f), path.join(mDir, f + '.disabled')); } catch {}
-                        }
+                            sendLog(`🧹 Mod inestable autolimpiado (${verStr.trim()}): ${f}`);
+                        } catch {}
                     }
                 }
             } catch {}
         };
 
-        cleanIncompatibleMods(path.join(instanceDir, 'mods'));
         if (instanceDir !== mcPath) {
-            cleanIncompatibleMods(path.join(mcPath, 'mods'));
-        }
-        const instancesParent = path.join(mcPath, 'instances');
-        if (fs.existsSync(instancesParent)) {
-            try {
-                const instDirs = fs.readdirSync(instancesParent);
-                for (const d of instDirs) {
-                    cleanIncompatibleMods(path.join(instancesParent, d, 'mods'));
-                }
-            } catch {}
+            cleanIncompatibleMods(path.join(instanceDir, 'mods'));
         }
 
         if (instanceDir !== mcPath) {
@@ -4276,12 +4278,20 @@ ipcMain.on('launch-game', async (event, data) => {
             sendLog(`📂 Instancia: ${path.basename(instanceDir)}`);
         }
 
+        const customLaunchArgs = [];
+        if (data.type === 'nebula' && data.auth && data.auth.skinUrl) {
+            customLaunchArgs.push('--userProperties', userProps);
+        }
+        if (instanceDir !== mcPath) {
+            customLaunchArgs.push('--gameDir', instanceDir);
+        }
+
         const opts = {
             authorization: auth, root: mcPath, javaPath: javaExe,
             version: versionOpts,
-            memory: { max: `${data.ram}G`, min: '512M' },
+            memory: { max: `${Math.min(Math.max(1, parseInt(data.ram) || 4), 16)}G`, min: '512M' },
             ...(instanceDir !== mcPath ? { overrides: { gameDirectory: instanceDir } } : {}),
-            ...(data.type === 'nebula' && data.auth && data.auth.skinUrl ? { customLaunchArgs: ['--userProperties', userProps] } : {})
+            ...(customLaunchArgs.length > 0 ? { customLaunchArgs } : {})
         };
 
         if (data.serverIp) {
@@ -4297,8 +4307,11 @@ ipcMain.on('launch-game', async (event, data) => {
         }
 
         let activeJvmArgs = s.jvmArgs || '';
-        if (activeJvmArgs && activeJvmArgs.trim()) {
-            opts.customArgs = activeJvmArgs.trim().split(/\s+/);
+        opts.customArgs = activeJvmArgs && activeJvmArgs.trim() ? activeJvmArgs.trim().split(/\s+/) : [];
+        if (isForge || isNeoForge) {
+            if (!opts.customArgs.includes('-Dfml.earlyprogresswindow=false')) {
+                opts.customArgs.push('-Dfml.earlyprogresswindow=false');
+            }
         }
 
         // Inyección del Java Agent para Cuenta Nebula
@@ -4771,11 +4784,36 @@ ipcMain.handle('search-resourcepacks', async (event, { query = '', type = 'resou
     return results;
 });
 
-ipcMain.handle('download-resourcepack', async (event, { projectId, type = 'resourcepack' }) => {
+ipcMain.handle('download-resourcepack', async (event, { projectId, type = 'resourcepack', targetInstance }) => {
     try {
         const s = loadSettings();
-        const mcPath = getMcPath(s.gameDir);
-        const targetSubDir = type === 'shader' ? 'shaderpacks' : 'resourcepacks';
+        let mcPath = getMcPath(s.gameDir);
+        let destLabel = '.minecraft';
+
+        if (targetInstance && targetInstance !== 'global') {
+            if (targetInstance.startsWith('instance:')) {
+                const instName = targetInstance.substring(9);
+                mcPath = path.join(mcPath, 'instances', instName);
+                destLabel = `instancia "${instName}"`;
+            } else if (targetInstance.startsWith('version:')) {
+                const verName = targetInstance.substring(8);
+                mcPath = path.join(mcPath, 'versions', verName);
+                destLabel = `versión "${verName}"`;
+            } else {
+                if (fs.existsSync(path.join(mcPath, 'instances', targetInstance))) {
+                    mcPath = path.join(mcPath, 'instances', targetInstance);
+                    destLabel = `instancia "${targetInstance}"`;
+                } else if (fs.existsSync(path.join(mcPath, 'versions', targetInstance))) {
+                    mcPath = path.join(mcPath, 'versions', targetInstance);
+                    destLabel = `versión "${targetInstance}"`;
+                } else {
+                    mcPath = path.join(mcPath, 'instances', targetInstance);
+                    destLabel = `instancia "${targetInstance}"`;
+                }
+            }
+        }
+
+        const targetSubDir = (type === 'shader') ? 'shaderpacks' : 'resourcepacks';
         const targetDir = path.join(mcPath, targetSubDir);
         fs.mkdirSync(targetDir, { recursive: true });
 
@@ -4783,19 +4821,64 @@ ipcMain.handle('download-resourcepack', async (event, { projectId, type = 'resou
         const versionsUrl = `https://api.modrinth.com/v2/project/${projectId}/version`;
         const versionsData = await httpsGet(versionsUrl);
         const versions = JSON.parse(versionsData);
-        if (!versions || versions.length === 0) throw new Error('No hay versiones disponibles.');
+        if (!versions || versions.length === 0) throw new Error('No hay versiones disponibles en Modrinth.');
 
         const primaryVersion = versions[0];
         const primaryFile = primaryVersion.files.find(f => f.primary) || primaryVersion.files[0];
         if (!primaryFile) throw new Error('No se encontró archivo de descarga.');
 
         const destPath = path.join(targetDir, primaryFile.filename);
-        sendLog(`📥 Descargando ${primaryFile.filename} en ${targetSubDir}...`);
+        sendLog(`📥 Descargando ${primaryFile.filename} en ${targetSubDir} (${destLabel})...`);
         await downloadFile(primaryFile.url, destPath);
-        sendLog(`✅ ${type === 'shader' ? 'Shader' : 'Textura'} instalada: ${primaryFile.filename}`);
-        return { success: true, filename: primaryFile.filename };
+        sendLog(`✅ ${type === 'shader' ? 'Shader' : 'Textura'} instalada en ${destLabel}: ${primaryFile.filename}`);
+        return { success: true, filename: primaryFile.filename, destLabel };
     } catch (err) {
         sendLog(`❌ Error descargando ${type}: ${err.message}`, 'error');
         return { success: false, error: err.message };
+    }
+});
+
+
+ipcMain.handle('get-installation-destinations', async (event) => {
+    try {
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        const destinations = [
+            { id: 'global', name: '🌐 .minecraft (Global / Por defecto)' }
+        ];
+
+        // 1. Instancias personalizadas (.minecraft/instances)
+        const instancesDir = path.join(mcPath, 'instances');
+        if (fs.existsSync(instancesDir)) {
+            const dirs = fs.readdirSync(instancesDir);
+            for (const dirName of dirs) {
+                const instancePath = path.join(instancesDir, dirName);
+                if (fs.statSync(instancePath).isDirectory()) {
+                    destinations.push({
+                        id: `instance:${dirName}`,
+                        name: `📦 Instancia: ${dirName}`
+                    });
+                }
+            }
+        }
+
+        // 2. Versiones instaladas (.minecraft/versions)
+        const versionsDir = path.join(mcPath, 'versions');
+        if (fs.existsSync(versionsDir)) {
+            const dirs = fs.readdirSync(versionsDir);
+            for (const dirName of dirs) {
+                const verPath = path.join(versionsDir, dirName);
+                if (fs.statSync(verPath).isDirectory()) {
+                    destinations.push({
+                        id: `version:${dirName}`,
+                        name: `🎮 Versión: ${dirName}`
+                    });
+                }
+            }
+        }
+
+        return destinations;
+    } catch (err) {
+        return [{ id: 'global', name: '🌐 .minecraft (Global / Por defecto)' }];
     }
 });
