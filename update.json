@@ -1,10 +1,10 @@
 {
-  "version": "4.2.8",
-  "notes": "\ud83d\ude80 Nebula Launcher v4.2.8: Interfaz de modpacks limpia y optimizaciones de rendimiento.",
-  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.2.8/app.asar",
+  "version": "4.2.9",
+  "notes": "\ud83d\ude80 Nebula Launcher v4.2.9: Verificaci\u00f3n obligatoria de correo para cuentas Nebula y protecci\u00f3n antispam de Firebase.",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.2.9/app.asar",
   "platforms": {
     "windows-x64": {
-      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.2.8/app.asar"
+      "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.2.9/app.asar"
     }
   }
 }
