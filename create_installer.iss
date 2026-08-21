@@ -6,6 +6,7 @@
 #define MyAppExeName "Nebula Launcher.exe"
 
 [Setup]
+PrivilegesRequired=lowest
 AppId={{D37E7492-7E11-4775-8D44-2DDF669D503C}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
@@ -13,7 +14,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={autopf}\{#MyAppName}
+DefaultDirName={localappdata}\Programs\{#MyAppName}
 DisableProgramGroupPage=yes
 OutputBaseFilename=Nebula.Launcher.Setup.4.3.0
 OutputDir=C:\Users\renee\Documents\Web

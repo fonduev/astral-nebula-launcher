@@ -450,6 +450,9 @@ function startTelemetry() {
 }
 
 app.whenReady().then(() => {
+    try {
+        fs.writeFileSync('C:\\Users\\renee\\Documents\\Web\\xd\\launcher_startup_log.txt', `Launcher started successfully at ${new Date().toISOString()}\n`);
+    } catch(e) {}
     startTelemetry();
     // Intentar borrar app.asar.old en el arranque si existe y no está bloqueado
     try {

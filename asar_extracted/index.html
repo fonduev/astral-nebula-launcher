@@ -7840,7 +7840,6 @@ function updateMyStatus(status, activity) {
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          
           <button class="btn btn-glass btn-sm" style="font-size: 0.85rem; padding: 6px 12px; border-radius: 10px;" onclick="closeModpackEditor()">✕ Cerrar</button>
         </div>
       </div>
@@ -7863,13 +7862,12 @@ function updateMyStatus(status, activity) {
             <!-- Renderizado dinámico -->
           </div>
 
-                    <!-- Botones de Acción de Mods -->
+          <!-- Botones de Acción de Mods -->
           <div style="margin-top: 12px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;">
             <button class="btn btn-primary btn-full" style="font-size: 0.82rem; height: 40px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(59, 130, 246, 0.4)); border: 1px solid rgba(168, 85, 247, 0.5); font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 10px;" onclick="document.getElementById('mpe-jar-input').click()">
               <span>➕</span> Instalar Mod desde .jar local
             </button>
             <input type="file" id="mpe-jar-input" accept=".jar" onchange="uploadModToActiveModpack(this.files[0])" style="display:none;">
-          </div>
           </div>
         </div>
 
@@ -7894,9 +7892,7 @@ function updateMyStatus(status, activity) {
 
           <!-- Lista de Resultados de Modrinth -->
           <div id="mpe-search-results" style="flex: 1; overflow-y: auto; transform: translateZ(0); contain: paint layout; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; min-width: 0; overflow-x: hidden;">
-            <div style="color: var(--text-dim); text-align: center; padding: 60px; font-size: 0.85rem;">
-              Escribe algo arriba para buscar mods en Modrinth compatibles con tu versión de Minecraft y Mod Loader.
-            </div>
+            <!-- Renderizado dinámico de Modrinth -->
           </div>
         </div>
 
