@@ -2,9 +2,9 @@
   "version": "4.3.0",
   "name": "Nebula Launcher v4.3.0",
   "releaseDate": "2026-08-20",
-  "url": "https://github.com/fonduexdd/nebula-launcher/releases/download/v4.3.0/app.asar",
-  "installerUrl": "https://github.com/fonduexdd/nebula-launcher/releases/download/v4.3.0/Nebula.Launcher.Setup.4.3.0.exe",
-  "portableUrl": "https://github.com/fonduexdd/nebula-launcher/releases/download/v4.3.0/Nebula-Launcher-v4.3.0-Portable.zip",
+  "url": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.3.0/app.asar",
+  "installerUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.3.0/Nebula.Launcher.Setup.4.3.0.exe",
+  "portableUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.3.0/Nebula-Launcher-v4.3.0-Portable.zip",
   "mandatory": false,
   "changelog": [
     "🌌 Vista previa automática de mods populares y recomendados de Modrinth sin necesidad de buscar.",
