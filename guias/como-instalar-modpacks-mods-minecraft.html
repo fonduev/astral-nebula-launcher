@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/x-icon" href="../icon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
   <title>Cómo Instalar Mods y Modpacks en Minecraft (Fabric, Forge, NeoForge) | Nebula</title>
   <meta name="description" content="Aprende a instalar mods y modpacks en Minecraft de forma fácil y segura. Comparativa entre Fabric, Forge y NeoForge, gestión de dependencias y cómo evitar crashes." />
 
@@ -506,10 +507,8 @@
 
   <script>
     function initCookieConsent() {
-      if (!localStorage.getItem('nebula_cookie_consent')) {
-        const banner = document.getElementById('cookieConsentBanner');
-        if (banner) banner.style.display = 'block';
-      }
+      // Google manages advertising consent through its certified CMP.
+      document.getElementById('cookieConsentBanner')?.remove();
     }
     function acceptCookieConsent() {
       localStorage.setItem('nebula_cookie_consent', 'accepted');
