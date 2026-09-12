@@ -1,19 +1,18 @@
 {
-  "version": "4.3.1",
-  "name": "Nebula Launcher v4.3.1 — Soporte Multilingüe (ES/EN/PT) & Cosmic Minimalist 2.0",
-  "releaseDate": "2026-09-08",
+  "version": "5.0.0",
+  "name": "Nebula Launcher v5.0.0 — Ultimate Cosmic Wallpapers 4K & MJ Smooth Criminal Edition",
+  "releaseDate": "2026-09-11",
   "url": "https://raw.githubusercontent.com/fonduev/astral-nebula-launcher/main/app.asar",
-  "installerUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.3.1/Nebula.Launcher.Setup.4.3.1.exe",
-  "portableUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v4.3.1/Nebula-Launcher-v4.3.1-Portable.zip",
+  "installerUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.0/Nebula.Launcher.Setup.5.0.0.exe",
+  "portableUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.0/Nebula-Launcher-v5.0.0-Portable.zip",
   "mandatory": false,
   "changelog": [
-    "🌐 Soporte Tri-Idioma Nativo (Español, English, Português) con selector rápido e i18n instantáneo.",
-    "🌌 Interfaz Cosmic Minimalist 2.0: Botón de inicio Hyper-Drive con glow cósmico, tarjetas frosted glass y profundidad z-index.",
-    "⚡ Micro-animaciones a 60 FPS aceleradas por GPU para cambios de pestañas y botones flotantes.",
-    "📜 Traducción en tiempo real del flujo de logs de Minecraft/Forge/Fabric/Quilt.",
-    "🖤 Temas Sólidos Minimalistas: OLED Dark, Midnight Clean, Carbon Dark y Amethyst Sleek.",
-    "🌸 Temas Interactivos: Sakura 3D, Cyberpunk Synthwave Láser, Deep Ocean y Retro 8-Bit.",
-    "⚡ Presets de RAM de 1-Clic: [4GB], [6GB ⭐], [8GB 🔥] y [12GB 🚀].",
-    "📂 Barra de Accesos Rápidos a carpetas de .minecraft, mods, capturas y shaders."
+    "🎩 Tema y Fondo Exclusivo de Michael Jackson — Smooth Criminal (Traje Blanco y Azul con pose 45°).",
+    "🖼️ Fondos de Pantalla HD 4K Panorámicos en TODOS los temas (Sakura, Cyberpunk, Deep Ocean, Pixel Art, Supernova, Aurora, Galaxia, Cosmos).",
+    "✨ Corrección y optimización del selector de Clientes PVP y pestañas de Modificadores sin superposición.",
+    "🎛️ Control de Desenfoque Global Personalizable (0px ultra-nítido por defecto hasta 40px con slider en ajustes).",
+    "⚡ Animaciones ultra-fluidas aceleradas por hardware para maximizar y restaurar ventana.",
+    "🛡️ Diálogo minimalista de confirmación de salida con opción de recordar preferencia y minimizar a la bandeja del sistema.",
+    "🌐 Soporte Multilingüe Nativo (Español, English, Português)."
   ]
 }

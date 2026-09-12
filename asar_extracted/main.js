@@ -4,7 +4,8 @@
 // ╚══════════════════════════════════════════════════════════════╝
 const dns = require('dns');
 if (dns.setDefaultResultOrder) dns.setDefaultResultOrder('ipv4first');
-const { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, clipboard, nativeImage } = require('electron');
+const net = require('net');
 const { Client, Authenticator } = require('minecraft-launcher-core');
 const path = require('path');
 const fs = require('fs');
@@ -110,7 +111,7 @@ function setRPCLauncher() {
     try {
         rpcClient.setActivity({
             details: '🪐 En el menú principal',
-            state: 'Nebula Launcher v4.3.1',
+            state: 'Nebula Launcher v5.0.0',
             startTimestamp: rpcStartTime,
             largeImageKey: 'launcher_logo',
             largeImageText: 'Nebula Launcher',
@@ -293,6 +294,16 @@ function createWindow() {
             event.preventDefault();
             win.hide();
         }
+    });
+
+    win.on('maximize', () => {
+        try { win.webContents.send('window-state-changed', { maximized: true }); } catch (e) {}
+    });
+    win.on('unmaximize', () => {
+        try { win.webContents.send('window-state-changed', { maximized: false }); } catch (e) {}
+    });
+    win.on('restore', () => {
+        try { win.webContents.send('window-restored'); } catch (e) {}
     });
     
     // AUTOMATION TEST HARNESS
@@ -1199,13 +1210,11 @@ ipcMain.handle('get-installed-versions', () => {
                 const qm = dir.match(/quilt-loader-([^\-]+)/);
                 displayName = qm ? `${baseVersion} (Quilt ${qm[1]})` : `${baseVersion} (Quilt)`;
             }
-            else if (low.includes('pvp') || low.includes('cmpack') || low.includes('client') || low.includes('flight')) {
+            else if ((low.includes('cmpack') || (low.includes('pvp') && !low.includes('nebulapvp'))) && !low.includes('flight')) {
                 type = 'pvp';
                 const m = dir.match(/(\d+\.\d+(?:\.\d+)?)/);
                 if (m) baseVersion = m[1];
                 if (low.includes('cmpack')) displayName = `CM Pack 1.8.8`;
-                else if (low.includes('flight')) displayName = `Flight Client`;
-                else if (low.includes('nebulapvp')) displayName = `Nebula PVP 1.8.9`;
                 else displayName = dir;
             }
             else {
@@ -4134,6 +4143,23 @@ ipcMain.handle('get-running-instances', () =>
 ipcMain.on('window-minimize', () => win?.minimize());
 ipcMain.on('window-maximize', () => win?.isMaximized() ? win.unmaximize() : win.maximize());
 ipcMain.on('window-close', () => win?.close());
+ipcMain.on('window-hide-to-tray', () => {
+    if (win) {
+        win.hide();
+        if (tray) {
+            try {
+                tray.displayBalloon({
+                    title: 'Nebula Launcher',
+                    content: '🌌 El launcher sigue activo en segundo plano en la barra de tareas.'
+                });
+            } catch (e) {}
+        }
+    }
+});
+ipcMain.on('app-quit', () => {
+    app.isQuitting = true;
+    app.quit();
+});
 ipcMain.on('open-url', (e, url) => shell.openExternal(url));
 ipcMain.on('open-client-url', (e, url) => shell.openExternal(url));
 ipcMain.handle('pick-java', async () => {
@@ -4145,24 +4171,309 @@ ipcMain.handle('pick-gamedir', async () => {
     return result.filePaths[0] || '';
 });
 
-// ── Screenshots ───────────────────────────────────────────────────
-ipcMain.handle('get-screenshots', () => {
+// ── Screenshots & Multi-Instance Gallery ───────────────────────────
+function getAllScreenshotDirectories() {
     const s = loadSettings();
-    const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
-    const ssDir = path.join(mcPath, 'screenshots');
-    if (!fs.existsSync(ssDir)) return [];
-    const files = fs.readdirSync(ssDir).filter(f => /\.(png|jpg|jpeg)$/i.test(f));
-    return files.map(f => ({ name: f, path: path.join(ssDir, f) })).sort((a, b) => {
-        const aTime = fs.statSync(a.path).mtime.getTime();
-        const bTime = fs.statSync(b.path).mtime.getTime();
-        return bTime - aTime;
-    }).slice(0, 50);
+    const candidateRoots = new Set();
+
+    if (s.gameDir && fs.existsSync(s.gameDir)) {
+        candidateRoots.add(path.resolve(s.gameDir));
+    }
+    const baseMc = path.resolve(path.join(BASE_DATA_DIR, '.minecraft'));
+    if (fs.existsSync(baseMc)) candidateRoots.add(baseMc);
+
+    if (process.env.APPDATA) {
+        const appdataMc = path.resolve(path.join(process.env.APPDATA, '.minecraft'));
+        if (fs.existsSync(appdataMc)) candidateRoots.add(appdataMc);
+
+        const nebulaMc = path.resolve(path.join(process.env.APPDATA, 'astral-nebula-launcher', '.minecraft'));
+        if (fs.existsSync(nebulaMc)) candidateRoots.add(nebulaMc);
+    }
+
+    const directories = [];
+    const seenDirs = new Set();
+
+    function addDir(dirPath, label) {
+        const resolved = path.resolve(dirPath);
+        const lower = resolved.toLowerCase();
+        if (!seenDirs.has(lower) && fs.existsSync(resolved)) {
+            seenDirs.add(lower);
+            directories.push({ path: resolved, label });
+        }
+    }
+
+    for (const root of candidateRoots) {
+        // 1. Root screenshots (Vanilla / Default)
+        addDir(path.join(root, 'screenshots'), 'Vanilla / Global');
+
+        // 2. Instances / Modpacks inside root/instances
+        const instDir = path.join(root, 'instances');
+        if (fs.existsSync(instDir)) {
+            try {
+                const subitems = fs.readdirSync(instDir);
+                for (const item of subitems) {
+                    const itemPath = path.join(instDir, item);
+                    try {
+                        if (fs.statSync(itemPath).isDirectory()) {
+                            addDir(path.join(itemPath, 'screenshots'), item);
+                        }
+                    } catch (e) {}
+                }
+            } catch (e) {}
+        }
+    }
+
+    return directories;
+}
+
+ipcMain.handle('get-screenshots', () => {
+    try {
+        const dirs = getAllScreenshotDirectories();
+        const results = [];
+        const seenFiles = new Set();
+
+        for (const dirInfo of dirs) {
+            if (!fs.existsSync(dirInfo.path)) continue;
+            try {
+                const files = fs.readdirSync(dirInfo.path).filter(f => /\.(png|jpg|jpeg)$/i.test(f));
+                for (const f of files) {
+                    const fullPath = path.resolve(path.join(dirInfo.path, f));
+                    const lowerPath = fullPath.toLowerCase();
+                    if (seenFiles.has(lowerPath)) continue;
+                    seenFiles.add(lowerPath);
+
+                    try {
+                        const st = fs.statSync(fullPath);
+                        results.push({
+                            name: f,
+                            path: fullPath,
+                            url: encodeURI('file:///' + fullPath.split(path.sep).join('/')),
+                            size: st.size,
+                            mtime: st.mtimeMs,
+                            instance: dirInfo.label,
+                            instanceDir: dirInfo.path
+                        });
+                    } catch (e) {}
+                }
+            } catch (e) {}
+        }
+
+        return results.sort((a, b) => b.mtime - a.mtime);
+    } catch (err) {
+        console.error('[get-screenshots error]', err);
+        return [];
+    }
+});
+
+ipcMain.handle('copy-screenshot-image', (event, filePath) => {
+    try {
+        if (!filePath || !fs.existsSync(filePath)) return { success: false, error: 'El archivo no existe' };
+        const img = nativeImage.createFromPath(filePath);
+        if (img.isEmpty()) return { success: false, error: 'No se pudo procesar la imagen' };
+        clipboard.writeImage(img);
+        return { success: true };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('delete-screenshot', (event, filePath) => {
+    try {
+        if (!filePath) return { success: false, error: 'Ruta no especificada' };
+        const target = path.resolve(filePath);
+        const lower = target.toLowerCase();
+        
+        // Ensure the file is an image inside a legitimate screenshots folder
+        const isImage = /\.(png|jpg|jpeg)$/i.test(target);
+        const isInsideScreenshots = lower.includes(path.sep + 'screenshots' + path.sep) || lower.endsWith(path.sep + 'screenshots');
+        
+        if (!isImage || !isInsideScreenshots) {
+            return { success: false, error: 'Acceso denegado: el archivo no pertenece a capturas de pantalla' };
+        }
+
+        if (fs.existsSync(target)) {
+            fs.unlinkSync(target);
+            return { success: true };
+        }
+        return { success: false, error: 'Archivo no encontrado' };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('show-item-in-folder', (event, filePath) => {
+    try {
+        if (filePath && fs.existsSync(filePath)) {
+            shell.showItemInFolder(filePath);
+            return { success: true };
+        }
+        return { success: false, error: 'Archivo no encontrado' };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('open-instance-screenshot-folder', (event, folderPath) => {
+    try {
+        if (folderPath && fs.existsSync(folderPath)) {
+            shell.openPath(folderPath);
+            return { success: true };
+        }
+        const s = loadSettings();
+        const defaultPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        const defaultSS = path.join(defaultPath, 'screenshots');
+        if (fs.existsSync(defaultSS)) {
+            shell.openPath(defaultSS);
+            return { success: true };
+        }
+        shell.openPath(defaultPath);
+        return { success: true };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+});
+
+// ── Minecraft Server List Ping (SLP) & SRV Resolution ───────────────
+function resolveMinecraftAddress(address) {
+    return new Promise((resolve) => {
+        let host = (address || '').trim();
+        let port = 25565;
+        if (host.includes(':')) {
+            const parts = host.split(':');
+            host = parts[0];
+            port = parseInt(parts[1]) || 25565;
+            return resolve({ host, port });
+        }
+        dns.resolveSrv('_minecraft._tcp.' + host, (err, records) => {
+            if (!err && records && records.length > 0) {
+                return resolve({ host: records[0].name, port: records[0].port });
+            }
+            resolve({ host, port });
+        });
+    });
+}
+
+function queryMinecraftSLPDirect(host, port, timeout = 3500) {
+    return new Promise((resolve) => {
+        const socket = new net.Socket();
+        const startTime = Date.now();
+        let latency = -1;
+        let buffer = Buffer.alloc(0);
+
+        socket.setTimeout(timeout);
+
+        function encodeVarInt(val) {
+            const bytes = [];
+            while (true) {
+                if ((val & 0xFFFFFF80) === 0) {
+                    bytes.push(val);
+                    return Buffer.from(bytes);
+                }
+                bytes.push((val & 0x7F) | 0x80);
+                val >>>= 7;
+            }
+        }
+
+        socket.on('connect', () => {
+            latency = Date.now() - startTime;
+            const hostBuf = Buffer.from(host, 'utf8');
+            const portBuf = Buffer.alloc(2);
+            portBuf.writeUInt16BE(port, 0);
+
+            const protoBuf = encodeVarInt(47); // 1.8+ / universal
+            const hostLenBuf = encodeVarInt(hostBuf.length);
+            const stateBuf = encodeVarInt(1); // 1 = status handshake
+
+            const handshakePayload = Buffer.concat([
+                encodeVarInt(0x00),
+                protoBuf,
+                hostLenBuf,
+                hostBuf,
+                portBuf,
+                stateBuf
+            ]);
+            const handshakePacket = Buffer.concat([
+                encodeVarInt(handshakePayload.length),
+                handshakePayload
+            ]);
+
+            const statusPacket = Buffer.from([0x01, 0x00]);
+            socket.write(Buffer.concat([handshakePacket, statusPacket]));
+        });
+
+        socket.on('data', (chunk) => {
+            buffer = Buffer.concat([buffer, chunk]);
+            try {
+                let offset = 0;
+                function readVarInt() {
+                    let result = 0;
+                    let numRead = 0;
+                    let b;
+                    do {
+                        if (offset >= buffer.length) return null;
+                        b = buffer[offset++];
+                        result |= (b & 0x7F) << (7 * numRead);
+                        numRead++;
+                        if (numRead > 5) throw new Error('VarInt overflow');
+                    } while ((b & 0x80) !== 0);
+                    return result;
+                }
+
+                const packetLength = readVarInt();
+                if (packetLength === null) return;
+                const packetId = readVarInt();
+                if (packetId === null) return;
+                const strLength = readVarInt();
+                if (strLength === null) return;
+
+                if (buffer.length - offset >= strLength) {
+                    const jsonStr = buffer.toString('utf8', offset, offset + strLength);
+                    socket.destroy();
+                    try {
+                        const data = JSON.parse(jsonStr);
+                        resolve({
+                            online: true,
+                            latency,
+                            players: data.players || { online: 0, max: 0 },
+                            version: data.version ? data.version.name : '',
+                            description: data.description || '',
+                            favicon: data.favicon || null
+                        });
+                    } catch (e) {
+                        resolve({ online: true, latency, raw: jsonStr });
+                    }
+                }
+            } catch (err) {
+                // Wait for additional chunks
+            }
+        });
+
+        socket.on('error', (err) => {
+            socket.destroy();
+            resolve({ online: false, latency: -1, error: err.message });
+        });
+
+        socket.on('timeout', () => {
+            socket.destroy();
+            resolve({ online: false, latency: -1, error: 'Tiempo de espera agotado' });
+        });
+
+        socket.connect(port, host);
+    });
+}
+
+ipcMain.handle('query-minecraft-server', async (event, { address }) => {
+    try {
+        const { host, port } = await resolveMinecraftAddress(address);
+        return await queryMinecraftSLPDirect(host, port);
+    } catch (e) {
+        return { online: false, latency: -1, error: e.message };
+    }
 });
 
 // ── PVP Clients ───────────────────────────────────────────────────
 const PVP_CLIENTS = [
-    { id: 'cmpack', name: 'CMPack', icon: '⚡', color: '#a855f7', desc: 'El mejor cliente PVP optimizado con mods integrados, HUD personalizable y rendimiento máximo en FPS para 1.8.8.', desc_en: 'The best PVP client optimized with built-in mods, customizable HUD, and maximum FPS for 1.8.8.', desc_pt: 'O melhor cliente PVP otimizado com mods integrados, HUD personalizável e desempenho máximo em FPS para 1.8.8.', url: 'https://cmpack.pl/' },
-    { id: 'nebulapvp', name: 'Nebula PVP', icon: '🌌', color: '#c084fc', desc: 'Cliente PVP propio de Nebula Launcher con optimizaciones exclusivas, HUD modular y cosméticos sincronizados. En desarrollo.', desc_en: "Nebula Launcher's native PVP client with exclusive optimizations, modular HUD, and synchronized cosmetics. In development.", desc_pt: 'Cliente PVP próprio do Nebula Launcher com otimizações exclusivas, HUD modular e cosméticos sincronizados. Em desenvolvimento.', comingSoon: true }
+    { id: 'cmpack', name: 'CMPack', icon: '⚡', color: '#a855f7', desc: 'El mejor cliente PVP optimizado con mods integrados, HUD personalizable y rendimiento máximo en FPS para 1.8.8.', desc_en: 'The best PVP client optimized with built-in mods, customizable HUD, and maximum FPS for 1.8.8.', desc_pt: 'O melhor cliente PVP otimizado com mods integrados, HUD personalizável e desempenho máximo em FPS para 1.8.8.', url: 'https://cmpack.pl/' }
 ];
 
 ipcMain.handle('get-pvp-clients', () => {
@@ -4178,8 +4489,8 @@ ipcMain.handle('get-pvp-clients', () => {
                 const low = d.toLowerCase();
                 const jsonPath = path.join(versionsDir, d, `${d}.json`);
                 if (!fs.existsSync(jsonPath)) continue;
-                if (low.includes('cmpack') || low === 'cmclient' || low.includes('nebulapvp') || low.includes('nebula_client')) continue;
-                if (low.includes('flight') || low.includes('pvp') || low.includes('client')) {
+                if (low.includes('cmpack') || low === 'cmclient' || low.includes('nebulapvp') || low.includes('nebula_client') || low.includes('flight')) continue;
+                if (low.includes('pvp') || low.includes('client')) {
                     list.push({
                         id: d,
                         name: d,
