@@ -3834,16 +3834,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   background: transparent !important;
 }
 
-/* ── Pure Minimalist Launcher Shell & Compact Surfaces ── */
+/* ── Pure Minimalist Launcher Shell & Compact Surfaces (High-Performance GPU Safe) ── */
 .launcher-shell {
   width: 100%;
   height: 100%;
   display: flex;
   border-radius: 16px !important;
   overflow: hidden;
-  background: rgba(10, 12, 20, 0.74) !important;
-  backdrop-filter: blur(28px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(150%) !important;
+  background: rgba(10, 12, 20, 0.78) !important;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
@@ -3851,9 +3849,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .sidebar {
   width: var(--sidebar-w);
   min-width: var(--sidebar-w);
-  background: rgba(7, 8, 14, 0.55) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
+  background: rgba(7, 8, 14, 0.70) !important;
   border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
@@ -3862,32 +3858,26 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 }
 
 .launch-card, .play-mod-card, .client-card, .glass-card, .settings-card, .changelog-card, .social-sidebar, .social-chat {
-  background: rgba(14, 17, 28, 0.6) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background: rgba(14, 18, 30, 0.82) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.22) !important;
   border-radius: 11px !important;
-  transition: border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-              background 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: border-color 0.15s ease,
+              background 0.15s ease,
+              box-shadow 0.15s ease !important;
 }
 
 .launch-card:hover, .play-mod-card:hover, .client-card:hover {
-  background: rgba(18, 22, 38, 0.75) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  transform: translateY(-1.5px) !important;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3) !important;
+  background: rgba(22, 28, 48, 0.90) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35) !important;
 }
 
 .has-custom-wallpaper .launcher-shell {
-  background: rgba(8, 10, 18, 0.45) !important;
-  backdrop-filter: blur(28px) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(140%) !important;
+  background: rgba(8, 10, 18, 0.72) !important;
 }
 .has-custom-wallpaper .sidebar {
-  background: rgba(6, 7, 13, 0.5) !important;
+  background: rgba(6, 7, 13, 0.78) !important;
 }
 .has-custom-wallpaper .launch-card,
 .has-custom-wallpaper .play-mod-card,
@@ -3896,10 +3886,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .has-custom-wallpaper .settings-card,
 .has-custom-wallpaper .social-sidebar,
 .has-custom-wallpaper .social-chat {
-  background: rgba(12, 15, 26, 0.55) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  background: rgba(14, 18, 30, 0.82) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -15458,23 +15446,8 @@ async function loadNebulaProfileData() {
         alpha: Math.random() * 0.5 + 0.4
       }));
 
-      // ── 4. Interactive Mouse Stardust Trail ──
+      // ── 4. Interactive Mouse Stardust Trail (Desactivado para estabilidad gráfica) ──
       const cursorParticles = [];
-      window.addEventListener('mousemove', (e) => {
-        if (cursorParticles.length < 35) {
-          const themeConf = getThemeColors();
-          const col = themeConf.stars[Math.floor(Math.random() * themeConf.stars.length)];
-          cursorParticles.push({
-            x: e.clientX,
-            y: e.clientY,
-            vx: (Math.random() - 0.5) * 2.2,
-            vy: (Math.random() - 0.5) * 2.2 - 0.6,
-            size: Math.random() * 3.2 + 1.5,
-            alpha: 0.85,
-            color: col
-          });
-        }
-      }, { passive: true });
 
       const stars = Array.from({ length: 280 }, (_, idx) => ({
         x: Math.random() * width,
@@ -15715,10 +15688,6 @@ window.updateCustomBgStyleUI = function() {
       scheduleNextShootingStar();
 
       let mouseX = 0, mouseY = 0;
-      window.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX / width - 0.5) * 12;
-        mouseY = (e.clientY / height - 0.5) * 12;
-      });
 
       let time = 0;
       let lastFrameTime = performance.now();
@@ -15727,6 +15696,7 @@ window.updateCustomBgStyleUI = function() {
         requestAnimationFrame(render);
 
         if (checkIsWindowMinimized()) return;
+        if (document.body.classList.contains('has-custom-wallpaper')) return;
 
         const currentNow = now || performance.now();
         const delta = Math.min(currentNow - lastFrameTime, 100);
@@ -15789,26 +15759,7 @@ window.updateCustomBgStyleUI = function() {
         }
 
         
-        // ── Render Cursor Stardust Trail ──
-        for (let i = cursorParticles.length - 1; i >= 0; i--) {
-          const cp = cursorParticles[i];
-          cp.x += cp.vx * deltaFactor;
-          cp.y += cp.vy * deltaFactor;
-          cp.alpha -= 0.026 * deltaFactor;
-          if (cp.alpha <= 0) {
-            cursorParticles.splice(i, 1);
-            continue;
-          }
-          ctx.save();
-          ctx.globalAlpha = cp.alpha;
-          ctx.fillStyle = cp.color;
-          ctx.shadowColor = cp.color;
-          ctx.shadowBlur = 0;
-          ctx.beginPath();
-          ctx.arc(cp.x, cp.y, cp.size, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
+
 
         // ── Render Deep Ocean Bubbles ──
         if (currentActiveTheme === 'deepocean') {
