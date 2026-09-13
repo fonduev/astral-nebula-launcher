@@ -263,10 +263,10 @@ function createWindow() {
         width: 1360, height: 800,
         minWidth: 1080, minHeight: 680,
         frame: false,
-        transparent: true,
+        transparent: false,
         resizable: true, hasShadow: true,
         show: true,
-        backgroundColor: '#00000000',
+        backgroundColor: '#070512',
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
