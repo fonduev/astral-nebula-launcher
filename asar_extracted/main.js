@@ -1049,16 +1049,31 @@ function getInstanceDir(mcPath, versionId) {
 // ── Versioning con URLs Robustas y Respaldo Local ─────────────────
 ipcMain.handle('get-all-versions', async () => {
     try {
-        sendLog('🔍 Cargando versiones oficiales de Minecraft (Vanilla)...');
+        const cacheFile = path.join(BASE_DATA_DIR, 'cache', 'version_manifest_v2.json');
         const urls = [
             'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json',
             'https://launchermeta.mojang.com/mc/game/version_manifest.json',
             'https://bmclapi2.bangbang93.com/mc/game/version_manifest_v2.json'
         ];
-        const cacheFile = path.join(BASE_DATA_DIR, 'cache', 'version_manifest_v2.json');
+
+        // Arranque instantáneo si existe caché local
+        if (fs.existsSync(cacheFile)) {
+            try {
+                const cachedData = fs.readFileSync(cacheFile, 'utf8');
+                const cachedManifest = JSON.parse(cachedData);
+                if (cachedManifest && cachedManifest.versions && cachedManifest.versions.length > 0) {
+                    httpsGetWithFallbacks(urls, {}, 6000).then(fresh => {
+                        try { fs.writeFileSync(cacheFile, fresh, 'utf8'); } catch {}
+                    }).catch(() => {});
+                    return cachedManifest.versions;
+                }
+            } catch (e) {}
+        }
+
+        sendLog('🔍 Cargando versiones oficiales de Minecraft (Vanilla)...');
         let data;
         try {
-            data = await httpsGetWithFallbacks(urls, {}, 8000);
+            data = await httpsGetWithFallbacks(urls, {}, 6000);
             try {
                 fs.mkdirSync(path.dirname(cacheFile), { recursive: true });
                 fs.writeFileSync(cacheFile, data, 'utf8');
@@ -1139,6 +1154,11 @@ ipcMain.handle('get-installed-versions', () => {
             const versionDir = path.join(versionsDir, dir);
             if (!fs.statSync(versionDir).isDirectory()) continue;
 
+            const low = dir.toLowerCase();
+            if (low.includes('nebulapvp') || low.includes('nebula_client') || low.includes('flight')) {
+                continue;
+            }
+
             const jsonPath = path.join(versionDir, `${dir}.json`);
             let versionData = {};
             let hasJson = fs.existsSync(jsonPath);
@@ -1175,7 +1195,6 @@ ipcMain.handle('get-installed-versions', () => {
             let baseVersion = versionData.inheritsFrom || dir;
             let type = versionData.type || 'release';
             let displayName = dir;
-            const low = dir.toLowerCase();
 
             if (low.includes('optifine')) {
                 type = 'optifine';
@@ -1210,7 +1229,7 @@ ipcMain.handle('get-installed-versions', () => {
                 const qm = dir.match(/quilt-loader-([^\-]+)/);
                 displayName = qm ? `${baseVersion} (Quilt ${qm[1]})` : `${baseVersion} (Quilt)`;
             }
-            else if ((low.includes('cmpack') || (low.includes('pvp') && !low.includes('nebulapvp'))) && !low.includes('flight')) {
+            else if (low.includes('cmpack') || low.includes('pvp')) {
                 type = 'pvp';
                 const m = dir.match(/(\d+\.\d+(?:\.\d+)?)/);
                 if (m) baseVersion = m[1];
@@ -1662,12 +1681,48 @@ ipcMain.handle('auto-install-optifine', async (event, mcVersion) => {
 // ══ FORGE: Todas las versiones MC soportadas (con mirror de respaldo) ══
 ipcMain.handle('get-forge-mc-versions', async () => {
     try {
-        sendLog('🔍 Cargando versiones de Forge soportadas...');
         const cacheFile = path.join(BASE_DATA_DIR, 'cache', 'forge_promos.json');
+        if (fs.existsSync(cacheFile)) {
+            try {
+                const cachedData = fs.readFileSync(cacheFile, 'utf8');
+                const promos = JSON.parse(cachedData);
+                if (promos && promos.promos && Object.keys(promos.promos).length > 0) {
+                    const versions = {};
+                    for (const [key, forgeVer] of Object.entries(promos.promos)) {
+                        const dashIdx = key.lastIndexOf('-');
+                        const mcVer = key.slice(0, dashIdx);
+                        const tag = key.slice(dashIdx + 1);
+                        if (!versions[mcVer]) versions[mcVer] = {};
+                        versions[mcVer][tag] = forgeVer;
+                    }
+                    const sorted = Object.keys(versions)
+                        .filter(v => /^\d+\.\d+(\.\d+)?$/.test(v))
+                        .sort((a, b) => {
+                            const pa = a.split('.').map(Number);
+                            const pb = b.split('.').map(Number);
+                            for (let i = 0; i < 3; i++) {
+                                const diff = (pb[i] || 0) - (pa[i] || 0);
+                                if (diff !== 0) return diff;
+                            }
+                            return 0;
+                        });
+                    // Actualizar en segundo plano
+                    httpsGet('https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json', {}, 5000)
+                        .then(fresh => { try { fs.writeFileSync(cacheFile, fresh, 'utf8'); } catch {} }).catch(() => {});
+                    return sorted.map(mcVer => ({
+                        mcVersion: mcVer,
+                        recommended: versions[mcVer].recommended || null,
+                        latest: versions[mcVer].latest || null
+                    }));
+                }
+            } catch (e) {}
+        }
+
+        sendLog('🔍 Cargando versiones de Forge soportadas...');
         let data;
         let isBmclapi = false;
         try {
-            data = await httpsGet('https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json', {}, 8000);
+            data = await httpsGet('https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json', {}, 6000);
             try {
                 fs.mkdirSync(path.dirname(cacheFile), { recursive: true });
                 fs.writeFileSync(cacheFile, data, 'utf8');
@@ -1675,7 +1730,7 @@ ipcMain.handle('get-forge-mc-versions', async () => {
         } catch (e1) {
             sendLog(`⚠️ files.minecraftforge.net no disponible (${e1.message}), usando mirror BMCLAPI...`, 'warn');
             try {
-                data = await httpsGet('https://bmclapi2.bangbang93.com/forge/minecraft', {}, 8000);
+                data = await httpsGet('https://bmclapi2.bangbang93.com/forge/minecraft', {}, 6000);
                 isBmclapi = true;
             } catch (e2) {
                 if (fs.existsSync(cacheFile)) {

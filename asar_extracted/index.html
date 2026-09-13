@@ -1247,7 +1247,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .versions-list{flex:1;overflow-y:auto;padding-right:8px;}
 .version-item{
   padding:14px 16px;margin-bottom:8px;border-radius:12px;background:var(--glass-light);border:.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;transition:all .2s;
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
 .version-item:hover{background:var(--glass-mid);transform:translateX(4px);}
 .version-info{flex:1;}
@@ -5403,7 +5402,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
           <button class="version-filter-btn" onclick="filterVersions('fabric', this)">Fabric</button>
           <button class="version-filter-btn" onclick="filterVersions('optifine', this)">OptiFine</button>
           <button class="version-filter-btn" onclick="filterVersions('pvp', this)">⚔️ Clientes PVP</button>
-          <button class="btn btn-sm btn-glass" onclick="refreshAllVersions()" style="margin-left:auto; font-size:0.75rem; padding:5px 12px;" title="Refrescar catálogo completo">🔄 Refrescar</button>
+          <input type="text" id="versionSearchInp" oninput="filterVersionsBySearch(this.value)" placeholder="🔍 Buscar versión..." style="margin-left:auto; background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:8px; padding:5px 12px; color:white; font-size:0.75rem; width:170px; outline:none;" />
+          <button class="btn btn-sm btn-glass" onclick="refreshAllVersions()" style="font-size:0.75rem; padding:5px 12px;" title="Refrescar catálogo completo">🔄 Refrescar</button>
         </div>
 
         <div class="versions-list" id="versions-list-container">
@@ -6897,7 +6897,6 @@ async function completeLogin() {
   loadFabricInstalledVersions();
   loadNeoForgeInstalledVersions();
   loadQuiltInstalledVersions();
-  loadVersionsList();
   populateInstalledModpacksSelect();
   
   const totalRam = settings.systemTotalRamGb || 16;
@@ -8087,6 +8086,23 @@ function directPlayVersion(versionId) {
   }
 }
 
+let versionSearchQuery = '';
+let versionsRenderLimit = 50;
+
+function escapeVersionHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function isExcludedVersion(str) {
+  const low = String(str || '').toLowerCase();
+  return low.includes('nebulapvp') || low.includes('nebula_client') || low.includes('flight');
+}
+
 function loadVersionsList() {
   const container = document.getElementById('versions-list-container');
   if (!container) return;
@@ -8102,13 +8118,16 @@ function loadVersionsList() {
     return;
   }
 
+  const cleanAllVer = (allVer || []).filter(v => v && v.id && !isExcludedVersion(v.id));
+  const cleanInstalledMeta = (installedMeta || []).filter(v => v && v.id && !isExcludedVersion(v.id) && !isExcludedVersion(v.displayName));
+
   const combined = [
-    ...allVer.map(v => ({
+    ...cleanAllVer.map(v => ({
       ...v,
       isInstalled: installed.has(v.id),
       displayName: `Minecraft ${v.id}`
     })),
-    ...installedMeta.filter(v => !allVer.some(a => a.id === v.id)).map(v => ({
+    ...cleanInstalledMeta.filter(v => !cleanAllVer.some(a => a.id === v.id)).map(v => ({
       ...v,
       isInstalled: true
     }))
@@ -8118,7 +8137,7 @@ function loadVersionsList() {
   if (currentVersionFilter !== 'all') {
     filtered = combined.filter(v => {
       if (currentVersionFilter === 'installed') {
-        return v.isInstalled || installed.has(v.id) || installedMeta.some(i => i.id === v.id);
+        return v.isInstalled || installed.has(v.id) || cleanInstalledMeta.some(i => i.id === v.id);
       }
       if (currentVersionFilter === 'fabric') {
         return v.type === 'fabric' || v.type === 'sodium';
@@ -8130,7 +8149,17 @@ function loadVersionsList() {
     });
   }
 
-  // Ordenar: instaladas arriba
+  if (versionSearchQuery) {
+    const q = versionSearchQuery.toLowerCase().trim();
+    filtered = filtered.filter(v => {
+      const idMatch = (v.id || '').toLowerCase().includes(q);
+      const nameMatch = (v.displayName || '').toLowerCase().includes(q);
+      const typeMatch = (v.type || '').toLowerCase().includes(q);
+      return idMatch || nameMatch || typeMatch;
+    });
+  }
+
+  // Ordenar: instaladas arriba, luego por fecha reciente
   filtered.sort((a, b) => {
     const aInst = a.isInstalled || installed.has(a.id);
     const bInst = b.isInstalled || installed.has(b.id);
@@ -8150,11 +8179,15 @@ function loadVersionsList() {
       </div>`;
       return;
     }
-    container.innerHTML = '<p style="color:var(--text-dim);text-align:center;padding:40px;">No hay versiones con el filtro seleccionado.</p>';
+    container.innerHTML = '<p style="color:var(--text-dim);text-align:center;padding:40px;">No hay versiones con el filtro o búsqueda seleccionada.</p>';
     return;
   }
 
-  container.innerHTML = filtered.map(v => {
+  const totalCount = filtered.length;
+  const shouldPaginate = (!versionSearchQuery && currentVersionFilter === 'all' && totalCount > versionsRenderLimit);
+  const toRender = shouldPaginate ? filtered.slice(0, versionsRenderLimit) : filtered;
+
+  const cardsHtml = toRender.map(v => {
     const badgeClass = {
       release: 'badge-release',
       snapshot: 'badge-snapshot',
@@ -8177,34 +8210,63 @@ function loadVersionsList() {
       quilt: 'QUILT',
       pvp: 'PVP CLIENT',
       custom: 'CUSTOM'
-    }[v.type] || v.type.toUpperCase();
+    }[v.type] || (v.type ? v.type.toUpperCase() : 'DESCONOCIDO');
 
-    const isInstalled = v.isInstalled || installed.has(v.id) || installedMeta.some(i => i.id === v.id);
+    const isInstalled = v.isInstalled || installed.has(v.id) || cleanInstalledMeta.some(i => i.id === v.id);
     const displayId = v.displayName || v.id;
+    const safeDisplayId = escapeVersionHtml(displayId);
+    const safeId = escapeVersionHtml(v.id);
+    const encodedId = encodeURIComponent(v.id);
+    const dateStr = v.releaseTime ? new Date(v.releaseTime).toLocaleDateString() : '';
 
     return `
       <div class="version-item" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;margin-bottom:8px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid ${isInstalled ? 'rgba(74,222,128,0.35)' : 'rgba(255,255,255,0.06)'};">
         <div class="version-info" style="display:flex;flex-direction:column;gap:4px;">
           <div class="version-id" style="font-weight:700;font-size:0.92rem;display:flex;align-items:center;gap:8px;">
-            <span>${displayId}</span>
+            <span>${safeDisplayId}</span>
             <span class="version-type-badge ${badgeClass}">${typeLabel}</span>
             ${isInstalled ? '<span class="version-type-badge badge-release" style="background:rgba(74,222,128,0.18);color:#4ade80;border:1px solid rgba(74,222,128,0.35);">✓ INSTALADA</span>' : ''}
           </div>
-          <div class="version-date" style="font-size:0.75rem;color:var(--text-dim);">${v.releaseTime ? new Date(v.releaseTime).toLocaleDateString() : ''} ${v.id !== displayId ? `<span style="opacity:0.6;">(${v.id})</span>` : ''}</div>
+          <div class="version-date" style="font-size:0.75rem;color:var(--text-dim);">${dateStr} ${v.id !== displayId ? `<span style="opacity:0.6;">(${safeId})</span>` : ''}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
           ${isInstalled
-            ? `<button class="btn btn-primary btn-sm" onclick="directPlayVersion('${v.id}')" style="padding:6px 14px;font-weight:700;cursor:pointer;">▶ Jugar</button>`
-            : `<button class="btn btn-glass btn-sm" onclick="showTab('play'); setPlayModifier('${v.type === 'snapshot' ? 'vanilla' : v.type}'); vbSelectVersion('${v.id}');" style="padding:6px 14px;cursor:pointer;">⬇ Instalar</button>`
+            ? `<button class="btn btn-primary btn-sm" onclick="directPlayVersion(decodeURIComponent('${encodedId}'))" style="padding:6px 14px;font-weight:700;cursor:pointer;">▶ Jugar</button>`
+            : `<button class="btn btn-glass btn-sm" onclick="showTab('play'); setPlayModifier('${v.type === 'snapshot' ? 'vanilla' : v.type}'); vbSelectVersion(decodeURIComponent('${encodedId}'));" style="padding:6px 14px;cursor:pointer;">⬇ Instalar</button>`
           }
         </div>
       </div>
     `;
   }).join('');
+
+  let loadMoreHtml = '';
+  if (shouldPaginate) {
+    loadMoreHtml = `
+      <div style="text-align:center; padding: 18px 0;">
+        <button class="btn btn-glass btn-sm" onclick="loadMoreVersions()" style="padding: 8px 24px; font-weight:700; cursor:pointer;">
+          ⬇️ Cargar más versiones (${toRender.length} de ${totalCount})
+        </button>
+      </div>
+    `;
+  }
+
+  container.innerHTML = cardsHtml + loadMoreHtml;
+}
+
+function loadMoreVersions() {
+  versionsRenderLimit += 50;
+  loadVersionsList();
+}
+
+function filterVersionsBySearch(val) {
+  versionSearchQuery = (val || '').trim();
+  versionsRenderLimit = 50;
+  loadVersionsList();
 }
 
 function filterVersions(type, el) {
   currentVersionFilter = type;
+  versionsRenderLimit = 50;
   document.querySelectorAll('.version-filter-btn').forEach(b=>b.classList.remove('active'));
   if (el) el.classList.add('active');
   loadVersionsList();
@@ -16361,7 +16423,14 @@ window.updateCustomBgStyleUI = function() {
       isTranslating = true;
       try {
         mutations.forEach(m => {
-          m.addedNodes.forEach(node => translateSubtree(node, window.currentLauncherLang));
+          m.addedNodes.forEach(node => {
+            if (node.nodeType === 1) {
+              const tag = (node.tagName || '').toLowerCase();
+              if (['script', 'style', 'code', 'pre', 'option'].includes(tag)) return;
+              if (node.id === 'versions-list-container' || (node.closest && (node.closest('#versions-list-container') || node.closest('#log-box') || node.closest('select')))) return;
+            }
+            translateSubtree(node, window.currentLauncherLang);
+          });
         });
       } catch(e) {
         console.warn('[i18n observer error]', e);
