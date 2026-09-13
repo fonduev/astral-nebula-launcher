@@ -5,6 +5,7 @@
 const dns = require('dns');
 if (dns.setDefaultResultOrder) dns.setDefaultResultOrder('ipv4first');
 const { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu, clipboard, nativeImage } = require('electron');
+app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
 const net = require('net');
 const { Client, Authenticator } = require('minecraft-launcher-core');
 const path = require('path');

@@ -160,15 +160,12 @@
 }
 
 
-/* ═══════ PERFORMANCE & GPU OPTIMIZATIONS ═══════ */
+/* ═══════ PERFORMANCE & GPU OPTIMIZATIONS (STABLE RENDERING) ═══════ */
 .version-card, .mod-card, .modpack-item, .modrinth-preview-card, .instance-card {
-  contain: content;
-  content-visibility: auto;
-  contain-intrinsic-size: 72px;
-  will-change: transform;
+  box-sizing: border-box;
 }
 .sidebar, .play-left, .play-right, .tab-panel {
-  contain: layout style;
+  box-sizing: border-box;
 }
 
 
@@ -1246,9 +1243,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .version-filter-btn.active{background:var(--btn-glass);color:var(--accent);border-color:var(--btn-border);}
 .versions-list{flex:1;overflow-y:auto;padding-right:8px;}
 .version-item{
-  padding:14px 16px;margin-bottom:8px;border-radius:12px;background:var(--glass-light);border:.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;transition:all .2s;
+  padding:14px 16px;margin-bottom:8px;border-radius:12px;background:rgba(18, 22, 38, 0.82);border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;transition:background 0.15s ease, border-color 0.15s ease;
 }
-.version-item:hover{background:var(--glass-mid);transform:translateX(4px);}
+.version-item:hover{background:rgba(30, 36, 60, 0.92);border-color:var(--accent);}
 .version-info{flex:1;}
 .version-id{font-size:.85rem;font-weight:600;margin-bottom:2px;}
 .version-type-badge{font-size:.6rem;padding:2px 8px;border-radius:6px;margin-left:8px;font-weight:600;}
@@ -8219,8 +8216,12 @@ function loadVersionsList() {
     const encodedId = encodeURIComponent(v.id);
     const dateStr = v.releaseTime ? new Date(v.releaseTime).toLocaleDateString() : '';
 
+    const cardBg = isInstalled ? 'rgba(12, 28, 22, 0.88)' : 'rgba(16, 20, 34, 0.86)';
+    const cardBorder = isInstalled ? 'rgba(74, 222, 128, 0.45)' : 'rgba(255, 255, 255, 0.09)';
+    const cardShadow = isInstalled ? '0 4px 14px rgba(74, 222, 128, 0.08)' : '0 4px 12px rgba(0, 0, 0, 0.25)';
+
     return `
-      <div class="version-item" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;margin-bottom:8px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid ${isInstalled ? 'rgba(74,222,128,0.35)' : 'rgba(255,255,255,0.06)'};">
+      <div class="version-item" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;margin-bottom:8px;border-radius:10px;background:${cardBg};border:1px solid ${cardBorder};box-shadow:${cardShadow};">
         <div class="version-info" style="display:flex;flex-direction:column;gap:4px;">
           <div class="version-id" style="font-weight:700;font-size:0.92rem;display:flex;align-items:center;gap:8px;">
             <span>${safeDisplayId}</span>
@@ -12263,7 +12264,6 @@ function updateMyStatus(status, activity) {
         .has-custom-wallpaper .sidebar,
         .has-custom-wallpaper .social-chat,
         .type-card,
-        .version-item,
         .mod-card,
         .sv-server-card,
         .console-outer,
@@ -16178,30 +16178,43 @@ window.updateCustomBgStyleUI = function() {
   <!-- ═══ 3D TILT INTERACTIVE ENGINE ═══ -->
   <script>
     (function init3DTiltFX() {
-      document.addEventListener('mousemove', (e) => {
-        const tiltCards = document.querySelectorAll('.tilt-card');
-        tiltCards.forEach(card => {
-          const rect = card.getBoundingClientRect();
-          if (
-            e.clientX >= rect.left && e.clientX <= rect.right &&
-            e.clientY >= rect.top && e.clientY <= rect.bottom
-          ) {
+      function bindTilt(card) {
+        if (!card || card._tiltBound) return;
+        card._tiltBound = true;
+        let ticking = false;
+
+        card.addEventListener('mousemove', (e) => {
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(() => {
+            ticking = false;
+            const rect = card.getBoundingClientRect();
+            if (rect.width <= 0 || rect.height <= 0) return;
             const x = (e.clientX - rect.left) / rect.width - 0.5;
             const y = (e.clientY - rect.top) / rect.height - 0.5;
             card.style.transform = `perspective(700px) rotateX(${-y * 10}deg) rotateY(${x * 10}deg) translateY(-2.5px)`;
             card.style.setProperty('--glare-x', `${(x + 0.5) * 100}%`);
             card.style.setProperty('--glare-y', `${(y + 0.5) * 100}%`);
-          } else if (card.style.transform && card.style.transform.includes('rotateX')) {
-            card.style.transform = 'perspective(700px) rotateX(0deg) rotateY(0deg) translateY(0px)';
-          }
-        });
-      }, { passive: true });
+          });
+        }, { passive: true });
 
-      document.addEventListener('mouseleave', () => {
-        document.querySelectorAll('.tilt-card').forEach(card => {
+        card.addEventListener('mouseleave', () => {
           card.style.transform = 'perspective(700px) rotateX(0deg) rotateY(0deg) translateY(0px)';
         });
-      });
+      }
+
+      function attachAll() {
+        document.querySelectorAll('.tilt-card').forEach(bindTilt);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attachAll);
+      } else {
+        attachAll();
+      }
+
+      // Re-bind when tabs change
+      window.addEventListener('load', attachAll);
     })();
   </script>
 
