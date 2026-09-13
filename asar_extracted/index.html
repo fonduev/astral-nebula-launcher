@@ -11,12 +11,12 @@
   }
 
 </script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/skinview3d@3.0.0/bundles/skinview3d.bundle.js"></script>
+<script src="libs/firebase-app-compat.js"></script>
+<script src="libs/firebase-auth-compat.js"></script>
+<script src="libs/firebase-database-compat.js"></script>
+<script src="libs/firebase-firestore-compat.js"></script>
+<script src="libs/firebase-storage-compat.js"></script>
+<script src="libs/skinview3d.bundle.js"></script>
 <script>
   if (window.tempModule) {
     module = window.tempModule;
@@ -10042,9 +10042,20 @@ function ensureFirebaseInitialized() {
     // Sincronizar selector de cierre
     const closeSel = document.getElementById('closeActionSettingSelect');
     if (closeSel) {
-      const rem = localStorage.getItem('nebula_remember_close') === 'true' || (settings && settings.rememberCloseAction);
-      const act = localStorage.getItem('nebula_close_action') || (settings && settings.closeAction) || 'ask';
-      closeSel.value = rem ? act : 'ask';
+      const rem = (settings && typeof settings.rememberCloseAction === 'boolean') 
+        ? settings.rememberCloseAction 
+        : (localStorage.getItem('nebula_remember_close') === 'true');
+      const act = (settings && settings.closeAction) || localStorage.getItem('nebula_close_action') || 'ask';
+      
+      if (!rem || act === 'ask') {
+        try {
+          localStorage.removeItem('nebula_remember_close');
+          localStorage.removeItem('nebula_close_action');
+        } catch(e) {}
+        closeSel.value = 'ask';
+      } else {
+        closeSel.value = act;
+      }
     }
     // Restaurar toggles de System Tray
     const minTog = document.getElementById('minimizeToTrayOnGameLaunchToggle');
@@ -10071,8 +10082,8 @@ function ensureFirebaseInitialized() {
       completeLogin();
     }
     
-    // Buscar actualizaciones al abrir el launcher
-    checkForUpdatesAuto();
+    // Buscar actualizaciones después del arranque sin bloquear la UI
+    setTimeout(checkForUpdatesAuto, 3000);
   } catch {}
 })();
 
@@ -12464,10 +12475,13 @@ function updateMyStatus(status, activity) {
     // ═══════ APP CLOSE & TRAY CONFIRMATION LOGIC ═══════
     function handleAppCloseRequest() {
       try {
-        const remember = localStorage.getItem('nebula_remember_close') === 'true';
-        const action = localStorage.getItem('nebula_close_action');
+        const hasSettings = typeof settings !== 'undefined' && settings;
+        const remember = hasSettings && typeof settings.rememberCloseAction === 'boolean'
+          ? settings.rememberCloseAction
+          : (localStorage.getItem('nebula_remember_close') === 'true');
+        const action = (hasSettings && settings.closeAction) || localStorage.getItem('nebula_close_action');
         
-        if (remember && (action === 'tray' || action === 'quit')) {
+        if (remember && action && action !== 'ask' && (action === 'tray' || action === 'quit')) {
           if (action === 'tray') {
             ipc.send('window-hide-to-tray');
           } else {

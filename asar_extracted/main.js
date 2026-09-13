@@ -265,7 +265,7 @@ function createWindow() {
         frame: false,
         transparent: false,
         resizable: true, hasShadow: true,
-        show: true,
+        show: false,
         backgroundColor: '#070512',
         webPreferences: {
             nodeIntegration: true,
@@ -275,11 +275,18 @@ function createWindow() {
         }
     });
     win.loadFile(path.join(__dirname, 'index.html'));
+
+    let isShown = false;
+    const revealWindow = () => {
+        if (isShown || !win) return;
+        isShown = true;
         win.center();
-    win.show();
-    win.focus();
-    win.setAlwaysOnTop(true);
-    win.setAlwaysOnTop(false);
+        win.show();
+        win.focus();
+    };
+
+    win.once('ready-to-show', revealWindow);
+    setTimeout(revealWindow, 500);
 
     win.on('minimize', (event) => {
         const s = loadSettings();
@@ -477,23 +484,23 @@ app.whenReady().then(() => {
     try {
         fs.writeFileSync('C:\\Users\\renee\\Documents\\Web\\xd\\launcher_startup_log.txt', `Launcher started successfully at ${new Date().toISOString()}\n`);
     } catch(e) {}
-    startTelemetry();
-    // Intentar borrar app.asar.old en el arranque si existe y no está bloqueado
-    try {
-        const fs = require('fs');
-        const path = require('path');
-        const oldAsar = path.join(path.dirname(app.getAppPath()), 'app.asar.old');
-        if (fs.existsSync(oldAsar)) {
-            fs.unlinkSync(oldAsar);
-            console.log('[Updater] Eliminado app.asar.old anterior.');
-        }
-    } catch(e) {
-        console.error('[Updater] No se pudo eliminar app.asar.old:', e);
-    }
     
-        createWindow();
+    // Abrir ventana principal al instante
+    createWindow();
+
+    // Tareas secundarias en segundo plano para no demorar la interfaz
+    setTimeout(() => {
         initSystemTray();
-    initDiscordRPC();
+        initDiscordRPC();
+        startTelemetry();
+        try {
+            const oldAsar = path.join(path.dirname(app.getAppPath()), 'app.asar.old');
+            if (fs.existsSync(oldAsar)) {
+                fs.unlinkSync(oldAsar);
+                console.log('[Updater] Eliminado app.asar.old anterior.');
+            }
+        } catch(e) {}
+    }, 100);
 });
 app.on('window-all-closed', () => {
     if (rpcClient) { try { rpcClient.destroy(); } catch { } }
@@ -1051,20 +1058,25 @@ function getInstanceDir(mcPath, versionId) {
 ipcMain.handle('get-all-versions', async () => {
     try {
         const cacheFile = path.join(BASE_DATA_DIR, 'cache', 'version_manifest_v2.json');
+        const bundledFile = path.join(__dirname, 'assets', 'version_manifest_v2.json');
+        const candidateFile = fs.existsSync(cacheFile) ? cacheFile : (fs.existsSync(bundledFile) ? bundledFile : null);
         const urls = [
             'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json',
             'https://launchermeta.mojang.com/mc/game/version_manifest.json',
             'https://bmclapi2.bangbang93.com/mc/game/version_manifest_v2.json'
         ];
 
-        // Arranque instantáneo si existe caché local
-        if (fs.existsSync(cacheFile)) {
+        // Arranque instantáneo si existe caché local o empaquetada
+        if (candidateFile) {
             try {
-                const cachedData = fs.readFileSync(cacheFile, 'utf8');
+                const cachedData = fs.readFileSync(candidateFile, 'utf8');
                 const cachedManifest = JSON.parse(cachedData);
                 if (cachedManifest && cachedManifest.versions && cachedManifest.versions.length > 0) {
                     httpsGetWithFallbacks(urls, {}, 6000).then(fresh => {
-                        try { fs.writeFileSync(cacheFile, fresh, 'utf8'); } catch {}
+                        try {
+                            fs.mkdirSync(path.dirname(cacheFile), { recursive: true });
+                            fs.writeFileSync(cacheFile, fresh, 'utf8');
+                        } catch {}
                     }).catch(() => {});
                     return cachedManifest.versions;
                 }
@@ -1409,6 +1421,31 @@ ipcMain.handle('get-optifine-versions', async (event, mcVersion) => {
 });
 
 ipcMain.handle('get-optifine-mc-versions', async () => {
+    const cacheFile = path.join(BASE_DATA_DIR, 'cache', 'optifine_versions.json');
+    const bundledFile = path.join(__dirname, 'assets', 'optifine_versions.json');
+    const candidateFile = fs.existsSync(cacheFile) ? cacheFile : (fs.existsSync(bundledFile) ? bundledFile : null);
+
+    if (candidateFile) {
+        try {
+            const cachedData = fs.readFileSync(candidateFile, 'utf8');
+            const list = JSON.parse(cachedData);
+            if (Array.isArray(list) && list.length > 0) {
+                // Actualizar en segundo plano sin demorar la respuesta
+                httpsGet('https://bmclapi2.bangbang93.com/optifine/versionList', {}, 6000).then(data => {
+                    try {
+                        const freshList = JSON.parse(data);
+                        if (Array.isArray(freshList)) {
+                            const res = [...new Set(freshList.map(item => item.mcversion))].filter(Boolean);
+                            fs.mkdirSync(path.dirname(cacheFile), { recursive: true });
+                            fs.writeFileSync(cacheFile, JSON.stringify(res), 'utf8');
+                        }
+                    } catch {}
+                }).catch(() => {});
+                return list;
+            }
+        } catch (e) {}
+    }
+
     sendLog('🔍 Cargando versiones de OptiFine soportadas...');
     let result = [];
     try {
@@ -1441,6 +1478,13 @@ ipcMain.handle('get-optifine-mc-versions', async () => {
                 result = [...new Set(list.map(item => item.mcversion))].filter(Boolean);
             }
         } catch (e) { }
+    }
+
+    if (result.length > 0) {
+        try {
+            fs.mkdirSync(path.dirname(cacheFile), { recursive: true });
+            fs.writeFileSync(cacheFile, JSON.stringify(result), 'utf8');
+        } catch {}
     }
 
     sendLog(`✅ ${result.length} versiones de Minecraft con soporte OptiFine`);
@@ -1683,9 +1727,11 @@ ipcMain.handle('auto-install-optifine', async (event, mcVersion) => {
 ipcMain.handle('get-forge-mc-versions', async () => {
     try {
         const cacheFile = path.join(BASE_DATA_DIR, 'cache', 'forge_promos.json');
-        if (fs.existsSync(cacheFile)) {
+        const bundledFile = path.join(__dirname, 'assets', 'forge_promos.json');
+        const candidateFile = fs.existsSync(cacheFile) ? cacheFile : (fs.existsSync(bundledFile) ? bundledFile : null);
+        if (candidateFile) {
             try {
-                const cachedData = fs.readFileSync(cacheFile, 'utf8');
+                const cachedData = fs.readFileSync(candidateFile, 'utf8');
                 const promos = JSON.parse(cachedData);
                 if (promos && promos.promos && Object.keys(promos.promos).length > 0) {
                     const versions = {};
@@ -2014,6 +2060,20 @@ ipcMain.handle('install-forge', async (event, forgeData) => {
 
 // ── NEOFORGE INSTALLATION (NEW) ──────────────────────────────────
 ipcMain.handle('get-neoforge-mc-versions', async () => {
+    const cacheFile = path.join(BASE_DATA_DIR, 'cache', 'neoforge_versions.json');
+    const bundledFile = path.join(__dirname, 'assets', 'neoforge_versions.json');
+    const candidateFile = fs.existsSync(cacheFile) ? cacheFile : (fs.existsSync(bundledFile) ? bundledFile : null);
+
+    if (candidateFile) {
+        try {
+            const cachedData = fs.readFileSync(candidateFile, 'utf8');
+            const list = JSON.parse(cachedData);
+            if (Array.isArray(list) && list.length > 0) {
+                return list;
+            }
+        } catch (e) {}
+    }
+
     try {
         sendLog('🔍 Cargando versiones de NeoForge soportadas...');
         const mcMap = new Set();
@@ -2063,6 +2123,13 @@ ipcMain.handle('get-neoforge-mc-versions', async () => {
             }
             return 0;
         });
+
+        if (sorted.length > 0) {
+            try {
+                fs.mkdirSync(path.dirname(cacheFile), { recursive: true });
+                fs.writeFileSync(cacheFile, JSON.stringify(sorted), 'utf8');
+            } catch {}
+        }
 
         sendLog(`✅ ${sorted.length} versiones de Minecraft con soporte NeoForge`);
         return sorted;
