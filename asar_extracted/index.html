@@ -1236,16 +1236,101 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .mod-upload{border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all .3s;margin-bottom:14px;}
 .mod-upload input{display:none;}
 
-/* ═══════ VERSIONES TAB (NEW) ═══════ */
-.version-filters{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
-.version-filter-btn{padding:8px 16px;border-radius:10px;background:var(--glass-mid);border:.5px solid var(--border);color:var(--text-dim);font-size:.75rem;cursor:pointer;transition:all .2s;}
-.version-filter-btn:hover{background:var(--glass-light);color:var(--text);}
-.version-filter-btn.active{background:var(--btn-glass);color:var(--accent);border-color:var(--btn-border);}
-.versions-list{flex:1;overflow-y:auto;padding-right:8px;}
-.version-item{
-  padding:14px 16px;margin-bottom:8px;border-radius:12px;background:rgba(18, 22, 38, 0.82);border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;transition:background 0.15s ease, border-color 0.15s ease;
+/* ═══════ VERSIONES TAB (OPTIMIZED GPU SAFE) ═══════ */
+#tab-versiones {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
+  height: 100%;
+  overflow: hidden !important;
+  padding: 44px 40px 20px;
+  box-sizing: border-box;
 }
-.version-item:hover{background:rgba(30, 36, 60, 0.92);border-color:var(--accent);}
+#tab-versiones.active {
+  display: flex !important;
+}
+.version-top-bar {
+  flex-shrink: 0;
+  margin-bottom: 12px;
+}
+.version-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.version-filter-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: var(--text-dim);
+  font-size: 0.74rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.version-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.10);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+.version-filter-btn.active {
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  border-color: var(--accent);
+}
+.versions-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+}
+.version-item {
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 10px;
+  background: rgba(18, 22, 38, 0.82);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  contain: layout paint;
+  transform: translateZ(0);
+}
+.version-item:hover {
+  background: rgba(28, 34, 56, 0.92) !important;
+  border-color: var(--accent) !important;
+}
+.version-item .btn {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: none !important;
+}
+.version-item .btn-primary {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.35), rgba(99, 102, 241, 0.25)) !important;
+  border: 1px solid rgba(168, 85, 247, 0.5) !important;
+  color: #fff !important;
+}
+.version-item .btn-primary:hover {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.55), rgba(99, 102, 241, 0.45)) !important;
+  border-color: #c084fc !important;
+}
+.version-item .btn-glass {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+}
+.version-item .btn-glass:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
 .version-info{flex:1;}
 .version-id{font-size:.85rem;font-weight:600;margin-bottom:2px;}
 .version-type-badge{font-size:.6rem;padding:2px 8px;border-radius:6px;margin-left:8px;font-weight:600;}
@@ -3825,8 +3910,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 }
 
 #vanGoghCanvas {
-  position: fixed; inset: 0; z-index: 1; pointer-events: none;
-  width: 100%; height: 100%; opacity: 0.85;
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  width: 100%; height: 100%; opacity: 0.75;
 }
 
 #main-launcher {
@@ -5374,24 +5459,26 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         </div>
       </div>
 
-      <div class="tab-panel" id="tab-versiones">
-        <h1 class="panel-title">Versiones</h1>
-        <p class="panel-sub">Todas las versiones disponibles e instaladas.</p>
+      <div class="tab-panel" id="tab-versiones" style="display:none;flex:1;flex-direction:column;min-height:0;height:100%;overflow:hidden;padding:44px 40px 20px;box-sizing:border-box;">
+        <div class="version-top-bar" style="flex-shrink:0;">
+          <h1 class="panel-title">Versiones</h1>
+          <p class="panel-sub">Todas las versiones disponibles e instaladas.</p>
 
-        <div class="version-filters" style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
-          <button class="version-filter-btn active" onclick="filterVersions('all', this)">Todas</button>
-          <button class="version-filter-btn" onclick="filterVersions('installed', this)" style="font-weight:700;">⭐ Instaladas</button>
-          <button class="version-filter-btn" onclick="filterVersions('release', this)">Oficiales</button>
-          <button class="version-filter-btn" onclick="filterVersions('snapshot', this)">Snapshots</button>
-          <button class="version-filter-btn" onclick="filterVersions('forge', this)">Forge</button>
-          <button class="version-filter-btn" onclick="filterVersions('fabric', this)">Fabric</button>
-          <button class="version-filter-btn" onclick="filterVersions('optifine', this)">OptiFine</button>
-          <button class="version-filter-btn" onclick="filterVersions('pvp', this)">⚔️ Clientes PVP</button>
-          <input type="text" id="versionSearchInp" oninput="filterVersionsBySearch(this.value)" placeholder="🔍 Buscar versión..." style="margin-left:auto; background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:8px; padding:5px 12px; color:white; font-size:0.75rem; width:170px; outline:none;" />
-          <button class="btn btn-sm btn-glass" onclick="refreshAllVersions()" style="font-size:0.75rem; padding:5px 12px;" title="Refrescar catálogo completo">🔄 Refrescar</button>
+          <div class="version-filters" style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
+            <button class="version-filter-btn active" onclick="filterVersions('all', this)">Todas</button>
+            <button class="version-filter-btn" onclick="filterVersions('installed', this)" style="font-weight:700;">⭐ Instaladas</button>
+            <button class="version-filter-btn" onclick="filterVersions('release', this)">Oficiales</button>
+            <button class="version-filter-btn" onclick="filterVersions('snapshot', this)">Snapshots</button>
+            <button class="version-filter-btn" onclick="filterVersions('forge', this)">Forge</button>
+            <button class="version-filter-btn" onclick="filterVersions('fabric', this)">Fabric</button>
+            <button class="version-filter-btn" onclick="filterVersions('optifine', this)">OptiFine</button>
+            <button class="version-filter-btn" onclick="filterVersions('pvp', this)">⚔️ Clientes PVP</button>
+            <input type="text" id="versionSearchInp" oninput="filterVersionsBySearch(this.value)" placeholder="🔍 Buscar versión..." style="margin-left:auto; background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:8px; padding:5px 12px; color:white; font-size:0.75rem; width:170px; outline:none;" />
+            <button class="btn btn-sm btn-glass" onclick="refreshAllVersions()" style="font-size:0.75rem; padding:5px 12px;" title="Refrescar catálogo completo">🔄 Refrescar</button>
+          </div>
         </div>
 
-        <div class="versions-list" id="versions-list-container">
+        <div class="versions-list" id="versions-list-container" style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:8px;">
           <p style="color:var(--text-dim);text-align:center;padding:40px;">Cargando versiones...</p>
         </div>
       </div>
@@ -7223,6 +7310,10 @@ function showTab(id) {
     svRenderList();
   }
   if (id === 'versiones') {
+    const tv = document.getElementById('tab-versiones');
+    if (tv) tv.scrollTop = 0;
+    const vc = document.getElementById('versions-list-container');
+    if (vc) vc.scrollTop = 0;
     loadVersionsList();
   }
   if (id === 'profile') {
@@ -15446,8 +15537,23 @@ async function loadNebulaProfileData() {
         alpha: Math.random() * 0.5 + 0.4
       }));
 
-      // ── 4. Interactive Mouse Stardust Trail (Desactivado para estabilidad gráfica) ──
+      // ── 4. Interactive Mouse Stardust Trail ──
       const cursorParticles = [];
+      window.addEventListener('mousemove', (e) => {
+        if (cursorParticles.length < 40) {
+          const themeConf = getThemeColors();
+          const col = themeConf.stars[Math.floor(Math.random() * themeConf.stars.length)];
+          cursorParticles.push({
+            x: e.clientX,
+            y: e.clientY,
+            vx: (Math.random() - 0.5) * 2.2,
+            vy: (Math.random() - 0.5) * 2.2 - 0.6,
+            size: Math.random() * 3.2 + 1.5,
+            alpha: 0.85,
+            color: col
+          });
+        }
+      }, { passive: true });
 
       const stars = Array.from({ length: 280 }, (_, idx) => ({
         x: Math.random() * width,
@@ -15688,6 +15794,10 @@ window.updateCustomBgStyleUI = function() {
       scheduleNextShootingStar();
 
       let mouseX = 0, mouseY = 0;
+      window.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / width - 0.5) * 12;
+        mouseY = (e.clientY / height - 0.5) * 12;
+      }, { passive: true });
 
       let time = 0;
       let lastFrameTime = performance.now();
@@ -15696,7 +15806,6 @@ window.updateCustomBgStyleUI = function() {
         requestAnimationFrame(render);
 
         if (checkIsWindowMinimized()) return;
-        if (document.body.classList.contains('has-custom-wallpaper')) return;
 
         const currentNow = now || performance.now();
         const delta = Math.min(currentNow - lastFrameTime, 100);
@@ -15760,6 +15869,26 @@ window.updateCustomBgStyleUI = function() {
 
         
 
+
+        // ── Render Cursor Stardust Trail ──
+        for (let i = cursorParticles.length - 1; i >= 0; i--) {
+          const cp = cursorParticles[i];
+          cp.x += cp.vx * deltaFactor;
+          cp.y += cp.vy * deltaFactor;
+          cp.alpha -= 0.026 * deltaFactor;
+          if (cp.alpha <= 0) {
+            cursorParticles.splice(i, 1);
+            continue;
+          }
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, cp.alpha);
+          ctx.fillStyle = cp.color;
+          ctx.shadowBlur = 0;
+          ctx.beginPath();
+          ctx.arc(cp.x, cp.y, cp.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
 
         // ── Render Deep Ocean Bubbles ──
         if (currentActiveTheme === 'deepocean') {
