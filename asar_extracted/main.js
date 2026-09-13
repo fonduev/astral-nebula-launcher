@@ -119,7 +119,7 @@ function setRPCLauncher() {
             smallImageText: 'Minecraft',
             instance: false,
             buttons: [
-                { label: '🪐 Descargar Nebula', url: 'https://astralnebula.com' },
+                { label: '🪐 Descargar Nebula', url: 'https://nebuladevstudios.com/' },
                 { label: '⭐ Ver en GitHub', url: 'https://github.com/fonduev/astral-nebula-launcher' }
             ]
         });
@@ -156,7 +156,7 @@ function setRPCPlaying(mcVersion, modType = null, modpackName = null) {
             smallImageText: 'Nebula Launcher',
             instance: true,
             buttons: [
-                { label: '🪐 Descargar Nebula', url: 'https://astralnebula.com' },
+                { label: '🪐 Descargar Nebula', url: 'https://nebuladevstudios.com/' },
                 { label: '⭐ Ver en GitHub', url: 'https://github.com/fonduev/astral-nebula-launcher' }
             ]
         });
