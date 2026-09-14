@@ -2973,20 +2973,32 @@ ipcMain.handle('import-modpack', async (event) => {
         let modpackType = 'unknown';
         let manifest = null;
 
+        const nebulaEntry = zipEntries.find(e => e.entryName === 'nebula.modpack.json' || e.entryName === 'instance.json');
+        if (nebulaEntry) {
+            modpackType = 'nebula';
+            try { manifest = JSON.parse(nebulaEntry.getData().toString('utf8')); } catch {}
+        }
+
         const manifestEntry = zipEntries.find(e => e.entryName === 'manifest.json');
-        if (manifestEntry) {
+        if (!manifest && manifestEntry) {
             modpackType = 'curseforge';
             manifest = JSON.parse(manifestEntry.getData().toString('utf8'));
         }
 
         const modrinthEntry = zipEntries.find(e => e.entryName === 'modrinth.index.json');
-        if (modrinthEntry) {
+        if (!manifest && modrinthEntry) {
             modpackType = 'modrinth';
             manifest = JSON.parse(modrinthEntry.getData().toString('utf8'));
         }
 
         if (!manifest) {
-            throw new Error('Formato de modpack no reconocido. Solo se soportan modpacks de CurseForge y Modrinth.');
+            const hasMods = zipEntries.some(e => e.entryName.startsWith('mods/') && e.entryName.endsWith('.jar'));
+            if (hasMods) {
+                modpackType = 'nebula';
+                manifest = { name: fileName.replace(/\.(zip|mrpack|nebula)$/i, ''), mcVersion: '1.21.1', loader: 'fabric', loaderVersion: '0.16.9' };
+            } else {
+                throw new Error('Formato de modpack no reconocido. Se admiten modpacks de Nebula, CurseForge y Modrinth.');
+            }
         }
 
         sendLog(`✅ Modpack detectado: ${modpackType.toUpperCase()}`);
@@ -2996,7 +3008,48 @@ ipcMain.handle('import-modpack', async (event) => {
         const instancePath = path.join(mcPath, 'instances', instanceName);
         fs.mkdirSync(instancePath, { recursive: true });
 
-        if (modpackType === 'curseforge') {
+        if (modpackType === 'nebula') {
+            // Instancia totalmente separada en .minecraft/instances/ (NUNCA en el .minecraft/mods principal)
+            let baseName = manifest.name || fileName.replace(/\.(zip|mrpack|nebula)$/i, '');
+            let cleanName = baseName.replace(/[^a-zA-Z0-9_\- ]/g, '').trim() || 'Modpack Importado';
+            let instanceName = cleanName;
+            let counter = 1;
+            while (fs.existsSync(path.join(mcPath, 'instances', instanceName))) {
+                instanceName = `${cleanName} (${counter++})`;
+            }
+            const instancePath = path.join(mcPath, 'instances', instanceName);
+            fs.mkdirSync(instancePath, { recursive: true });
+
+            sendLog(`📦 Extrayendo en instancia separada: instances/${instanceName}...`);
+            sendProgress(30, 'Extrayendo archivos...');
+
+            zip.extractAllTo(instancePath, true);
+
+            const finalMeta = {
+                name: instanceName,
+                mcVersion: manifest.mcVersion || '1.21.1',
+                loader: manifest.loader || 'fabric',
+                loaderVersion: manifest.loaderVersion || '',
+                iconUrl: manifest.iconUrl || '',
+                screenshotUrl: manifest.screenshotUrl || '',
+                description: manifest.description || 'Modpack compartido por un amigo.',
+                projectId: manifest.projectId || '',
+                source: manifest.source || '',
+                versionId: manifest.versionId || '',
+                versionNumber: manifest.versionNumber || ''
+            };
+            fs.writeFileSync(path.join(instancePath, 'instance.json'), JSON.stringify(finalMeta, null, 2), 'utf8');
+
+            sendProgress(100, 'Modpack importado ✓');
+            sendLog(`✅ Nueva instancia independiente creada: "${instanceName}" en .minecraft/instances/${instanceName}`);
+            return {
+                success: true,
+                name: instanceName,
+                mcVersion: finalMeta.mcVersion,
+                path: instancePath
+            };
+
+        } else if (modpackType === 'curseforge') {
             const mcVersion = manifest.minecraft.version;
             const forgeVersion = manifest.minecraft.modLoaders?.[0]?.id?.replace('forge-', '');
 
@@ -3362,7 +3415,11 @@ ipcMain.handle('get-installed-modpacks', async (event) => {
                         loaderVersion: meta.loaderVersion,
                         iconUrl: meta.iconUrl || '',
                         screenshotUrl: meta.screenshotUrl || '',
-                        description: meta.description || ''
+                        description: meta.description || '',
+                        projectId: meta.projectId || '',
+                        source: meta.source || '',
+                        versionId: meta.versionId || '',
+                        versionNumber: meta.versionNumber || ''
                     });
                 } catch (e) {
                     modpacks.push(getFallbackInstanceMeta(dirName));
@@ -3511,7 +3568,7 @@ function httpsGetWithHeaders(url, headers = {}, timeoutMs = 15000) {
     });
 }
 
-async function installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl, description) {
+async function installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl, description, targetFileId) {
     currentOperation = { type: 'install-modpack', cancelled: false };
     try {
         sendLog(`📥 Obteniendo información de "${title}" desde CurseForge...`);
@@ -3528,7 +3585,7 @@ async function installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl
 
         // Sort files by ID descending to ensure we get the latest file version
         filesData.data.sort((a, b) => b.id - a.id);
-        const latestFile = filesData.data[0];
+        const latestFile = targetFileId ? filesData.data.find(f => String(f.id) === String(targetFileId)) || filesData.data[0] : filesData.data[0];
         const downloadUrl = latestFile.downloadUrl;
         if (!downloadUrl) {
             throw new Error('El modpack no permite descargas directas automatizadas desde la API de CurseForge.');
@@ -3639,7 +3696,11 @@ async function installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl
             loaderVersion: loaderVer,
             iconUrl,
             screenshotUrl,
-            description
+            description,
+            projectId: String(projectId),
+            source: 'curseforge',
+            versionId: String(latestFile.id),
+            versionNumber: latestFile.displayName || latestFile.fileName
         };
         fs.writeFileSync(path.join(instancePath, 'instance.json'), JSON.stringify(metadata, null, 2));
 
@@ -3752,55 +3813,1063 @@ ipcMain.handle('search-modpacks', async (event, { query, platform = 'all' }) => 
     return results;
 });
 
+// ── File & Directory helpers for modpacks ──────────────────
+function copyDirSync(src, dest) {
+    fs.mkdirSync(dest, { recursive: true });
+    const entries = fs.readdirSync(src, { withFileTypes: true });
+    for (const entry of entries) {
+        const srcPath = path.join(src, entry.name);
+        const destPath = path.join(dest, entry.name);
+        if (entry.isDirectory()) {
+            copyDirSync(srcPath, destPath);
+        } else {
+            fs.copyFileSync(srcPath, destPath);
+        }
+    }
+}
+
+function cleanDirSync(dir) {
+    if (!fs.existsSync(dir)) return;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        try {
+            if (entry.isDirectory()) {
+                fs.rmSync(fullPath, { recursive: true, force: true });
+            } else {
+                fs.unlinkSync(fullPath);
+            }
+        } catch (e) {}
+    }
+}
+
+function copyDirSafelySync(src, dest) {
+    if (!fs.existsSync(src)) return;
+    fs.mkdirSync(dest, { recursive: true });
+    const sensitive = new Set([
+        'saves', 'screenshots', 'options.txt', 'servers.dat', 'servers.dat_old',
+        'launcher_profiles.json', 'usercache.json', 'command_history.txt',
+        'version_backups', '_ias_accounts_do_not_send_to_anyone'
+    ]);
+    const entries = fs.readdirSync(src, { withFileTypes: true });
+    for (const entry of entries) {
+        const nameLower = entry.name.toLowerCase();
+        const destPath = path.join(dest, entry.name);
+        if (sensitive.has(nameLower) && fs.existsSync(destPath)) {
+            continue; // Nunca sobreescribir datos del usuario
+        }
+        const srcPath = path.join(src, entry.name);
+        if (entry.isDirectory()) {
+            copyDirSafelySync(srcPath, destPath);
+        } else {
+            if (!sensitive.has(nameLower) || !fs.existsSync(destPath)) {
+                fs.mkdirSync(path.dirname(destPath), { recursive: true });
+                fs.copyFileSync(srcPath, destPath);
+            }
+        }
+    }
+}
+
 // ── Get available online versions for a modpack project ──
-ipcMain.handle('get-modpack-online-versions', async (event, { projectId, source }) => {
+ipcMain.handle('get-modpack-online-versions', async (event, params) => {
     try {
-        if (source === 'curseforge') {
-            // CurseForge: fetch files for this mod
-            const url = `https://api.curseforge.com/v1/mods/${projectId}/files?pageSize=20&sortField=5&sortOrder=desc`;
-            const headers = { 'x-api-key': '$2a$10$bL4bIL5pUWqfcO7KwqnNkuKpxoV6K1HM6wqKMm7q1VfHn6eOiM2Mi', 'Accept': 'application/json' };
-            try {
-                const raw = await httpsGet(url, headers);
-                const data = JSON.parse(raw);
-                const files = data.data || [];
-                const versions = files.slice(0, 15).map(f => ({
-                    id: String(f.id),
-                    versionNumber: f.displayName || f.fileName,
-                    name: f.displayName || f.fileName,
-                    date: f.fileDate ? f.fileDate.split('T')[0] : '',
-                    gameVersions: f.gameVersions || [],
-                    mcVersion: (f.gameVersions || []).find(v => /^\d+\.\d+/.test(v)) || ''
-                }));
-                return { onlineVersions: versions };
-            } catch (e) {
-                return { onlineVersions: [] };
+        let { folderName, projectId, source, modpackName } = params || {};
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        let meta = null;
+        let localBackups = [];
+
+        if (folderName) {
+            const instancePath = path.join(mcPath, 'instances', folderName);
+            const jsonPath = path.join(instancePath, 'instance.json');
+            if (fs.existsSync(jsonPath)) {
+                try {
+                    meta = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+                } catch (e) {}
+            }
+            if (!meta) {
+                meta = getFallbackInstanceMeta(folderName);
+            }
+
+            if (!projectId && meta.projectId) projectId = meta.projectId;
+            if (!source && meta.source) source = meta.source;
+
+            // Revisar copias de seguridad locales
+            const backupsDir = path.join(instancePath, 'version_backups');
+            if (fs.existsSync(backupsDir)) {
+                try {
+                    localBackups = fs.readdirSync(backupsDir).filter(f => {
+                        try { return fs.statSync(path.join(backupsDir, f)).isDirectory(); } catch { return false; }
+                    });
+                } catch {}
+            }
+
+            // Auto-detectar y auto-resolver projectId & source si no existen (ej. modpacks antiguos como Axas Perfect Pack)
+            if (!projectId || !source) {
+                const iconUrl = meta.iconUrl || '';
+                const nameToSearch = meta.name || modpackName || folderName;
+
+                if (iconUrl.includes('forgecdn.net') || iconUrl.includes('curseforge')) {
+                    source = 'curseforge';
+                } else if (iconUrl.includes('modrinth.com')) {
+                    source = 'modrinth';
+                }
+
+                // 1. Probar en CurseForge
+                if (source === 'curseforge' || !source) {
+                    try {
+                        const CF_KEY = '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm';
+                        const cfSearchUrl = `https://api.curseforge.com/v1/mods/search?gameId=432&classId=4471&searchFilter=${encodeURIComponent(nameToSearch)}&pageSize=5`;
+                        const cfRaw = await httpsGetWithHeaders(cfSearchUrl, { 'x-api-key': CF_KEY });
+                        const cfData = JSON.parse(cfRaw);
+                        if (cfData.data && cfData.data.length > 0) {
+                            const match = cfData.data.find(m => m.name.toLowerCase() === nameToSearch.toLowerCase()) || cfData.data[0];
+                            projectId = String(match.id);
+                            source = 'curseforge';
+                        }
+                    } catch (e) {}
+                }
+
+                // 2. Probar en Modrinth
+                if (!projectId && (source === 'modrinth' || !source)) {
+                    try {
+                        const mrSearchUrl = `https://api.modrinth.com/v2/search?query=${encodeURIComponent(nameToSearch)}&facets=[["project_type:modpack"]]&limit=5`;
+                        const mrRaw = await httpsGet(mrSearchUrl);
+                        const mrData = JSON.parse(mrRaw);
+                        if (mrData.hits && mrData.hits.length > 0) {
+                            const match = mrData.hits.find(m => m.title.toLowerCase() === nameToSearch.toLowerCase()) || mrData.hits[0];
+                            projectId = match.project_id;
+                            source = 'modrinth';
+                        }
+                    } catch (e) {}
+                }
+
+                // Guardar en instance.json para que quede enlazado permanentemente
+                if (projectId && source && fs.existsSync(instancePath)) {
+                    meta.projectId = projectId;
+                    meta.source = source;
+                    try {
+                        fs.writeFileSync(jsonPath, JSON.stringify(meta, null, 2), 'utf8');
+                    } catch (e) {}
+                }
             }
         }
 
-        // Default: Modrinth
-        const url = `https://api.modrinth.com/v2/project/${projectId}/version`;
-        const raw = await httpsGet(url);
-        const versionsData = JSON.parse(raw);
-        if (!versionsData || versionsData.length === 0) return { onlineVersions: [] };
+        if (source === 'curseforge' && projectId) {
+            const CF_KEY = '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm';
+            const url = `https://api.curseforge.com/v1/mods/${projectId}/files?pageSize=30&sortField=5&sortOrder=desc`;
+            const headers = { 'x-api-key': CF_KEY, 'Accept': 'application/json' };
+            try {
+                const raw = await httpsGetWithHeaders(url, headers);
+                const data = JSON.parse(raw);
+                const files = data.data || [];
+                const versions = files.map(f => {
+                    const verId = String(f.id);
+                    const verName = f.displayName || f.fileName;
+                    const gameVers = f.gameVersions || [];
+                    const mcVer = gameVers.find(v => /^\d+\.\d+/.test(v)) || '';
+                    return {
+                        id: verId,
+                        versionNumber: verName,
+                        name: verName,
+                        date: f.fileDate ? f.fileDate.split('T')[0] : '',
+                        gameVersions: gameVers,
+                        mcVersion: mcVer,
+                        isLocal: localBackups.includes(verId)
+                    };
+                });
+                return { onlineVersions: versions, meta, localBackups };
+            } catch (e) {
+                return { onlineVersions: [], meta, localBackups };
+            }
+        }
 
-        const versions = versionsData.slice(0, 20).map(v => ({
-            id: v.id,
-            versionNumber: v.version_number || v.name,
-            name: v.name,
-            date: v.date_published ? v.date_published.split('T')[0] : '',
-            gameVersions: v.game_versions || [],
-            mcVersion: (v.game_versions || [])[0] || ''
-        }));
-        return { onlineVersions: versions };
+        if (projectId) {
+            // Default: Modrinth
+            const url = `https://api.modrinth.com/v2/project/${projectId}/version`;
+            const raw = await httpsGet(url);
+            const versionsData = JSON.parse(raw);
+            if (!versionsData || versionsData.length === 0) return { onlineVersions: [], meta, localBackups };
+
+            const versions = versionsData.map(v => {
+                const verId = v.id;
+                const verName = v.version_number || v.name;
+                const gameVers = v.game_versions || [];
+                const mcVer = gameVers[0] || '';
+                return {
+                    id: verId,
+                    versionNumber: verName,
+                    name: v.name || verName,
+                    date: v.date_published ? v.date_published.split('T')[0] : '',
+                    gameVersions: gameVers,
+                    mcVersion: mcVer,
+                    isLocal: localBackups.includes(verId)
+                };
+            });
+            return { onlineVersions: versions, meta, localBackups };
+        }
+
+        return { onlineVersions: [], meta, localBackups };
     } catch (err) {
         sendLog(`❌ Error obteniendo versiones del modpack: ${err.message}`, 'error');
         return { onlineVersions: [], error: err.message };
     }
 });
 
-ipcMain.handle('install-modpack-from-search', async (event, { projectId, title, iconUrl, screenshotUrl, description, source }) => {
+// ── Cambiar versión de Modpack o de Loader ──────────────────
+ipcMain.handle('change-modpack-version', async (event, data) => {
+    try {
+        const { folderName, loaderVersion, targetVersionId, versionNumber, projectId, source } = data || {};
+        if (!folderName) throw new Error('No se especificó la carpeta del modpack.');
+
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        const instancePath = path.join(mcPath, 'instances', folderName);
+        const jsonPath = path.join(instancePath, 'instance.json');
+
+        if (!fs.existsSync(instancePath)) {
+            throw new Error('No se encontró la carpeta del modpack en disco.');
+        }
+
+        let meta = {};
+        if (fs.existsSync(jsonPath)) {
+            try { meta = JSON.parse(fs.readFileSync(jsonPath, 'utf8')); } catch {}
+        }
+
+        // Caso A: Cambio de versión del Loader
+        if (loaderVersion && !targetVersionId) {
+            meta.loaderVersion = loaderVersion;
+            fs.writeFileSync(jsonPath, JSON.stringify(meta, null, 2), 'utf8');
+            sendLog(`✅ Versión de loader actualizada a ${loaderVersion} para "${meta.name || folderName}".`);
+            return { success: true };
+        }
+
+        // Caso B: Cambio de versión del Modpack
+        if (!targetVersionId) {
+            throw new Error('No se especificó la versión destino del modpack.');
+        }
+
+        currentOperation = { type: 'change-modpack-version', cancelled: false };
+        const dispVer = versionNumber || targetVersionId;
+        sendLog(`🔄 Iniciando cambio de versión a ${dispVer} para "${meta.name || folderName}"...`);
+        sendProgress(5, 'Preparando cambio de versión...');
+
+        let pId = projectId || meta.projectId;
+        let pSource = source || meta.source;
+
+        if (!pId || !pSource) {
+            const iconUrl = meta.iconUrl || '';
+            const nameToSearch = meta.name || folderName;
+            if (iconUrl.includes('forgecdn.net') || iconUrl.includes('curseforge')) pSource = 'curseforge';
+            else if (iconUrl.includes('modrinth.com')) pSource = 'modrinth';
+
+            if (pSource === 'curseforge' || !pSource) {
+                try {
+                    const CF_KEY = '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm';
+                    const cfSearchUrl = `https://api.curseforge.com/v1/mods/search?gameId=432&classId=4471&searchFilter=${encodeURIComponent(nameToSearch)}&pageSize=5`;
+                    const cfRaw = await httpsGetWithHeaders(cfSearchUrl, { 'x-api-key': CF_KEY });
+                    const cfData = JSON.parse(cfRaw);
+                    if (cfData.data && cfData.data.length > 0) {
+                        const match = cfData.data.find(m => m.name.toLowerCase() === nameToSearch.toLowerCase()) || cfData.data[0];
+                        pId = String(match.id);
+                        pSource = 'curseforge';
+                    }
+                } catch (e) {}
+            }
+
+            if (!pId && (pSource === 'modrinth' || !pSource)) {
+                try {
+                    const mrSearchUrl = `https://api.modrinth.com/v2/search?query=${encodeURIComponent(nameToSearch)}&facets=[["project_type:modpack"]]&limit=5`;
+                    const mrRaw = await httpsGet(mrSearchUrl);
+                    const mrData = JSON.parse(mrRaw);
+                    if (mrData.hits && mrData.hits.length > 0) {
+                        const match = mrData.hits.find(m => m.title.toLowerCase() === nameToSearch.toLowerCase()) || mrData.hits[0];
+                        pId = match.project_id;
+                        pSource = 'modrinth';
+                    }
+                } catch (e) {}
+            }
+        }
+
+        const safeTargetKey = String(targetVersionId).replace(/[^a-zA-Z0-9_\-]/g, '_');
+        const targetBackupDir = path.join(instancePath, 'version_backups', safeTargetKey);
+        const targetBackupMods = path.join(targetBackupDir, 'mods');
+
+        const backupCurrentVersion = () => {
+            const currentVerKey = (meta.versionId || meta.versionNumber || 'previous').replace(/[^a-zA-Z0-9_\-]/g, '_');
+            const currentBackupDir = path.join(instancePath, 'version_backups', currentVerKey);
+            const currentBackupMods = path.join(currentBackupDir, 'mods');
+            const currentModsDir = path.join(instancePath, 'mods');
+
+            fs.mkdirSync(currentBackupMods, { recursive: true });
+            if (fs.existsSync(currentModsDir)) {
+                copyDirSync(currentModsDir, currentBackupMods);
+                cleanDirSync(currentModsDir);
+            }
+            fs.writeFileSync(path.join(currentBackupDir, 'instance.json'), JSON.stringify(meta, null, 2), 'utf8');
+            sendLog(`📦 Respaldo de mods guardado en version_backups/${currentVerKey}`);
+        };
+
+        // Si ya está guardada localmente en backups
+        if (fs.existsSync(targetBackupMods) && fs.readdirSync(targetBackupMods).length > 0) {
+            sendLog(`⚡ Restaurando versión ${dispVer} desde el respaldo local...`);
+            sendProgress(40, 'Restaurando mods...');
+            backupCurrentVersion();
+
+            const modsDir = path.join(instancePath, 'mods');
+            fs.mkdirSync(modsDir, { recursive: true });
+            copyDirSync(targetBackupMods, modsDir);
+
+            const savedMetaPath = path.join(targetBackupDir, 'instance.json');
+            if (fs.existsSync(savedMetaPath)) {
+                try {
+                    const savedMeta = JSON.parse(fs.readFileSync(savedMetaPath, 'utf8'));
+                    meta.mcVersion = savedMeta.mcVersion || meta.mcVersion;
+                    meta.loader = savedMeta.loader || meta.loader;
+                    meta.loaderVersion = savedMeta.loaderVersion || meta.loaderVersion;
+                } catch (e) {}
+            }
+            meta.versionId = String(targetVersionId);
+            meta.versionNumber = dispVer;
+            if (pId) meta.projectId = String(pId);
+            if (pSource) meta.source = pSource;
+            fs.writeFileSync(jsonPath, JSON.stringify(meta, null, 2), 'utf8');
+
+            sendProgress(100, 'Versión cambiada ✓');
+            sendLog(`✅ Modpack "${meta.name || folderName}" cambiado exitosamente a la versión ${dispVer}.`);
+            currentOperation = null;
+            return { success: true };
+        }
+
+        const tempDir = path.join(BASE_DATA_DIR, 'temp');
+        fs.mkdirSync(tempDir, { recursive: true });
+
+        if (pSource === 'curseforge') {
+            const CF_KEY = '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm';
+            sendLog(`📥 Obteniendo información de la versión de CurseForge...`);
+            sendProgress(10, 'Consultando CurseForge...');
+
+            const cfFileUrl = `https://api.curseforge.com/v1/mods/${pId}/files/${targetVersionId}`;
+            const fileRes = JSON.parse(await httpsGetWithHeaders(cfFileUrl, { 'x-api-key': CF_KEY }));
+            const fileData = fileRes?.data;
+            if (!fileData) throw new Error('No se encontró el archivo del modpack en CurseForge.');
+
+            let dlUrl = fileData.downloadUrl;
+            if (!dlUrl) {
+                const idStr = String(fileData.id);
+                const splitIdx = idStr.length > 3 ? idStr.length - 3 : 0;
+                const firstPart = idStr.substring(0, splitIdx);
+                const lastPart = idStr.substring(splitIdx);
+                dlUrl = `https://edge.forgecdn.net/files/${firstPart}/${lastPart}/${encodeURIComponent(fileData.fileName)}`;
+            }
+
+            const tempZipPath = path.join(tempDir, `update-${targetVersionId}.zip`);
+            sendLog(`📥 Descargando archivo: ${fileData.displayName || fileData.fileName}...`);
+            sendProgress(15, 'Descargando modpack...');
+            await downloadFile(dlUrl, tempZipPath, (p, mb, extra) => {
+                if (currentOperation && currentOperation.cancelled) throw new Error('Operación cancelada');
+                let label = `Descargando modpack: ${p}%`;
+                if (extra && extra.remainingTimeStr) label += ` (${extra.speedMBps.toFixed(1)} MB/s, restante: ${extra.remainingTimeStr})`;
+                sendProgress(15 + Math.floor(p * 0.15), label);
+            });
+
+            sendProgress(30, 'Extrayendo modpack...');
+            const zip = new AdmZip(tempZipPath);
+            const zipEntries = zip.getEntries();
+            const manifestEntry = zipEntries.find(e => e.entryName === 'manifest.json');
+            if (!manifestEntry) throw new Error('No se encontró manifest.json en el modpack.');
+
+            const manifest = JSON.parse(manifestEntry.getData().toString('utf8'));
+            const mcVer = manifest.minecraft?.version || meta.mcVersion;
+            const loaderId = manifest.minecraft?.modLoaders?.[0]?.id || '';
+            const isFabric = loaderId.toLowerCase().includes('fabric');
+            const isQuilt = loaderId.toLowerCase().includes('quilt');
+            const isNeoForge = loaderId.toLowerCase().includes('neoforge');
+            const newLoaderVer = loaderId.replace(/^(forge-|fabric-|neoforge-|quilt-)/i, '') || meta.loaderVersion;
+            const newLoader = isFabric ? 'fabric' : (isQuilt ? 'quilt' : (isNeoForge ? 'neoforge' : (loaderId ? 'forge' : meta.loader || 'fabric')));
+
+            // Respaldar versión actual
+            backupCurrentVersion();
+
+            // Extraer overrides preservando saves y opciones
+            const overridesPrefix = manifest.overrides || 'overrides';
+            const sensitive = new Set([
+                'saves', 'screenshots', 'options.txt', 'servers.dat', 'servers.dat_old',
+                'launcher_profiles.json', 'usercache.json', 'command_history.txt', 'version_backups'
+            ]);
+
+            zipEntries.forEach(entry => {
+                if (entry.entryName.startsWith(overridesPrefix + '/')) {
+                    const relativePath = entry.entryName.substring(overridesPrefix.length + 1);
+                    if (!relativePath) return;
+                    const firstPart = relativePath.split('/')[0].toLowerCase();
+                    const targetPath = path.join(instancePath, relativePath);
+
+                    if (sensitive.has(firstPart) && fs.existsSync(targetPath)) return;
+
+                    if (entry.isDirectory) {
+                        fs.mkdirSync(targetPath, { recursive: true });
+                    } else {
+                        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+                        fs.writeFileSync(targetPath, entry.getData());
+                    }
+                }
+            });
+
+            const modsDir = path.join(instancePath, 'mods');
+            fs.mkdirSync(modsDir, { recursive: true });
+            const totalFiles = manifest.files.length;
+            let downloaded = 0;
+            const startTimeMods = Date.now();
+
+            for (const file of manifest.files) {
+                if (currentOperation && currentOperation.cancelled) throw new Error('Operación cancelada');
+                try {
+                    const modPath = path.join(modsDir, `mod_${file.fileID}.jar`);
+                    await downloadCurseForgeMod(file.projectID, file.fileID, modPath);
+                    downloaded++;
+
+                    let etaStr = '';
+                    if (downloaded > 2) {
+                        const elapsed = (Date.now() - startTimeMods) / 1000;
+                        const avgTime = elapsed / downloaded;
+                        const remSecs = Math.round((totalFiles - downloaded) * avgTime);
+                        etaStr = remSecs > 60 ? `, restante: ${Math.floor(remSecs / 60)}m ${remSecs % 60}s` : `, restante: ${remSecs}s`;
+                    }
+                    sendProgress(40 + Math.floor((downloaded / totalFiles) * 55), `Descargando mods: ${downloaded}/${totalFiles}${etaStr}`);
+                } catch (err) {
+                    sendLog(`⚠️ Error descargando mod ${file.projectID}: ${err.message}`);
+                }
+            }
+
+            try { fs.unlinkSync(tempZipPath); } catch {}
+
+            meta.mcVersion = mcVer;
+            meta.loader = newLoader;
+            meta.loaderVersion = newLoaderVer;
+            meta.versionId = String(targetVersionId);
+            meta.versionNumber = dispVer;
+            meta.projectId = String(pId);
+            meta.source = 'curseforge';
+            fs.writeFileSync(jsonPath, JSON.stringify(meta, null, 2), 'utf8');
+
+            try {
+                fs.mkdirSync(targetBackupMods, { recursive: true });
+                copyDirSync(modsDir, targetBackupMods);
+                fs.writeFileSync(path.join(targetBackupDir, 'instance.json'), JSON.stringify(meta, null, 2), 'utf8');
+            } catch (e) {}
+
+            sendLog(`✅ Modpack "${meta.name || folderName}" actualizado exitosamente a la versión ${dispVer}.`);
+            sendProgress(100, 'Versión cambiada ✓');
+            currentOperation = null;
+            return { success: true };
+
+        } else {
+            // Modrinth
+            sendLog(`📥 Obteniendo información de la versión en Modrinth...`);
+            sendProgress(10, 'Consultando Modrinth...');
+
+            const vUrl = `https://api.modrinth.com/v2/version/${targetVersionId}`;
+            const versionData = JSON.parse(await httpsGet(vUrl));
+            const mrpackFile = versionData.files?.find(f => f.filename.endsWith('.mrpack') || f.primary) || versionData.files?.[0];
+            if (!mrpackFile) throw new Error('No se encontró archivo .mrpack en esta versión.');
+
+            const tempMrpackPath = path.join(tempDir, `update-${targetVersionId}.mrpack`);
+            sendLog(`📥 Descargando archivo del modpack: ${mrpackFile.filename}...`);
+            sendProgress(15, 'Descargando modpack...');
+            await downloadFile(mrpackFile.url, tempMrpackPath, (p, mb, extra) => {
+                if (currentOperation && currentOperation.cancelled) throw new Error('Operación cancelada');
+                let label = `Descargando modpack: ${p}%`;
+                if (extra && extra.remainingTimeStr) label += ` (${extra.speedMBps.toFixed(1)} MB/s, restante: ${extra.remainingTimeStr})`;
+                sendProgress(15 + Math.floor(p * 0.15), label);
+            });
+
+            sendProgress(30, 'Extrayendo modpack...');
+            const tempExtractDir = path.join(tempDir, `extract-${targetVersionId}`);
+            fs.mkdirSync(tempExtractDir, { recursive: true });
+            const zip = new AdmZip(tempMrpackPath);
+            zip.extractAllTo(tempExtractDir, true);
+
+            const manifestPath = path.join(tempExtractDir, 'modrinth.index.json');
+            if (!fs.existsSync(manifestPath)) throw new Error('No se encontró modrinth.index.json dentro del modpack.');
+
+            const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+            const mcVer = manifest.dependencies?.minecraft || meta.mcVersion;
+            const fabVer = manifest.dependencies?.['fabric-loader'] || manifest.dependencies?.fabric;
+            const qVer = manifest.dependencies?.['quilt-loader'] || manifest.dependencies?.quilt;
+            const neoVer = manifest.dependencies?.neoforge;
+            const fVer = manifest.dependencies?.forge;
+            const newLoader = fabVer ? 'fabric' : (qVer ? 'quilt' : (neoVer ? 'neoforge' : (fVer ? 'forge' : meta.loader || 'fabric')));
+            const newLoaderVer = fabVer || qVer || neoVer || fVer || meta.loaderVersion || '';
+
+            backupCurrentVersion();
+
+            const overridesDir = path.join(tempExtractDir, 'overrides');
+            if (fs.existsSync(overridesDir)) {
+                copyDirSafelySync(overridesDir, instancePath);
+            }
+
+            const modsDir = path.join(instancePath, 'mods');
+            fs.mkdirSync(modsDir, { recursive: true });
+            const totalFiles = manifest.files.length;
+            let downloaded = 0;
+            const startTimeMods = Date.now();
+
+            for (const file of manifest.files) {
+                if (currentOperation && currentOperation.cancelled) throw new Error('Operación cancelada');
+                try {
+                    const targetFilePath = path.join(instancePath, file.path);
+                    fs.mkdirSync(path.dirname(targetFilePath), { recursive: true });
+                    await downloadFile(file.downloads[0], targetFilePath, () => {});
+                    downloaded++;
+
+                    let etaStr = '';
+                    if (downloaded > 2) {
+                        const elapsed = (Date.now() - startTimeMods) / 1000;
+                        const avgTime = elapsed / downloaded;
+                        const remSecs = Math.round((totalFiles - downloaded) * avgTime);
+                        etaStr = remSecs > 60 ? `, restante: ${Math.floor(remSecs / 60)}m ${remSecs % 60}s` : `, restante: ${remSecs}s`;
+                    }
+                    sendProgress(40 + Math.floor((downloaded / totalFiles) * 55), `Descargando archivos: ${downloaded}/${totalFiles}${etaStr}`);
+                } catch (err) {
+                    sendLog(`⚠️ Error descargando archivo ${file.path}: ${err.message}`);
+                }
+            }
+
+            try { fs.rmSync(tempExtractDir, { recursive: true, force: true }); } catch {}
+            try { fs.unlinkSync(tempMrpackPath); } catch {}
+
+            meta.mcVersion = mcVer;
+            meta.loader = newLoader;
+            meta.loaderVersion = newLoaderVer;
+            meta.versionId = String(targetVersionId);
+            meta.versionNumber = dispVer;
+            meta.projectId = String(pId);
+            meta.source = 'modrinth';
+            fs.writeFileSync(jsonPath, JSON.stringify(meta, null, 2), 'utf8');
+
+            try {
+                fs.mkdirSync(targetBackupMods, { recursive: true });
+                copyDirSync(modsDir, targetBackupMods);
+                fs.writeFileSync(path.join(targetBackupDir, 'instance.json'), JSON.stringify(meta, null, 2), 'utf8');
+            } catch (e) {}
+
+            sendLog(`✅ Modpack "${meta.name || folderName}" actualizado exitosamente a la versión ${dispVer}.`);
+            sendProgress(100, 'Versión cambiada ✓');
+            currentOperation = null;
+            return { success: true };
+        }
+
+    } catch (err) {
+        sendLog(`❌ Error cambiando versión del modpack: ${err.message}`, 'error');
+        sendProgress(0, '');
+        currentOperation = null;
+        return { success: false, error: err.message };
+    }
+});
+
+
+// ── Exportar Modpack para Amigos (Crea archivo .zip limpio) ─────────
+ipcMain.handle('export-modpack-for-friends', async (event, { folderName }) => {
+    try {
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        const instancePath = path.join(mcPath, 'instances', folderName);
+        const jsonPath = path.join(instancePath, 'instance.json');
+
+        if (!fs.existsSync(instancePath)) {
+            throw new Error('No se encontró la instancia del modpack.');
+        }
+
+        let meta = {};
+        if (fs.existsSync(jsonPath)) {
+            try { meta = JSON.parse(fs.readFileSync(jsonPath, 'utf8')); } catch {}
+        }
+
+        const safeName = (meta.name || folderName).replace(/[^a-zA-Z0-9_\- ]/g, '').trim();
+        const defaultFilename = `${safeName}.nebula.zip`;
+
+        const res = await dialog.showSaveDialog(win, {
+            title: 'Guardar paquete de modpack para amigos',
+            defaultPath: defaultFilename,
+            filters: [
+                { name: 'Paquete de Modpack Nebula (*.zip)', extensions: ['zip'] }
+            ]
+        });
+
+        if (res.canceled || !res.filePath) {
+            return { success: false, error: 'Cancelado' };
+        }
+
+        sendLog(`📦 Exportando modpack "${meta.name || folderName}" para compartir...`);
+        sendProgress(20, 'Empaquetando mods y configuraciones...');
+
+        const zip = new AdmZip();
+
+        // 1. Manifest de Nebula e instance.json
+        const nebulaManifest = {
+            formatVersion: 1,
+            modpackType: 'nebula',
+            name: meta.name || folderName,
+            mcVersion: meta.mcVersion || '1.21.1',
+            loader: meta.loader || 'fabric',
+            loaderVersion: meta.loaderVersion || '',
+            iconUrl: meta.iconUrl || '',
+            screenshotUrl: meta.screenshotUrl || '',
+            description: meta.description || 'Modpack compartido desde Nebula Launcher.',
+            projectId: meta.projectId || '',
+            source: meta.source || '',
+            versionId: meta.versionId || '',
+            versionNumber: meta.versionNumber || '',
+            exportedAt: new Date().toISOString()
+        };
+
+        zip.addFile('nebula.modpack.json', Buffer.from(JSON.stringify(nebulaManifest, null, 2), 'utf8'));
+        zip.addFile('instance.json', Buffer.from(JSON.stringify(nebulaManifest, null, 2), 'utf8'));
+
+        // 2. Empaquetar mods
+        const modsDir = path.join(instancePath, 'mods');
+        if (fs.existsSync(modsDir)) {
+            const modFiles = fs.readdirSync(modsDir);
+            for (const mf of modFiles) {
+                const fullModPath = path.join(modsDir, mf);
+                if (fs.statSync(fullModPath).isFile() && (mf.endsWith('.jar') || mf.endsWith('.disabled'))) {
+                    zip.addLocalFile(fullModPath, 'mods');
+                }
+            }
+        }
+
+        // 3. Empaquetar config si existe
+        const configDir = path.join(instancePath, 'config');
+        if (fs.existsSync(configDir)) {
+            zip.addLocalFolder(configDir, 'config');
+        }
+
+        // 4. Empaquetar defaultconfigs si existe
+        const defConfigDir = path.join(instancePath, 'defaultconfigs');
+        if (fs.existsSync(defConfigDir)) {
+            zip.addLocalFolder(defConfigDir, 'defaultconfigs');
+        }
+
+        sendProgress(70, 'Guardando archivo...');
+        zip.writeZip(res.filePath);
+
+        sendProgress(100, 'Exportación completada ✓');
+        sendLog(`✅ Modpack exportado exitosamente en: ${res.filePath}`);
+        return { success: true, filePath: res.filePath, name: meta.name || folderName };
+
+    } catch (err) {
+        sendLog(`❌ Error exportando modpack: ${err.message}`, 'error');
+        sendProgress(0, '');
+        return { success: false, error: err.message };
+    }
+});
+
+// ── Generar Código Nebula Corto (Mods + Configs en la Nube) ─────────
+ipcMain.handle('generate-modpack-share-code', async (event, { folderName }) => {
+    try {
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        const instancePath = path.join(mcPath, 'instances', folderName);
+        const jsonPath = path.join(instancePath, 'instance.json');
+
+        if (!fs.existsSync(instancePath)) {
+            throw new Error('No se encontró la instancia del modpack.');
+        }
+
+        let meta = {};
+        if (fs.existsSync(jsonPath)) {
+            try { meta = JSON.parse(fs.readFileSync(jsonPath, 'utf8')); } catch {}
+        }
+
+        // 1. Escanear todos los mods presentes en instancePath/mods (originales + agregados por el usuario)
+        const modsDir = path.join(instancePath, 'mods');
+        const jarFiles = fs.existsSync(modsDir) 
+            ? fs.readdirSync(modsDir).filter(f => f.endsWith('.jar') && !f.endsWith('.disabled'))
+            : [];
+
+        const hashToFile = {};
+        for (const jf of jarFiles) {
+            try {
+                const buf = fs.readFileSync(path.join(modsDir, jf));
+                const sha1 = crypto.createHash('sha1').update(buf).digest('hex');
+                hashToFile[sha1] = jf;
+            } catch (e) {}
+        }
+
+        const onlineMods = [];
+        const embeddedMods = [];
+        const hashes = Object.keys(hashToFile);
+        if (hashes.length > 0) {
+            try {
+                const postData = JSON.stringify({ hashes, algorithm: 'sha1' });
+                const mrRes = await new Promise((resolve) => {
+                    const req = https.request('https://api.modrinth.com/v2/version_files', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'User-Agent': 'NebulaLauncher/1.0',
+                            'Content-Length': Buffer.byteLength(postData)
+                        },
+                        timeout: 15000
+                    }, (res) => {
+                        let b = '';
+                        res.on('data', c => b += c);
+                        res.on('end', () => {
+                            try { resolve(JSON.parse(b)); } catch { resolve({}); }
+                        });
+                    });
+                    req.on('error', () => resolve({}));
+                    req.on('timeout', () => { req.destroy(); resolve({}); });
+                    req.write(postData);
+                    req.end();
+                });
+
+                let totalEmbeddedBytes = 0;
+                for (const [sha1, jf] of Object.entries(hashToFile)) {
+                    if (mrRes[sha1] && mrRes[sha1].files && mrRes[sha1].files[0]) {
+                        onlineMods.push({
+                            name: jf,
+                            url: mrRes[sha1].files[0].url,
+                            sha1: sha1
+                        });
+                    } else {
+                        // Mod no encontrado en Modrinth (mod privado o local): si es liviano (<4MB), incrustar directamente
+                        try {
+                            const fp = path.join(modsDir, jf);
+                            const st = fs.statSync(fp);
+                            if (st.size < 4 * 1024 * 1024 && (totalEmbeddedBytes + st.size) < 6 * 1024 * 1024) {
+                                embeddedMods.push({
+                                    name: jf,
+                                    data: fs.readFileSync(fp).toString('base64'),
+                                    sha1: sha1
+                                });
+                                totalEmbeddedBytes += st.size;
+                            }
+                        } catch (e) {}
+                    }
+                }
+            } catch (e) {}
+        }
+
+        // 2. Escanear configuraciones en instancePath/config
+        const configDir = path.join(instancePath, 'config');
+        const configs = {};
+        if (fs.existsSync(configDir)) {
+            function readConfigsRec(d, rel) {
+                for (const it of fs.readdirSync(d)) {
+                    const fp = path.join(d, it);
+                    const rpath = rel ? rel + '/' + it : it;
+                    try {
+                        const stat = fs.statSync(fp);
+                        if (stat.isDirectory()) {
+                            readConfigsRec(fp, rpath);
+                        } else if (stat.size < 60000) { // límite de 60KB por archivo
+                            configs[rpath] = fs.readFileSync(fp, 'utf8');
+                        }
+                    } catch (e) {}
+                }
+            }
+            try { readConfigsRec(configDir, ''); } catch (e) {}
+        }
+
+        // 3. Crear el paquete de modpack
+        const payload = {
+            v: 2,
+            type: 'nebula-share-package',
+            name: meta.name || folderName,
+            mcVersion: meta.mcVersion || '1.21.1',
+            loader: meta.loader || 'fabric',
+            loaderVersion: meta.loaderVersion || '',
+            iconUrl: meta.iconUrl || '',
+            screenshotUrl: meta.screenshotUrl || '',
+            description: meta.description || '',
+            projectId: meta.projectId || '',
+            source: meta.source || '',
+            versionId: meta.versionId || '',
+            versionNumber: meta.versionNumber || '',
+            mods: onlineMods,
+            embeddedMods: embeddedMods,
+            configs: configs,
+            createdAt: new Date().toISOString()
+        };
+
+        const rawJson = JSON.stringify(payload);
+        const compressedBuf = zlib.deflateSync(Buffer.from(rawJson, 'utf8'));
+
+        // 4. Subir a bytebin para obtener un código súper corto (ej: NEBULA-6X2RCs9iLD)
+        let shortCode = null;
+        try {
+            const uploadRes = await new Promise((resolve, reject) => {
+                const req = https.request('https://bytebin.lucko.me/post', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'NebulaLauncher/1.0',
+                        'Content-Length': Buffer.byteLength(rawJson)
+                    },
+                    timeout: 12000
+                }, (res) => {
+                    let b = '';
+                    res.on('data', c => b += c);
+                    res.on('end', () => {
+                        try {
+                            const data = JSON.parse(b);
+                            if (data.key) resolve(data.key);
+                            else reject(new Error('No key returned'));
+                        } catch (e) { reject(e); }
+                    });
+                });
+                req.on('error', reject);
+                req.on('timeout', () => { req.destroy(); reject(new Error('Timeout')); });
+                req.write(rawJson);
+                req.end();
+            });
+
+            if (uploadRes) {
+                shortCode = `NEBULA-${uploadRes}`;
+            }
+        } catch (e) {
+            // Fallback a código comprimido base64 si no hay conexión al bytebin
+            shortCode = 'NEBULA:' + compressedBuf.toString('base64');
+        }
+
+        const totalIncludedMods = onlineMods.length + embeddedMods.length;
+        return {
+            success: true,
+            code: shortCode,
+            name: meta.name || folderName,
+            modCount: totalIncludedMods,
+            totalJars: jarFiles.length,
+            configCount: Object.keys(configs).length
+        };
+
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+});
+
+// ── Canjear Código Nebula (Crea Instancia Aislada o Actualiza Existente) ───
+ipcMain.handle('redeem-modpack-share-code', async (event, args) => {
+    try {
+        let rawCode = '';
+        let mode = 'auto'; // 'auto', 'update', 'new'
+        if (typeof args === 'object' && args !== null) {
+            rawCode = args.code || '';
+            mode = args.mode || 'auto';
+        } else {
+            rawCode = args || '';
+        }
+
+        if (!rawCode || typeof rawCode !== 'string') {
+            throw new Error('Por favor ingresa un código válido.');
+        }
+        let clean = rawCode.trim();
+
+        // Limpiar prefijo NEBULA- o NEBULA: o URL
+        if (clean.startsWith('NEBULA-')) clean = clean.substring(7);
+        else if (clean.startsWith('NEBULA:')) clean = clean.substring(7);
+        else if (clean.includes('bytebin.lucko.me/')) clean = clean.split('bytebin.lucko.me/')[1];
+
+        clean = clean.trim();
+
+        let payload = null;
+
+        // Caso 1: Código corto en la nube (ej: 6X2RCs9iLD)
+        if (clean.length > 0 && clean.length <= 40 && !clean.includes('{') && !clean.includes(';')) {
+            sendLog(`☁️ Descargando receta del modpack desde el código "${clean}"...`);
+            sendProgress(5, 'Consultando código...');
+
+            const cloudData = await new Promise((resolve, reject) => {
+                const req = https.get(`https://bytebin.lucko.me/${clean}`, {
+                    headers: { 'User-Agent': 'NebulaLauncher/1.0' },
+                    timeout: 12000
+                }, (res) => {
+                    if (res.statusCode !== 200) {
+                        res.resume();
+                        return reject(new Error(`Código no encontrado (HTTP ${res.statusCode})`));
+                    }
+                    let b = '';
+                    res.on('data', c => b += c);
+                    res.on('end', () => {
+                        try { resolve(JSON.parse(b)); } catch { resolve({}); }
+                    });
+                });
+                req.on('error', reject);
+                req.on('timeout', () => { req.destroy(); reject(new Error('Timeout de conexión')); });
+            });
+
+            payload = cloudData;
+        } else {
+            // Caso 2: Código Base64 directo
+            try {
+                const inflated = zlib.inflateSync(Buffer.from(clean, 'base64')).toString('utf8');
+                payload = JSON.parse(inflated);
+            } catch (e1) {
+                try {
+                    const decoded = Buffer.from(clean, 'base64').toString('utf8');
+                    payload = JSON.parse(decoded);
+                } catch (e2) {
+                    throw new Error('El formato del código no es válido o ha expirado.');
+                }
+            }
+        }
+
+        if (!payload || !payload.name) {
+            throw new Error('El código no contiene información de modpack válida.');
+        }
+
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+
+        let baseName = payload.name || 'Modpack Compartido';
+        let cleanName = baseName.replace(/[^a-zA-Z0-9_\- ]/g, '').trim() || 'Modpack Compartido';
+        const exactExistingPath = path.join(mcPath, 'instances', cleanName);
+
+        // Si ya existe la instancia y el modo es 'auto', pedir confirmación al usuario
+        if (fs.existsSync(exactExistingPath) && mode === 'auto') {
+            const totalModsInPayload = (payload.mods ? payload.mods.length : 0) + (payload.embeddedMods ? payload.embeddedMods.length : 0);
+            return {
+                success: false,
+                needConfirmation: true,
+                existingName: cleanName,
+                code: rawCode,
+                totalMods: totalModsInPayload,
+                configCount: Object.keys(payload.configs || {}).length
+            };
+        }
+
+        let targetFolder = cleanName;
+        let isUpdating = false;
+
+        if (mode === 'update' && fs.existsSync(exactExistingPath)) {
+            targetFolder = cleanName;
+            isUpdating = true;
+        } else {
+            let counter = 1;
+            while (fs.existsSync(path.join(mcPath, 'instances', targetFolder))) {
+                targetFolder = `${cleanName} (${counter++})`;
+            }
+        }
+
+        const instancePath = path.join(mcPath, 'instances', targetFolder);
+        fs.mkdirSync(instancePath, { recursive: true });
+
+        currentOperation = { type: 'install-modpack', cancelled: false };
+        if (isUpdating) {
+            sendLog(`🔄 Actualizando modpack "${targetFolder}" con nuevos mods y configs (conservando tus mundos)...`);
+            sendProgress(10, 'Actualizando modpack...');
+        } else {
+            sendLog(`📦 Creando nueva instancia independiente: "${targetFolder}"...`);
+            sendProgress(10, 'Creando instancia...');
+        }
+
+        // Guardar o actualizar instance.json
+        const metadata = {
+            name: targetFolder,
+            mcVersion: payload.mcVersion || '1.21.1',
+            loader: payload.loader || 'fabric',
+            loaderVersion: payload.loaderVersion || '',
+            iconUrl: payload.iconUrl || '',
+            screenshotUrl: payload.screenshotUrl || '',
+            description: payload.description || (isUpdating ? 'Modpack actualizado con nuevos mods.' : 'Modpack instalado mediante Código de Amigo.'),
+            projectId: payload.projectId ? String(payload.projectId) : '',
+            source: payload.source || '',
+            versionId: payload.versionId ? String(payload.versionId) : '',
+            versionNumber: payload.versionNumber || ''
+        };
+        fs.writeFileSync(path.join(instancePath, 'instance.json'), JSON.stringify(metadata, null, 2), 'utf8');
+
+        // Descargar mods
+        const allMods = payload.mods || [];
+        if (allMods.length > 0 || (payload.embeddedMods && payload.embeddedMods.length > 0)) {
+            const modsDir = path.join(instancePath, 'mods');
+            fs.mkdirSync(modsDir, { recursive: true });
+
+            let downloaded = 0;
+            let newlyDownloaded = 0;
+            const total = allMods.length;
+            const startTime = Date.now();
+
+            for (const mod of allMods) {
+                if (currentOperation && currentOperation.cancelled) throw new Error('Operación cancelada');
+                try {
+                    const destJar = path.join(modsDir, mod.name);
+                    // Si ya existe el mod y tiene tamaño (en modo actualización), omitir descarga
+                    if (fs.existsSync(destJar) && fs.statSync(destJar).size > 0) {
+                        downloaded++;
+                        continue;
+                    }
+                    await downloadFile(mod.url, destJar, () => {});
+                    downloaded++;
+                    newlyDownloaded++;
+
+                    let etaStr = '';
+                    if (downloaded > 2) {
+                        const elapsed = (Date.now() - startTime) / 1000;
+                        const avg = elapsed / downloaded;
+                        const remSecs = Math.round((total - downloaded) * avg);
+                        etaStr = remSecs > 60 ? `, restante: ${Math.floor(remSecs / 60)}m ${remSecs % 60}s` : `, restante: ${remSecs}s`;
+                    }
+                    sendProgress(15 + Math.floor((downloaded / total) * 70), `Descargando mods: ${downloaded}/${total}${etaStr}`);
+                } catch (err) {
+                    sendLog(`⚠️ Mod no descargado: ${mod.name} (${err.message})`);
+                }
+            }
+
+            // Restaurar mods locales incrustados (si los había)
+            if (payload.embeddedMods && Array.isArray(payload.embeddedMods)) {
+                for (const em of payload.embeddedMods) {
+                    try {
+                        const destJar = path.join(modsDir, em.name);
+                        if (!fs.existsSync(destJar) && em.data) {
+                            fs.writeFileSync(destJar, Buffer.from(em.data, 'base64'));
+                            newlyDownloaded++;
+                        }
+                    } catch (e) {}
+                }
+            }
+
+            if (isUpdating) {
+                sendLog(`✨ Se añadieron ${newlyDownloaded} mods nuevos a la instancia.`);
+            }
+        } else if (payload.projectId && payload.source) {
+            if (payload.source === 'curseforge') {
+                return await installCurseForgeModpack(payload.projectId, targetFolder, payload.iconUrl, payload.screenshotUrl, payload.description, payload.versionId);
+            }
+        }
+
+        // Restaurar configs
+        if (payload.configs && typeof payload.configs === 'object' && Object.keys(payload.configs).length > 0) {
+            sendProgress(90, 'Restaurando configuraciones...');
+            const configDir = path.join(instancePath, 'config');
+            fs.mkdirSync(configDir, { recursive: true });
+
+            for (const [relPath, content] of Object.entries(payload.configs)) {
+                try {
+                    const destPath = path.join(configDir, relPath);
+                    fs.mkdirSync(path.dirname(destPath), { recursive: true });
+                    fs.writeFileSync(destPath, content, 'utf8');
+                } catch (e) {}
+            }
+        }
+
+        sendProgress(100, isUpdating ? 'Modpack actualizado ✓' : 'Modpack instalado ✓');
+        sendLog(`✅ Modpack "${targetFolder}" ${isUpdating ? 'actualizado exitosamente' : 'instalado'} con todos sus mods y configs.`);
+        currentOperation = null;
+        return { success: true, name: targetFolder, isUpdating };
+
+    } catch (err) {
+        sendLog(`❌ Error canjeando código: ${err.message}`, 'error');
+        sendProgress(0, '');
+        currentOperation = null;
+        return { success: false, error: err.message };
+    }
+});
+
+ipcMain.handle('install-modpack-from-search', async (event, { projectId, title, iconUrl, screenshotUrl, description, source, versionId }) => {
     if (source === 'curseforge') {
-        return await installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl, description);
+        return await installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl, description, versionId);
     }
 
     // Default: Modrinth
@@ -3907,7 +4976,11 @@ ipcMain.handle('install-modpack-from-search', async (event, { projectId, title, 
             loaderVersion: fabricVersion || quiltVersion || neoforgeVersion || forgeVersion || '',
             iconUrl,
             screenshotUrl,
-            description
+            description,
+            projectId: String(projectId),
+            source: 'modrinth',
+            versionId: latestVersion.id,
+            versionNumber: latestVersion.version_number || latestVersion.name || latestVersion.id
         };
         fs.writeFileSync(path.join(instancePath, 'instance.json'), JSON.stringify(metadata, null, 2));
 

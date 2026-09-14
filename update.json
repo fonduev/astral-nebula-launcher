@@ -1,18 +1,22 @@
 {
   "version": "5.0.0",
   "name": "Nebula Launcher v5.0.0 — Ultimate Cosmic Wallpapers 4K & MJ Smooth Criminal Edition",
-  "releaseDate": "2026-09-11",
+  "releaseDate": "2026-09-14",
   "url": "https://raw.githubusercontent.com/fonduev/astral-nebula-launcher/main/app.asar",
   "installerUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.0/Nebula.Launcher.Setup.5.0.0.exe",
   "portableUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.0/Nebula-Launcher-v5.0.0-Portable.zip",
   "mandatory": false,
   "changelog": [
+    "⚡ Sistema de Código Nebula (ej: NEBULA-suv1LXjW0X): Comparte modpacks modificados al instante incluyendo todos los mods agregados y configuraciones personalizadas.",
+    "🛡️ Instancias Totalmente Aisladas: Los modpacks compartidos se instalan en su propia carpeta independiente dentro de instances/ sin alterar tus mundos ni mods base.",
+    "🔄 Actualización Inteligente: Descarga solo los mods nuevos agregados al modpack en segundos conservando tus mundos de un jugador y servidores.",
+    "📦 Soporte de Mods Locales Incrustados: Mods agregados que no estén en la base de datos pública se incrustan directamente en la nube.",
     "🎩 Tema y Fondo Exclusivo de Michael Jackson — Smooth Criminal (Traje Blanco y Azul con pose 45°).",
     "🖼️ Fondos de Pantalla HD 4K Panorámicos en TODOS los temas (Sakura, Cyberpunk, Deep Ocean, Pixel Art, Supernova, Aurora, Galaxia, Cosmos).",
     "✨ Corrección y optimización del selector de Clientes PVP y pestañas de Modificadores sin superposición.",
     "🎛️ Control de Desenfoque Global Personalizable (0px ultra-nítido por defecto hasta 40px con slider en ajustes).",
     "⚡ Animaciones ultra-fluidas aceleradas por hardware para maximizar y restaurar ventana.",
-    "🛡️ Diálogo minimalista de confirmación de salida con opción de recordar preferencia y minimizar a la bandeja del sistema.",
+    "🛡️ Diálogo minimalista de confirmación de salida con opción de recordar preferencia.",
     "🌐 Soporte Multilingüe Nativo (Español, English, Português)."
   ]
 }
