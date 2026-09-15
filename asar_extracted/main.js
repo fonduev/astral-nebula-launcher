@@ -6086,22 +6086,22 @@ ipcMain.on('launch-game', async (event, data) => {
         let userProps = '{}';
         if (data.type === 'microsoft' && data.auth) {
             auth = { access_token: data.auth.accessToken, client_token: crypto.randomUUID(), uuid: data.auth.uuid, name: data.auth.name, user_properties: '{}' };
-        } else if (data.type === 'nebula' && data.auth) {
-            if (data.auth.skinUrl) {
-                const model = data.auth.model;
-                const texturesPayload = {
-                    timestamp: Date.now(),
-                    profileId: (data.auth.uuid || '').replace(/-/g, ''),
-                    profileName: data.username,
-                    textures: { SKIN: { url: data.auth.skinUrl } }
-                };
-                if (model === 'slim') { texturesPayload.textures.SKIN.metadata = { model: 'slim' }; }
-                userProps = JSON.stringify([{ name: 'textures', value: Buffer.from(JSON.stringify(texturesPayload)).toString('base64') }]);
-            }
-            // Usar Authenticator.getAuth() como base (formato offline correcto),
-            // luego sobrescribir uuid y user_properties con datos de Nebula
+        } else if ((data.type === 'nebula' || data.type === 'offline') && data.auth && data.auth.skinUrl) {
+            const model = data.auth.model || data.auth.skinModel || 'classic';
+            const texturesPayload = {
+                timestamp: Date.now(),
+                profileId: (data.auth.uuid || '').replace(/-/g, ''),
+                profileName: data.username,
+                textures: { SKIN: { url: data.auth.skinUrl } }
+            };
+            if (model === 'slim' || model === 'alex') { texturesPayload.textures.SKIN.metadata = { model: 'slim' }; }
+            userProps = JSON.stringify([{ name: 'textures', value: Buffer.from(JSON.stringify(texturesPayload)).toString('base64') }]);
             auth = Authenticator.getAuth(data.username);
-            auth.uuid = data.auth.uuid;
+            if (data.auth.uuid) auth.uuid = data.auth.uuid;
+            auth.user_properties = userProps;
+        } else if (data.type === 'nebula' && data.auth) {
+            auth = Authenticator.getAuth(data.username);
+            if (data.auth.uuid) auth.uuid = data.auth.uuid;
             auth.user_properties = userProps;
         } else {
             auth = Authenticator.getAuth(data.username);
@@ -6158,7 +6158,7 @@ ipcMain.on('launch-game', async (event, data) => {
         }
 
         const customLaunchArgs = [];
-        if (data.type === 'nebula' && data.auth && data.auth.skinUrl) {
+        if (data.auth && data.auth.skinUrl) {
             customLaunchArgs.push('--userProperties', userProps);
         }
         if (instanceDir !== mcPath) {
@@ -6193,8 +6193,8 @@ ipcMain.on('launch-game', async (event, data) => {
             }
         }
 
-        // Inyección del Java Agent para Cuenta Nebula
-        if (data.type === 'nebula') {
+        // Inyección del Java Agent para Cuenta Nebula o cuentas con skin personalizada
+        if (data.type === 'nebula' || (data.auth && data.auth.skinUrl)) {
             try {
                 // 2. Agente de skins existente
                 const destAgentPath = path.join(BASE_DATA_DIR, 'nebula-skin-agent.jar');
@@ -6205,7 +6205,7 @@ ipcMain.on('launch-game', async (event, data) => {
                     if (fs.existsSync(srcAgentPath)) {
                         const srcStat = fs.statSync(srcAgentPath);
                         const destStat = fs.statSync(destAgentPath);
-                        if (srcStat.size === destStat.size) {
+                        if (srcStat.size === destStat.size && srcStat.mtimeMs <= destStat.mtimeMs) {
                             copyNeeded = false;
                         }
                     } else {
@@ -6215,24 +6215,37 @@ ipcMain.on('launch-game', async (event, data) => {
                 
                 if (copyNeeded && fs.existsSync(srcAgentPath)) {
                     fs.copyFileSync(srcAgentPath, destAgentPath);
-                    sendLog('[System] Java Agent de skins copiado a almacenamiento externo.');
+                    sendLog('[System] Java Agent de skins actualizado en almacenamiento externo.');
                 }
                 
                 if (fs.existsSync(destAgentPath)) {
-                    sendLog('[SKIN DEBUG] skinUrl: ' + (data.auth.skinUrl || '(vacio)'));
-                    sendLog('[SKIN DEBUG] model: ' + (data.auth.model || '(vacio)'));
-                                        const dbUrl = s.socialFirebase?.databaseURL || 'https://astral-nebula-social-default-rtdb.firebaseio.com';
+                    const playerName = data.auth?.username || data.auth?.name || data.username || '';
+                    const playerUuid = data.auth?.uuid || '';
+                    const playerSkinUrl = data.auth?.skinUrl || '';
+                    const playerModel = data.auth?.model || data.auth?.skinModel || 'classic';
+                    const playerCapeUrl = data.auth?.capeUrl || '';
+
+                    sendLog(`[SKIN DEBUG] Jugador: ${playerName} | skinUrl: ${playerSkinUrl || '(vacio)'} | modelo: ${playerModel}`);
+                    const dbUrl = s.socialFirebase?.databaseURL || 'https://astral-nebula-social-default-rtdb.firebaseio.com';
                     opts.customArgs.push(`-javaagent:${destAgentPath}=${dbUrl}`);
                     opts.customArgs.push(`-Dfabric.systemLibraries=${destAgentPath}`);
-                    opts.customArgs.push(`-Dnebula.skin.uuid=${data.auth.uuid}`);
-                    opts.customArgs.push(`-Dnebula.skin.uuid.nodashes=${(data.auth.uuid || '').replace(/-/g, '')}`);
-                    if (data.auth.skinUrl) {
-                        opts.customArgs.push(`-Dnebula.skin.url=${data.auth.skinUrl}`);
+                    if (playerName) {
+                        opts.customArgs.push(`-Dnebula.skin.name=${playerName}`);
                     }
-                    if (data.auth.model) {
-                        opts.customArgs.push(`-Dnebula.skin.model=${data.auth.model}`);
+                    if (playerUuid) {
+                        opts.customArgs.push(`-Dnebula.skin.uuid=${playerUuid}`);
+                        opts.customArgs.push(`-Dnebula.skin.uuid.nodashes=${playerUuid.replace(/-/g, '')}`);
                     }
-                    sendLog(`🌌 Cuenta Nebula activa. Soporte de skins conectado: ${dbUrl}`);
+                    if (playerSkinUrl) {
+                        opts.customArgs.push(`-Dnebula.skin.url=${playerSkinUrl}`);
+                    }
+                    if (playerModel) {
+                        opts.customArgs.push(`-Dnebula.skin.model=${playerModel}`);
+                    }
+                    if (playerCapeUrl) {
+                        opts.customArgs.push(`-Dnebula.skin.cape=${playerCapeUrl}`);
+                    }
+                    sendLog(`🌌 Soporte de skins Nebula activo (${playerName || 'local'}).`);
                 } else {
                     sendLog('⚠️ No se encontró nebula-skin-agent.jar. El soporte de skins no estará activo.', 'warn');
                 }
