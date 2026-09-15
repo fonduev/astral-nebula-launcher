@@ -4565,10 +4565,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <p class="login-step-sub">Ingresa tus credenciales para acceder a tu perfil y tus skins.</p>
         
         <label class="label">CORREO ELECTRÓNICO</label>
-        <input class="inp" id="nebula-email" placeholder="ejemplo@correo.com" style="margin-bottom:14px">
+        <input class="inp" id="nebula-email" placeholder="ejemplo@correo.com" style="margin-bottom:14px" onkeydown="if(event.key==='Enter') startNebulaLogin()">
         
         <label class="label">CONTRASEÑA</label>
-        <input class="inp" id="nebula-password" type="password" placeholder="••••••••">
+        <input class="inp" id="nebula-password" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter') startNebulaLogin()">
         <div style="text-align: right; margin-top: 4px;">
           <a href="#" onclick="event.preventDefault(); switchNebulaForm('forgot')" style="color: #a78bfa; font-size: 0.75rem; text-decoration: none;">¿Olvidaste tu contraseña?</a>
         </div>
@@ -4587,7 +4587,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <p class="login-step-sub">Ingresa tu correo para recuperar el acceso a tu cuenta.</p>
         
         <label class="label">CORREO ELECTRÓNICO</label>
-        <input class="inp" id="nebula-forgot-email" placeholder="ejemplo@correo.com" style="margin-bottom:14px">
+        <input class="inp" id="nebula-forgot-email" placeholder="ejemplo@correo.com" style="margin-bottom:14px" onkeydown="if(event.key==='Enter') startNebulaForgot()">
         
         <button class="btn btn-primary btn-full" style="margin-top:20px" id="btnNebulaForgot" onclick="startNebulaForgot()">
           Enviar enlace de recuperación
@@ -4610,13 +4610,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <p class="login-step-sub">Regístrate para subir tu propia skin personalizada.</p>
         
         <label class="label">NOMBRE DE JUGADOR (NICKNAME)</label>
-        <input class="inp" id="nebula-reg-username" placeholder="Tu nickname (para el juego)" style="margin-bottom:14px" maxlength="16">
+        <input class="inp" id="nebula-reg-username" placeholder="Tu nickname (para el juego)" style="margin-bottom:14px" maxlength="16" onkeydown="if(event.key==='Enter') startNebulaRegister()">
         
         <label class="label">CORREO ELECTRÓNICO</label>
-        <input class="inp" id="nebula-reg-email" placeholder="ejemplo@correo.com" style="margin-bottom:14px">
+        <input class="inp" id="nebula-reg-email" placeholder="ejemplo@correo.com" style="margin-bottom:14px" onkeydown="if(event.key==='Enter') startNebulaRegister()">
         
         <label class="label">CONTRASEÑA</label>
-        <input class="inp" id="nebula-reg-password" type="password" placeholder="Mínimo 6 caracteres">
+        <input class="inp" id="nebula-reg-password" type="password" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key==='Enter') startNebulaRegister()">
         
         <button class="btn btn-primary btn-full" style="margin-top:20px" id="btnNebulaRegister" onclick="startNebulaRegister()">
           🌌 Crear Cuenta y Continuar
@@ -13388,18 +13388,23 @@ function updateMyStatus(status, activity) {
     }
 
     async function startNebulaLogin() {
-      const email = document.getElementById('nebula-login-email').value.trim();
-      const password = document.getElementById('nebula-login-password').value;
+      ensureFirebaseInitialized();
+      const emailInput = document.getElementById('nebula-email') || document.getElementById('nebula-login-email');
+      const passwordInput = document.getElementById('nebula-password') || document.getElementById('nebula-login-password');
       const status = document.getElementById('nebula-status');
       const btn = document.getElementById('btnNebulaLogin');
 
+      const email = emailInput ? emailInput.value.trim() : '';
+      const password = passwordInput ? passwordInput.value : '';
+
       if (!email || !password) {
-        status.textContent = '❌ Por favor ingresa tu correo y contraseña.';
+        if (status) status.textContent = '❌ Por favor ingresa tu correo y contraseña.';
+        toast('Por favor ingresa tu correo y contraseña.', 'error');
         return;
       }
 
-      btn.disabled = true;
-      status.innerHTML = '<span class="spinner"></span> Iniciando sesión...';
+      if (btn) btn.disabled = true;
+      if (status) status.innerHTML = '<span class="spinner"></span> Iniciando sesión...';
 
       try {
         const credentials = await firebase.auth().signInWithEmailAndPassword(email, password);
@@ -13415,6 +13420,7 @@ function updateMyStatus(status, activity) {
         let username = user.displayName || email.split('@')[0];
         let skinUrl = '';
         let capeUrl = '';
+        let model = 'classic';
         let userUuid = await ipc.invoke('get-offline-uuid', username);
 
         try {
@@ -13425,6 +13431,7 @@ function updateMyStatus(status, activity) {
             if (userData.username) username = userData.username;
             if (userData.skinUrl) skinUrl = userData.skinUrl;
             if (userData.capeUrl) capeUrl = userData.capeUrl;
+            if (userData.model) model = userData.model;
             if (userData.uuid) userUuid = userData.uuid;
           }
         } catch (dbErr) {
@@ -13439,40 +13446,49 @@ function updateMyStatus(status, activity) {
           username: username,
           uuid: userUuid,
           skinUrl: skinUrl,
+          model: model,
           capeUrl: capeUrl
         };
 
         toast(`¡Bienvenido de vuelta, ${authUser}!`, 'success');
         completeLogin();
       } catch (err) {
+        console.error('Error en login Nebula:', err);
         let msg = err.message;
         if (msg.includes('auth/invalid-credential') || msg.includes('auth/wrong-password') || msg.includes('auth/user-not-found')) {
           msg = 'Correo o contraseña incorrectos.';
+        } else if (msg.includes('auth/too-many-requests')) {
+          msg = 'Demasiados intentos fallidos. Intenta más tarde.';
+        } else if (msg.includes('auth/network-request-failed')) {
+          msg = 'Error de conexión. Revisa tu internet.';
         }
-        status.textContent = '❌ Error: ' + msg;
+        if (status) status.textContent = '❌ Error: ' + msg;
         toast('Error al iniciar sesión: ' + msg, 'error');
       } finally {
-        btn.disabled = false;
+        if (btn) btn.disabled = false;
       }
     }
 
     window.resendNebulaVerification = async function() {
-      const email = document.getElementById('nebula-login-email').value.trim();
-      const password = document.getElementById('nebula-login-password').value;
+      ensureFirebaseInitialized();
+      const emailInput = document.getElementById('nebula-email') || document.getElementById('nebula-login-email');
+      const passwordInput = document.getElementById('nebula-password') || document.getElementById('nebula-login-password');
       const status = document.getElementById('nebula-status');
+      const email = emailInput ? emailInput.value.trim() : '';
+      const password = passwordInput ? passwordInput.value : '';
       if (!email || !password) {
-        status.textContent = '❌ Ingresa tu correo y contraseña para reenviar el enlace.';
+        if (status) status.textContent = '❌ Ingresa tu correo y contraseña para reenviar el enlace.';
         return;
       }
       try {
-        status.innerHTML = '<span class="spinner"></span> Reenviando enlace de verificación...';
+        if (status) status.innerHTML = '<span class="spinner"></span> Reenviando enlace de verificación...';
         const credentials = await firebase.auth().signInWithEmailAndPassword(email, password);
         await credentials.user.sendEmailVerification();
         await firebase.auth().signOut();
-        status.innerHTML = `<span style="color:#4ade80;">✅ Enlace reenviado a <b>${email}</b>. Revisa tu bandeja de entrada o spam.</span>`;
+        if (status) status.innerHTML = `<span style="color:#4ade80;">✅ Enlace reenviado a <b>${email}</b>. Revisa tu bandeja de entrada o spam.</span>`;
         toast('Enlace de verificación enviado.', 'success');
       } catch (err) {
-        status.textContent = '❌ Error al reenviar: ' + err.message;
+        if (status) status.textContent = '❌ Error al reenviar: ' + err.message;
       }
     };
 
