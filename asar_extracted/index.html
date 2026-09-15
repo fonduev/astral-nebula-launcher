@@ -6196,9 +6196,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
               <button class="btn btn-ghost btn-sm" style="flex:1; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); font-size:0.75rem; font-weight:600;" onclick="rotateSkinViewer(true)">↺ Rotar</button>
               <button class="btn btn-ghost btn-sm" style="flex:1; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); font-size:0.75rem; font-weight:600;" onclick="toggleSkinViewerAnimation()">🚶 Animación</button>
             </div>
-            <!-- Apartado Copiar URL Skin para Servidores No Premium -->
+            <!-- Apartado Copiar URL Skin -->
             <div style="margin-top:20px; width:100%; display:flex; flex-direction:column; gap:6px;">
-              <span class="label" style="font-size:0.65rem; text-align:left; color:var(--text-dim);">URL DE TU SKIN (NO PREMIUM)</span>
+              <span class="label" id="skin-url-copy-label" style="font-size:0.65rem; text-align:left; color:var(--text-dim);">URL DE TU SKIN (NO PREMIUM)</span>
               <div style="display:flex; gap:6px; width:100%;">
                 <input type="text" id="skin-url-copy-input" readonly class="inp" style="flex:1; padding:6px 10px; font-size:0.75rem; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:var(--text-dim); border-radius:8px; pointer-events:all;" placeholder="Sin skin activa">
                 <button class="btn btn-primary btn-sm" style="padding:6px 12px; font-size:0.75rem; border-radius:8px; background:linear-gradient(135deg,#a855f7,#6366f1); font-weight:700;" onclick="copyActiveSkinUrl()">Copiar</button>
@@ -6231,8 +6231,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
               </div>
             </div>
 
-            <h3 style="margin-bottom:12px; font-weight:600; letter-spacing:0.05em; color:var(--accent);">SUBIR SKIN PERSONALIZADA</h3>
-            <p style="font-size:0.75rem; color:var(--text-dim); line-height:1.5; margin-bottom:16px;">
+            <h3 id="profile-skin-section-title" style="margin-bottom:12px; font-weight:600; letter-spacing:0.05em; color:var(--accent);">SUBIR SKIN PERSONALIZADA</h3>
+            <p id="profile-skin-section-sub" style="font-size:0.75rem; color:var(--text-dim); line-height:1.5; margin-bottom:16px;">
               Sube una skin de Minecraft en formato <strong>.png</strong>. La skin se actualizará en tiempo real para todos los jugadores que usen Nebula Launcher.
             </p>
 
@@ -13606,7 +13606,52 @@ function updateMyStatus(status, activity) {
       if (authType === 'microsoft') {
         emailText = (authData && (authData.email || (authData.auth && authData.auth.email))) || window.t('Cuenta Oficial Microsoft');
         if (editBtn) editBtn.style.display = 'none';
-        if (badgeText) badgeText.textContent = 'MICROSOFT';
+        if (badgeText) badgeText.textContent = 'MICROSOFT (OFICIAL)';
+
+        const skinTitle = document.getElementById('profile-skin-section-title');
+        if (skinTitle) skinTitle.textContent = 'CAMBIAR SKIN EN MINECRAFT.NET';
+        const skinSub = document.getElementById('profile-skin-section-sub');
+        if (skinSub) skinSub.textContent = 'Sube tu skin en formato .png. Se actualizará directamente en tu cuenta oficial de Mojang / Minecraft.net, igual que en Lunar Client.';
+        const confirmBtn = document.getElementById('skin-upload-confirm-btn');
+        if (confirmBtn) confirmBtn.textContent = '📤 Subir a Minecraft.net';
+        const copyLabel = document.getElementById('skin-url-copy-label');
+        if (copyLabel) copyLabel.textContent = 'URL OFICIAL DE TU SKIN';
+
+        // Consulta en tiempo real a la API oficial de Mojang
+        (async () => {
+          try {
+            const mcProfile = await ipc.invoke('get-microsoft-profile');
+            if (mcProfile && Array.isArray(mcProfile.skins) && mcProfile.skins.length > 0) {
+              const activeSkin = mcProfile.skins.find(s => s.state === 'ACTIVE') || mcProfile.skins[0];
+              if (activeSkin && activeSkin.url) {
+                authData.skinUrl = activeSkin.url;
+                const isSlim = (activeSkin.variant || '').toLowerCase() === 'slim';
+                const mType = isSlim ? 'slim' : 'default';
+                authData.model = mType;
+                const modelSelect = document.getElementById('skin-model-select');
+                if (modelSelect) modelSelect.value = mType;
+                if (copyInput) copyInput.value = activeSkin.url;
+                if (typeof initSkinViewer === 'function') {
+                  initSkinViewer(activeSkin.url, mType);
+                }
+              }
+            }
+            if (mcProfile && Array.isArray(mcProfile.capes) && mcProfile.capes.length > 0) {
+              const activeCape = mcProfile.capes.find(c => c.state === 'ACTIVE') || mcProfile.capes[0];
+              if (activeCape && activeCape.url) {
+                authData.capeUrl = activeCape.url;
+                if (skinViewer && typeof skinViewer.loadCape === 'function') {
+                  loadSkinImageBypassCors(activeCape.url, (safeCapeUrl) => {
+                    if (skinViewer) skinViewer.loadCape(safeCapeUrl);
+                  });
+                }
+              }
+            }
+          } catch (e) {
+            console.warn("[MicrosoftProfile] Error consultando perfil oficial:", e);
+          }
+        })();
+
         skinUrl = (authData && authData.skinUrl) || `https://minotar.net/skin/${encodeURIComponent(currentUsername)}`;
       } else if (authType === 'nebula') {
         emailText = (authData && authData.email) || window.t('Cuenta Nebula');
@@ -13934,6 +13979,42 @@ async function loadNebulaProfileData() {
       }
     }
 
+    function detectSkinModelFromImage(imageSrc, callback) {
+      if (!imageSrc) { callback('default'); return; }
+      const img = new Image();
+      img.onload = () => {
+        if (img.width === 64 && img.height === 64) {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const imgData = ctx.getImageData(0, 0, 64, 64);
+            const getAlpha = (x, y) => imgData.data[((y * 64) + x) * 4 + 3];
+
+            // In a 64x64 slim skin (Alex), the arm 4th column is transparent
+            let isSlim = true;
+            for (let y = 20; y < 32; y++) {
+              if (getAlpha(54, y) !== 0 || getAlpha(55, y) !== 0) { isSlim = false; break; }
+            }
+            if (isSlim) {
+              for (let y = 52; y < 64; y++) {
+                if (getAlpha(46, y) !== 0 || getAlpha(47, y) !== 0) { isSlim = false; break; }
+              }
+            }
+            callback(isSlim ? 'slim' : 'default');
+            return;
+          } catch (e) {
+            console.warn("Error auto-detecting skin model:", e);
+          }
+        }
+        callback('default');
+      };
+      img.onerror = () => callback('default');
+      img.src = imageSrc;
+    }
+
     function initSkinViewer(skinUrl, modelType = 'default') {
       const container = document.getElementById('skin-viewer-container');
       if (!container) return;
@@ -13961,13 +14042,18 @@ async function loadNebulaProfileData() {
 
         loadSkinImageBypassCors(urlToLoad, (safeUrl) => {
           try {
-            skinViewer = new skinview3d.SkinViewer({
-              canvas: canvas,
-              width: container.clientWidth || 280,
-              height: container.clientHeight || 320,
-              skin: safeUrl,
-              model: modelType
-            });
+            detectSkinModelFromImage(safeUrl, (detectedModel) => {
+              const finalModel = (modelType === 'slim' || detectedModel === 'slim') ? 'slim' : modelType;
+              const modelSelect = document.getElementById('skin-model-select');
+              if (modelSelect) modelSelect.value = finalModel;
+
+              skinViewer = new skinview3d.SkinViewer({
+                canvas: canvas,
+                width: container.clientWidth || 280,
+                height: container.clientHeight || 320,
+                skin: safeUrl,
+                model: finalModel
+              });
 
             if (authData && authData.capeUrl) {
               loadSkinImageBypassCors(authData.capeUrl, (safeCapeUrl) => {
@@ -14011,6 +14097,7 @@ async function loadNebulaProfileData() {
             // Auto rotar despacio
             skinViewer.autoRotate = true;
             skinViewer.autoRotateSpeed = 1.0;
+            });
           } catch (err) {
             console.error('Error al inicializar skinview3d interno:', err);
             container.innerHTML = `<div style="color:var(--red);font-size:0.75rem;padding:20px;text-align:center;">Error al renderizar 3D: ${err.message}</div>`;
@@ -14195,6 +14282,46 @@ async function loadNebulaProfileData() {
       progressBar.style.width = '0%';
 
       try {
+        if (authType === 'microsoft') {
+          status.textContent = 'Subiendo skin a los servidores de Mojang (Minecraft.net)...';
+          progressBar.style.width = '35%';
+
+          let fileBase64 = null;
+          if (!file.path) {
+            fileBase64 = await new Promise((res) => {
+              const r = new FileReader();
+              r.onload = () => res(r.result);
+              r.readAsDataURL(file);
+            });
+          }
+
+          progressBar.style.width = '70%';
+          const selectedModel = document.getElementById('skin-model-select') ? document.getElementById('skin-model-select').value : 'default';
+          const res = await ipc.invoke('upload-microsoft-skin', {
+            filePath: file.path || null,
+            fileBase64: fileBase64,
+            variant: selectedModel === 'slim' ? 'slim' : 'classic'
+          });
+
+          progressBar.style.width = '100%';
+          if (res && res.success) {
+            toast('¡Skin subida exitosamente a Minecraft.net!', 'success');
+            status.textContent = '✅ Skin subida y sincronizada con tu cuenta oficial de Minecraft.';
+            if (res.skinUrl) {
+              authData.skinUrl = res.skinUrl;
+              authData.model = selectedModel;
+              window.currentSkinUrl = res.skinUrl;
+              if (skinViewer) {
+                skinViewer.loadSkin(res.skinUrl, { model: selectedModel });
+              }
+            }
+            document.getElementById('skin-upload-confirm-btn').style.display = 'none';
+          } else {
+            throw new Error((res && res.error) || 'Fallo al subir skin a Minecraft.net');
+          }
+          return;
+        }
+
         const uid = authData.uid;
         progressBar.style.width = '30%';
         

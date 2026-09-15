@@ -5919,6 +5919,143 @@ ipcMain.on('microsoft-login', async (event) => {
     }
 });
 
+ipcMain.handle('get-microsoft-profile', async () => {
+    const s = readSettings();
+    let auth = s.lastAuthData;
+    if (!auth || !auth.accessToken) return null;
+
+    try {
+        auth = await validateOrRefreshMicrosoftAuth(auth);
+        s.lastAuthData = auth;
+        writeSettings(s);
+
+        return await new Promise((resolve) => {
+            const req = https.get({
+                hostname: 'api.minecraftservices.com',
+                path: '/minecraft/profile',
+                headers: { Authorization: `Bearer ${auth.accessToken}` }
+            }, (res) => {
+                let d = '';
+                res.on('data', c => d += c);
+                res.on('end', () => {
+                    try { resolve(JSON.parse(d)); } catch (e) { resolve(null); }
+                });
+            });
+            req.on('error', () => resolve(null));
+        });
+    } catch (e) {
+        return null;
+    }
+});
+
+ipcMain.handle('upload-microsoft-skin', async (event, { filePath, fileBase64, variant }) => {
+    const s = readSettings();
+    let auth = s.lastAuthData;
+    if (!auth || !auth.accessToken) {
+        throw new Error('No hay una sesión activa de Microsoft.');
+    }
+
+    auth = await validateOrRefreshMicrosoftAuth(auth);
+    s.lastAuthData = auth;
+    writeSettings(s);
+
+    let imgBuffer;
+    if (filePath && fs.existsSync(filePath)) {
+        imgBuffer = fs.readFileSync(filePath);
+    } else if (fileBase64) {
+        imgBuffer = Buffer.from(fileBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+    } else {
+        throw new Error('No se proporcionó archivo de skin válido.');
+    }
+
+    const varValue = (variant === 'slim' || variant === 'alex') ? 'slim' : 'classic';
+    const boundary = '--------------------------' + crypto.randomBytes(16).toString('hex');
+    const crlf = '\r\n';
+
+    const parts = [
+        Buffer.from(`--${boundary}${crlf}Content-Disposition: form-data; name="variant"${crlf}${crlf}${varValue}${crlf}`),
+        Buffer.from(`--${boundary}${crlf}Content-Disposition: form-data; name="file"; filename="skin.png"${crlf}Content-Type: image/png${crlf}${crlf}`),
+        imgBuffer,
+        Buffer.from(`${crlf}--${boundary}--${crlf}`)
+    ];
+    const payload = Buffer.concat(parts);
+
+    const sendToMojang = (token) => new Promise((resolve, reject) => {
+        const req = https.request({
+            hostname: 'api.minecraftservices.com',
+            path: '/minecraft/profile/skins',
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': `multipart/form-data; boundary=${boundary}`,
+                'Content-Length': payload.length
+            }
+        }, (res) => {
+            let resData = '';
+            res.on('data', chunk => resData += chunk);
+            res.on('end', () => {
+                if (res.statusCode === 200 || res.statusCode === 204) {
+                    resolve({ ok: true, status: res.statusCode });
+                } else {
+                    resolve({ ok: false, status: res.statusCode, body: resData });
+                }
+            });
+        });
+        req.on('error', reject);
+        req.write(payload);
+        req.end();
+    });
+
+    let result = await sendToMojang(auth.accessToken);
+    if (!result.ok && result.status === 401 && auth.refreshToken) {
+        sendLog('🔄 Token caducado al subir skin, renovando con Microsoft...', 'warn');
+        auth = await refreshMicrosoftAuth(auth.refreshToken);
+        s.lastAuthData = auth;
+        writeSettings(s);
+        result = await sendToMojang(auth.accessToken);
+    }
+
+    if (!result.ok) {
+        let errDesc = result.body || `HTTP ${result.status}`;
+        try {
+            const parsed = JSON.parse(result.body);
+            if (parsed.errorMessage) errDesc = parsed.errorMessage;
+        } catch (e) {}
+        throw new Error(errDesc);
+    }
+
+    sendLog(`✨ ¡Skin subida exitosamente a Minecraft.net (modelo: ${varValue})!`);
+
+    let officialSkinUrl = '';
+    try {
+        const mcProfile = await new Promise((resolve) => {
+            const req = https.get({
+                hostname: 'api.minecraftservices.com',
+                path: '/minecraft/profile',
+                headers: { Authorization: `Bearer ${auth.accessToken}` }
+            }, (res) => {
+                let d = '';
+                res.on('data', c => d += c);
+                res.on('end', () => {
+                    try { resolve(JSON.parse(d)); } catch (e) { resolve(null); }
+                });
+            });
+            req.on('error', () => resolve(null));
+        });
+        if (mcProfile && Array.isArray(mcProfile.skins)) {
+            const activeSkin = mcProfile.skins.find(sk => sk.state === 'ACTIVE') || mcProfile.skins[0];
+            if (activeSkin && activeSkin.url) officialSkinUrl = activeSkin.url;
+        }
+    } catch (e) {}
+
+    return {
+        success: true,
+        variant: varValue,
+        skinUrl: officialSkinUrl
+    };
+});
+
+
 // ── Launch Game ─── Multi-instancia ──────────────────────────────
 ipcMain.on('launch-game', async (event, data) => {
     const s = loadSettings();
@@ -6193,8 +6330,8 @@ ipcMain.on('launch-game', async (event, data) => {
             }
         }
 
-        // Inyección del Java Agent para Cuenta Nebula o cuentas con skin personalizada
-        if (data.type === 'nebula' || (data.auth && data.auth.skinUrl)) {
+        // Inyección del Java Agent para Cuenta Nebula o cuentas no-premium con skin personalizada
+        if (data.type !== 'microsoft' && (data.type === 'nebula' || (data.auth && data.auth.skinUrl))) {
             try {
                 // 2. Agente de skins existente
                 const destAgentPath = path.join(BASE_DATA_DIR, 'nebula-skin-agent.jar');
