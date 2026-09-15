@@ -15,6 +15,7 @@ const http = require('http');
 const { execSync, spawn, exec } = require('child_process');
 const crypto = require('crypto');
 const AdmZip = require('adm-zip');
+const zlib = require('zlib');
 
 process.on('uncaughtException', (err) => {
   try {
@@ -4600,6 +4601,7 @@ ipcMain.handle('generate-modpack-share-code', async (event, { folderName }) => {
         // 4. Subir a bytebin para obtener un código súper corto (ej: NEBULA-6X2RCs9iLD)
         let shortCode = null;
         try {
+            sendLog(`☁️ Subiendo paquete de modpack a la nube (${(rawJson.length / 1024).toFixed(1)} KB)...`);
             const uploadRes = await new Promise((resolve, reject) => {
                 const req = https.request('https://bytebin.lucko.me/post', {
                     method: 'POST',
@@ -4608,7 +4610,7 @@ ipcMain.handle('generate-modpack-share-code', async (event, { folderName }) => {
                         'User-Agent': 'NebulaLauncher/1.0',
                         'Content-Length': Buffer.byteLength(rawJson)
                     },
-                    timeout: 12000
+                    timeout: 30000
                 }, (res) => {
                     let b = '';
                     res.on('data', c => b += c);
@@ -4628,8 +4630,10 @@ ipcMain.handle('generate-modpack-share-code', async (event, { folderName }) => {
 
             if (uploadRes) {
                 shortCode = `NEBULA-${uploadRes}`;
+                sendLog(`✅ Código Nebula generado exitosamente: ${shortCode}`);
             }
         } catch (e) {
+            sendLog(`⚠️ Error al subir código corto a bytebin (${e.message}), usando código alternativo`);
             // Fallback a código comprimido base64 si no hay conexión al bytebin
             shortCode = 'NEBULA:' + compressedBuf.toString('base64');
         }

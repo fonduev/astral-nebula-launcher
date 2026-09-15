@@ -12087,10 +12087,17 @@ function updateMyStatus(status, activity) {
           if (badgeMods) badgeMods.textContent = `📦 ${res.modCount} mods incluidos`;
           if (badgeConfigs) badgeConfigs.textContent = `⚙️ ${res.configCount} configs incluidas`;
         } else {
+          const errMsg = (res && res.error) ? res.error : 'Error desconocido';
           if (codeInput) codeInput.value = 'Error al generar';
+          if (badgeMods) badgeMods.textContent = '❌ No se pudo generar';
+          if (badgeConfigs) badgeConfigs.textContent = errMsg.length > 35 ? errMsg.substring(0, 32) + '...' : errMsg;
+          toast(`⚠️ Error al generar código: ${errMsg}`, 'error');
         }
       } catch (err) {
         if (codeInput) codeInput.value = 'Error: ' + err.message;
+        if (badgeMods) badgeMods.textContent = '❌ Error de comunicación';
+        if (badgeConfigs) badgeConfigs.textContent = err.message;
+        toast(`⚠️ Error: ${err.message}`, 'error');
       }
     }
 
