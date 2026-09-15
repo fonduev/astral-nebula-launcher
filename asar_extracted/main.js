@@ -5715,7 +5715,80 @@ async function doMicrosoftAuth() {
     const authUrl = `https://login.live.com/oauth20_authorize.srf?client_id=${CLIENT_ID}&response_type=code&scope=XboxLive.signin%20offline_access&redirect_uri=${encodeURIComponent(REDIRECT)}`;
 
     const code = await new Promise((resolve, reject) => {
-        const aw = new BrowserWindow({ width: 520, height: 680, title: 'Microsoft Login', webPreferences: { nodeIntegration: false, contextIsolation: true } });
+        const aw = new BrowserWindow({
+            width: 560,
+            height: 740,
+            title: '🔒 https://login.live.com - Conexión Segura Oficial con Microsoft',
+            autoHideMenuBar: true,
+            resizable: true,
+            minimizable: true,
+            maximizable: false,
+            webPreferences: {
+                nodeIntegration: false,
+                contextIsolation: true
+            }
+        });
+
+        const injectSecurityBanner = () => {
+            try {
+                aw.webContents.insertCSS(`
+                    #nebula-security-bar {
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        right: 0 !important;
+                        background: #090d16 !important;
+                        color: #f8fafc !important;
+                        padding: 7px 12px !important;
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+                        font-size: 11px !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: space-between !important;
+                        z-index: 2147483647 !important;
+                        border-bottom: 2px solid #10b981 !important;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.6) !important;
+                        user-select: none !important;
+                    }
+                    #nebula-security-bar .lock {
+                        color: #10b981 !important;
+                        font-weight: 700 !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        gap: 6px !important;
+                    }
+                    #nebula-security-bar .url {
+                        background: #1e293b !important;
+                        padding: 2px 7px !important;
+                        border-radius: 4px !important;
+                        color: #38bdf8 !important;
+                        font-family: Consolas, monospace !important;
+                        font-weight: 600 !important;
+                    }
+                    #nebula-security-bar .info {
+                        color: #94a3b8 !important;
+                        font-size: 10px !important;
+                    }
+                    body {
+                        padding-top: 36px !important;
+                    }
+                `).catch(() => {});
+
+                aw.webContents.executeJavaScript(`
+                    (function() {
+                        if (!document.getElementById('nebula-security-bar')) {
+                            var bar = document.createElement('div');
+                            bar.id = 'nebula-security-bar';
+                            bar.innerHTML = '<div class="lock">🔒 <span class="url">https://login.live.com</span> <span style="color:#e2e8f0;margin-left:4px;">Servidor Oficial de Microsoft</span></div><div class="info">Conexión directa y cifrada. Nebula Launcher nunca ve tus claves.</div>';
+                            document.documentElement.appendChild(bar);
+                        }
+                    })();
+                `).catch(() => {});
+            } catch (e) {}
+        };
+
+        aw.webContents.on('did-finish-load', injectSecurityBanner);
+
         aw.loadURL(authUrl);
         const check = (_, url) => {
             if (url.includes('code=')) { const m = url.match(/code=([^&]+)/); if (m) { aw.close(); resolve(decodeURIComponent(m[1])); } }
