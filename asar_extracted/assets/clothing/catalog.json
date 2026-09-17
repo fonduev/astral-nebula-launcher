@@ -1,0 +1,98 @@
+[
+  {
+    "id": "acc_headphones",
+    "name": "Auriculares Gaming",
+    "category": "acc",
+    "icon": "🎧",
+    "file": "acc_headphones.png",
+    "desc": "Cascos gamer con almohadillas y micrófono neón."
+  },
+  {
+    "id": "acc_crown",
+    "name": "Corona Real Dorada",
+    "category": "acc",
+    "icon": "👑",
+    "file": "acc_crown.png",
+    "desc": "Corona dorada con rubí y esmeralda incrustados."
+  },
+  {
+    "id": "acc_sunglasses",
+    "name": "Gafas de Sol Oscuras",
+    "category": "acc",
+    "icon": "🕶️",
+    "file": "acc_sunglasses.png",
+    "desc": "Lentes oscuros estilo urbano con reflejo."
+  },
+  {
+    "id": "acc_bandana",
+    "name": "Bandana Ninja Táctica",
+    "category": "acc",
+    "icon": "🥷",
+    "file": "acc_bandana.png",
+    "desc": "Máscara que cubre la mitad inferior del rostro."
+  },
+  {
+    "id": "acc_cat_ears",
+    "name": "Orejas de Gato Kawaii",
+    "category": "acc",
+    "icon": "🐱",
+    "file": "acc_cat_ears.png",
+    "desc": "Diadema con orejitas felinas rosas y negras."
+  },
+  {
+    "id": "suit_tuxedo",
+    "name": "Smoking / Tuxedo",
+    "category": "suits",
+    "icon": "🤵",
+    "file": "suit_tuxedo.png",
+    "desc": "Traje de gala negro con camisa blanca y pajarita roja."
+  },
+  {
+    "id": "suit_executive",
+    "name": "Traje Ejecutivo Azul",
+    "category": "suits",
+    "icon": "👔",
+    "file": "suit_executive.png",
+    "desc": "Traje formal azul marino con corbata carmesí."
+  },
+  {
+    "id": "hoodie_nebula",
+    "name": "Hoodie Cósmico Nebula",
+    "category": "hoodies",
+    "icon": "💜",
+    "file": "hoodie_nebula.png",
+    "desc": "Sudadera oficial Nebula con capucha y cordones."
+  },
+  {
+    "id": "hoodie_cyberpunk",
+    "name": "Hoodie Cyberpunk",
+    "category": "hoodies",
+    "icon": "🖤",
+    "file": "hoodie_cyberpunk.png",
+    "desc": "Sudadera oscura con líneas de neón cian."
+  },
+  {
+    "id": "jacket_leather",
+    "name": "Chaqueta de Cuero",
+    "category": "hoodies",
+    "icon": "🧥",
+    "file": "jacket_leather.png",
+    "desc": "Chaqueta vintage de cuero con cuello de borrego."
+  },
+  {
+    "id": "armor_knight",
+    "name": "Pechera de Caballero",
+    "category": "armor",
+    "icon": "⚔️",
+    "file": "armor_knight.png",
+    "desc": "Armadura de placas de acero con hombreras."
+  },
+  {
+    "id": "armor_assassin",
+    "name": "Atuendo de Asesino",
+    "category": "armor",
+    "icon": "🗡️",
+    "file": "armor_assassin.png",
+    "desc": "Traje táctico con correas, faja roja y guardabrazos."
+  }
+]

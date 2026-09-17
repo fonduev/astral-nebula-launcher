@@ -21,7 +21,7 @@ process.on('uncaughtException', (err) => {
   try {
     const fs = require('fs');
     const path = require('path');
-    const errLog = 'C:\\Users\\renee\\Documents\\Web\\xd\\main_error.txt';
+    const errLog = path.join(BASE_DATA_DIR || app.getPath('userData'), 'main_error.txt');
     fs.appendFileSync(errLog, `[${new Date().toISOString()}] Uncaught Exception: ${err.stack || err}\n\n`, 'utf8');
   } catch(e) {}
 });
@@ -29,7 +29,7 @@ process.on('unhandledRejection', (reason, promise) => {
   try {
     const fs = require('fs');
     const path = require('path');
-    const errLog = 'C:\\Users\\renee\\Documents\\Web\\xd\\main_error.txt';
+    const errLog = path.join(BASE_DATA_DIR || app.getPath('userData'), 'main_error.txt');
     fs.appendFileSync(errLog, `[${new Date().toISOString()}] Unhandled Rejection: ${reason.stack || reason}\n\n`, 'utf8');
   } catch(e) {}
 });
@@ -1689,7 +1689,7 @@ ipcMain.handle('download-vanilla-version', async (event, mcVersion) => {
     }
 });
 
-// ── OPTIFINE (FIXED - Using BMCLAPI mirror like TLauncher) ──────────
+// ── OPTIFINE (FIXED - Using BMCLAPI mirror) ──────────
 // Función interna (NO IPC handler) para verificar y obtener info de OptiFine
 async function getOptiFineInfo(mcVersion) {
     try {
@@ -5496,6 +5496,149 @@ ipcMain.handle('toggle-mod', async (event, modPath) => {
     }
 });
 
+
+// ── NUEVO: Cuarentena de Mod Flagged por Nebula Shield Anti-Malware ──
+ipcMain.handle('quarantine-flagged-mod', async (event, { folderName, filename }) => {
+    try {
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        let modsDir = path.join(mcPath, 'mods');
+        if (folderName) {
+            const instMods = path.join(mcPath, 'instances', folderName, 'mods');
+            if (fs.existsSync(instMods)) {
+                modsDir = instMods;
+            } else {
+                const mpMods = path.join(mcPath, 'modpacks', folderName, 'mods');
+                if (fs.existsSync(mpMods)) modsDir = mpMods;
+            }
+        }
+        const targetPath = path.join(modsDir, filename);
+        if (!fs.existsSync(targetPath)) {
+            return { success: false, error: 'Archivo no encontrado: ' + filename };
+        }
+        const quarantineDir = path.join(modsDir, '.quarantine');
+        if (!fs.existsSync(quarantineDir)) fs.mkdirSync(quarantineDir, { recursive: true });
+        const destPath = path.join(quarantineDir, filename + '.quarantined');
+        fs.renameSync(targetPath, destPath);
+        sendLog(`🛡️ [Nebula Shield] Mod puesto en cuarentena: ${filename}`);
+        return { success: true };
+    } catch (err) {
+        sendLog(`❌ Error en cuarentena: ${err.message}`, 'error');
+        return { success: false, error: err.message };
+    }
+});
+
+// ── NUEVO: Creación de Modpacks Personalizados (Custom Modpack Engine) ──
+ipcMain.handle('create-custom-modpack', async (event, data) => {
+    try {
+        const { name, description, mcVersion, loader, loaderVersion, iconBase64 } = data;
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        const instancesDir = path.join(mcPath, 'instances');
+        if (!fs.existsSync(instancesDir)) fs.mkdirSync(instancesDir, { recursive: true });
+
+        const cleanName = (name || 'custom_pack').replace(/[^a-zA-Z0-9_\-]/g, '_').toLowerCase();
+        let folderName = cleanName;
+        let counter = 1;
+        while (fs.existsSync(path.join(instancesDir, folderName))) {
+            folderName = `${cleanName}_${counter++}`;
+        }
+
+        const targetDir = path.join(instancesDir, folderName);
+        fs.mkdirSync(targetDir, { recursive: true });
+        fs.mkdirSync(path.join(targetDir, 'mods'), { recursive: true });
+        fs.mkdirSync(path.join(targetDir, 'config'), { recursive: true });
+
+        let iconUrl = '';
+        if (iconBase64 && iconBase64.startsWith('data:image/')) {
+            try {
+                const b64Data = iconBase64.replace(/^data:image\/\w+;base64,/, '');
+                const iconPath = path.join(targetDir, 'icon.png');
+                fs.writeFileSync(iconPath, Buffer.from(b64Data, 'base64'));
+                iconUrl = iconPath;
+            } catch (e) {}
+        }
+
+        const instanceMeta = {
+            name: name,
+            folderName: folderName,
+            description: description || 'Modpack personalizado creado por el usuario.',
+            mcVersion: mcVersion,
+            loader: loader,
+            loaderVersion: loaderVersion || '',
+            iconUrl: iconUrl,
+            source: 'custom',
+            created: new Date().toISOString()
+        };
+
+        fs.writeFileSync(path.join(targetDir, 'instance.json'), JSON.stringify(instanceMeta, null, 2), 'utf8');
+        sendLog(`✅ Modpack personalizado creado: "${name}" en "${folderName}"`);
+        return { success: true, folderName };
+    } catch (err) {
+        sendLog(`❌ Error creando modpack: ${err.message}`, 'error');
+        return { success: false, error: err.message };
+    }
+});
+
+// ── NUEVO: Instalador de Clientes .JAR / PvP ──
+ipcMain.handle('install-jar-client', async (event, url) => {
+    try {
+        if (!url || typeof url !== 'string') {
+            return { success: false, error: 'URL no válida.' };
+        }
+        if (!url.toLowerCase().endsWith('.jar')) {
+            shell.openExternal(url);
+            return { success: true, openedBrowser: true };
+        }
+        const s = loadSettings();
+        const tempDir = path.join(BASE_DATA_DIR, 'temp_downloads');
+        if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+
+        const jarName = path.basename(new URL(url).pathname) || 'installer.jar';
+        const destPath = path.join(tempDir, jarName);
+
+        // Descargar el instalador
+        await new Promise((resolve, reject) => {
+            const https = require('https');
+            const http = require('http');
+            const client = url.startsWith('https') ? https : http;
+            const fileStream = fs.createWriteStream(destPath);
+            const req = client.get(url, { headers: { 'User-Agent': 'NebulaLauncher/5.0.1' } }, (res) => {
+                if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                    return resolve(ipcMain.emit('install-jar-client', event, res.headers.location));
+                }
+                if (res.statusCode !== 200) {
+                    return reject(new Error(`HTTP ${res.statusCode}`));
+                }
+                res.pipe(fileStream);
+                fileStream.on('finish', () => {
+                    fileStream.close();
+                    resolve();
+                });
+            });
+            req.on('error', (err) => {
+                try { fs.unlinkSync(destPath); } catch (e) {}
+                reject(err);
+            });
+        });
+
+        // Ejecutar el .jar con Java
+        const javaPath = s.javaPath || 'java';
+        const proc = spawn(javaPath, ['-jar', destPath], { detached: true, stdio: 'ignore' });
+        proc.unref();
+
+        return { success: true };
+    } catch (err) {
+        try { shell.openExternal(url); return { success: true, openedBrowser: true }; } catch (e) {}
+        return { success: false, error: err.message };
+    }
+});
+
+// Listener seguro para pasos de inicio
+ipcMain.on('renderer-ready-step', (event, data) => {
+    // Procesa el progreso del renderer de forma silenciosa y segura
+});
+
 ipcMain.handle('delete-mod', async (event, modPath) => {
     try {
         fs.unlinkSync(modPath);
@@ -5666,11 +5809,13 @@ ipcMain.on('app-quit', () => {
 ipcMain.on('open-url', (e, url) => shell.openExternal(url));
 ipcMain.on('open-client-url', (e, url) => shell.openExternal(url));
 ipcMain.handle('pick-java', async () => {
-    const result = await dialog.showOpenDialog(win, { properties: ['openFile'], filters: [{ name: 'Java', extensions: ['exe'] }] });
+    const parentWin = (win && !win.isDestroyed()) ? win : null;
+    const result = await dialog.showOpenDialog(parentWin, { properties: ['openFile'], filters: [{ name: 'Java', extensions: ['exe'] }] });
     return result.filePaths[0] || '';
 });
 ipcMain.handle('pick-gamedir', async () => {
-    const result = await dialog.showOpenDialog(win, { properties: ['openDirectory'] });
+    const parentWin = (win && !win.isDestroyed()) ? win : null;
+    const result = await dialog.showOpenDialog(parentWin, { properties: ['openDirectory'] });
     return result.filePaths[0] || '';
 });
 
@@ -6355,6 +6500,135 @@ ipcMain.handle('upload-microsoft-skin', async (event, { filePath, fileBase64, va
         success: true,
         variant: varValue,
         skinUrl: officialSkinUrl
+    };
+});
+
+// ── Búsqueda y Descarga de Skins por Jugador (Mojang / PlayerDB / Ashcon) ──
+ipcMain.handle('fetch-player-skin', async (event, rawUsername) => {
+    if (!rawUsername || typeof rawUsername !== 'string') {
+        return { success: false, error: 'Por favor escribe un nombre de usuario válido.' };
+    }
+    const username = rawUsername.trim();
+    if (!username) {
+        return { success: false, error: 'El nombre de usuario no puede estar vacío.' };
+    }
+
+    const https = require('https');
+
+    const fetchJson = (url, headers = {}) => new Promise((resolve) => {
+        const req = https.get(url, {
+            headers: { 'User-Agent': 'NebulaLauncher/5.0.1', ...headers },
+            timeout: 7000
+        }, (res) => {
+            if (res.statusCode < 200 || res.statusCode >= 300) return resolve(null);
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try { resolve(JSON.parse(data)); } catch { resolve(null); }
+            });
+        });
+        req.on('error', () => resolve(null));
+        req.on('timeout', () => { req.destroy(); resolve(null); });
+    });
+
+    const downloadAsBase64 = (url) => new Promise((resolve) => {
+        if (!url) return resolve(null);
+        const protocol = url.startsWith('https') ? https : require('http');
+        const req = protocol.get(url, {
+            headers: { 'User-Agent': 'NebulaLauncher/5.0.1' },
+            timeout: 8000
+        }, (res) => {
+            if (res.statusCode < 200 || res.statusCode >= 300) return resolve(null);
+            const chunks = [];
+            res.on('data', c => chunks.push(c));
+            res.on('end', () => {
+                const buffer = Buffer.concat(chunks);
+                resolve(`data:image/png;base64,${buffer.toString('base64')}`);
+            });
+        });
+        req.on('error', () => resolve(null));
+        req.on('timeout', () => { req.destroy(); resolve(null); });
+    });
+
+    // 1. Intento oficial con Mojang Session Server
+    try {
+        const profileData = await fetchJson(`https://api.mojang.com/users/profiles/minecraft/${encodeURIComponent(username)}`);
+        if (profileData && profileData.id) {
+            const uuid = profileData.id;
+            const officialName = profileData.name || username;
+            const sessionData = await fetchJson(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`);
+            if (sessionData && Array.isArray(sessionData.properties)) {
+                const texProp = sessionData.properties.find(p => p.name === 'textures');
+                if (texProp && texProp.value) {
+                    const decoded = JSON.parse(Buffer.from(texProp.value, 'base64').toString('utf8'));
+                    const skinObj = decoded?.textures?.SKIN;
+                    if (skinObj && skinObj.url) {
+                        const skinUrl = skinObj.url;
+                        const model = skinObj?.metadata?.model === 'slim' ? 'slim' : 'default';
+                        const dataUrl = await downloadAsBase64(skinUrl);
+                        if (dataUrl) {
+                            return {
+                                success: true,
+                                username: officialName,
+                                uuid: uuid,
+                                skinUrl: skinUrl,
+                                dataUrl: dataUrl,
+                                model: model
+                            };
+                        }
+                    }
+                }
+            }
+        }
+    } catch (e) {}
+
+    // 2. Fallback a PlayerDB
+    try {
+        const pdb = await fetchJson(`https://playerdb.co/api/player/minecraft/${encodeURIComponent(username)}`);
+        if (pdb && pdb.success && pdb.data && pdb.data.player) {
+            const p = pdb.data.player;
+            const officialName = p.username || username;
+            const uuid = p.id || p.raw_id;
+            const skinUrl = p.skin_texture;
+            if (skinUrl) {
+                const dataUrl = await downloadAsBase64(skinUrl);
+                if (dataUrl) {
+                    return {
+                        success: true,
+                        username: officialName,
+                        uuid: uuid,
+                        skinUrl: skinUrl,
+                        dataUrl: dataUrl,
+                        model: 'default'
+                    };
+                }
+            }
+        }
+    } catch (e) {}
+
+    // 3. Fallback a Ashcon
+    try {
+        const ash = await fetchJson(`https://api.ashcon.app/mojang/v2/user/${encodeURIComponent(username)}`);
+        if (ash && ash.textures && ash.textures.skin) {
+            const skinUrl = ash.textures.skin.url;
+            const model = ash.textures.skin.model === 'slim' ? 'slim' : 'default';
+            const dataUrl = await downloadAsBase64(skinUrl);
+            if (dataUrl) {
+                return {
+                    success: true,
+                    username: ash.username || username,
+                    uuid: ash.uuid,
+                    skinUrl: skinUrl,
+                    dataUrl: dataUrl,
+                    model: model
+                };
+            }
+        }
+    } catch (e) {}
+
+    return {
+        success: false,
+        error: `No se encontró ningún jugador con el nombre "${username}" o no tiene skin activa.`
     };
 });
 

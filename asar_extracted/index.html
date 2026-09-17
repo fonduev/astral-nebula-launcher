@@ -6976,6 +6976,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                   <span id="wardrobe-count-badge" style="font-size:0.7rem; font-weight:700; color:#c084fc; background:rgba(168,85,247,0.12); border:1px solid rgba(168,85,247,0.25); padding:3px 10px; border-radius:12px;">0 atuendos</span>
+                  <button class="btn btn-secondary btn-sm" style="font-size:0.75rem; border-radius:8px; display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; font-weight:700; cursor:pointer;" onclick="openSkinStealerModal()">
+                    <span>🔍 Buscar Jugador</span>
+                  </button>
                   <button class="btn btn-primary btn-sm" style="font-size:0.75rem; border-radius:8px; display:flex; align-items:center; gap:6px; background:linear-gradient(135deg,#a855f7,#6366f1); font-weight:700;" onclick="selectSkinFile()">
                     <span>➕ Añadir Skin</span>
                   </button>
@@ -7028,7 +7031,7 @@ function getSavedGlobalBlur() {
     const localVal = localStorage.getItem('nebula_bg_blur');
     if (localVal !== null) return parseInt(localVal, 10);
   } catch(e) {}
-  return 0;
+  return 0; // Por defecto 0px: fondos 100% nítidos sin desenfoque
 }
 
 function applyGlobalBlur(blurPx) {
@@ -7045,18 +7048,44 @@ function applyGlobalBlur(blurPx) {
     styleEl.id = 'dynamic-global-blur-style';
     document.head.appendChild(styleEl);
   }
+
+  const selectors = `
+    .launcher-shell,
+    .sidebar,
+    .glass-panel,
+    .glass-card,
+    .launch-card,
+    .play-mod-card,
+    .client-card,
+    .server-card,
+    .settings-card,
+    .changelog-card,
+    .social-sidebar,
+    .social-chat,
+    .has-custom-wallpaper .launcher-shell,
+    .has-custom-wallpaper .sidebar,
+    .has-custom-wallpaper .social-chat,
+    .type-card,
+    .mod-card,
+    .sv-server-card,
+    .console-outer,
+    .updater-panel-card,
+    #social-login-card,
+    [data-theme="vangogh"] .sidebar,
+    [data-theme="vangogh"] .settings-card,
+    [data-theme="vangogh"] #main-launcher
+  `;
+
   if (blurPx === 0) {
     styleEl.innerHTML = `
-      .card, .stat-card, .sidebar, .top-bar, .modal-box, .btn-glass, .tag, .input, .select,
-      .server-card, .version-item, .mod-item, .category-badge, .log-console, .console-box {
+      ${selectors} {
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
       }
     `;
   } else {
     styleEl.innerHTML = `
-      .card, .stat-card, .sidebar, .top-bar, .modal-box, .btn-glass, .tag, .input, .select,
-      .server-card, .version-item, .mod-item, .category-badge, .log-console, .console-box {
+      ${selectors} {
         backdrop-filter: blur(${blurPx}px) !important;
         -webkit-backdrop-filter: blur(${blurPx}px) !important;
       }
@@ -7741,9 +7770,9 @@ async function completeLogin() {
   if (settings.javaPath) document.getElementById('javaPathDisp').textContent=settings.javaPath;
   if (settings.gameDir) document.getElementById('gameDirDisp').textContent=settings.gameDir;
   
-  if (document.getElementById('sUpdateUrl')) document.getElementById('sUpdateUrl').value = settings.updateUrl || '';
-  if (document.getElementById('sAdsUrl')) document.getElementById('sAdsUrl').value = settings.adsUrl || '';
-  if (document.getElementById('personalizedAdsToggle')) document.getElementById('personalizedAdsToggle').checked = !!settings.personalizedAds;
+  const sUp = document.getElementById('sUpdateUrl'); if (sUp) sUp.value = settings.updateUrl || '';
+  const sAds = document.getElementById('sAdsUrl'); if (sAds) sAds.value = settings.adsUrl || '';
+  const pAds = document.getElementById('personalizedAdsToggle'); if (pAds) pAds.checked = !!settings.personalizedAds;
   
   if (document.getElementById('sPrependCommand')) document.getElementById('sPrependCommand').value = settings.prependCommand || '';
   if (document.getElementById('sJvmArgs')) document.getElementById('sJvmArgs').value = settings.jvmArgs || '';
@@ -8026,20 +8055,8 @@ function onCustomBgSelected(input) {
   }
 }
 
-function clearCustomBgImage() {
-  if (typeof window.clearCustomBgImage === 'function' && window.clearCustomBgImage !== clearCustomBgImage) {
-    window.clearCustomBgImage();
-  } else {
-    // Fallback directo
-    if (settings && settings.customTheme) {
-      settings.customTheme.bgImage = null;
-      ipc.send('save-settings', settings);
-    }
-    localStorage.removeItem('nebula_custom_bg_path');
-    if (typeof applyCustomBgMediaToDOM === 'function') applyCustomBgMediaToDOM('');
-  }
-  toast('🗑️ Fondo personalizado eliminado', 'info');
-}
+// Delegated to primary clearCustomBgImage defined at top
+// (toast already handled by window.clearCustomBgImage)
 
 // ═══════ TABS ═══════
 // Mapeo de tab-id → texto parcial en el nav-item (para evitar bugs con traducción)
@@ -10002,9 +10019,14 @@ function toggleHideToTrayOnMinimize(checked) {
 }
 
 function saveSettings() {
-  settings.ram = parseInt(document.getElementById('sRamSlider').value);
+  const ramEl = document.getElementById('sRamSlider');
+  if (ramEl) settings.ram = parseInt(ramEl.value);
   settings.theme = currentTheme;
-  settings.updateUrl = document.getElementById('sUpdateUrl').value.trim();
+  
+  const updateUrlEl = document.getElementById('sUpdateUrl');
+  if (updateUrlEl && updateUrlEl.value) {
+    settings.updateUrl = updateUrlEl.value.trim();
+  }
   
   const minimizeTog = document.getElementById('minimizeToTrayOnGameLaunchToggle');
   if (minimizeTog) settings.minimizeToTrayOnGameLaunch = minimizeTog.checked;
@@ -10013,17 +10035,22 @@ function saveSettings() {
 
   const sFbApiKey = document.getElementById('sFbApiKey');
   if (sFbApiKey) {
+    const projEl = document.getElementById('sFbProjectId');
+    const authEl = document.getElementById('sFbAuthDomain');
+    const appEl = document.getElementById('sFbAppId');
     settings.socialFirebase = {
       apiKey: sFbApiKey.value.trim(),
-      projectId: document.getElementById('sFbProjectId').value.trim(),
-      authDomain: document.getElementById('sFbAuthDomain').value.trim(),
-      appId: document.getElementById('sFbAppId').value.trim()
+      projectId: projEl ? projEl.value.trim() : (settings.socialFirebase?.projectId || ''),
+      authDomain: authEl ? authEl.value.trim() : (settings.socialFirebase?.authDomain || ''),
+      appId: appEl ? appEl.value.trim() : (settings.socialFirebase?.appId || '')
     };
   }
   
   // Guardar opciones avanzadas
-  settings.prependCommand = document.getElementById('sPrependCommand').value.trim();
-  settings.jvmArgs = document.getElementById('sJvmArgs').value.trim();
+  const prependEl = document.getElementById('sPrependCommand');
+  if (prependEl) settings.prependCommand = prependEl.value.trim();
+  const jvmEl = document.getElementById('sJvmArgs');
+  if (jvmEl) settings.jvmArgs = jvmEl.value.trim();
   
   ipc.send('save-settings', settings);
   toast('Guardado. Inicializando base de datos social...', 'success');
@@ -12228,7 +12255,7 @@ function updateMyStatus(status, activity) {
     </div>
   </div>
 
-  <!-- Modal: Editor de Mods del Modpack (Estilo TLauncher Premium) -->
+  <!-- Modal: Editor de Mods del Modpack (Nebula Mods Studio) -->
   <div id="modpack-editor-modal" class="modal-overlay" style="display:none; -webkit-app-region: no-drag;">
     <div class="modal-content" style="max-width: 1050px; width: 95%; height: 90vh; text-align: left; align-items: stretch; gap: 14px; padding: 25px; overflow: hidden; display: flex; flex-direction: column;">
       
@@ -12701,7 +12728,7 @@ function updateMyStatus(status, activity) {
           <div>
             <div style="font-size:0.75rem; font-weight:800; color:#c084fc; letter-spacing:0.04em; display:flex; align-items:center; gap:6px;">
               MODO FUSIÓN (2 SKINS ACTIVAS)
-              <span style="font-size:0.62rem; background:rgba(168,85,247,0.25); color:#e9d5ff; padding:2px 6px; border-radius:6px; font-weight:700;">ESTILO NOVASKIN</span>
+              <span style="font-size:0.62rem; background:rgba(168,85,247,0.25); color:#e9d5ff; padding:2px 6px; border-radius:6px; font-weight:700;">FUSIÓN MULTICAPA</span>
             </div>
             <div style="font-size:0.68rem; color:var(--text-dim);">Usa el Borrador (E) sobre la ropa para descubrir la piel/skin base debajo en 3D.</div>
           </div>
@@ -12725,35 +12752,194 @@ function updateMyStatus(status, activity) {
       </div>
 
       <!-- Modal de Selección de 2da Skin (Desde PC o Clóset) -->
-      <div id="se-overlay-picker-modal" class="modal-overlay" style="display:none; z-index:10005; background:rgba(0,0,0,0.75); -webkit-app-region:no-drag; align-items:center; justify-content:center;">
-        <div class="glass-card" style="width:480px; max-width:92vw; background:rgba(18,15,32,0.96); border:1.5px solid rgba(168,85,247,0.3); border-radius:18px; padding:22px; box-shadow:0 12px 40px rgba(0,0,0,0.6); display:flex; flex-direction:column; gap:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="font-size:0.95rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
-              <span>🧥</span> Sobreponer Segunda Skin
+      <div id="se-overlay-picker-modal" class="modal-overlay" style="display:none; z-index:10005; background:rgba(0,0,0,0.8); -webkit-app-region:no-drag; align-items:center; justify-content:center;">
+        <div class="glass-card" style="width:640px; max-width:94vw; max-height:88vh; background:rgba(18,15,32,0.97); border:1.5px solid rgba(168,85,247,0.35); border-radius:20px; padding:22px; box-shadow:0 16px 50px rgba(0,0,0,0.7); display:flex; flex-direction:column; gap:14px; overflow:hidden;">
+          
+          <!-- Cabecera del Modal -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.08);">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:1.4rem;">🧥</span>
+              <div>
+                <div style="font-size:1rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
+                  Sobreponer Segunda Skin <span style="font-size:0.65rem; background:linear-gradient(135deg,#a855f7,#6366f1); padding:2px 8px; border-radius:8px; font-weight:800;">ESTUDIO DE CAPAS</span>
+                </div>
+                <div style="font-size:0.7rem; color:var(--text-dim); margin-top:2px;">Elige una prenda, busca un jugador o sube tu propia ropa para combinarla.</div>
+              </div>
             </div>
-            <button class="se-close-btn" style="position:static; width:26px; height:26px; font-size:0.75rem;" onclick="closeAddOverlaySkinModal()">✕</button>
+            <button class="se-close-btn" style="position:static; width:28px; height:28px; font-size:0.8rem;" onclick="closeAddOverlaySkinModal()">✕</button>
           </div>
-          <div style="font-size:0.74rem; color:var(--text-dim); line-height:1.4;">
-            Elige de dónde quieres cargar la segunda skin (traje, ropa, chaqueta o accesorios). Se colocará sobre tu skin actual y podrás borrar con el <strong>Borrador</strong> las partes que no quieras.
-          </div>
-          <div style="display:flex; gap:10px;">
-            <button class="btn btn-primary" style="flex:1; height:42px; border-radius:10px; font-size:0.8rem; font-weight:700; background:linear-gradient(135deg,#a855f7,#6366f1); display:flex; align-items:center; justify-content:center; gap:8px;" onclick="triggerOverlayFileInput()">
-              <span>📁</span> Subir archivo PNG de mi PC
+
+          <!-- Pestañas del Selector -->
+          <div style="display:flex; gap:6px; background:rgba(255,255,255,0.03); padding:4px; border-radius:12px; border:1px solid rgba(255,255,255,0.06);">
+            <button class="se-seg-btn active" id="ov-tab-btn-catalog" onclick="switchOverlayModalTab('catalog')" style="flex:1; padding:7px 4px; font-size:0.75rem; font-weight:700; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:5px;">
+              <span>🧥</span> Catálogo de Ropa
+            </button>
+            <button class="se-seg-btn" id="ov-tab-btn-wardrobe" onclick="switchOverlayModalTab('wardrobe')" style="flex:1; padding:7px 4px; font-size:0.75rem; font-weight:700; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:5px;">
+              <span>👔</span> Mi Clóset
+            </button>
+            <button class="se-seg-btn" id="ov-tab-btn-stealer" onclick="switchOverlayModalTab('stealer')" style="flex:1; padding:7px 4px; font-size:0.75rem; font-weight:700; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:5px;">
+              <span>🔍</span> Buscar Jugador
+            </button>
+            <button class="se-seg-btn" id="ov-tab-btn-upload" onclick="switchOverlayModalTab('upload')" style="flex:1; padding:7px 4px; font-size:0.75rem; font-weight:700; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:5px;">
+              <span>📁</span> Archivo de PC
             </button>
           </div>
-          <div style="margin-top:4px;">
-            <div style="font-size:0.72rem; font-weight:700; color:var(--text); margin-bottom:8px;">O elige un atuendo de tu Clóset de Ropa:</div>
-            <div id="se-overlay-wardrobe-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(90px, 1fr)); gap:8px; max-height:180px; overflow-y:auto; padding:2px;">
-              <!-- Miniaturas del clóset cargadas dinámicamente -->
+
+          <!-- Contenido Pestaña 1: Catálogo de Ropa -->
+          <div id="ov-view-catalog" style="display:flex; flex-direction:column; gap:10px; flex:1; overflow-y:auto; min-height:280px; max-height:360px;">
+            <!-- Filtros de Categoría -->
+            <div style="display:flex; gap:6px; flex-wrap:wrap; padding-bottom:4px;">
+              <button class="se-seg-btn active" id="cat-filter-all" onclick="filterClothingCatalog('all')" style="font-size:0.68rem; padding:3px 10px; border-radius:10px;">🌟 Todas</button>
+              <button class="se-seg-btn" id="cat-filter-hoodies" onclick="filterClothingCatalog('hoodies')" style="font-size:0.68rem; padding:3px 10px; border-radius:10px;">🧥 Sudaderas</button>
+              <button class="se-seg-btn" id="cat-filter-suits" onclick="filterClothingCatalog('suits')" style="font-size:0.68rem; padding:3px 10px; border-radius:10px;">🤵 Trajes</button>
+              <button class="se-seg-btn" id="cat-filter-acc" onclick="filterClothingCatalog('acc')" style="font-size:0.68rem; padding:3px 10px; border-radius:10px;">🎧 Accesorios</button>
+              <button class="se-seg-btn" id="cat-filter-armor" onclick="filterClothingCatalog('armor')" style="font-size:0.68rem; padding:3px 10px; border-radius:10px;">⚔️ Armaduras</button>
             </div>
-            <div id="se-overlay-wardrobe-empty" style="display:none; text-align:center; padding:16px; color:var(--text-dim); font-size:0.7rem;">
+            <!-- Cuadrícula de Prendas -->
+            <div id="se-catalog-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:10px; padding:2px;">
+              <!-- Se inyecta dinámicamente -->
+            </div>
+          </div>
+
+          <!-- Contenido Pestaña 2: Mi Clóset -->
+          <div id="ov-view-wardrobe" style="display:none; flex-direction:column; gap:8px; flex:1; overflow-y:auto; min-height:280px; max-height:360px;">
+            <div style="font-size:0.72rem; color:var(--text-dim);">Selecciona cualquier atuendo de tu armario para sobreponerlo como segunda capa:</div>
+            <div id="se-overlay-wardrobe-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(105px, 1fr)); gap:10px; padding:2px;">
+              <!-- Cargado dinámicamente -->
+            </div>
+            <div id="se-overlay-wardrobe-empty" style="display:none; text-align:center; padding:32px 16px; color:var(--text-dim); font-size:0.75rem;">
               No tienes atuendos guardados en el clóset aún.
             </div>
           </div>
+
+          <!-- Contenido Pestaña 3: Buscar Jugador -->
+          <div id="ov-view-stealer" style="display:none; flex-direction:column; gap:12px; flex:1; overflow-y:auto; min-height:280px; max-height:360px;">
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="ov-stealer-input" placeholder="Nick de Minecraft (ej: Spreen, Dream, Technoblade)..." style="flex:1; height:40px; border-radius:10px; background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.12); color:#fff; padding:0 14px; font-size:0.82rem; font-family:inherit; outline:none;" onkeydown="if(event.key==='Enter') executeOverlayPlayerSearch()">
+              <button class="btn btn-primary" style="height:40px; padding:0 18px; border-radius:10px; font-size:0.8rem; font-weight:700; background:linear-gradient(135deg,#a855f7,#6366f1); display:flex; align-items:center; gap:6px;" onclick="executeOverlayPlayerSearch()">
+                <span>🔍 Buscar</span>
+              </button>
+            </div>
+            <!-- Chips sugeridos -->
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              <span style="font-size:0.68rem; color:var(--text-dim); font-weight:700;">Populares:</span>
+              <button class="se-seg-btn" style="font-size:0.65rem; padding:2px 8px; border-radius:6px;" onclick="setOverlayStealerQuery('Spreen')">Spreen</button>
+              <button class="se-seg-btn" style="font-size:0.65rem; padding:2px 8px; border-radius:6px;" onclick="setOverlayStealerQuery('Dream')">Dream</button>
+              <button class="se-seg-btn" style="font-size:0.65rem; padding:2px 8px; border-radius:6px;" onclick="setOverlayStealerQuery('Technoblade')">Technoblade</button>
+              <button class="se-seg-btn" style="font-size:0.65rem; padding:2px 8px; border-radius:6px;" onclick="setOverlayStealerQuery('ElMariana')">ElMariana</button>
+              <button class="se-seg-btn" style="font-size:0.65rem; padding:2px 8px; border-radius:6px;" onclick="setOverlayStealerQuery('Roier')">Roier</button>
+            </div>
+            <!-- Resultado de búsqueda en overlay -->
+            <div id="ov-stealer-result" style="display:none; align-items:center; gap:16px; background:rgba(255,255,255,0.03); border:1.5px solid rgba(168,85,247,0.3); border-radius:14px; padding:12px 16px; margin-top:6px;">
+              <canvas id="ov-stealer-canvas" style="width:50px; height:80px; image-rendering:pixelated; background:rgba(0,0,0,0.25); border-radius:8px; border:1px solid rgba(255,255,255,0.08);"></canvas>
+              <div style="flex:1;">
+                <div id="ov-stealer-name" style="font-size:0.95rem; font-weight:800; color:#fff;">Player</div>
+                <div id="ov-stealer-model" style="font-size:0.68rem; color:#c084fc; font-weight:700; margin-top:2px;">Classic (4px)</div>
+                <div style="font-size:0.7rem; color:var(--text-dim); margin-top:4px;">Listo para sobreponer sobre tu skin y borrar partes.</div>
+              </div>
+              <button class="btn btn-primary btn-sm" style="font-size:0.75rem; font-weight:700; background:linear-gradient(135deg,#a855f7,#6366f1); padding:8px 14px; border-radius:8px;" onclick="applyOverlayFromStealer()">
+                <span>✨ Sobreponer Esta Skin</span>
+              </button>
+            </div>
+            <div id="ov-stealer-loading" style="display:none; text-align:center; padding:24px; color:var(--text-dim); font-size:0.78rem;">
+              <span>⏳ Buscando skin en servidores oficiales de Minecraft...</span>
+            </div>
+          </div>
+
+          <!-- Contenido Pestaña 4: Archivo de PC -->
+          <div id="ov-view-upload" style="display:none; flex-direction:column; gap:12px; flex:1; align-items:center; justify-content:center; padding:20px; border:2px dashed rgba(168,85,247,0.3); border-radius:14px; background:rgba(255,255,255,0.01);">
+            <span style="font-size:2.4rem;">📁</span>
+            <div style="font-size:0.86rem; font-weight:700; color:#fff;">Carga un archivo de skin desde tu ordenador</div>
+            <div style="font-size:0.72rem; color:var(--text-dim); text-align:center; max-width:320px;">
+              Formato compatible: PNG de 64x64 o 64x32. Se colocará sobre tu skin actual.
+            </div>
+            <button class="btn btn-primary" style="height:40px; padding:0 24px; border-radius:10px; font-size:0.8rem; font-weight:700; background:linear-gradient(135deg,#a855f7,#6366f1); margin-top:6px;" onclick="triggerOverlayFileInput()">
+              Seleccionar Archivo .PNG
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <!-- 🔍 MODAL GLOBAL: ROBADOR Y BUSCADOR DE SKINS POR NICK (SKIN STEALER) -->
+      <!-- ═══════════════════════════════════════════════════════════════════ -->
+      <div id="skin-stealer-modal" class="modal-overlay" style="display:none; z-index:10010; background:rgba(0,0,0,0.8); -webkit-app-region:no-drag; align-items:center; justify-content:center;">
+        <div class="glass-card" style="width:520px; max-width:92vw; background:rgba(18,15,32,0.98); border:1.5px solid rgba(168,85,247,0.35); border-radius:20px; padding:24px; box-shadow:0 16px 50px rgba(0,0,0,0.7); display:flex; flex-direction:column; gap:16px;">
+          
+          <!-- Cabecera -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.08);">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:1.5rem;">🔍</span>
+              <div>
+                <div style="font-size:1.05rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
+                  Buscador de Skins por Jugador
+                  <span style="font-size:0.65rem; background:rgba(168,85,247,0.25); color:#e9d5ff; padding:2px 8px; border-radius:8px; font-weight:800;">OFICIAL MOJANG</span>
+                </div>
+                <div style="font-size:0.7rem; color:var(--text-dim); margin-top:2px;">Escribe el nick de cualquier jugador para obtener su skin al instante.</div>
+              </div>
+            </div>
+            <button class="se-close-btn" style="position:static; width:28px; height:28px; font-size:0.8rem;" onclick="closeSkinStealerModal()">✕</button>
+          </div>
+
+          <!-- Barra de Búsqueda -->
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="stealer-global-input" placeholder="Escribe un nick (ej: Spreen, Dream, Technoblade)..." style="flex:1; height:42px; border-radius:10px; background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.12); color:#fff; padding:0 14px; font-size:0.85rem; font-family:inherit; outline:none;" onkeydown="if(event.key==='Enter') executeGlobalSkinSearch()">
+            <button class="btn btn-primary" style="height:42px; padding:0 20px; border-radius:10px; font-size:0.82rem; font-weight:700; background:linear-gradient(135deg,#a855f7,#6366f1); display:flex; align-items:center; gap:6px;" onclick="executeGlobalSkinSearch()">
+              <span>🔍 Buscar</span>
+            </button>
+          </div>
+
+          <!-- Chips de Jugadores Populares -->
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span style="font-size:0.68rem; color:var(--text-dim); font-weight:700;">Sugerencias:</span>
+            <button class="se-seg-btn" style="font-size:0.66rem; padding:2px 8px; border-radius:6px;" onclick="setGlobalStealerQuery('Spreen')">Spreen</button>
+            <button class="se-seg-btn" style="font-size:0.66rem; padding:2px 8px; border-radius:6px;" onclick="setGlobalStealerQuery('Dream')">Dream</button>
+            <button class="se-seg-btn" style="font-size:0.66rem; padding:2px 8px; border-radius:6px;" onclick="setGlobalStealerQuery('Technoblade')">Technoblade</button>
+            <button class="se-seg-btn" style="font-size:0.66rem; padding:2px 8px; border-radius:6px;" onclick="setGlobalStealerQuery('ElMariana')">ElMariana</button>
+            <button class="se-seg-btn" style="font-size:0.66rem; padding:2px 8px; border-radius:6px;" onclick="setGlobalStealerQuery('Roier')">Roier</button>
+            <button class="se-seg-btn" style="font-size:0.66rem; padding:2px 8px; border-radius:6px;" onclick="setGlobalStealerQuery('Vegetta777')">Vegetta777</button>
+          </div>
+
+          <!-- Loader de Búsqueda -->
+          <div id="stealer-global-loading" style="display:none; text-align:center; padding:30px 16px; color:var(--text-dim); font-size:0.8rem;">
+            <span>⏳ Buscando jugador en los servidores de Minecraft...</span>
+          </div>
+
+          <!-- Tarjeta de Resultado -->
+          <div id="stealer-global-result" style="display:none; background:rgba(255,255,255,0.03); border:1.5px solid rgba(168,85,247,0.3); border-radius:16px; padding:16px; gap:16px; align-items:center;">
+            <canvas id="stealer-global-canvas" style="width:70px; height:110px; image-rendering:pixelated; background:rgba(0,0,0,0.3); border-radius:10px; border:1px solid rgba(255,255,255,0.08);"></canvas>
+            
+            <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span id="stealer-res-name" style="font-size:1.1rem; font-weight:800; color:#fff;">Player</span>
+                <span id="stealer-res-model" style="font-size:0.62rem; font-weight:800; padding:2px 8px; border-radius:6px; background:rgba(168,85,247,0.25); color:#c084fc;">Steve (4px)</span>
+              </div>
+              <div id="stealer-res-uuid" style="font-size:0.65rem; color:var(--text-dim); font-family:monospace; word-break:break-all;">UUID</div>
+
+              <!-- Botones de Acción -->
+              <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+                <button class="btn btn-primary btn-sm" style="font-size:0.72rem; font-weight:700; background:linear-gradient(135deg,#a855f7,#6366f1); padding:6px 12px; border-radius:8px;" onclick="saveStealerSkinToWardrobe()">
+                  <span>🧥 Guardar en Clóset</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" style="font-size:0.72rem; font-weight:700; background:rgba(255,255,255,0.08); padding:6px 12px; border-radius:8px;" onclick="equipStealerSkinDirect()">
+                  <span>⚡ Equipar</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" style="font-size:0.72rem; font-weight:700; background:rgba(255,255,255,0.08); padding:6px 12px; border-radius:8px;" onclick="editStealerSkinInTaller()">
+                  <span>✏️ Editar en Taller</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" style="font-size:0.72rem; font-weight:700; background:rgba(255,255,255,0.08); padding:6px 12px; border-radius:8px;" onclick="downloadStealerSkinPng()">
+                  <span>⬇️ Descargar PNG</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
       <!-- Cuerpo Principal del Editor: 3 Columnas -->
+      
       <div class="se-main-layout">
         <!-- PANEL IZQUIERDO: Herramientas y Paleta de Colores -->
         <div class="se-left-panel">
@@ -13691,96 +13877,14 @@ function updateMyStatus(status, activity) {
     
     
     
-    // ═══════ UNIVERSAL BACKGROUND & PANEL BLUR CONTROL ═══════
-    function getSavedGlobalBlur() {
-      if (typeof settings !== 'undefined' && settings) {
-        if (settings.bgBlur !== undefined) return parseInt(settings.bgBlur, 10);
-        if (settings.customTheme && settings.customTheme.blur !== undefined) return parseInt(settings.customTheme.blur, 10);
-      }
-      const localVal = localStorage.getItem('nebula_bg_blur');
-      if (localVal !== null) return parseInt(localVal, 10);
-      return 0; // Por defecto 0px: fondos 100% nitidos y limpios sin desenfoque
-    }
+    // ═══════ UNIVERSAL BACKGROUND & PANEL BLUR CONTROL (Defined at top) ═══════
 
-    function applyGlobalBlur(blurPx) {
-      blurPx = parseInt(blurPx, 10);
-      if (isNaN(blurPx) || blurPx < 0) blurPx = 0;
-      if (blurPx > 50) blurPx = 50;
-
-      // Variables CSS globales
-      document.documentElement.style.setProperty('--bg-blur', `${blurPx}px`);
-      document.documentElement.style.setProperty('--custom-blur', `${blurPx}px`);
-
-      // Inyectar o actualizar estilo dinamico que controla todos los paneles
-      let styleEl = document.getElementById('dynamic-global-blur-style');
-      if (!styleEl) {
-        styleEl = document.createElement('style');
-        styleEl.id = 'dynamic-global-blur-style';
-        document.head.appendChild(styleEl);
-      }
-
-      const selectors = `
-        .launcher-shell,
-        .sidebar,
-        .glass-panel,
-        .glass-card,
-        .launch-card,
-        .play-mod-card,
-        .client-card,
-        .server-card,
-        .settings-card,
-        .changelog-card,
-        .social-sidebar,
-        .social-chat,
-        .has-custom-wallpaper .launcher-shell,
-        .has-custom-wallpaper .sidebar,
-        .has-custom-wallpaper .social-chat,
-        .type-card,
-        .mod-card,
-        .sv-server-card,
-        .console-outer,
-        .updater-panel-card,
-        #social-login-card,
-        [data-theme="vangogh"] .sidebar,
-        [data-theme="vangogh"] .settings-card,
-        [data-theme="vangogh"] #main-launcher
-      `;
-
-      if (blurPx === 0) {
-        styleEl.innerHTML = `
-          ${selectors} {
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-          }
-        `;
-      } else {
-        styleEl.innerHTML = `
-          ${selectors} {
-            backdrop-filter: blur(${blurPx}px) saturate(140%) !important;
-            -webkit-backdrop-filter: blur(${blurPx}px) saturate(140%) !important;
-          }
-        `;
-      }
-
-      // Actualizar displays visuales
-      const disp = document.getElementById('globalBlurValDisplay');
-      if (disp) {
-        disp.textContent = blurPx === 0 ? '0px (Sin desenfoque)' : `${blurPx}px`;
-      }
-      const customVal = document.getElementById('customBlurVal');
-      if (customVal) {
-        customVal.textContent = `${blurPx}px`;
-      }
-
-      // Sincronizar sliders
-      const sld1 = document.getElementById('globalBlurSlider');
-      if (sld1 && parseInt(sld1.value, 10) !== blurPx) sld1.value = blurPx;
-      const sld2 = document.getElementById('customBlurInp');
-      if (sld2 && parseInt(sld2.value, 10) !== blurPx) sld2.value = blurPx;
-    }
-
+    
     function onGlobalBlurSliderInput(val) {
-      applyGlobalBlur(val);
+      const blurVal = parseInt(val, 10) || 0;
+      applyGlobalBlur(blurVal);
+      const lbl = document.getElementById('global-blur-val');
+      if (lbl) lbl.textContent = `${blurVal}px`;
     }
 
     function onGlobalBlurSliderChange(val) {
@@ -13788,16 +13892,13 @@ function updateMyStatus(status, activity) {
       applyGlobalBlur(blurPx);
       try {
         localStorage.setItem('nebula_bg_blur', blurPx);
-        if (typeof settings !== 'undefined' && settings) {
-          settings.bgBlur = blurPx;
-          if (!settings.customTheme) settings.customTheme = {};
-          settings.customTheme.blur = blurPx;
-          ipc.send('save-settings', settings);
-        }
-        toast(blurPx === 0 ? '✨ Fondos nítidos (sin desenfoque)' : `✨ Desenfoque ajustado a ${blurPx}px`);
-      } catch (e) {
-        console.warn('Error saving blur setting:', e);
+      } catch (e) {}
+      if (typeof settings !== 'undefined' && settings) {
+        settings.bgBlur = blurPx;
+        if (typeof ipc !== 'undefined') ipc.send('save-settings', settings);
       }
+      const lbl = document.getElementById('global-blur-val');
+      if (lbl) lbl.textContent = `${blurPx}px`;
     }
 
     function resetGlobalBlur() {
@@ -14747,7 +14848,7 @@ function updateMyStatus(status, activity) {
         const skinTitle = document.getElementById('profile-skin-section-title');
         if (skinTitle) skinTitle.textContent = 'CAMBIAR SKIN EN MINECRAFT.NET';
         const skinSub = document.getElementById('profile-skin-section-sub');
-        if (skinSub) skinSub.textContent = 'Sube tu skin en formato .png. Se actualizará directamente en tu cuenta oficial de Mojang / Minecraft.net, igual que en Lunar Client.';
+        if (skinSub) skinSub.textContent = 'Sube tu skin en formato .png. Se actualizará directamente en tu cuenta oficial de Mojang / Minecraft.net, de forma automática.';
         const confirmBtn = document.getElementById('skin-upload-confirm-btn');
         if (confirmBtn) confirmBtn.textContent = '📤 Subir a Minecraft.net';
         const copyLabel = document.getElementById('skin-url-copy-label');
@@ -15598,7 +15699,8 @@ async function loadNebulaProfileData() {
     }
 
     function selectCapeFile() {
-      document.getElementById('cape-file-input').click();
+      const inp = document.getElementById('cape-file-input');
+      if (inp) inp.click();
     }
 
     function handleCapeFileSelect(e) {
@@ -16926,6 +17028,32 @@ async function loadNebulaProfileData() {
       compositeEditorCanvases();
     }
 
+    
+    function loadEditorPreset(preset) {
+      const sel = document.getElementById('se-preset-select');
+      if (preset === 'profile') {
+        const activeSkin = (typeof authData !== 'undefined' && authData && authData.skinUrl)
+          ? authData.skinUrl
+          : 'assets/steve.png';
+        loadTextureToEditor(activeSkin);
+        toast('👤 Tu skin actual cargada en el taller', 'info');
+      } else if (preset === 'steve') {
+        loadTextureToEditor('assets/steve.png');
+        setEditorModel('default');
+        toast('🧍 Steve clásico cargado', 'info');
+      } else if (preset === 'alex') {
+        loadTextureToEditor('assets/alex.png');
+        setEditorModel('slim');
+        toast('🧍 Alex Slim cargada', 'info');
+      } else if (preset === 'blank') {
+        confirmClearEditor();
+      } else if (preset === 'file') {
+        const inp = document.getElementById('se-import-file-input');
+        if (inp) inp.click();
+      }
+      if (sel) sel.selectedIndex = 0;
+    }
+
     function confirmClearEditor() {
       if (!confirm('¿Seguro que deseas limpiar el lienzo? Se borrarán los trazos actuales.')) return;
       pushEditorUndoState();
@@ -17018,10 +17146,336 @@ async function loadNebulaProfileData() {
       toast(target === 'overlay' ? 'Editando Skin Sobrepuesta (Ropa)' : 'Editando Skin Base (Cuerpo)', 'info');
     }
 
-    function openAddOverlaySkinModal() {
+        // ══════════════════════════════════════════════════════════════════════
+    // 👗 CATÁLOGO DE PRENDAS Y ACCESORIOS (CLOTHING CATALOG ENGINE)
+    // ══════════════════════════════════════════════════════════════════════
+    const CLOTHING_CATALOG = [{"id": "acc_headphones", "name": "Auriculares Gaming", "category": "acc", "icon": "🎧", "file": "acc_headphones.png", "desc": "Cascos gamer con almohadillas y micrófono neón."}, {"id": "acc_crown", "name": "Corona Real Dorada", "category": "acc", "icon": "👑", "file": "acc_crown.png", "desc": "Corona dorada con rubí y esmeralda incrustados."}, {"id": "acc_sunglasses", "name": "Gafas de Sol Oscuras", "category": "acc", "icon": "🕶️", "file": "acc_sunglasses.png", "desc": "Lentes oscuros estilo urbano con reflejo."}, {"id": "acc_bandana", "name": "Bandana Ninja Táctica", "category": "acc", "icon": "🥷", "file": "acc_bandana.png", "desc": "Máscara que cubre la mitad inferior del rostro."}, {"id": "acc_cat_ears", "name": "Orejas de Gato Kawaii", "category": "acc", "icon": "🐱", "file": "acc_cat_ears.png", "desc": "Diadema con orejitas felinas rosas y negras."}, {"id": "suit_tuxedo", "name": "Smoking / Tuxedo", "category": "suits", "icon": "🤵", "file": "suit_tuxedo.png", "desc": "Traje de gala negro con camisa blanca y pajarita roja."}, {"id": "suit_executive", "name": "Traje Ejecutivo Azul", "category": "suits", "icon": "👔", "file": "suit_executive.png", "desc": "Traje formal azul marino con corbata carmesí."}, {"id": "hoodie_nebula", "name": "Hoodie Cósmico Nebula", "category": "hoodies", "icon": "💜", "file": "hoodie_nebula.png", "desc": "Sudadera oficial Nebula con capucha y cordones."}, {"id": "hoodie_cyberpunk", "name": "Hoodie Cyberpunk", "category": "hoodies", "icon": "🖤", "file": "hoodie_cyberpunk.png", "desc": "Sudadera oscura con líneas de neón cian."}, {"id": "jacket_leather", "name": "Chaqueta de Cuero", "category": "hoodies", "icon": "🧥", "file": "jacket_leather.png", "desc": "Chaqueta vintage de cuero con cuello de borrego."}, {"id": "armor_knight", "name": "Pechera de Caballero", "category": "armor", "icon": "⚔️", "file": "armor_knight.png", "desc": "Armadura de placas de acero con hombreras."}, {"id": "armor_assassin", "name": "Atuendo de Asesino", "category": "armor", "icon": "🗡️", "file": "armor_assassin.png", "desc": "Traje táctico con correas, faja roja y guardabrazos."}];
+    const CLOTHING_BASE64 = {"acc_bandana": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAeUlEQVR4nO3SMQqDQBAF0N0T2KRIKVgLuYHYpMl509iINxBSB7a0sMkJEggYlKQOqO91f6aZGSYEAACAHYphJYqyfs7z/dbGzR7gmJ8+yw6pj1O+nLt37dpUX70pb+IAv2SHfPEBjzGtZnYAAAAAAAAAAAAAACD81QtekxcEd4IqBAAAAABJRU5ErkJggg==", "acc_cat_ears": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAWUlEQVR4nO3VoQ2AQAwF0IY56tiJxRgMywjsgDhyBkFAIThy7yVN/netagTtyxxLnaf+xhA/sU7zeXjN3dmXrdxlgC7k5Q1+uw0AAAAAAAAAAAAAAAAARIsOoCgVtxbQ/IQAAAAASUVORK5CYII=", "acc_crown": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAcElEQVR4nO3RMQoCQQwF0Ah2guyh5mK2HsLOI2yxleex2m1sZ2Smki3EbnB4DwKBEMgnEQDwF/J2LbViRPkj2D7k+f5swdeUWtV+Wi7l1/1v80N09rqdun70GJ095tz7BAAAAAAAAAAAAAAAAABiFG8VvzGLavwoLAAAAABJRU5ErkJggg==", "acc_headphones": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAoUlEQVR4nO3WsQkCMRQA0JyFbiEWFhZWVs7gDI7lBreD2AhOYGVhYSEWzqA2J0klgqfVneHeg0AC+ZAffsgPoeOKkInhaFK9ri/nY9GpC+ivD9VsME7z/f0UHotpNmcHAL43OvGvj+O96WkivnXx4KtyU823t5REU/G98GeW112r8a35VMK/lnP2T6BOTCiWdu0mAAAAAAAAAAAAAAAAQvIEJbVKTybHu3YAAAAASUVORK5CYII=", "acc_sunglasses": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAYElEQVR4nO3RoQ2AMBCG0esENQgEISgE+0/CHAgQ6BJEE9IJCLxn7kt+eREAAPxTipfKuSv3PY4t1W49t7vjq/az7P0wr+O0lNrxJzl3pX762QAAAAAAAAAAAAAAAEC0LkpwHC3qzv+uAAAAAElFTkSuQmCC", "armor_assassin": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABCElEQVR4nO3YT2rCQBTH8V8e2dSCeAFXBd30Ht2JuYiH8QIeQekBPIUbC121BxDBbJWIQhtFqzPBJu/7WQ0z8OYP817CSAAAAAAAAAAAAAAAoOmS2AH7/dftpfHlchF9zhAm50zOmZxLH72AazUj1LWaY1VMmrW//tT3H1gVQafr7q8NF+2iz1UKTNddvQ8/9u3BrCeXNWAyf5Lbr0B2uPbldHBxA7JSzh8PIUYdKB9maExTBc4tyk0RHG9WF8ff1PADeGm1VCdp7ICfea4qxU6lNGo0SaPnzkk6/OyTvmNPCQB3S1Rzoe8JJudMzpmcMzlnci5Vw9z6XmByzuScyblENcefoMLsAAmXPQXlTLggAAAAAElFTkSuQmCC", "armor_knight": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAA/0lEQVR4nO3YT2rCQBTH8Z8/pnfyAoW2oIJdV3DvcQSXgl1X0EIt9AK9SJeewEVLujMFQ+qEaN73A1mEGd784TGTPAkAAAAAAAAAAAAAAHRdL3fA+fP796n22dNd9jHPYQVnBWcFl9qeQNWZUTY9PB69L29edM6ZYzVoeNvX63aTNeb+4evoufoMqGv78amckhrym6pv0vpe0mFVmaptcVOBiwUXKTreTS528YXwt4AVnBWcFZybvrIGw5EuWcodsPylVjZTxzdgvJtU9FjkHhIA/q2nK1euJ9StFyR1zJ8aQcXvc1LH1K0XWMFZwVnBWcFZwVnBWcFZwbntCbTtBxPqODT/Gd6AAAAAAElFTkSuQmCC", "hoodie_cyberpunk": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAA0ElEQVR4nO3YsQ3CMBSE4cuJMhVVCloWYArWgMFgDaZgAVqKVFTpQaJFIgjHspP3f02kF+ls2dKTbQkAAAAAAAAAAAAAACxdM3Vg122e3/73/X3yMVNYwVnBWcGtSk9grGekGus5zjHo43R5f4dh+KjVxqpIiUWyZiLX4jhH6GG3/alWA+cIPV9vP9VqYAVnBeec4W3bTpa1Pu6VgxWcVZFcu1z1dbgrfBQGEFujmUttolZwVnDWQvz7XmAFZwVnBWcF12jmOAcksoJz6QmU9gIgiSiZ9qPXgwAAAABJRU5ErkJggg==", "hoodie_nebula": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAA/UlEQVR4nO3YMU7DMBjF8dcn7x3YmLgDGxNITIxchqVjF27AKRiZQDCxcQcmNoaqBwCpQ9VWKhBi05T3/0mRHEd6TiL7S2QJAAAAAAAAAAAAAAD8d6PagZOT94+vrk+fD6qP2YcVzgpnhSutgh9frtbOz46vf1Uz+vqu5pRWAz/MbzQ9nS3ak6fxsj00pWX4+cVYQ2eFc8vw+7vZ4ugyY/561pRWwatr/qfrv8vLqsUKV1p9Ao8OL9f6Xt9ut34Kd8ktQjcfflvfEFjhrHCl9S/wZh2onT/EugJgf4y05/ruJ1jhrHBWOCucFc4KZ4WzwlnhrHBl1zdQW9f9gk+6fjLdIEeHPwAAAABJRU5ErkJggg==", "jacket_leather": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAA6ElEQVR4nO3YvU0DQRTE8fFoK6ACyBzhIsipgYTAuctwTuDENTinCBORQQW0AMKSJcuysfDt+uPm/5NOp9VJc6vdpxc8CQAAAAAAAAAAAAAA9N2gduDzw933X99nrx/V/9mFFc4KZ4UrLUKni/fVe/I43Ln+T8/o6lDPscKVFqHrmx49vWg5H++8+UthhbPCuUXob+lHH8ByPq6e+fb5tXquognuq4guB3N/e6MWik6gRUXUYoWzwpXagZuNarS1BoBLM9CV6zpPsMJZ4axwVjgrnNUTx84Linri2HmBFc4KZ4XzuTdwbj/hii1oeCgV0AAAAABJRU5ErkJggg==", "suit_executive": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAA20lEQVR4nO3YPWpCQRTF8ePB3h28RoIogk0qi9QuI42tpYsQF5HVpEojSEQkjTtwA4lgYfVQ5Pl4xvP/NfMFdy4DcwdGAgAAAAAAAAAAAAAAz65174DFePF3aX3/Ob/7nlVY4axwVrh2HUEPPx9a7dbaDorTuPe91+hlqE73/eaaUdW1mmOFs8JZ4dp1Bu9/rU/tr0IPYPM6PBfBuCvwNlmW9h+NFc51BC1778vmnr4GTIuZHp0Vzk0nAABNaumfq/qfYIWzwlnhrHBWOCucFc4KZ4WzwrnpBJp2BJTTHTbn+Z14AAAAAElFTkSuQmCC", "suit_tuxedo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABJUlEQVR4nO3YsUrEQBQF0LuXKSSEIClk2WIbQcRqq5T+jV/l19habSViJSmCWAQJIYiNskFBdDG7bB4mefc0mUySO2GYPMIAIiIiIiIiIiIiIiIiIiIiMnWzvgPT+dn7X9fLp4fexzwE4RzhHOFcODQgSuZbv/n1+hYnady2n8saq1W29f6jKIGlrpoTLAatygJvlxlumqY9P42iti9JFxiaYBWcVUCRP7btxfJip2dem8p8RfxEOBcsQuv6BWNBi9A4Pt552U+2BmyMYRJoEfpV7e+v8199Q0PL8POrJYaOluHfV8BQcYwroM+JDejZ5mfGUpHffR7HU2hFZLhmGLmuPcguhHOEc4RzhHOEc4RzhHOEc4RzxATts18QTN/kH+y7X/AB5Rg9X9pu3NYAAAAASUVORK5CYII="};
+    window.currentCatalogFilter = 'all';
+
+    function renderClothingCatalog(category = 'all') {
+      window.currentCatalogFilter = category;
+      const grid = document.getElementById('se-catalog-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const items = category === 'all' ? CLOTHING_CATALOG : CLOTHING_CATALOG.filter(c => c.category === category);
+
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.style.cssText = `
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 10px 8px 8px;
+          border-radius: 12px;
+          background: rgba(255,255,255,0.03);
+          border: 1.5px solid rgba(255,255,255,0.08);
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          gap: 6px;
+          cursor: pointer;
+        `;
+
+        card.onmouseenter = () => {
+          card.style.borderColor = 'rgba(168,85,247,0.5)';
+          card.style.background = 'rgba(168,85,247,0.1)';
+          card.style.transform = 'translateY(-2px)';
+        };
+        card.onmouseleave = () => {
+          card.style.borderColor = 'rgba(255,255,255,0.08)';
+          card.style.background = 'rgba(255,255,255,0.03)';
+          card.style.transform = 'none';
+        };
+
+        // Miniatura 2D Canvas de la prenda
+        const cv = document.createElement('canvas');
+        cv.style.cssText = 'width: 48px; height: 76px; image-rendering: pixelated; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06);';
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => drawSkin2D(cv, img, false);
+        img.src = CLOTHING_BASE64[item.id] || `assets/clothing/${item.file}`;
+        card.appendChild(cv);
+
+        const titleBox = document.createElement('div');
+        titleBox.style.cssText = 'text-align:center; width:100%;';
+        const title = document.createElement('div');
+        title.style.cssText = 'font-size:0.7rem; font-weight:800; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+        title.textContent = `${item.icon} ${item.name}`;
+        titleBox.appendChild(title);
+
+        const desc = document.createElement('div');
+        desc.style.cssText = 'font-size:0.58rem; color:var(--text-dim); margin-top:2px; line-height:1.2; height:24px; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;';
+        desc.textContent = item.desc;
+        titleBox.appendChild(desc);
+        card.appendChild(titleBox);
+
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-primary btn-sm';
+        btn.style.cssText = 'width:100%; font-size:0.65rem; font-weight:800; background:linear-gradient(135deg,#a855f7,#6366f1); padding:4px 0; border-radius:6px; margin-top:auto;';
+        btn.textContent = '✨ Probar Prenda';
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          applyCatalogClothing(item.id);
+        };
+        card.appendChild(btn);
+
+        card.onclick = () => applyCatalogClothing(item.id);
+        grid.appendChild(card);
+      });
+    }
+
+    function filterClothingCatalog(cat) {
+      ['all', 'hoodies', 'suits', 'acc', 'armor'].forEach(c => {
+        const b = document.getElementById(`cat-filter-${c}`);
+        if (b) b.classList.toggle('active', c === cat);
+      });
+      renderClothingCatalog(cat);
+    }
+
+    function applyCatalogClothing(itemId) {
+      const item = CLOTHING_CATALOG.find(c => c.id === itemId);
+      const dataUrl = CLOTHING_BASE64[itemId];
+      if (!dataUrl) return;
+
+      loadSecondarySkin(dataUrl);
+      closeAddOverlaySkinModal();
+      toast(`✨ "${item ? item.name : 'Prenda'}" colocada sobre tu skin. ¡Usa el Borrador para recortar o Fusionar!`, 'success');
+    }
+
+    function switchOverlayModalTab(tab) {
+      const tabs = ['catalog', 'wardrobe', 'stealer', 'upload'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`ov-tab-btn-${t}`);
+        const view = document.getElementById(`ov-view-${t}`);
+        if (btn) btn.classList.toggle('active', t === tab);
+        if (view) view.style.display = (t === tab) ? 'flex' : 'none';
+      });
+
+      if (tab === 'catalog') renderClothingCatalog(window.currentCatalogFilter || 'all');
+      if (tab === 'wardrobe') renderOverlayWardrobeGrid();
+    }
+
+    function renderOverlayWardrobeGrid() {
+      const grid = document.getElementById('se-overlay-wardrobe-grid');
+      const empty = document.getElementById('se-overlay-wardrobe-empty');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const wardrobe = getSkinWardrobe();
+      if (wardrobe.length === 0) {
+        if (empty) empty.style.display = 'block';
+        return;
+      }
+      if (empty) empty.style.display = 'none';
+
+      wardrobe.forEach(item => {
+        const card = document.createElement('div');
+        card.style.cssText = 'display:flex; flex-direction:column; align-items:center; padding:8px 6px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); cursor:pointer; gap:4px;';
+        card.onmouseenter = () => { card.style.borderColor = 'var(--accent)'; card.style.background = 'rgba(168,85,247,0.1)'; };
+        card.onmouseleave = () => { card.style.borderColor = 'rgba(255,255,255,0.08)'; card.style.background = 'rgba(255,255,255,0.03)'; };
+
+        const cv = document.createElement('canvas');
+        cv.style.cssText = 'width:42px; height:68px; image-rendering:pixelated; border-radius:6px; background:rgba(0,0,0,0.3);';
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => drawSkin2D(cv, img, item.model === 'slim');
+        img.src = item.dataUrl || item.url;
+        card.appendChild(cv);
+
+        const lbl = document.createElement('div');
+        lbl.style.cssText = 'font-size:0.65rem; font-weight:700; color:#fff; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center;';
+        lbl.textContent = item.name;
+        card.appendChild(lbl);
+
+        card.onclick = () => {
+          loadSecondarySkin(item.dataUrl || item.url);
+          closeAddOverlaySkinModal();
+          toast(`Cargando "${item.name}" como 2da skin sobrepuesta...`, 'info');
+        };
+        grid.appendChild(card);
+      });
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // 🔍 BUSCADOR DE SKINS POR NICK / MOJANG (SKIN STEALER ENGINE)
+    // ══════════════════════════════════════════════════════════════════════
+    window.currentStealerResult = null;
+    window.currentOverlayStealerResult = null;
+
+    function openSkinStealerModal() {
+      const modal = document.getElementById('skin-stealer-modal');
+      if (!modal) return;
+      modal.style.display = 'flex';
+      const inp = document.getElementById('stealer-global-input');
+      if (inp) {
+        inp.focus();
+        inp.select();
+      }
+    }
+
+    function closeSkinStealerModal() {
+      const modal = document.getElementById('skin-stealer-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function setGlobalStealerQuery(nick) {
+      const inp = document.getElementById('stealer-global-input');
+      if (inp) inp.value = nick;
+      executeGlobalSkinSearch();
+    }
+
+    async function executeGlobalSkinSearch() {
+      const inp = document.getElementById('stealer-global-input');
+      const val = inp?.value?.trim();
+      if (!val) {
+        toast('Escribe el nick de un jugador para buscar su skin.', 'warn');
+        return;
+      }
+
+      const loading = document.getElementById('stealer-global-loading');
+      const resBox = document.getElementById('stealer-global-result');
+      if (loading) loading.style.display = 'block';
+      if (resBox) resBox.style.display = 'none';
+
+      try {
+        const res = await ipc.invoke('fetch-player-skin', val);
+        if (loading) loading.style.display = 'none';
+
+        if (!res || !res.success) {
+          toast(res?.error || `No se encontró la skin de "${val}".`, 'error');
+          return;
+        }
+
+        window.currentStealerResult = res;
+
+        const nameEl = document.getElementById('stealer-res-name');
+        const modelEl = document.getElementById('stealer-res-model');
+        const uuidEl = document.getElementById('stealer-res-uuid');
+        const cv = document.getElementById('stealer-global-canvas');
+
+        if (nameEl) nameEl.textContent = res.username;
+        if (modelEl) modelEl.textContent = res.model === 'slim' ? 'Alex (Slim 3px)' : 'Steve (Classic 4px)';
+        if (uuidEl) uuidEl.textContent = `UUID: ${res.uuid}`;
+
+        if (cv && res.dataUrl) {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => drawSkin2D(cv, img, res.model === 'slim');
+          img.src = res.dataUrl;
+        }
+
+        if (resBox) resBox.style.display = 'flex';
+      } catch (e) {
+        if (loading) loading.style.display = 'none';
+        toast(`Error al buscar skin: ${e.message}`, 'error');
+      }
+    }
+
+    function saveStealerSkinToWardrobe() {
+      const res = window.currentStealerResult;
+      if (!res || !res.dataUrl) return;
+
+      addSkinToWardrobe(res.username, res.dataUrl, res.model, false);
+      toast(`¡Skin de ${res.username} guardada en tu Clóset de Ropa!`, 'success');
+      closeSkinStealerModal();
+    }
+
+    async function equipStealerSkinDirect() {
+      const res = window.currentStealerResult;
+      if (!res || !res.dataUrl) return;
+
+      addSkinToWardrobe(res.username, res.dataUrl, res.model, true);
+      const items = getSkinWardrobe();
+      const item = items.find(i => i.dataUrl === res.dataUrl) || items[0];
+      if (item) equipSkinFromWardrobe(item.id);
+      closeSkinStealerModal();
+    }
+
+    function editStealerSkinInTaller() {
+      const res = window.currentStealerResult;
+      if (!res || !res.dataUrl) return;
+
+      openSkinEditor();
+      loadTextureToEditor(res.dataUrl);
+      setEditorModel(res.model || 'default');
+      closeSkinStealerModal();
+      toast(`Abriendo skin de ${res.username} en el Taller...`, 'info');
+    }
+
+    function downloadStealerSkinPng() {
+      const res = window.currentStealerResult;
+      if (!res || !res.dataUrl) return;
+
+      const a = document.createElement('a');
+      a.href = res.dataUrl;
+      a.download = `skin_${res.username.toLowerCase()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      toast(`Skin de ${res.username} descargada.`, 'success');
+    }
+
+    // Overlay modal embedded stealer
+    function setOverlayStealerQuery(nick) {
+      const inp = document.getElementById('ov-stealer-input');
+      if (inp) inp.value = nick;
+      executeOverlayPlayerSearch();
+    }
+
+    async function executeOverlayPlayerSearch() {
+      const inp = document.getElementById('ov-stealer-input');
+      const val = inp?.value?.trim();
+      if (!val) return;
+
+      const loading = document.getElementById('ov-stealer-loading');
+      const resBox = document.getElementById('ov-stealer-result');
+      if (loading) loading.style.display = 'block';
+      if (resBox) resBox.style.display = 'none';
+
+      try {
+        const res = await ipc.invoke('fetch-player-skin', val);
+        if (loading) loading.style.display = 'none';
+        if (!res || !res.success) {
+          toast(res?.error || `No se encontró la skin de "${val}".`, 'error');
+          return;
+        }
+
+        window.currentOverlayStealerResult = res;
+        const nameEl = document.getElementById('ov-stealer-name');
+        const modelEl = document.getElementById('ov-stealer-model');
+        const cv = document.getElementById('ov-stealer-canvas');
+
+        if (nameEl) nameEl.textContent = res.username;
+        if (modelEl) modelEl.textContent = res.model === 'slim' ? 'Alex (Slim 3px)' : 'Steve (Classic 4px)';
+
+        if (cv && res.dataUrl) {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => drawSkin2D(cv, img, res.model === 'slim');
+          img.src = res.dataUrl;
+        }
+
+        if (resBox) resBox.style.display = 'flex';
+      } catch (e) {
+        if (loading) loading.style.display = 'none';
+        toast(`Error al buscar skin: ${e.message}`, 'error');
+      }
+    }
+
+    function applyOverlayFromStealer() {
+      const res = window.currentOverlayStealerResult;
+      if (!res || !res.dataUrl) return;
+
+      loadSecondarySkin(res.dataUrl);
+      closeAddOverlaySkinModal();
+      toast(`Skin de ${res.username} sobrepuesta como ropa. ¡Usa el Borrador para descubrir la piel base!`, 'success');
+    }
+
+function openAddOverlaySkinModal() {
       const modal = document.getElementById('se-overlay-picker-modal');
       if (!modal) return;
       modal.style.display = 'flex';
+      switchOverlayModalTab('catalog');
 
       const grid = document.getElementById('se-overlay-wardrobe-grid');
       const empty = document.getElementById('se-overlay-wardrobe-empty');
@@ -17723,7 +18177,7 @@ async function loadNebulaProfileData() {
       }
     }
 
-    // ── PREMIUM MODS & MODPACK MANAGER MODAL (TLAUNCHER STYLE) ──────
+    // ── PREMIUM MODS & MODPACK MANAGER MODAL (NEBULA STUDIO) ──────
     let activeEditorVersionId = '';
     let activeEditorLoader = '';
     let activeEditorMcVersion = '';
