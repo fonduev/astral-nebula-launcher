@@ -85,6 +85,7 @@ function initDiscordRPC() {
             rpcReady = true;
             console.log('[Discord RPC] ✅ Conectado');
             setRPCLauncher();
+            checkRunningGameOnStartup();
         });
 
         rpcClient.on('disconnected', () => {
@@ -113,7 +114,7 @@ function setRPCLauncher() {
     try {
         rpcClient.setActivity({
             details: '🪐 En el menú principal',
-            state: 'Nebula Launcher v5.0.0',
+            state: 'Nebula Launcher v5.0.1',
             startTimestamp: rpcStartTime,
             largeImageKey: 'launcher_logo',
             largeImageText: 'Nebula Launcher',
@@ -128,41 +129,334 @@ function setRPCLauncher() {
     } catch { }
 }
 
-// Presencia: jugando Minecraft o Modpack (Rich Presence más bonito)
-function setRPCPlaying(mcVersion, modType = null, modpackName = null) {
+let activeRPCData = {
+    mcVersion: '',
+    modType: null,
+    modpackName: null,
+    iconUrl: null,
+    serverIp: null,
+    stateType: 'menu', // 'menu' | 'server' | 'singleplayer'
+    startTimestamp: Date.now()
+};
+
+function updateDiscordActivity() {
     if (!rpcReady || !rpcClient) return;
-    
-    let details = `Jugando Minecraft ${mcVersion}`;
-    let state = '🎮 Vanilla';
-    
-    if (modpackName) {
-        details = `⚔️ Jugando ${modpackName}`;
-        state = `Nebula Launcher • ${mcVersion}`;
-    } else if (modType) {
-        state = modType === 'optifine' ? '✨ OptiFine'
-            : modType === 'neoforge' ? '🌿 NeoForge'
-                : modType === 'forge' ? '🔥 Forge'
-                    : modType === 'fabric' ? '💎 Fabric'
-                        : modType === 'quilt' ? '🔮 Quilt'
-                            : '🎮 Modificado';
+
+    const { mcVersion, modType, modpackName, iconUrl, serverIp, stateType, startTimestamp } = activeRPCData;
+
+    // 1. Determinar imagen y tooltip del Modpack o de la Versión
+    let modpackOrVersionImage = 'mc_logo';
+    let modpackOrVersionText = modpackName || `Minecraft ${mcVersion || ''}`.trim();
+
+    if (iconUrl && typeof iconUrl === 'string' && (iconUrl.startsWith('http://') || iconUrl.startsWith('https://'))) {
+        modpackOrVersionImage = iconUrl;
+    } else {
+        const vKey = String(mcVersion || '').trim();
+        if (vKey.startsWith('1.21')) {
+            modpackOrVersionImage = 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.21.1/assets/minecraft/textures/block/crafter_top.png';
+            modpackOrVersionText = modpackName || `Minecraft 1.21 • Tricky Trials`;
+        } else if (vKey.startsWith('1.20')) {
+            modpackOrVersionImage = 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.20/assets/minecraft/textures/block/cherry_sapling.png';
+            modpackOrVersionText = modpackName || `Minecraft 1.20 • Trails & Tales`;
+        } else if (vKey.startsWith('1.19')) {
+            modpackOrVersionImage = 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.19/assets/minecraft/textures/block/sculk_catalyst_top.png';
+            modpackOrVersionText = modpackName || `Minecraft 1.19 • The Wild`;
+        } else if (vKey.startsWith('1.18') || vKey.startsWith('1.17')) {
+            modpackOrVersionImage = 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.18/assets/minecraft/textures/block/amethyst_block.png';
+            modpackOrVersionText = modpackName || `Minecraft ${vKey} • Caves & Cliffs`;
+        } else if (vKey.startsWith('1.16')) {
+            modpackOrVersionImage = 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.16.5/assets/minecraft/textures/block/respawn_anchor_top_off.png';
+            modpackOrVersionText = modpackName || `Minecraft 1.16 • Nether Update`;
+        } else if (vKey.startsWith('1.12')) {
+            modpackOrVersionImage = 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.12/assets/minecraft/textures/blocks/concrete_cyan.png';
+            modpackOrVersionText = modpackName || `Minecraft 1.12 • World of Color`;
+        } else if (vKey.startsWith('1.8')) {
+            modpackOrVersionImage = 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.8.9/assets/minecraft/textures/items/diamond_sword.png';
+            modpackOrVersionText = modpackName || `Minecraft 1.8.9 • Classic PvP`;
+        }
     }
-    
+
+    let largeImage = 'mc_logo';
+    let largeText = `Minecraft ${mcVersion || ''}`.trim();
+    let smallImage = 'launcher_logo';
+    let smallText = 'Nebula Launcher v5.0.1';
+
+    // 2. Si está en un Servidor:
+    //    Foto grande principal = Icono/Logo del Servidor
+    //    Foto pequeña (esquina) = Modpack o Versión de Minecraft
+    if (stateType === 'server' && serverIp) {
+        const host = serverIp.split(':')[0].trim();
+        if (host.toLowerCase() === 'localhost' || host === '127.0.0.1' || host.includes('Local')) {
+            largeImage = 'mc_logo';
+            largeText = '🌐 Servidor Local (LAN)';
+        } else {
+            largeImage = `https://api.mcsrvstat.us/icon/${encodeURIComponent(host)}`;
+            largeText = `🌐 ${serverIp}`;
+        }
+        smallImage = modpackOrVersionImage;
+        smallText = modpackOrVersionText;
+    } else {
+        // En Menú o Singleplayer:
+        // Foto grande = Modpack o Versión | Foto pequeña (esquina) = Nebula Launcher
+        largeImage = modpackOrVersionImage;
+        largeText = modpackOrVersionText;
+        smallImage = 'launcher_logo';
+        smallText = 'Nebula Launcher v5.0.1';
+    }
+
+    // 3. Determinar detalles (details)
+    let details = '';
+    if (modpackName) {
+        details = `⚔️ ${modpackName}`;
+    } else if (modType) {
+        const modName = modType === 'optifine' ? 'OptiFine'
+            : modType === 'neoforge' ? 'NeoForge'
+            : modType === 'forge' ? 'Forge'
+            : modType === 'fabric' ? 'Fabric'
+            : modType === 'quilt' ? 'Quilt'
+            : 'Modificado';
+        details = `⛏️ Minecraft ${mcVersion} (${modName})`;
+    } else {
+        details = `⛏️ Minecraft ${mcVersion} Vanilla`;
+    }
+
+    // 4. Determinar estado (state)
+    let state = '';
+    if (stateType === 'server' && serverIp) {
+        state = `🌐 ${serverIp}`;
+    } else if (stateType === 'singleplayer') {
+        state = `🌲 En mundo individual`;
+    } else {
+        state = `🎮 En el menú principal`;
+    }
+
     try {
         rpcClient.setActivity({
             details: details,
             state: state,
-            startTimestamp: Date.now(),
-            largeImageKey: 'mc_logo',
-            largeImageText: `Minecraft ${mcVersion}`,
-            smallImageKey: 'launcher_logo',
-            smallImageText: 'Nebula Launcher',
+            startTimestamp: startTimestamp || Date.now(),
+            largeImageKey: largeImage,
+            largeImageText: largeText,
+            smallImageKey: smallImage,
+            smallImageText: smallText,
             instance: true,
             buttons: [
                 { label: '🪐 Descargar Nebula', url: 'https://nebuladevstudios.com/' },
                 { label: '⭐ Ver en GitHub', url: 'https://github.com/fonduev/astral-nebula-launcher' }
             ]
         });
-    } catch { }
+    } catch (e) { }
+}
+
+function setRPCPlaying(opts = {}) {
+    if (!rpcReady || !rpcClient) return;
+
+    if (typeof opts === 'string') {
+        opts = {
+            mcVersion: arguments[0],
+            modType: arguments[1] || null,
+            modpackName: arguments[2] || null
+        };
+    }
+
+    activeRPCData = {
+        mcVersion: opts.mcVersion || activeRPCData.mcVersion || '',
+        modType: opts.modType !== undefined ? opts.modType : activeRPCData.modType,
+        modpackName: opts.modpackName !== undefined ? opts.modpackName : activeRPCData.modpackName,
+        iconUrl: opts.iconUrl !== undefined ? opts.iconUrl : activeRPCData.iconUrl,
+        serverIp: opts.serverIp !== undefined ? opts.serverIp : activeRPCData.serverIp,
+        stateType: opts.stateType !== undefined ? opts.stateType : (opts.serverIp ? 'server' : (activeRPCData.stateType || 'menu')),
+        startTimestamp: opts.startTimestamp || activeRPCData.startTimestamp || Date.now()
+    };
+
+    updateDiscordActivity();
+}
+
+let logWatcherInterval = null;
+let lastLogSize = 0;
+
+function parseLineForDiscord(rawStr) {
+    if (!rawStr || typeof rawStr !== 'string') return;
+
+    // 1. Conexión a Servidor
+    // Detecta: "Connecting to volatik.net, 25565", "Connecting to mc.hypixel.net:25565", "[Client] Connecting to...", etc.
+    const connectMatch = rawStr.match(/(?:Connecting to|connect(?:ing)? to|Joined server)\s+([a-zA-Z0-9.\-_]+)(?:[,\s:]+(\d+))?/i);
+    if (connectMatch) {
+        let host = connectMatch[1].trim();
+        const port = connectMatch[2] ? parseInt(connectMatch[2].trim()) : 25565;
+        if (host.toLowerCase() === 'localhost' || host === '127.0.0.1') {
+            host = 'Servidor Local (LAN)';
+        } else if (port && port !== 25565 && !host.includes(':')) {
+            host = `${host}:${port}`;
+        }
+        setRPCPlaying({
+            serverIp: host,
+            stateType: 'server'
+        });
+        sendLog(`🌐 [Discord RPC] Conexión detectada a servidor: ${host}`);
+        return;
+    }
+
+    // 2. Entrada a Mundo Individual (Singleplayer)
+    if (rawStr.includes('Starting integrated server') ||
+        rawStr.includes('Starting integrated minecraft server') ||
+        rawStr.includes('Saving chunks for level \'ServerLevel') ||
+        rawStr.includes('Changing dimension to minecraft:overworld')) {
+        if (activeRPCData && activeRPCData.stateType !== 'singleplayer' && activeRPCData.stateType !== 'server') {
+            setRPCPlaying({
+                serverIp: null,
+                stateType: 'singleplayer'
+            });
+            sendLog('🌲 [Discord RPC] Estado: En mundo individual');
+        }
+        return;
+    }
+
+    // 3. Salida de Mundo Individual al Menú Principal
+    if (rawStr.includes('Stopping server') || rawStr.includes('Stopping singleplayer server')) {
+        if (activeRPCData && activeRPCData.stateType === 'singleplayer') {
+            setRPCPlaying({
+                serverIp: null,
+                stateType: 'menu'
+            });
+            sendLog('🎮 [Discord RPC] Estado: En el menú principal');
+        }
+        return;
+    }
+}
+
+function startLogWatcher(logFilePath) {
+    if (logWatcherInterval) {
+        clearInterval(logWatcherInterval);
+        logWatcherInterval = null;
+    }
+    if (!fs.existsSync(logFilePath)) return;
+
+    try {
+        const stats = fs.statSync(logFilePath);
+        lastLogSize = Math.max(0, stats.size - 40960);
+    } catch {
+        lastLogSize = 0;
+    }
+
+    const checkLog = () => {
+        try {
+            if (!fs.existsSync(logFilePath)) return;
+            const stats = fs.statSync(logFilePath);
+            if (stats.size < lastLogSize) {
+                lastLogSize = 0;
+            }
+            if (stats.size > lastLogSize) {
+                const readLen = stats.size - lastLogSize;
+                const buf = Buffer.alloc(readLen);
+                const fd = fs.openSync(logFilePath, 'r');
+                fs.readSync(fd, buf, 0, readLen, lastLogSize);
+                fs.closeSync(fd);
+                lastLogSize = stats.size;
+                const chunk = buf.toString('utf8');
+                const lines = chunk.split(/\r?\n/);
+                for (const line of lines) {
+                    parseLineForDiscord(line);
+                }
+            }
+        } catch {}
+    };
+
+    checkLog();
+    logWatcherInterval = setInterval(checkLog, 1500);
+}
+
+function stopLogWatcher() {
+    if (logWatcherInterval) {
+        clearInterval(logWatcherInterval);
+        logWatcherInterval = null;
+    }
+}
+
+function checkRunningGameOnStartup() {
+    try {
+        const cp = require('child_process');
+        cp.exec('tasklist /FI "IMAGENAME eq javaw.exe" /NH', (err, stdout) => {
+            if (!stdout || !stdout.toLowerCase().includes('javaw.exe')) return;
+
+            const mcDir = path.join(BASE_DATA_DIR, '.minecraft');
+            const logPath = path.join(mcDir, 'logs', 'latest.log');
+            if (!fs.existsSync(logPath)) return;
+
+            try {
+                const logContent = fs.readFileSync(logPath, 'utf8');
+                const lines = logContent.split(/\r?\n/);
+                const lastLines = lines.slice(-600);
+
+                let detectedServer = null;
+                let isSingleplayer = false;
+
+                for (let i = lastLines.length - 1; i >= 0; i--) {
+                    const line = lastLines[i];
+                    const m = line.match(/(?:Connecting to|connect(?:ing)? to|Joined server)\s+([a-zA-Z0-9.\-_]+)(?:[,\s:]+(\d+))?/i);
+                    if (m) {
+                        let host = m[1].trim();
+                        const port = m[2] ? parseInt(m[2].trim()) : 25565;
+                        if (host.toLowerCase() === 'localhost' || host === '127.0.0.1') {
+                            host = 'Servidor Local (LAN)';
+                        } else if (port && port !== 25565 && !host.includes(':')) {
+                            host = `${host}:${port}`;
+                        }
+                        detectedServer = host;
+                        break;
+                    }
+                    if (line.includes('Starting integrated server') || line.includes('Starting integrated minecraft server')) {
+                        isSingleplayer = true;
+                        break;
+                    }
+                }
+
+                // Detect most recently active instance in instances folder
+                let modpackName = null;
+                let iconUrl = null;
+                let mcVersion = '1.21.1';
+
+                const instancesDir = path.join(mcDir, 'instances');
+                if (fs.existsSync(instancesDir)) {
+                    let newestMtime = 0;
+                    let newestMeta = null;
+                    const dirs = fs.readdirSync(instancesDir);
+                    for (const d of dirs) {
+                        const dPath = path.join(instancesDir, d);
+                        try {
+                            const st = fs.statSync(dPath);
+                            if (st.mtimeMs > newestMtime) {
+                                const iPath = path.join(dPath, 'instance.json');
+                                if (fs.existsSync(iPath)) {
+                                    newestMtime = st.mtimeMs;
+                                    newestMeta = JSON.parse(fs.readFileSync(iPath, 'utf8'));
+                                }
+                            }
+                        } catch {}
+                    }
+                    if (newestMeta) {
+                        if (newestMeta.name) modpackName = newestMeta.name;
+                        if (newestMeta.iconUrl) iconUrl = newestMeta.iconUrl;
+                        if (newestMeta.mcVersion) mcVersion = newestMeta.mcVersion;
+                    }
+                }
+
+                startLogWatcher(logPath);
+
+                setRPCPlaying({
+                    mcVersion: mcVersion,
+                    modpackName: modpackName,
+                    iconUrl: iconUrl,
+                    serverIp: detectedServer,
+                    stateType: detectedServer ? 'server' : (isSingleplayer ? 'singleplayer' : 'menu'),
+                    startTimestamp: Date.now()
+                });
+                console.log(`[Discord RPC] ✅ Sincronizado juego en ejecución: ${modpackName || mcVersion} | ${detectedServer ? '🌐 ' + detectedServer : (isSingleplayer ? '🌲 Singleplayer' : 'En menú')}`);
+            } catch (e) {
+                console.log('[Discord RPC] Error al reconstruir estado de juego:', e);
+            }
+        });
+    } catch (e) {}
 }
 
 let win;
@@ -1073,6 +1367,8 @@ ipcMain.handle('get-all-versions', async () => {
                 const cachedData = fs.readFileSync(candidateFile, 'utf8');
                 const cachedManifest = JSON.parse(cachedData);
                 if (cachedManifest && cachedManifest.versions && cachedManifest.versions.length > 0) {
+                    const releases = cachedManifest.versions.filter(v => v.type === 'release');
+                    sendLog(`✅ ${cachedManifest.versions.length} versiones oficiales de Minecraft (Vanilla) cargadas (${releases.length} estables)`);
                     httpsGetWithFallbacks(urls, {}, 6000).then(fresh => {
                         try {
                             fs.mkdirSync(path.dirname(cacheFile), { recursive: true });
@@ -1251,6 +1547,7 @@ ipcMain.handle('get-installed-versions', () => {
                 else displayName = dir;
             }
             else {
+                type = 'vanilla';
                 displayName = dir;
             }
 
@@ -1265,7 +1562,10 @@ ipcMain.handle('get-installed-versions', () => {
         }
 
         const counts = {};
-        installed.forEach(i => counts[i.type] = (counts[i.type] || 0) + 1);
+        installed.forEach(i => {
+            const t = (i.type === 'release' || i.type === 'snapshot' || i.type === 'vanilla') ? 'vanilla' : i.type;
+            counts[t] = (counts[t] || 0) + 1;
+        });
         const summary = Object.entries(counts).map(([t, c]) => `${t}: ${c}`).join(', ');
         sendLog(`✅ ${installed.length} versiones instaladas detectadas (${summary})`);
     } catch (err) {
@@ -1431,6 +1731,7 @@ ipcMain.handle('get-optifine-mc-versions', async () => {
             const cachedData = fs.readFileSync(candidateFile, 'utf8');
             const list = JSON.parse(cachedData);
             if (Array.isArray(list) && list.length > 0) {
+                sendLog(`✅ ${list.length} versiones de Minecraft con soporte OptiFine cargadas`);
                 // Actualizar en segundo plano sin demorar la respuesta
                 httpsGet('https://bmclapi2.bangbang93.com/optifine/versionList', {}, 6000).then(data => {
                     try {
@@ -1754,6 +2055,7 @@ ipcMain.handle('get-forge-mc-versions', async () => {
                             }
                             return 0;
                         });
+                    sendLog(`✅ ${sorted.length} versiones de Minecraft con soporte Forge cargadas`);
                     // Actualizar en segundo plano
                     httpsGet('https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json', {}, 5000)
                         .then(fresh => { try { fs.writeFileSync(cacheFile, fresh, 'utf8'); } catch {} }).catch(() => {});
@@ -2070,6 +2372,7 @@ ipcMain.handle('get-neoforge-mc-versions', async () => {
             const cachedData = fs.readFileSync(candidateFile, 'utf8');
             const list = JSON.parse(cachedData);
             if (Array.isArray(list) && list.length > 0) {
+                sendLog(`✅ ${list.length} versiones de Minecraft con soporte NeoForge cargadas`);
                 return list;
             }
         } catch (e) {}
@@ -6106,6 +6409,7 @@ ipcMain.on('launch-game', async (event, data) => {
         let launchVersion = data.version;
         let launchModId = data.modId;
         let modpackDispName = '';
+        let modpackIconUrl = null;
 
         // Auto-detect: si la versión enviada ES un ID de loader (fabric-loader-x-MC, etc.),
         // extraer correctamente la versión base de MC y el custom mod ID.
@@ -6148,6 +6452,7 @@ ipcMain.on('launch-game', async (event, data) => {
             }
             const meta = JSON.parse(fs.readFileSync(instanceJsonPath, 'utf8'));
             modpackDispName = meta.name || data.modpackName;
+            if (meta.iconUrl) modpackIconUrl = meta.iconUrl;
             const mcVer = meta.mcVersion;
             const loader = meta.loader;
             const loaderVer = meta.loaderVersion;
@@ -6401,7 +6706,8 @@ ipcMain.on('launch-game', async (event, data) => {
         // (primer output de datos del proceso Java = juego iniciado)
         let trayHiddenThisInstance = false;
         launcher.on('data', e => {
-            sendLog(String(e));
+            const rawStr = String(e);
+            sendLog(rawStr);
             if (!trayHiddenThisInstance && s.minimizeToTrayOnGameLaunch !== false && win && win.isVisible()) {
                 trayHiddenThisInstance = true;
                 win.hide();
@@ -6414,14 +6720,29 @@ ipcMain.on('launch-game', async (event, data) => {
                     } catch (e) {}
                 }
             }
+
+            // ── Discord RPC Server & State Sniffer ───────────────────
+            try {
+                parseLineForDiscord(rawStr);
+            } catch (rpcErr) {}
         });
         launcher.on('close', code => {
+            stopLogWatcher();
             runningInstances.delete(instanceId);
             const count = runningInstances.size;
             sendLog(`✅ Instancia #${instanceId} cerrada (código: ${code}).`);
             win?.webContents.send('instances-update', { count, closedId: instanceId });
             if (count === 0) {
                 sendProgress(0, '');
+                activeRPCData = {
+                    mcVersion: '',
+                    modType: null,
+                    modpackName: null,
+                    iconUrl: null,
+                    serverIp: null,
+                    stateType: 'menu',
+                    startTimestamp: Date.now()
+                };
                 setRPCLauncher();
                 const traySettings = loadSettings();
                 if (traySettings.minimizeToTrayOnGameLaunch !== false && win) {
@@ -6601,8 +6922,17 @@ ipcMain.on('launch-game', async (event, data) => {
                             : launchModId.toLowerCase().includes('quilt') ? 'quilt'
                                 : null)
             : null;
-        setRPCPlaying(launchVersion, modType, data.modpackName ? modpackDispName : null);
+        setRPCPlaying({
+            mcVersion: launchVersion,
+            modType: modType,
+            modpackName: data.modpackName ? modpackDispName : null,
+            iconUrl: modpackIconUrl,
+            serverIp: data.serverIp || null,
+            stateType: data.serverIp ? 'server' : 'menu',
+            startTimestamp: Date.now()
+        });
 
+        startLogWatcher(path.join(mcPath, 'logs', 'latest.log'));
         sendLog(`✅ ${displayVersion} iniciado. ¡Que te diviertas!`);
         sendProgress(100, '🎮 En juego');
 
