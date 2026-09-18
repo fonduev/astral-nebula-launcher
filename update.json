@@ -1,17 +1,16 @@
 {
-  "version": "5.0.1",
-  "name": "Nebula Launcher v5.0.1 — Clóset de Ropa, 2da Skin en Taller y Discord RPC 2.0",
-  "releaseDate": "2026-09-16",
+  "version": "5.0.2",
+  "name": "Nebula Launcher v5.0.2 — Creador de Instancias Vanilla, Fondos Personalizados y Multi-JAR",
+  "releaseDate": "2026-09-18",
   "url": "https://raw.githubusercontent.com/fonduev/astral-nebula-launcher/main/app.asar",
-  "installerUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.1/Nebula.Launcher.Setup.5.0.1.exe",
-  "portableUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.1/Nebula-Launcher-v5.0.1-Portable.zip",
+  "installerUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.2/Nebula.Launcher.Setup.5.0.2.exe",
+  "portableUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.2/Nebula-Launcher-v5.0.2-Portable.zip",
   "mandatory": false,
   "changelog": [
-    "🧥 Clóset de Ropa (Skin Wardrobe): Guarda todos tus atuendos con miniaturas 2D, soporte para cuentas Microsoft, Nebula y Offline, y equipa con 1 solo clic.",
-    "🎨 Taller de Skins - Sobreposición de 2da Skin (Estilo NovaSkin): Carga una segunda skin sobre tu skin base, borra partes con el borrador para descubrir la piel debajo en 3D en tiempo real y fusiónalas en una sola skin.",
-    "🎮 Discord Rich Presence 2.0: Muestra el logo oficial del servidor al que estés conectado en vivo (con detección de IP como volatik.net), carátulas oficiales de modpacks en la esquina o ilustraciones HD temáticas según la versión de Minecraft.",
-    "🌐 Detección de IP y Mundos en Tiempo Real: Identifica automáticamente servidores multijugador y mundos individuales sin falsos positivos de desconexión.",
-    "✨ Mejoras en el Editor 3D: Corrección en el canal alfa y opacidad para transparencias perfectas en modelos Classic y Slim.",
-    "🚫 Limpieza de Interfaz: Eliminación completa de la sección obsoleta de capas en el perfil para dar paso al nuevo Clóset de Ropa."
+    "🌿 Soporte para Minecraft Vanilla Puro: Creación de instancias aisladas de Minecraft oficial sin modloaders obligatorios, ejecutando clientes limpios con mundos y configuraciones propias.",
+    "🖼️ Banners y Fondos Personalizables: Nuevo selector de fondos para tarjetas de instancias y modpacks, botón directo 'Fondo' en tarjeta y reemplazo de imagen por defecto de Einstein por el wallpaper oficial.",
+    "📦 Selección Múltiple de Mods (.jar): Permite seleccionar e instalar múltiples archivos .jar simultáneamente tanto en la creación de modpacks como en el gestor Nebula Studio.",
+    "🚀 Acceso Rápido desde Inicio: Botón destacado '➕ Nueva Instancia' en la cabecera superior y barra de versiones simplificada y limpia.",
+    "⚡ Optimizaciones de Rendimiento: Parámetros JVM optimizados, recolector de basura balanceado y tasa de refresco desbloqueada sin VSync forzado."
   ]
 }

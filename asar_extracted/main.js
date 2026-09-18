@@ -272,29 +272,50 @@ function setRPCPlaying(opts = {}) {
     updateDiscordActivity();
 }
 
+function isValidServerHost(host) {
+    if (!host || typeof host !== 'string') return false;
+    const h = host.toLowerCase().trim();
+    if (['realms', 'mojang', 'minecraft', 'server', 'the', 'world'].includes(h)) return false;
+    if (h === 'localhost' || h === '127.0.0.1') return true;
+    // Un servidor real de Minecraft tiene al menos un punto (ej: hypixel.net, aternos.me, 192.168.1.1)
+    return h.includes('.') && !h.startsWith('.') && !h.endsWith('.');
+}
+
 let logWatcherInterval = null;
 let lastLogSize = 0;
 
 function parseLineForDiscord(rawStr) {
     if (!rawStr || typeof rawStr !== 'string') return;
 
-    // 1. Conexión a Servidor
-    // Detecta: "Connecting to volatik.net, 25565", "Connecting to mc.hypixel.net:25565", "[Client] Connecting to...", etc.
-    const connectMatch = rawStr.match(/(?:Connecting to|connect(?:ing)? to|Joined server)\s+([a-zA-Z0-9.\-_]+)(?:[,\s:]+(\d+))?/i);
+    // Ignorar líneas de error, fallos de ping o intentos fallidos a realms
+    if (/\b(?:couldn'?t|failed to|can'?t ping|can'?t connect|unable to|error)\b/i.test(rawStr)) {
+        if (rawStr.includes('connect to') || rawStr.includes('Connecting to')) {
+            if (activeRPCData && activeRPCData.stateType === 'server') {
+                setRPCPlaying({ serverIp: null, stateType: 'menu' });
+            }
+        }
+        return;
+    }
+
+    // 1. Conexión a Servidor Real
+    // Detecta: "Connecting to volatik.net, 25565", "[Render thread/INFO]: Connecting to mc.hypixel.net, 25565", etc.
+    const connectMatch = rawStr.match(/(?:Connecting to|Joined server)\s+([a-zA-Z0-9.\-_]+)(?:[,\s:]+(\d+))?/i);
     if (connectMatch) {
         let host = connectMatch[1].trim();
-        const port = connectMatch[2] ? parseInt(connectMatch[2].trim()) : 25565;
-        if (host.toLowerCase() === 'localhost' || host === '127.0.0.1') {
-            host = 'Servidor Local (LAN)';
-        } else if (port && port !== 25565 && !host.includes(':')) {
-            host = `${host}:${port}`;
+        if (isValidServerHost(host)) {
+            const port = connectMatch[2] ? parseInt(connectMatch[2].trim()) : 25565;
+            if (host.toLowerCase() === 'localhost' || host === '127.0.0.1') {
+                host = 'Servidor Local (LAN)';
+            } else if (port && port !== 25565 && !host.includes(':')) {
+                host = `${host}:${port}`;
+            }
+            setRPCPlaying({
+                serverIp: host,
+                stateType: 'server'
+            });
+            sendLog(`🌐 [Discord RPC] Conexión detectada a servidor: ${host}`);
+            return;
         }
-        setRPCPlaying({
-            serverIp: host,
-            stateType: 'server'
-        });
-        sendLog(`🌐 [Discord RPC] Conexión detectada a servidor: ${host}`);
-        return;
     }
 
     // 2. Entrada a Mundo Individual (Singleplayer)
@@ -312,9 +333,14 @@ function parseLineForDiscord(rawStr) {
         return;
     }
 
-    // 3. Salida de Mundo Individual al Menú Principal
-    if (rawStr.includes('Stopping server') || rawStr.includes('Stopping singleplayer server')) {
-        if (activeRPCData && activeRPCData.stateType === 'singleplayer') {
+    // 3. Salida de Mundo Individual o Servidor al Menú Principal
+    if (rawStr.includes('Stopping server') ||
+        rawStr.includes('Stopping singleplayer server') ||
+        rawStr.includes('Disconnected from server') ||
+        rawStr.includes('Disconnecting from') ||
+        rawStr.includes('Lost connection:') ||
+        rawStr.includes('Connection closed')) {
+        if (activeRPCData && (activeRPCData.stateType === 'singleplayer' || activeRPCData.stateType === 'server')) {
             setRPCPlaying({
                 serverIp: null,
                 stateType: 'menu'
@@ -393,20 +419,26 @@ function checkRunningGameOnStartup() {
 
                 for (let i = lastLines.length - 1; i >= 0; i--) {
                     const line = lastLines[i];
-                    const m = line.match(/(?:Connecting to|connect(?:ing)? to|Joined server)\s+([a-zA-Z0-9.\-_]+)(?:[,\s:]+(\d+))?/i);
+                    if (/\b(?:couldn'?t|failed to|can'?t ping|can'?t connect|unable to|error)\b/i.test(line)) continue;
+                    const m = line.match(/(?:Connecting to|Joined server)\s+([a-zA-Z0-9.\-_]+)(?:[,\s:]+(\d+))?/i);
                     if (m) {
                         let host = m[1].trim();
-                        const port = m[2] ? parseInt(m[2].trim()) : 25565;
-                        if (host.toLowerCase() === 'localhost' || host === '127.0.0.1') {
-                            host = 'Servidor Local (LAN)';
-                        } else if (port && port !== 25565 && !host.includes(':')) {
-                            host = `${host}:${port}`;
+                        if (isValidServerHost(host)) {
+                            const port = m[2] ? parseInt(m[2].trim()) : 25565;
+                            if (host.toLowerCase() === 'localhost' || host === '127.0.0.1') {
+                                host = 'Servidor Local (LAN)';
+                            } else if (port && port !== 25565 && !host.includes(':')) {
+                                host = `${host}:${port}`;
+                            }
+                            detectedServer = host;
+                            break;
                         }
-                        detectedServer = host;
-                        break;
                     }
                     if (line.includes('Starting integrated server') || line.includes('Starting integrated minecraft server')) {
                         isSingleplayer = true;
+                        break;
+                    }
+                    if (line.includes('Stopping server') || line.includes('Stopping singleplayer server') || line.includes('Disconnected from server')) {
                         break;
                     }
                 }
@@ -5531,7 +5563,7 @@ ipcMain.handle('quarantine-flagged-mod', async (event, { folderName, filename })
 // ── NUEVO: Creación de Modpacks Personalizados (Custom Modpack Engine) ──
 ipcMain.handle('create-custom-modpack', async (event, data) => {
     try {
-        const { name, description, mcVersion, loader, loaderVersion, iconBase64 } = data;
+        const { name, description, mcVersion, loader, loaderVersion, iconBase64, bgBase64, selectedModPaths } = data;
         const s = loadSettings();
         const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
         const instancesDir = path.join(mcPath, 'instances');
@@ -5546,7 +5578,8 @@ ipcMain.handle('create-custom-modpack', async (event, data) => {
 
         const targetDir = path.join(instancesDir, folderName);
         fs.mkdirSync(targetDir, { recursive: true });
-        fs.mkdirSync(path.join(targetDir, 'mods'), { recursive: true });
+        const modsDir = path.join(targetDir, 'mods');
+        fs.mkdirSync(modsDir, { recursive: true });
         fs.mkdirSync(path.join(targetDir, 'config'), { recursive: true });
 
         let iconUrl = '';
@@ -5559,6 +5592,32 @@ ipcMain.handle('create-custom-modpack', async (event, data) => {
             } catch (e) {}
         }
 
+        let screenshotUrl = '';
+        if (bgBase64 && bgBase64.startsWith('data:image/')) {
+            try {
+                const b64BgData = bgBase64.replace(/^data:image\/\w+;base64,/, '');
+                const bannerPath = path.join(targetDir, 'banner.png');
+                fs.writeFileSync(bannerPath, Buffer.from(b64BgData, 'base64'));
+                screenshotUrl = bannerPath;
+            } catch (e) {}
+        }
+
+        // Copiar mods seleccionados en lote (.jar)
+        let installedModsCount = 0;
+        if (Array.isArray(selectedModPaths) && selectedModPaths.length > 0) {
+            for (const modFilePath of selectedModPaths) {
+                try {
+                    if (fs.existsSync(modFilePath)) {
+                        const baseName = path.basename(modFilePath);
+                        fs.copyFileSync(modFilePath, path.join(modsDir, baseName));
+                        installedModsCount++;
+                    }
+                } catch (errCopy) {
+                    sendLog(`⚠️ Error copiando mod inicial ${modFilePath}: ${errCopy.message}`, 'warn');
+                }
+            }
+        }
+
         const instanceMeta = {
             name: name,
             folderName: folderName,
@@ -5567,16 +5626,120 @@ ipcMain.handle('create-custom-modpack', async (event, data) => {
             loader: loader,
             loaderVersion: loaderVersion || '',
             iconUrl: iconUrl,
+            screenshotUrl: screenshotUrl,
             source: 'custom',
             created: new Date().toISOString()
         };
 
         fs.writeFileSync(path.join(targetDir, 'instance.json'), JSON.stringify(instanceMeta, null, 2), 'utf8');
-        sendLog(`✅ Modpack personalizado creado: "${name}" en "${folderName}"`);
-        return { success: true, folderName };
+        sendLog(`✅ Modpack personalizado creado: "${name}" en "${folderName}" (${installedModsCount} mods incluidos)`);
+        return { success: true, folderName, installedModsCount, screenshotUrl };
     } catch (err) {
         sendLog(`❌ Error creando modpack: ${err.message}`, 'error');
         return { success: false, error: err.message };
+    }
+});
+
+// ── Actualizar Imagen de Fondo (Banner) de un Modpack Existente ──
+ipcMain.handle('update-modpack-banner', async (event, { folderName, bgBase64 }) => {
+    try {
+        if (!folderName || !bgBase64) return { success: false, error: 'Datos incompletos.' };
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        const instanceDir = path.join(mcPath, 'instances', folderName);
+        if (!fs.existsSync(instanceDir)) {
+            return { success: false, error: 'La instancia especificada no existe.' };
+        }
+        const b64Data = bgBase64.replace(/^data:image\/\w+;base64,/, '');
+        const bannerPath = path.join(instanceDir, 'banner.png');
+        fs.writeFileSync(bannerPath, Buffer.from(b64Data, 'base64'));
+
+        const instanceJsonPath = path.join(instanceDir, 'instance.json');
+        let meta = {};
+        if (fs.existsSync(instanceJsonPath)) {
+            try { meta = JSON.parse(fs.readFileSync(instanceJsonPath, 'utf8')); } catch {}
+        }
+        meta.screenshotUrl = bannerPath;
+        fs.writeFileSync(instanceJsonPath, JSON.stringify(meta, null, 2), 'utf8');
+        sendLog(`🖼️ Fondo actualizado correctamente para: ${folderName}`);
+        return { success: true, screenshotUrl: bannerPath };
+    } catch (err) {
+        sendLog(`❌ Error al actualizar fondo de modpack: ${err.message}`, 'error');
+        return { success: false, error: err.message };
+    }
+});
+
+// ── Instalación Múltiple de Mods Locales (.jar) ──
+ipcMain.handle('install-multiple-mods', async (event, { files, versionId }) => {
+    try {
+        if (!Array.isArray(files) || files.length === 0) {
+            return { success: false, error: 'No se enviaron archivos para instalar.' };
+        }
+        const s = loadSettings();
+        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
+        const instanceDir = versionId ? getInstanceDir(mcPath, versionId) : mcPath;
+        const modsDir = path.join(instanceDir, 'mods');
+        fs.mkdirSync(modsDir, { recursive: true });
+
+        const installed = [];
+        const errors = [];
+        for (const filePath of files) {
+            try {
+                if (fs.existsSync(filePath)) {
+                    const fileName = path.basename(filePath);
+                    const destPath = path.join(modsDir, fileName);
+                    fs.copyFileSync(filePath, destPath);
+                    installed.push(fileName);
+                }
+            } catch (e) {
+                errors.push({ file: filePath, error: e.message });
+            }
+        }
+        sendLog(`✅ ${installed.length} mods instalados en ${path.basename(instanceDir)}`);
+        return { success: true, count: installed.length, installed, errors };
+    } catch (err) {
+        sendLog(`❌ Error instalando mods múltiples: ${err.message}`, 'error');
+        return { success: false, error: err.message };
+    }
+});
+
+// ── Diálogo Nativo: Seleccionar Múltiples Archivos .JAR ──
+ipcMain.handle('select-multiple-jar-files', async () => {
+    try {
+        const { canceled, filePaths } = await dialog.showOpenDialog({
+            title: 'Seleccionar Mods (.jar)',
+            properties: ['openFile', 'multiSelections'],
+            filters: [
+                { name: 'Mods de Minecraft (*.jar)', extensions: ['jar'] },
+                { name: 'Todos los archivos (*.*)', extensions: ['*'] }
+            ]
+        });
+        if (canceled) return { canceled: true, filePaths: [] };
+        return { canceled: false, filePaths };
+    } catch (err) {
+        return { canceled: true, error: err.message, filePaths: [] };
+    }
+});
+
+// ── Diálogo Nativo: Seleccionar Imagen de Fondo ──
+ipcMain.handle('select-image-file', async () => {
+    try {
+        const { canceled, filePaths } = await dialog.showOpenDialog({
+            title: 'Seleccionar Imagen de Fondo o Banner',
+            properties: ['openFile'],
+            filters: [
+                { name: 'Imágenes (*.png, *.jpg, *.jpeg, *.webp)', extensions: ['png', 'jpg', 'jpeg', 'webp'] },
+                { name: 'Todos los archivos (*.*)', extensions: ['*'] }
+            ]
+        });
+        if (canceled || filePaths.length === 0) return { canceled: true };
+        const chosen = filePaths[0];
+        const ext = path.extname(chosen).replace('.', '').toLowerCase() || 'png';
+        const data = fs.readFileSync(chosen);
+        const base64 = `data:image/${ext === 'jpg' ? 'jpeg' : ext};base64,${data.toString('base64')}`;
+        return { canceled: false, filePath: chosen, base64 };
+    } catch (err) {
+        return { canceled: true, error: err.message };
     }
 });
 
@@ -5922,6 +6085,72 @@ ipcMain.handle('copy-screenshot-image', (event, filePath) => {
         return { success: true };
     } catch (e) {
         return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('upload-screenshot-share', async (event, filePath) => {
+    try {
+        if (!filePath || !fs.existsSync(filePath)) {
+            return { success: false, error: 'El archivo no existe o fue movido' };
+        }
+
+        const ext = path.extname(filePath).toLowerCase();
+        let mime = 'image/png';
+        if (ext === '.jpg' || ext === '.jpeg') mime = 'image/jpeg';
+        else if (ext === '.webp') mime = 'image/webp';
+
+        const fileBuffer = fs.readFileSync(filePath);
+        const fileName = path.basename(filePath);
+        const boundary = '----WebKitFormBoundary' + crypto.randomBytes(16).toString('hex');
+
+        const parts = [
+            Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="reqtype"\r\n\r\nfileupload\r\n`),
+            Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="fileToUpload"; filename="${fileName}"\r\nContent-Type: ${mime}\r\n\r\n`),
+            fileBuffer,
+            Buffer.from(`\r\n--${boundary}--\r\n`)
+        ];
+        const bodyBuffer = Buffer.concat(parts);
+
+        const uploadUrl = await new Promise((resolve, reject) => {
+            const req = https.request('https://catbox.moe/user/api.php', {
+                method: 'POST',
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) NebulaLauncher/5.0',
+                    'Content-Type': 'multipart/form-data; boundary=' + boundary,
+                    'Content-Length': bodyBuffer.length
+                },
+                timeout: 30000
+            }, (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                    const trimmed = data.trim();
+                    if (res.statusCode >= 200 && res.statusCode < 300 && trimmed.startsWith('http')) {
+                        resolve(trimmed);
+                    } else {
+                        reject(new Error(`Error del servidor (${res.statusCode}): ${trimmed}`));
+                    }
+                });
+            });
+
+            req.on('timeout', () => {
+                req.destroy();
+                reject(new Error('Tiempo de espera agotado al conectar con el servidor de subida'));
+            });
+
+            req.on('error', (err) => {
+                reject(new Error(`Fallo de conexión: ${err.message}`));
+            });
+
+            req.write(bodyBuffer);
+            req.end();
+        });
+
+        clipboard.writeText(uploadUrl);
+        return { success: true, url: uploadUrl };
+    } catch (err) {
+        console.error('[upload-screenshot-share error]', err);
+        return { success: false, error: err.message };
     }
 });
 
@@ -6849,6 +7078,8 @@ ipcMain.on('launch-game', async (event, data) => {
                 const files = fs.readdirSync(mDir);
                 const verStr = `${launchVersion || ''} ${launchModId || ''} ${data.version || ''}`;
                 const isSnapshot26 = verStr.includes('26.');
+                const hasVulkanMod = files.some(f => f.toLowerCase().includes('vulkanmod') && !f.toLowerCase().endsWith('.disabled'));
+                const hasMoreCulling = files.some(f => f.toLowerCase().includes('moreculling') && !f.toLowerCase().endsWith('.disabled'));
                 for (const f of files) {
                     const fLow = f.toLowerCase();
                     const isExtra = fLow.includes('sodium-extra') || fLow.includes('sodiumextra') || fLow.includes('reeses-sodium') || fLow.includes('reesessodium');
@@ -6857,6 +7088,28 @@ ipcMain.on('launch-game', async (event, data) => {
                         try {
                             fs.unlinkSync(path.join(mDir, f));
                             sendLog(`🧹 Mod inestable autolimpiado (${verStr.trim()}): ${f}`);
+                        } catch {}
+                    }
+                    // Auto-desactivar incompatibilidades de VulkanMod
+                    if (hasVulkanMod) {
+                        if (fLow.includes('immediatelyfast') && !fLow.endsWith('.disabled')) {
+                            try {
+                                fs.renameSync(path.join(mDir, f), path.join(mDir, f + '.disabled'));
+                                sendLog(`🛡️ Mod incompatible con Vulkan desactivado: ${f}`);
+                            } catch {}
+                        }
+                        if (fLow.includes('beryl') && !fLow.endsWith('.disabled')) {
+                            try {
+                                fs.renameSync(path.join(mDir, f), path.join(mDir, f + '.disabled'));
+                                sendLog(`🛡️ Mod experimental Beryl desactivado: ${f}`);
+                            } catch {}
+                        }
+                    }
+                    // Auto-desactivar duplicado de culling si MoreCulling ya está instalado
+                    if (hasMoreCulling && fLow.includes('entityculling') && !fLow.endsWith('.disabled')) {
+                        try {
+                            fs.renameSync(path.join(mDir, f), path.join(mDir, f + '.disabled'));
+                            sendLog(`🛡️ Mod duplicado de culling desactivado (MoreCulling activo): ${f}`);
                         } catch {}
                     }
                 }
@@ -6881,10 +7134,13 @@ ipcMain.on('launch-game', async (event, data) => {
             customLaunchArgs.push('--gameDir', instanceDir);
         }
 
+        const parsedRam = parseInt(data.ram) || 6;
+        const maxMemGb = Math.min(Math.max(2, parsedRam), 16);
+        const minMemGb = Math.max(2, Math.min(maxMemGb, 4));
         const opts = {
             authorization: auth, root: mcPath, javaPath: javaExe,
             version: versionOpts,
-            memory: { max: `${Math.min(Math.max(1, parseInt(data.ram) || 4), 16)}G`, min: '512M' },
+            memory: { max: `${maxMemGb}G`, min: `${minMemGb}G` },
             ...(instanceDir !== mcPath ? { overrides: { gameDirectory: instanceDir } } : {}),
             ...(customLaunchArgs.length > 0 ? { customLaunchArgs } : {})
         };
@@ -7150,12 +7406,13 @@ ipcMain.on('launch-game', async (event, data) => {
         try {
             if (!opts.customArgs) opts.customArgs = [];
             const cpuCores = require('os').cpus().length || 4;
+            // Balancear hilos de GC para procesadores de 4-8 núcleos evitando saturar el hilo de render/audio
+            const gcThreads = Math.max(2, Math.min(4, Math.floor(cpuCores / 2)));
             const perfArgs = [
                 `-XX:ActiveProcessorCount=${cpuCores}`,
-                `-XX:ParallelGCThreads=${cpuCores}`,
-                `-XX:ConcGCThreads=${Math.max(1, Math.floor(cpuCores / 4))}`,
+                `-XX:ParallelGCThreads=${gcThreads}`,
+                `-XX:ConcGCThreads=${Math.max(1, Math.floor(gcThreads / 2))}`,
                 '-XX:+AlwaysPreTouch',
-                '-XX:+UseNUMA',
                 '-XX:+PerfDisableSharedMem',
                 '-Dsun.rmi.dgc.server.gcInterval=2147483646',
                 '-Dsun.rmi.dgc.client.gcInterval=2147483646'
@@ -7165,7 +7422,7 @@ ipcMain.on('launch-game', async (event, data) => {
                     opts.customArgs.push(arg);
                 }
             }
-            sendLog(`🚀 Optimizador del Launcher: ${cpuCores} núcleos CPU asignados y RAM pre-reservada (-XX:+AlwaysPreTouch).`);
+            sendLog(`🚀 Optimizador del Launcher: ${cpuCores} núcleos CPU detectados, ${gcThreads} hilos de GC y RAM pre-reservada (-XX:+AlwaysPreTouch).`);
         } catch {}
 
         launcher.launch(opts);

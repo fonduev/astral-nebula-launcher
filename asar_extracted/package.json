@@ -1,6 +1,6 @@
 {
   "name": "astral-nebula-launcher",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "Nebula Launcher \u2014 Minecraft Launcher con soporte Premium, Forge y OptiFine",
   "main": "main.js",
   "dependencies": {

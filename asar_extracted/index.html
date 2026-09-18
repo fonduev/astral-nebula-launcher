@@ -1910,6 +1910,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   color: #f97316;
   background: rgba(249, 115, 22, 0.1);
 }
+.modpack-card-loader.vanilla {
+  border-color: rgba(74, 222, 128, 0.4);
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+}
+.modpack-card-loader.neoforge {
+  border-color: rgba(234, 179, 8, 0.4);
+  color: #eab308;
+  background: rgba(234, 179, 8, 0.1);
+}
+.modpack-card-loader.quilt {
+  border-color: rgba(192, 132, 252, 0.4);
+  color: #c084fc;
+  background: rgba(192, 132, 252, 0.1);
+}
 .modpack-card-actions {
   position: absolute;
   inset: 0;
@@ -5454,7 +5469,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
               <div>
                 <div style="font-size:.64rem;letter-spacing:.1em;color:var(--text-dim);text-transform:uppercase;margin-bottom:2px;">ESTADO DEL LAUNCHER</div>
                 <div style="font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:8px;">
-                  <span id="updater-panel-ver">Nebula Launcher v5.0.1</span>
+                  <span id="updater-panel-ver">Nebula Launcher v5.0.2</span>
                   <span style="font-size:0.65rem; background:rgba(74,222,128,0.15); color:#4ade80; border:1px solid rgba(74,222,128,0.4); padding:2px 7px; border-radius:10px;">🟢 Actualizado</span>
                 </div>
               </div>
@@ -5499,12 +5514,44 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         </div>
 
         <div class="changelog-container">
-          <!-- Versión 5.0.1 (Actual) -->
+          <!-- Versión 5.0.2 (Actual) -->
+          <div class="changelog-card">
+            <div class="changelog-header">
+              <div class="changelog-ver">
+                <span>Versión 5.0.2</span>
+                <span class="changelog-badge-latest">Versión Activa</span>
+              </div>
+              <span class="changelog-date">18 Septiembre 2026</span>
+            </div>
+            <ul class="changelog-list">
+              <li class="changelog-item">
+                <span class="cl-tag cl-tag-new">Instancias</span>
+                <span><strong>Soporte para Minecraft Vanilla Puro:</strong> Crea instancias aisladas oficiales de Minecraft sin modloaders requeridos, con sus propios mundos, ajustes y texturas.</span>
+              </li>
+              <li class="changelog-item">
+                <span class="cl-tag cl-tag-art">Fondos</span>
+                <span><strong>Banners y Fondos Personalizados:</strong> Selector panorámico al crear modpacks, botón "Fondo" directo en tarjeta y reemplazo de imagen por defecto de Einstein.</span>
+              </li>
+              <li class="changelog-item">
+                <span class="cl-tag cl-tag-new">Mods</span>
+                <span><strong>Instalación Múltiple de Archivos .JAR:</strong> Selección simultánea de múltiples mods tanto al crear una instancia como en el gestor Nebula Studio.</span>
+              </li>
+              <li class="changelog-item">
+                <span class="cl-tag cl-tag-opt">Rendimiento</span>
+                <span><strong>Optimización Global de Juego:</strong> FPS desbloqueados (sin VSync forzado), tiempos de carga acelerados y argumentos de memoria JVM optimizados.</span>
+              </li>
+              <li class="changelog-item">
+                <span class="cl-tag cl-tag-new">UI</span>
+                <span><strong>Acceso Rápido desde Inicio:</strong> Botón directo "➕ Nueva Instancia" en el encabezado principal y barra de versiones simplificada.</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Versión 5.0.1 -->
           <div class="changelog-card">
             <div class="changelog-header">
               <div class="changelog-ver">
                 <span>Versión 5.0.1</span>
-                <span class="changelog-badge-latest">Versión Activa</span>
               </div>
               <span class="changelog-date">25 Agosto 2026</span>
             </div>
@@ -5723,9 +5770,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
             <h1 class="panel-title" id="play-title" style="margin:0 0 4px 0;">Iniciar Minecraft</h1>
             <p class="panel-sub" id="play-subtitle" style="margin:0;">Minecraft cargado y listo.</p>
           </div>
-          <div class="engine-status-pill" id="engine-status-pill" title="Estado de la instancia">
-            <span class="engine-status-dot" id="engine-status-dot"></span>
-            <span class="engine-status-text" id="engine-status-text">Motor Listo</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button class="btn btn-glass btn-sm" id="btn-quick-create-instance" onclick="showCreateModpackModal(true)" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(56, 189, 248, 0.2)); border: 1px solid var(--accent); color: white; font-weight: 700; border-radius: 10px; padding: 7px 14px; display: flex; align-items: center; gap: 7px; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.3); cursor: pointer; transition: all 0.25s ease;" title="Crear una nueva instancia o modpack independiente">
+              <span style="font-size:1rem;">➕</span> <span>Nueva Instancia</span>
+            </button>
+            <div class="engine-status-pill" id="engine-status-pill" title="Estado de la instancia">
+              <span class="engine-status-dot" id="engine-status-dot"></span>
+              <span class="engine-status-text" id="engine-status-text">Motor Listo</span>
+            </div>
           </div>
         </div>
 
@@ -5736,7 +5788,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
                 <div class="lc-title" style="margin:0;">VERSIÓN</div>
                 <div style="display:flex;gap:5px;align-items:center;">
                   <button class="vb-toggle-snap" id="vb-installed-toggle" onclick="vbToggleInstalledOnly()" title="Ver solo versiones instaladas" style="padding:2px 8px;font-size:0.65rem;border-radius:6px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:var(--text-dim);cursor:pointer;">⭐ INSTALADAS</button>
-                  <button class="vb-toggle-snap" id="vb-snap-toggle" onclick="vbToggleSnapshots()" title="Mostrar/ocultar snapshots">SNAP</button>
                 </div>
               </div>
               <input class="vb-search" id="vb-search" placeholder="🔍 Buscar versión..." oninput="vbFilterList()" />
@@ -7006,7 +7057,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
 
 
-<div id="launcher-version-tag" style="position: fixed; right: 16px; bottom: 14px; font-size: 0.68rem; color: rgba(255, 255, 255, 0.22); font-family: 'Outfit', sans-serif; font-weight: 700; pointer-events: none; z-index: 99999; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.6);">v5.0.1</div>
+<div id="launcher-version-tag" style="position: fixed; right: 16px; bottom: 14px; font-size: 0.68rem; color: rgba(255, 255, 255, 0.22); font-family: 'Outfit', sans-serif; font-weight: 700; pointer-events: none; z-index: 99999; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.6);">v5.0.2</div>
 
 <script>
 const { ipcRenderer: ipc } = require('electron');
@@ -7585,8 +7636,9 @@ async function populateInstalledModpacksSelect() {
     modpacks.forEach(m => {
       const opt = document.createElement('option');
       opt.value = m.folderName;
-      const loaderName = m.loader.charAt(0).toUpperCase() + m.loader.slice(1);
-      opt.textContent = `${m.name} (${loaderName} ${m.mcVersion})`;
+      const isVanilla = !m.loader || m.loader.toLowerCase() === 'vanilla';
+      const loaderName = isVanilla ? 'Vanilla' : (m.loader.charAt(0).toUpperCase() + m.loader.slice(1));
+      opt.textContent = isVanilla ? `${m.name} (Vanilla ${m.mcVersion})` : `${m.name} (${loaderName} ${m.mcVersion})`;
       select.appendChild(opt);
     });
     // Restore selection if it still exists
@@ -7624,21 +7676,26 @@ function onModpackSelectChange() {
       versionSelect.value = mp.mcVersion;
 
       // Asegurar que el loader del modpack esté en modSelect
-      const loaderName = mp.loader.charAt(0).toUpperCase() + mp.loader.slice(1);
-      let hasMod = false;
-      for (let i = 0; i < modSelect.options.length; i++) {
-        if (modSelect.options[i].textContent.includes(loaderName) && modSelect.options[i].textContent.includes(mp.loaderVersion)) {
-          hasMod = true;
-          modSelect.value = modSelect.options[i].value;
-          break;
+      const isVanilla = !mp.loader || mp.loader.toLowerCase() === 'vanilla';
+      if (isVanilla) {
+        modSelect.value = '';
+      } else {
+        const loaderName = mp.loader.charAt(0).toUpperCase() + mp.loader.slice(1);
+        let hasMod = false;
+        for (let i = 0; i < modSelect.options.length; i++) {
+          if (modSelect.options[i].textContent.includes(loaderName) && modSelect.options[i].textContent.includes(mp.loaderVersion)) {
+            hasMod = true;
+            modSelect.value = modSelect.options[i].value;
+            break;
+          }
         }
-      }
-      if (!hasMod) {
-        const opt = document.createElement('option');
-        opt.value = `${mp.loader}-${mp.loaderVersion}`;
-        opt.textContent = `${loaderName} ${mp.loaderVersion}`;
-        modSelect.appendChild(opt);
-        modSelect.value = opt.value;
+        if (!hasMod) {
+          const opt = document.createElement('option');
+          opt.value = `${mp.loader}-${mp.loaderVersion}`;
+          opt.textContent = `${loaderName} ${mp.loaderVersion}`;
+          modSelect.appendChild(opt);
+          modSelect.value = opt.value;
+        }
       }
     }
 
@@ -10225,7 +10282,7 @@ document.getElementById('off-user').addEventListener('keydown', e=>{ if(e.key===
 
 // ═══════ MODPACKS FRONTEND LOGIC ═══════
 let currentModpacksView = 'my';
-const DEFAULT_SCREENSHOT = 'https://images.unsplash.com/photo-1607988795691-3d0147b43231?w=500';
+const DEFAULT_SCREENSHOT = 'assets/wallpapers/nebula.jpg';
 
 function switchModpacksView(view) {
   currentModpacksView = view;
@@ -10267,13 +10324,21 @@ async function loadInstalledModpacks() {
     }
 
     grid.innerHTML = modpacks.map(m => {
-      const bgImg = m.screenshotUrl || DEFAULT_SCREENSHOT;
-      const iconImg = m.iconUrl || '📦';
-      const loaderClass = m.loader.toLowerCase();
-      const loaderName = m.loader.charAt(0).toUpperCase() + m.loader.slice(1);
+      const rawBg = m.screenshotUrl || DEFAULT_SCREENSHOT;
+      const normBg = rawBg.replace(/\\/g, '/');
+      const bgImg = (normBg.startsWith('http') || normBg.startsWith('assets') || normBg.startsWith('file://')) ? normBg : `file:///${normBg}`;
       
-      const iconHtml = m.iconUrl 
-        ? `<img src="${m.iconUrl}" class="modpack-card-icon">`
+      const rawIcon = m.iconUrl || '';
+      const normIcon = rawIcon.replace(/\\/g, '/');
+      const iconSrc = normIcon ? ((normIcon.startsWith('http') || normIcon.startsWith('assets') || normIcon.startsWith('file://') || normIcon.startsWith('data:')) ? normIcon : `file:///${normIcon}`) : '';
+      
+      const isVanilla = !m.loader || m.loader.toLowerCase() === 'vanilla';
+      const loaderClass = isVanilla ? 'vanilla' : m.loader.toLowerCase();
+      const loaderName = isVanilla ? 'Vanilla' : (m.loader.charAt(0).toUpperCase() + m.loader.slice(1));
+      const loaderVerText = (isVanilla || !m.loaderVersion) ? '' : ` ${m.loaderVersion}`;
+      
+      const iconHtml = iconSrc 
+        ? `<img src="${iconSrc}" class="modpack-card-icon">`
         : `<div class="modpack-card-icon" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem;">📦</div>`;
 
       return `
@@ -10290,16 +10355,17 @@ async function loadInstalledModpacks() {
             
             <div class="modpack-card-meta">
               <span>MC ${m.mcVersion}</span>
-              <span class="modpack-card-loader ${loaderClass}">${loaderName} ${m.loaderVersion}</span>
+              <span class="modpack-card-loader ${loaderClass}">${loaderName}${loaderVerText}</span>
             </div>
           </div>
 
-          <div class="modpack-card-actions" style="display: flex; flex-direction: column !important; gap: 8px; padding: 14px 16px; justify-content: center; box-sizing: border-box;">
-            <button class="btn btn-primary" style="width: 100%; height: 42px; font-size: 0.95rem; font-weight: 800; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);" onclick="launchModpack('${m.folderName}')">🎮 JUGAR</button>
-            <div style="display: flex; gap: 6px; width: 100%;">
-              <button class="btn btn-glass" style="flex: 1; height: 36px; font-size: 0.76rem; font-weight: 600; padding: 0; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="openModpackEditor('${m.folderName}', '${m.name.replace(/'/g, "\\'")}')">🛠️ Mods</button>
-              <button class="btn btn-glass" style="flex: 1; height: 36px; font-size: 0.76rem; font-weight: 600; padding: 0; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="openChangeVersionModal('${m.folderName}', '${m.name.replace(/'/g, "\\'")}', '${m.loaderVersion}', '${m.mcVersion}')">⚙️ Versión</button>
-              <button class="btn btn-glass" style="flex: 1; height: 36px; font-size: 0.76rem; font-weight: 600; padding: 0; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.15); color: #e9d5ff;" onclick="openShareModpackModal('${m.folderName}', '${m.name.replace(/'/g, "\\'")}')" title="Compartir modpack con Código Nebula">⚡ Compartir</button>
+          <div class="modpack-card-actions" style="display: flex; flex-direction: column !important; gap: 8px; padding: 12px 14px; justify-content: center; box-sizing: border-box;">
+            <button class="btn btn-primary" style="width: 100%; height: 38px; font-size: 0.92rem; font-weight: 800; border-radius: 9px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);" onclick="launchModpack('${m.folderName}')">🎮 JUGAR</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; width: 100%;">
+              <button class="btn btn-glass" style="height: 32px; font-size: 0.74rem; font-weight: 600; padding: 0 4px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="openModpackEditor('${m.folderName}', '${m.name.replace(/'/g, "\\'")}')">🛠️ Mods</button>
+              <button class="btn btn-glass" style="height: 32px; font-size: 0.74rem; font-weight: 600; padding: 0 4px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px;" onclick="openChangeVersionModal('${m.folderName}', '${m.name.replace(/'/g, "\\'")}', '${m.loaderVersion}', '${m.mcVersion}')">⚙️ Versión</button>
+              <button class="btn btn-glass" style="height: 32px; font-size: 0.74rem; font-weight: 600; padding: 0 4px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.15); color: #e9d5ff;" onclick="promptChangeModpackBanner('${m.folderName}', '${m.name.replace(/'/g, "\\'")}')" title="Cambiar imagen de fondo de este modpack">🖼️ Fondo</button>
+              <button class="btn btn-glass" style="height: 32px; font-size: 0.74rem; font-weight: 600; padding: 0 4px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.15); color: #bae6fd;" onclick="openShareModpackModal('${m.folderName}', '${m.name.replace(/'/g, "\\'")}')" title="Compartir modpack con Código Nebula">⚡ Compartir</button>
             </div>
           </div>
         </div>
@@ -10307,6 +10373,25 @@ async function loadInstalledModpacks() {
     }).join('');
   } catch (err) {
     grid.innerHTML = `<div style="color:var(--red);text-align:center;padding:40px;width:100%;">Error al cargar modpacks: ${err.message}</div>`;
+  }
+}
+
+async function promptChangeModpackBanner(folderName, modpackName) {
+  try {
+    const res = await ipc.invoke('select-image-file');
+    if (res && !res.canceled && res.base64) {
+      toast(`🖼️ Actualizando fondo de "${modpackName}"...`, 'info');
+      const updateRes = await ipc.invoke('update-modpack-banner', { folderName, bgBase64: res.base64 });
+      if (updateRes && updateRes.success) {
+        toast(`✅ ¡Fondo de "${modpackName}" actualizado!`, 'success');
+        await loadInstalledModpacks();
+      } else {
+        toast(`❌ Error: ${updateRes?.error || 'No se pudo actualizar'}`, 'error');
+      }
+    }
+  } catch (err) {
+    console.error('Error changing banner:', err);
+    toast(`❌ Error: ${err.message}`, 'error');
   }
 }
 
@@ -12230,6 +12315,20 @@ function updateMyStatus(status, activity) {
         </div>
       </div>
 
+      <!-- Fondo / Banner de la Tarjeta -->
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <label class="label" style="margin: 0; font-size: 0.75rem;">🖼️ Imagen de Fondo (Banner de la Tarjeta)</label>
+          <span style="font-size: 0.65rem; color: var(--text-dim);">Reemplaza la imagen predeterminada</span>
+        </div>
+        <div id="cm-bg-preview" onclick="selectCmBanner()" style="width: 100%; height: 75px; border-radius: 12px; border: 1.5px dashed rgba(255,255,255,0.2); background: linear-gradient(135deg, rgba(30, 27, 75, 0.7), rgba(15, 23, 42, 0.85)), url('assets/wallpapers/nebula.jpg') center/cover; cursor: pointer; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+          <div id="cm-bg-overlay" style="background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 20px; font-size: 0.72rem; color: #fff; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,0.15);">
+            <span>📁</span> <span>Haz clic para elegir imagen de fondo</span>
+          </div>
+        </div>
+        <input type="file" id="cm-bg-input" accept="image/*" onchange="previewCmBg(this.files[0])" style="display:none;">
+      </div>
+
       <!-- Configuración del Loader -->
       <div style="display: flex; gap: 14px;">
         <div style="flex: 1;">
@@ -12237,9 +12336,10 @@ function updateMyStatus(status, activity) {
           <select class="inp" id="cm-version-select" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.3); color: white; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); height: 38px; outline: none; padding: 0 10px; font-size: 0.85rem;"></select>
         </div>
         <div style="flex: 1;">
-          <label class="label" style="margin-bottom: 4px; font-size: 0.75rem;">Mod Loader</label>
-          <select class="inp" id="cm-loader-select" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.3); color: white; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); height: 38px; outline: none; padding: 0 10px; font-size: 0.85rem;">
-            <option value="fabric">Fabric</option>
+          <label class="label" style="margin-bottom: 4px; font-size: 0.75rem;">Tipo / Mod Loader</label>
+          <select class="inp" id="cm-loader-select" onchange="onCmLoaderChange(this.value)" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.3); color: white; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); height: 38px; outline: none; padding: 0 10px; font-size: 0.85rem;">
+            <option value="fabric" selected>Fabric (Recomendado)</option>
+            <option value="vanilla">Vanilla (Oficial sin mods)</option>
             <option value="forge">Forge</option>
             <option value="neoforge">NeoForge</option>
             <option value="quilt">Quilt</option>
@@ -12247,10 +12347,32 @@ function updateMyStatus(status, activity) {
         </div>
       </div>
 
+      <!-- Selector Múltiple de Mods Iniciales (.JAR) -->
+      <div id="cm-mods-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 12px; transition: all 0.2s ease;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <div>
+            <label class="label" style="margin: 0; font-size: 0.75rem; font-weight: 700; color: var(--text);">📦 Mods Iniciales (.jar)</label>
+            <div id="cm-mods-hint" style="font-size: 0.65rem; color: var(--text-dim);">Elige uno o varios archivos .jar a la vez para instalar</div>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button type="button" id="cm-select-mods-btn" class="btn btn-glass btn-sm" onclick="selectInitialModsDialog()" style="font-size: 0.72rem; padding: 4px 10px; background: rgba(168,85,247,0.2); border-color: rgba(168,85,247,0.4); color: #e9d5ff;">
+              ➕ Seleccionar .JARs
+            </button>
+            <button type="button" id="cm-clear-mods-btn" class="btn btn-glass btn-sm" onclick="clearSelectedInitialMods()" style="display: none; font-size: 0.72rem; padding: 4px 8px; color: #f43f5e;">
+              ✕ Limpiar
+            </button>
+          </div>
+        </div>
+        <input type="file" id="cm-mods-input" accept=".jar" multiple onchange="onInitialModsSelected(this.files)" style="display:none;">
+        <div id="cm-mods-preview-list" style="max-height: 75px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 4px; padding-top: 2px;">
+          <span style="font-size: 0.7rem; color: var(--text-dim); font-style: italic;">Sin mods seleccionados (puedes incluirlos ahora o agregarlos después).</span>
+        </div>
+      </div>
+
       <!-- Botones de Acción -->
-      <div style="display: flex; gap: 14px; margin-top: 10px;">
+      <div style="display: flex; gap: 14px; margin-top: 6px;">
         <button class="btn btn-ghost" style="flex: 1; height: 42px;" onclick="closeCreateModpackModal()">Cancelar</button>
-        <button class="btn btn-primary" id="btn-cm-confirm" style="flex: 1; height: 42px;" onclick="createCustomModpack()">Crear Modpack</button>
+        <button class="btn btn-primary" id="btn-cm-confirm" style="flex: 1; height: 42px; font-weight: 700;" onclick="createCustomModpack()">Crear Instancia</button>
       </div>
     </div>
   </div>
@@ -12269,12 +12391,13 @@ function updateMyStatus(status, activity) {
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="btn btn-glass btn-sm" style="font-size: 0.8rem; padding: 6px 12px; border-radius: 10px; border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.15); color: #e9d5ff;" onclick="changeActiveModpackBanner()" title="Cambiar imagen de fondo / banner de este modpack">🖼️ Cambiar Fondo</button>
           <button class="btn btn-glass btn-sm" style="font-size: 0.85rem; padding: 6px 12px; border-radius: 10px;" onclick="closeModpackEditor()">✕ Cerrar</button>
         </div>
       </div>
 
-      <!-- Cuerpo del Editor -->
-      <div style="display: flex; gap: 20px; flex: 1; min-height: 0; overflow: hidden;">
+      <!-- Cuerpo del Editor (Split View) -->
+      <div style="display: flex; gap: 20px; flex: 1; overflow: hidden; min-height: 0;">
         
         <!-- Panel Izquierdo: Mods Instalados -->
         <div style="width: 35%; display: flex; flex-direction: column; background: #130f28; transform: translateZ(0); contain: paint layout; border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 15px; overflow: hidden; min-width: 0;">
@@ -12293,10 +12416,10 @@ function updateMyStatus(status, activity) {
 
           <!-- Botones de Acción de Mods -->
           <div style="margin-top: 12px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;">
-            <button class="btn btn-primary btn-full" style="font-size: 0.82rem; height: 40px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(59, 130, 246, 0.4)); border: 1px solid rgba(168, 85, 247, 0.5); font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 10px;" onclick="document.getElementById('mpe-jar-input').click()">
-              <span>➕</span> Instalar Mod desde .jar local
+            <button class="btn btn-primary btn-full" style="font-size: 0.82rem; height: 40px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(59, 130, 246, 0.4)); border: 1px solid rgba(168, 85, 247, 0.5); font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 10px;" onclick="selectMpeJarFiles()">
+              <span>➕</span> Instalar Mods desde .jar (Múltiples)
             </button>
-            <input type="file" id="mpe-jar-input" accept=".jar" onchange="uploadModToActiveModpack(this.files[0])" style="display:none;">
+            <input type="file" id="mpe-jar-input" accept=".jar" multiple onchange="uploadModToActiveModpack(this.files)" style="display:none;">
           </div>
         </div>
 
@@ -12579,10 +12702,12 @@ function updateMyStatus(status, activity) {
         <select id="ss-instance-select" class="inp" style="width:230px; height:38px; font-size:0.78rem; font-weight:600;" onchange="filterScreenshots()" title="Filtrar por instancia o modpack">
           <option value="all">🌐 Todas las instancias</option>
         </select>
-        <select id="ss-sort-select" class="inp" style="width:160px; height:38px; font-size:0.78rem;" onchange="filterScreenshots()">
+        <select id="ss-sort-select" class="inp" style="width:165px; height:38px; font-size:0.78rem;" onchange="filterScreenshots()">
           <option value="newest">📅 Más recientes</option>
           <option value="oldest">📅 Más antiguas</option>
           <option value="biggest">💾 Mayor tamaño</option>
+          <option value="smallest">💾 Menor tamaño</option>
+          <option value="name">🔤 Nombre (A-Z)</option>
         </select>
       </div>
 
@@ -12602,6 +12727,7 @@ function updateMyStatus(status, activity) {
       <div class="ss-lightbox-info">
         <span class="ss-lightbox-title" id="lb-filename">screenshot.png</span>
         <span class="ss-lightbox-badge" id="lb-instance" style="background:rgba(255,255,255,0.08); border-color:var(--accent); color:var(--accent);">🏷️ Instancia</span>
+        <span class="ss-lightbox-badge" id="lb-resolution" style="background:rgba(56,189,248,0.1); border-color:rgba(56,189,248,0.3); color:#38bdf8;">1920 × 1080 px</span>
         <span class="ss-lightbox-badge" id="lb-counter">1 / 1</span>
         <span style="font-size:0.72rem; color:var(--text-dim);" id="lb-date"></span>
       </div>
@@ -12626,15 +12752,31 @@ function updateMyStatus(status, activity) {
 
     <!-- Barra de herramientas inferior -->
     <div class="ss-lightbox-toolbar" onclick="event.stopPropagation()">
-      <button class="btn btn-primary" onclick="copyCurrentScreenshot()" style="gap:7px; display:flex; align-items:center; font-size:0.78rem; padding:8px 16px;">
+      <!-- Controles de Zoom y Rotación -->
+      <div style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.05); border-radius:12px; padding:3px 8px; border:1px solid rgba(255,255,255,0.08);">
+        <button class="btn btn-ghost" onclick="zoomLightbox(-0.25)" style="padding:4px 8px; font-size:0.8rem;" title="Reducir zoom (-)">🔍 -</button>
+        <span id="lb-zoom-text" style="font-size:0.72rem; font-weight:700; color:#e2e8f0; min-width:44px; text-align:center; user-select:none;">100%</span>
+        <button class="btn btn-ghost" onclick="zoomLightbox(0.25)" style="padding:4px 8px; font-size:0.8rem;" title="Aumentar zoom (+)">🔍 +</button>
+        <button class="btn btn-ghost" onclick="resetLightboxTransform()" style="padding:4px 7px; font-size:0.75rem;" title="Restablecer escala (0)">↺</button>
+        <button class="btn btn-ghost" onclick="rotateLightbox()" style="padding:4px 7px; font-size:0.75rem;" title="Rotar 90° (R)">↻</button>
+      </div>
+
+      <button id="lb-btn-copy" class="btn btn-primary" onclick="copyCurrentScreenshot()" style="gap:7px; display:flex; align-items:center; font-size:0.78rem; padding:8px 16px;" title="Copiar como imagen nativa para pegar en Discord con Ctrl+V (Ctrl+C)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        Copiar Imagen
+        <span id="lb-btn-copy-text">Copiar Imagen</span>
       </button>
-      <button class="btn btn-ghost" onclick="revealCurrentScreenshot()" style="gap:7px; display:flex; align-items:center; font-size:0.78rem; padding:8px 14px;">
+
+      <button id="lb-btn-upload" class="btn btn-ghost" onclick="uploadCurrentScreenshot()" style="gap:7px; display:flex; align-items:center; font-size:0.78rem; padding:8px 15px; color:#38bdf8; border-color:rgba(56,189,248,0.25);" title="Subir a la nube y copiar enlace directo público">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span id="lb-btn-upload-text">Subir y Compartir</span>
+      </button>
+
+      <button class="btn btn-ghost" onclick="revealCurrentScreenshot()" style="gap:7px; display:flex; align-items:center; font-size:0.78rem; padding:8px 14px;" title="Mostrar archivo en el Explorador de Windows">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         Mostrar en Carpeta
       </button>
-      <button class="btn btn-ghost" onclick="deleteCurrentScreenshot()" style="gap:7px; display:flex; align-items:center; font-size:0.78rem; padding:8px 14px; color:#f87171;" title="Eliminar captura del disco">
+
+      <button class="btn btn-ghost" onclick="deleteCurrentScreenshot()" style="gap:7px; display:flex; align-items:center; font-size:0.78rem; padding:8px 14px; color:#f87171;" title="Eliminar captura permanentemente del disco (Delete)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         Eliminar
       </button>
@@ -13657,15 +13799,21 @@ function updateMyStatus(status, activity) {
         filtered.sort((a, b) => a.mtime - b.mtime);
       } else if (sort === 'biggest') {
         filtered.sort((a, b) => b.size - a.size);
+      } else if (sort === 'smallest') {
+        filtered.sort((a, b) => a.size - b.size);
+      } else if (sort === 'name') {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
       }
 
       currentFilteredScreenshots = filtered;
 
       if (countBadge) {
+        const totalBytes = filtered.reduce((acc, cur) => acc + (cur.size || 0), 0);
+        const storageStr = formatBytes(totalBytes);
         if (instFilter !== 'all') {
-          countBadge.textContent = `${filtered.length} de ${allScreenshots.length} (${instFilter})`;
+          countBadge.textContent = `${filtered.length} de ${allScreenshots.length} (${instFilter}) • ${storageStr}`;
         } else {
-          countBadge.textContent = `${filtered.length} captura${filtered.length === 1 ? '' : 's'} en total`;
+          countBadge.textContent = `${filtered.length} captura${filtered.length === 1 ? '' : 's'} • ${storageStr}`;
         }
       }
 
@@ -13713,13 +13861,16 @@ function updateMyStatus(status, activity) {
               <span class="ss-instance-chip" title="Instancia / Modpack: ${instTag}">🏷️ ${instTag}</span>
               <img class="ss-thumb-img" src="${ss.url}" alt="${ss.name}" onerror="this.style.opacity='0.5';">
               <div class="ss-thumb-overlay">
-                <button class="ss-btn-action" onclick="event.stopPropagation(); openLightbox(${idx})" title="Ampliar">
+                <button class="ss-btn-action" onclick="event.stopPropagation(); openLightbox(${idx})" title="Ampliar pantalla completa">
                   🔍
                 </button>
-                <button class="ss-btn-action" onclick="event.stopPropagation(); copyScreenshotByIndex(${idx})" title="Copiar al portapapeles">
+                <button class="ss-btn-action" onclick="event.stopPropagation(); copyScreenshotByIndex(${idx})" title="Copiar imagen HD (Ctrl+C)">
                   📋
                 </button>
-                <button class="ss-btn-action" onclick="event.stopPropagation(); revealScreenshotByIndex(${idx})" title="Mostrar en carpeta">
+                <button class="ss-btn-action" onclick="event.stopPropagation(); uploadScreenshotByIndex(${idx})" title="Subir y compartir enlace público (1 clic)" style="color:#38bdf8;">
+                  🌐
+                </button>
+                <button class="ss-btn-action" onclick="event.stopPropagation(); revealScreenshotByIndex(${idx})" title="Mostrar en carpeta de Windows">
                   📁
                 </button>
                 <button class="ss-btn-action" onclick="event.stopPropagation(); deleteScreenshotByIndex(${idx})" title="Eliminar" style="color:#f87171;">
@@ -13734,6 +13885,49 @@ function updateMyStatus(status, activity) {
           </div>
         `;
       }).join('');
+    }
+
+    // ── Estado del Visor Cósmico (Zoom, Paneo, Rotación) ─────────────
+    let lbZoom = 1;
+    let lbRotation = 0;
+    let lbPanX = 0;
+    let lbPanY = 0;
+    let lbIsDragging = false;
+    let lbStartX = 0;
+    let lbStartY = 0;
+
+    function applyLightboxTransform() {
+      const img = document.getElementById('lb-image');
+      const zoomText = document.getElementById('lb-zoom-text');
+      if (img) {
+        img.style.transform = `translate(${lbPanX}px, ${lbPanY}px) scale(${lbZoom}) rotate(${lbRotation}deg)`;
+        img.style.cursor = lbZoom > 1 ? (lbIsDragging ? 'grabbing' : 'grab') : 'default';
+      }
+      if (zoomText) {
+        zoomText.textContent = `${Math.round(lbZoom * 100)}%`;
+      }
+    }
+
+    function zoomLightbox(delta) {
+      lbZoom = Math.max(0.5, Math.min(4.0, parseFloat((lbZoom + delta).toFixed(2))));
+      if (lbZoom <= 1) {
+        lbPanX = 0;
+        lbPanY = 0;
+      }
+      applyLightboxTransform();
+    }
+
+    function resetLightboxTransform() {
+      lbZoom = 1;
+      lbRotation = 0;
+      lbPanX = 0;
+      lbPanY = 0;
+      applyLightboxTransform();
+    }
+
+    function rotateLightbox() {
+      lbRotation = (lbRotation + 90) % 360;
+      applyLightboxTransform();
     }
 
     // Lightbox handlers
@@ -13756,8 +13950,21 @@ function updateMyStatus(status, activity) {
       const counter = document.getElementById('lb-counter');
       const dateEl = document.getElementById('lb-date');
       const instBadge = document.getElementById('lb-instance');
+      const resBadge = document.getElementById('lb-resolution');
 
-      if (img) img.src = ss.url;
+      resetLightboxTransform();
+
+      if (img) {
+        img.src = ss.url;
+        img.onload = () => {
+          if (resBadge && img.naturalWidth && img.naturalHeight) {
+            resBadge.textContent = `${img.naturalWidth} × ${img.naturalHeight} px`;
+          }
+        };
+        if (img.complete && img.naturalWidth && img.naturalHeight && resBadge) {
+          resBadge.textContent = `${img.naturalWidth} × ${img.naturalHeight} px`;
+        }
+      }
       if (filename) filename.textContent = ss.name;
       if (counter) counter.textContent = `${index + 1} / ${currentFilteredScreenshots.length}`;
       if (dateEl) dateEl.textContent = `${formatScreenshotDate(ss.mtime)} • ${formatBytes(ss.size)}`;
@@ -13766,7 +13973,7 @@ function updateMyStatus(status, activity) {
         instBadge.title = `Carpeta: ${ss.instanceDir || ''}`;
       }
 
-      // Neutralizar temporalmente el drag-bar para que no intercepte clicks en ningun pixel del encabezado
+      // Neutralizar temporalmente el drag-bar para que no intercepte clicks
       const dragBar = document.getElementById('drag-bar');
       if (dragBar) {
         dragBar.style.webkitAppRegion = 'no-drag';
@@ -13803,14 +14010,54 @@ function updateMyStatus(status, activity) {
       const ss = currentFilteredScreenshots[idx];
       if (!ss) return;
       try {
+        const btnText = document.getElementById('lb-btn-copy-text');
         const res = await ipc.invoke('copy-screenshot-image', ss.path);
         if (res.success) {
-          toast('✅ ¡Imagen copiada al portapapeles! Puedes pegarla en Discord con Ctrl+V', 'success');
+          if (btnText) {
+            const prev = btnText.textContent;
+            btnText.textContent = '¡Copiada! ✅';
+            setTimeout(() => { btnText.textContent = prev; }, 1600);
+          }
+          toast('📋 ¡Imagen HD copiada al portapapeles! Pégala con Ctrl+V en Discord o WhatsApp.', 'success');
         } else {
           toast(`❌ Error al copiar: ${res.error}`, 'error');
         }
       } catch (e) {
         toast(`❌ Error al copiar imagen: ${e.message}`, 'error');
+      }
+    }
+
+    async function uploadCurrentScreenshot() {
+      await uploadScreenshotByIndex(currentLightboxIndex);
+    }
+
+    async function uploadScreenshotByIndex(idx) {
+      const ss = currentFilteredScreenshots[idx];
+      if (!ss) return;
+      const btnText = document.getElementById('lb-btn-upload-text');
+      const prevText = btnText ? btnText.textContent : '';
+
+      try {
+        if (btnText) btnText.textContent = '⏳ Subiendo...';
+        toast('⏳ Subiendo captura a la nube...', 'info');
+
+        const res = await ipc.invoke('upload-screenshot-share', ss.path);
+        if (res.success && res.url) {
+          if (btnText) {
+            btnText.textContent = '¡Enlace copiado! 🔗';
+            setTimeout(() => { btnText.textContent = prevText; }, 2200);
+          }
+          toast(`🌐 ¡Enlace directo copiado al portapapeles! ${res.url}`, 'success');
+          if (window.confirm(`¡Captura subida con éxito!\n\nEnlace copiado al portapapeles:\n${res.url}\n\n¿Deseas abrir la imagen en tu navegador web?`)) {
+            shell.openExternal(res.url);
+          }
+        } else {
+          if (btnText) btnText.textContent = prevText;
+          toast(`❌ Error al subir: ${res.error || 'Fallo desconocido'}`, 'error');
+        }
+      } catch (e) {
+        if (btnText) btnText.textContent = prevText;
+        toast(`❌ Error al subir captura: ${e.message}`, 'error');
       }
     }
 
@@ -13873,6 +14120,83 @@ function updateMyStatus(status, activity) {
         toast(`❌ Error al eliminar: ${e.message}`, 'error');
       }
     }
+
+    // Eventos de interacción del ratón y teclado en el Lightbox
+    window.addEventListener('DOMContentLoaded', () => {
+      const lbImg = document.getElementById('lb-image');
+      if (lbImg) {
+        // Rueda del ratón para Zoom in/out suave
+        lbImg.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          const delta = e.deltaY < 0 ? 0.25 : -0.25;
+          zoomLightbox(delta);
+        }, { passive: false });
+
+        // Doble clic para alternar entre 100% y 200%
+        lbImg.addEventListener('dblclick', (e) => {
+          e.stopPropagation();
+          if (lbZoom > 1.2) {
+            resetLightboxTransform();
+          } else {
+            lbZoom = 2;
+            applyLightboxTransform();
+          }
+        });
+
+        // Arrastrar para mover (Pan) cuando zoom > 1
+        lbImg.addEventListener('mousedown', (e) => {
+          if (lbZoom > 1) {
+            lbIsDragging = true;
+            lbStartX = e.clientX - lbPanX;
+            lbStartY = e.clientY - lbPanY;
+            applyLightboxTransform();
+            e.preventDefault();
+          }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+          if (lbIsDragging && lbZoom > 1) {
+            lbPanX = e.clientX - lbStartX;
+            lbPanY = e.clientY - lbStartY;
+            applyLightboxTransform();
+          }
+        });
+
+        window.addEventListener('mouseup', () => {
+          if (lbIsDragging) {
+            lbIsDragging = false;
+            applyLightboxTransform();
+          }
+        });
+      }
+
+      // Atajos de Teclado Universales para Lightbox
+      window.addEventListener('keydown', (e) => {
+        const lb = document.getElementById('screenshot-lightbox');
+        if (!lb || lb.style.display !== 'flex') return;
+
+        if (e.key === 'Escape') {
+          closeLightbox();
+        } else if (e.key === 'ArrowLeft') {
+          navigateLightbox(-1);
+        } else if (e.key === 'ArrowRight') {
+          navigateLightbox(1);
+        } else if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
+          e.preventDefault();
+          copyCurrentScreenshot();
+        } else if (e.key === '+' || e.key === '=') {
+          zoomLightbox(0.25);
+        } else if (e.key === '-' || e.key === '_') {
+          zoomLightbox(-0.25);
+        } else if (e.key === '0') {
+          resetLightboxTransform();
+        } else if (e.key === 'r' || e.key === 'R') {
+          rotateLightbox();
+        } else if (e.key === 'Delete') {
+          deleteCurrentScreenshot();
+        }
+      });
+    });
 
     
     
@@ -18039,14 +18363,57 @@ function openAddOverlaySkinModal() {
 
     // MODPACK CREATION MODAL LOGIC
     let cmIconBase64 = '';
+    let cmBgBase64 = '';
+    let cmSelectedModPaths = [];
+    let cmOpenedFromHome = false;
 
-    function showCreateModpackModal() {
+    function showCreateModpackModal(fromHome = false) {
+      cmOpenedFromHome = fromHome;
       document.getElementById('cm-name-input').value = '';
       document.getElementById('cm-desc-input').value = '';
       document.getElementById('cm-icon-preview').innerHTML = '📦';
       cmIconBase64 = '';
+      cmBgBase64 = '';
+      cmSelectedModPaths = [];
+
+      const loaderSel = document.getElementById('cm-loader-select');
+      if (loaderSel) {
+        loaderSel.value = 'fabric';
+      }
+      onCmLoaderChange('fabric');
+
+      const bgPreview = document.getElementById('cm-bg-preview');
+      if (bgPreview) {
+        bgPreview.style.backgroundImage = "linear-gradient(135deg, rgba(30, 27, 75, 0.7), rgba(15, 23, 42, 0.85)), url('assets/wallpapers/nebula.jpg')";
+        const overlay = document.getElementById('cm-bg-overlay');
+        if (overlay) overlay.innerHTML = '<span>📁</span> <span>Haz clic para elegir imagen de fondo</span>';
+      }
+
+      renderSelectedInitialMods();
       populateCmVersions();
       document.getElementById('create-modpack-modal').style.display = 'flex';
+    }
+
+    function onCmLoaderChange(val) {
+      const isVanilla = (val === 'vanilla');
+      const modsBox = document.getElementById('cm-mods-box');
+      const modsHint = document.getElementById('cm-mods-hint');
+      const selectBtn = document.getElementById('cm-select-mods-btn');
+      if (isVanilla) {
+        if (modsBox) modsBox.style.opacity = '0.55';
+        if (modsHint) modsHint.innerHTML = '<span style="color:#4ade80;font-weight:600;">✨ Instancia Vanilla pura: no requiere mods .jar (se ejecutará limpia y aislada).</span>';
+        if (selectBtn) {
+          selectBtn.style.pointerEvents = 'none';
+          selectBtn.style.opacity = '0.4';
+        }
+      } else {
+        if (modsBox) modsBox.style.opacity = '1';
+        if (modsHint) modsHint.textContent = 'Elige uno o varios archivos .jar a la vez para instalar';
+        if (selectBtn) {
+          selectBtn.style.pointerEvents = 'auto';
+          selectBtn.style.opacity = '1';
+        }
+      }
     }
 
     function closeCreateModpackModal() {
@@ -18064,6 +18431,96 @@ function openAddOverlaySkinModal() {
       reader.readAsDataURL(file);
     }
 
+    async function selectCmBanner() {
+      try {
+        const res = await ipc.invoke('select-image-file');
+        if (res && !res.canceled && res.base64) {
+          cmBgBase64 = res.base64;
+          const preview = document.getElementById('cm-bg-preview');
+          preview.style.backgroundImage = `linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%), url('${cmBgBase64}')`;
+          const overlay = document.getElementById('cm-bg-overlay');
+          if (overlay) overlay.innerHTML = '<span>✅</span> <span>Fondo personalizado listo (clic para cambiar)</span>';
+        }
+      } catch (e) {
+        document.getElementById('cm-bg-input').click();
+      }
+    }
+
+    function previewCmBg(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        cmBgBase64 = e.target.result;
+        const preview = document.getElementById('cm-bg-preview');
+        preview.style.backgroundImage = `linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%), url('${cmBgBase64}')`;
+        const overlay = document.getElementById('cm-bg-overlay');
+        if (overlay) overlay.innerHTML = '<span>✅</span> <span>Fondo personalizado listo (clic para cambiar)</span>';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function selectInitialModsDialog() {
+      try {
+        const res = await ipc.invoke('select-multiple-jar-files');
+        if (res && !res.canceled && res.filePaths && res.filePaths.length > 0) {
+          for (const p of res.filePaths) {
+            if (!cmSelectedModPaths.includes(p)) {
+              cmSelectedModPaths.push(p);
+            }
+          }
+          renderSelectedInitialMods();
+        }
+      } catch (err) {
+        document.getElementById('cm-mods-input').click();
+      }
+    }
+
+    function onInitialModsSelected(fileList) {
+      if (!fileList || fileList.length === 0) return;
+      for (let i = 0; i < fileList.length; i++) {
+        const f = fileList[i];
+        if (f.path && !cmSelectedModPaths.includes(f.path)) {
+          cmSelectedModPaths.push(f.path);
+        }
+      }
+      renderSelectedInitialMods();
+    }
+
+    function clearSelectedInitialMods() {
+      cmSelectedModPaths = [];
+      renderSelectedInitialMods();
+    }
+
+    function removeInitialMod(index) {
+      cmSelectedModPaths.splice(index, 1);
+      renderSelectedInitialMods();
+    }
+
+    function renderSelectedInitialMods() {
+      const container = document.getElementById('cm-mods-preview-list');
+      const clearBtn = document.getElementById('cm-clear-mods-btn');
+      if (!container) return;
+      
+      if (cmSelectedModPaths.length === 0) {
+        container.innerHTML = '<span style="font-size: 0.7rem; color: var(--text-dim); font-style: italic;">Sin mods seleccionados (puedes incluirlos ahora o agregarlos después).</span>';
+        if (clearBtn) clearBtn.style.display = 'none';
+        return;
+      }
+      
+      if (clearBtn) clearBtn.style.display = 'inline-flex';
+      
+      let html = `<div style="width: 100%; font-size: 0.72rem; font-weight: 700; color: #c084fc; margin-bottom: 4px;">📦 ${cmSelectedModPaths.length} mod(s) preparado(s):</div>`;
+      html += cmSelectedModPaths.map((p, idx) => {
+        const name = p.split(/[\\/]/).pop();
+        return `<span style="background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); color: #e9d5ff; font-size: 0.68rem; padding: 2px 7px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 2px;">
+          <span style="max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</span>
+          <span onclick="removeInitialMod(${idx})" style="cursor: pointer; opacity: 0.8; font-weight: bold; margin-left: 2px;" title="Quitar">✕</span>
+        </span>`;
+      }).join(' ');
+      
+      container.innerHTML = html;
+    }
+
     function populateCmVersions() {
       const sel = document.getElementById('cm-version-select');
       sel.innerHTML = '';
@@ -18079,6 +18536,7 @@ function openAddOverlaySkinModal() {
     }
 
     async function getLatestLoaderVersion(loader, mcVersion) {
+      if (loader === 'vanilla' || !loader) return '';
       try {
         if (loader === 'fabric') {
           const res = await fetch(`https://meta.fabricmc.net/v2/versions/loader/${mcVersion}`);
@@ -18135,36 +18593,58 @@ function openAddOverlaySkinModal() {
       const btn = document.getElementById('btn-cm-confirm');
       
       if (!name) {
-        toast('Por favor, ingresa el nombre del modpack.', 'error');
+        toast('Por favor, ingresa el nombre de la instancia.', 'error');
         return;
+      }
+
+      if (loader === 'vanilla') {
+        cmSelectedModPaths = [];
       }
       
       btn.disabled = true;
-      btn.textContent = '⏳ Creando carpeta...';
+      btn.textContent = '⏳ Creando instancia...';
       try {
         // Resolve loader version
         const loaderVersion = await getLatestLoaderVersion(loader, mcVersion);
         
+        const defaultDesc = (loader === 'vanilla')
+          ? 'Instancia Vanilla oficial creada en Nebula Launcher.'
+          : 'Instancia personalizada creada en Nebula Launcher.';
+
         const result = await ipc.invoke('create-custom-modpack', {
           name,
-          description: description || 'Modpack personalizado creado por el usuario.',
+          description: description || defaultDesc,
           mcVersion,
           loader,
           loaderVersion,
           iconBase64: cmIconBase64,
+          bgBase64: cmBgBase64,
+          selectedModPaths: cmSelectedModPaths,
           modsToDownload: []
         });
         
         if (result.success) {
-          toast(`✅ Modpack "${name}" creado con éxito!`, 'success');
+          if (loader === 'vanilla') {
+            toast(`✅ ¡Instancia Vanilla "${name}" creada con éxito!`, 'success');
+          } else {
+            toast(`✅ ¡Instancia "${name}" creada con éxito! (${result.installedModsCount || 0} mods instalados)`, 'success');
+          }
           closeCreateModpackModal();
-          switchModpacksView('my');
-          loadInstalledModpacks();
+          await loadInstalledModpacks();
           populateInstalledModpacksSelect();
-          // Automatically open the new premium mod manager for the newly created modpack!
-          setTimeout(() => {
-            openModpackEditor(result.folderName, name);
-          }, 500);
+          
+          if (cmOpenedFromHome) {
+            showTab('play');
+            // Auto-select the newly created modpack on the home screen
+            setTimeout(() => {
+              vbSelectModpack(result.folderName);
+            }, 300);
+          } else {
+            switchModpacksView('my');
+            setTimeout(() => {
+              openModpackEditor(result.folderName, name);
+            }, 500);
+          }
         } else {
           toast(`❌ Error: ${result.error}`, 'error');
         }
@@ -18173,7 +18653,7 @@ function openAddOverlaySkinModal() {
         toast(`❌ Error: ${err.message}`, 'error');
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Crear Modpack';
+        btn.textContent = 'Crear Instancia';
       }
     }
 
@@ -18202,6 +18682,7 @@ function openAddOverlaySkinModal() {
       if (!loader || !mcVersion) {
         const lower = versionId.toLowerCase();
         if (lower.includes('fabric')) loader = 'fabric';
+        else if (lower.includes('vanilla')) loader = 'vanilla';
         else if (lower.includes('forge')) loader = 'forge';
         else if (lower.includes('neoforge')) loader = 'neoforge';
         else if (lower.includes('quilt')) loader = 'quilt';
@@ -18221,10 +18702,8 @@ function openAddOverlaySkinModal() {
       activeEditorLoader = loader;
       activeEditorMcVersion = mcVersion;
       
-      document.getElementById('mpe-subtitle').textContent = `Minecraft ${mcVersion} • Loader: ${loader.toUpperCase()}`;
-      document.getElementById('mpe-search-input').value = '';
-      document.getElementById('mpe-local-search').value = '';
-            document.getElementById('mpe-subtitle').textContent = `Minecraft ${mcVersion} • Loader: ${loader.toUpperCase()}`;
+      const subtitleLoader = (loader.toLowerCase() === 'vanilla') ? 'Vanilla Oficial (Sin Mods)' : `Loader: ${loader.toUpperCase()}`;
+      document.getElementById('mpe-subtitle').textContent = `Minecraft ${mcVersion} • ${subtitleLoader}`;
       document.getElementById('mpe-search-input').value = '';
       document.getElementById('mpe-local-search').value = '';
       document.getElementById('mpe-search-results').innerHTML = `
@@ -18323,20 +18802,70 @@ function openAddOverlaySkinModal() {
       }
     }
 
-    async function uploadModToActiveModpack(file) {
-      if (!file) return;
-      toast(`📥 Instalando mod: ${file.name}...`, 'info');
+    async function changeActiveModpackBanner() {
+      if (!activeEditorVersionId) return;
+      let displayName = activeEditorVersionId;
+      if (window.installedModpacks) {
+        const mp = window.installedModpacks.find(x => x.folderName === activeEditorVersionId);
+        if (mp) displayName = mp.name;
+      }
+      await promptChangeModpackBanner(activeEditorVersionId, displayName);
+    }
+
+    async function selectMpeJarFiles() {
       try {
-        const result = await ipc.invoke('install-mod', { file: file.path, versionId: activeEditorVersionId });
-        if (result.success) {
-          toast(`✅ Mod ${file.name} instalado con éxito!`, 'success');
-          await loadModpackEditorMods();
-          renderMpeSearchResults();
-        } else {
-          toast(`❌ Error: ${result.error}`, 'error');
+        const res = await ipc.invoke('select-multiple-jar-files');
+        if (res && !res.canceled && res.filePaths && res.filePaths.length > 0) {
+          toast(`📥 Instalando ${res.filePaths.length} mods seleccionados...`, 'info');
+          const result = await ipc.invoke('install-multiple-mods', { files: res.filePaths, versionId: activeEditorVersionId });
+          if (result.success) {
+            toast(`✅ ¡${result.count} mods instalados con éxito!`, 'success');
+            await loadModpackEditorMods();
+            renderMpeSearchResults();
+          } else {
+            toast(`❌ Error: ${result.error}`, 'error');
+          }
         }
       } catch (err) {
-        toast(`❌ Error: ${err.message}`, 'error');
+        document.getElementById('mpe-jar-input').click();
+      }
+    }
+
+    async function uploadModToActiveModpack(files) {
+      if (!files) return;
+      const fileArr = files instanceof FileList ? Array.from(files) : (Array.isArray(files) ? files : [files]);
+      if (fileArr.length === 0) return;
+
+      if (fileArr.length === 1) {
+        const file = fileArr[0];
+        toast(`📥 Instalando mod: ${file.name}...`, 'info');
+        try {
+          const result = await ipc.invoke('install-mod', { file: file.path, versionId: activeEditorVersionId });
+          if (result.success) {
+            toast(`✅ Mod ${file.name} instalado con éxito!`, 'success');
+            await loadModpackEditorMods();
+            renderMpeSearchResults();
+          } else {
+            toast(`❌ Error: ${result.error}`, 'error');
+          }
+        } catch (err) {
+          toast(`❌ Error: ${err.message}`, 'error');
+        }
+      } else {
+        toast(`📥 Instalando ${fileArr.length} mods en lote...`, 'info');
+        try {
+          const paths = fileArr.map(f => f.path);
+          const result = await ipc.invoke('install-multiple-mods', { files: paths, versionId: activeEditorVersionId });
+          if (result.success) {
+            toast(`✅ ¡${result.count} mods instalados con éxito!`, 'success');
+            await loadModpackEditorMods();
+            renderMpeSearchResults();
+          } else {
+            toast(`❌ Error: ${result.error}`, 'error');
+          }
+        } catch (err) {
+          toast(`❌ Error: ${err.message}`, 'error');
+        }
       }
     }
 
@@ -18345,6 +18874,17 @@ function openAddOverlaySkinModal() {
       const sortSelect = document.getElementById('mpe-sort-select');
       const sortValue = sortSelect ? sortSelect.value : (query ? 'relevance' : 'downloads');
       const resultsDiv = document.getElementById('mpe-search-results');
+      
+      if (activeEditorLoader === 'vanilla') {
+        resultsDiv.innerHTML = `
+          <div style="color:var(--text-dim); text-align:center; padding:35px 20px; font-size:0.85rem; line-height:1.6;">
+            <div style="font-size:2rem; margin-bottom:8px;">🌿</div>
+            <div style="font-weight:700; color:#4ade80; font-size:0.95rem; margin-bottom:4px;">Instancia Vanilla Oficial</div>
+            Esta instancia está configurada en Vanilla puro (sin modloader). Para instalar mods de Fabric o Forge, crea una instancia seleccionando el loader correspondiente.
+          </div>
+        `;
+        return;
+      }
       
       const isPopularPreview = !query;
       resultsDiv.innerHTML = isPopularPreview
