@@ -3743,12 +3743,17 @@ ipcMain.handle('get-installed-modpacks', async (event) => {
             if (fs.existsSync(instanceJsonPath)) {
                 try {
                     const meta = JSON.parse(fs.readFileSync(instanceJsonPath, 'utf8'));
+                    const rawName = (meta.name && typeof meta.name === 'string') ? meta.name.trim() : '';
+                    const safeName = (rawName && rawName !== '—' && rawName !== '-' && rawName !== '_') ? rawName : dirName;
+                    const safeMc = (meta.mcVersion && meta.mcVersion !== 'undefined' && meta.mcVersion !== 'Desconocido') ? meta.mcVersion : (meta.version || '1.20.1');
+                    const safeLoader = (meta.loader && meta.loader !== 'undefined') ? meta.loader : 'vanilla';
+
                     modpacks.push({
                         folderName: dirName,
-                        name: meta.name || dirName,
-                        mcVersion: meta.mcVersion,
-                        loader: meta.loader,
-                        loaderVersion: meta.loaderVersion,
+                        name: safeName,
+                        mcVersion: safeMc,
+                        loader: safeLoader,
+                        loaderVersion: (meta.loaderVersion && meta.loaderVersion !== 'undefined') ? meta.loaderVersion : '',
                         iconUrl: meta.iconUrl || '',
                         screenshotUrl: meta.screenshotUrl || '',
                         description: meta.description || '',
@@ -3775,15 +3780,16 @@ ipcMain.handle('get-installed-modpacks', async (event) => {
 });
 
 function getFallbackInstanceMeta(dirName) {
+    const safeName = (dirName && dirName !== '—' && dirName !== '-' && dirName !== '_') ? dirName : 'Instancia';
     return {
         folderName: dirName,
-        name: dirName,
-        mcVersion: 'Desconocido',
-        loader: 'Desconocido',
+        name: safeName,
+        mcVersion: '1.20.1',
+        loader: 'vanilla',
         loaderVersion: '',
         iconUrl: '',
         screenshotUrl: '',
-        description: 'Instancia local sin metadatos.'
+        description: 'Instancia local.'
     };
 }
 
@@ -5564,12 +5570,21 @@ ipcMain.handle('quarantine-flagged-mod', async (event, { folderName, filename })
 ipcMain.handle('create-custom-modpack', async (event, data) => {
     try {
         const { name, description, mcVersion, loader, loaderVersion, iconBase64, bgBase64, selectedModPaths } = data;
+        const rawName = (name && typeof name === 'string') ? name.trim() : '';
+        const safeName = (rawName && rawName !== '—' && rawName !== '-' && rawName !== '_') ? rawName : 'Nueva Instancia';
+        const safeMcVersion = (mcVersion && mcVersion !== 'undefined' && mcVersion !== 'Desconocido') ? mcVersion : '1.20.1';
+        const safeLoader = (loader && loader !== 'undefined') ? loader : 'vanilla';
+        const safeLoaderVersion = (loaderVersion && loaderVersion !== 'undefined') ? loaderVersion : '';
+
         const s = loadSettings();
         const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
         const instancesDir = path.join(mcPath, 'instances');
         if (!fs.existsSync(instancesDir)) fs.mkdirSync(instancesDir, { recursive: true });
 
-        const cleanName = (name || 'custom_pack').replace(/[^a-zA-Z0-9_\-]/g, '_').toLowerCase();
+        let cleanName = safeName.replace(/[^a-zA-Z0-9_\-]/g, '_').toLowerCase();
+        if (!cleanName || cleanName.replace(/_/g, '') === '') {
+            cleanName = `instancia_${Date.now()}`;
+        }
         let folderName = cleanName;
         let counter = 1;
         while (fs.existsSync(path.join(instancesDir, folderName))) {
@@ -5618,13 +5633,17 @@ ipcMain.handle('create-custom-modpack', async (event, data) => {
             }
         }
 
+        const defaultDesc = (safeLoader === 'vanilla')
+            ? 'Instancia Vanilla oficial creada en Nebula Launcher.'
+            : 'Modpack personalizado creado por el usuario.';
+
         const instanceMeta = {
-            name: name,
+            name: safeName,
             folderName: folderName,
-            description: description || 'Modpack personalizado creado por el usuario.',
-            mcVersion: mcVersion,
-            loader: loader,
-            loaderVersion: loaderVersion || '',
+            description: description || defaultDesc,
+            mcVersion: safeMcVersion,
+            loader: safeLoader,
+            loaderVersion: safeLoaderVersion,
             iconUrl: iconUrl,
             screenshotUrl: screenshotUrl,
             source: 'custom',
@@ -5632,7 +5651,7 @@ ipcMain.handle('create-custom-modpack', async (event, data) => {
         };
 
         fs.writeFileSync(path.join(targetDir, 'instance.json'), JSON.stringify(instanceMeta, null, 2), 'utf8');
-        sendLog(`✅ Modpack personalizado creado: "${name}" en "${folderName}" (${installedModsCount} mods incluidos)`);
+        sendLog(`✅ Modpack personalizado creado: "${safeName}" en "${folderName}" (${installedModsCount} mods incluidos)`);
         return { success: true, folderName, installedModsCount, screenshotUrl };
     } catch (err) {
         sendLog(`❌ Error creando modpack: ${err.message}`, 'error');
@@ -6954,11 +6973,11 @@ ipcMain.on('launch-game', async (event, data) => {
                 throw new Error('No se encontró el archivo instance.json del modpack.');
             }
             const meta = JSON.parse(fs.readFileSync(instanceJsonPath, 'utf8'));
-            modpackDispName = meta.name || data.modpackName;
+            modpackDispName = (meta.name && meta.name.trim() && meta.name !== '—') ? meta.name : data.modpackName;
             if (meta.iconUrl) modpackIconUrl = meta.iconUrl;
-            const mcVer = meta.mcVersion;
-            const loader = meta.loader;
-            const loaderVer = meta.loaderVersion;
+            const mcVer = (meta.mcVersion && meta.mcVersion !== 'undefined' && meta.mcVersion !== 'Desconocido') ? meta.mcVersion : '1.20.1';
+            const loader = (meta.loader && meta.loader !== 'undefined') ? meta.loader : 'vanilla';
+            const loaderVer = (meta.loaderVersion && meta.loaderVersion !== 'undefined') ? meta.loaderVersion : (loader === 'fabric' ? '0.16.9' : '');
 
             launchVersion = mcVer;
 

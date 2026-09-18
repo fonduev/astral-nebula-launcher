@@ -7637,8 +7637,11 @@ async function populateInstalledModpacksSelect() {
       const opt = document.createElement('option');
       opt.value = m.folderName;
       const isVanilla = !m.loader || m.loader.toLowerCase() === 'vanilla';
-      const loaderName = isVanilla ? 'Vanilla' : (m.loader.charAt(0).toUpperCase() + m.loader.slice(1));
-      opt.textContent = isVanilla ? `${m.name} (Vanilla ${m.mcVersion})` : `${m.name} (${loaderName} ${m.mcVersion})`;
+      const loaderName = isVanilla ? 'Vanilla' : (m.loader ? (m.loader.charAt(0).toUpperCase() + m.loader.slice(1)) : 'Fabric');
+      const mcVer = (m.mcVersion && m.mcVersion !== 'undefined' && m.mcVersion !== 'Desconocido') ? m.mcVersion : '';
+      const verSuffix = mcVer ? ` ${mcVer}` : '';
+      const displayName = (m.name && m.name.trim() && m.name !== '—') ? m.name : (m.folderName || 'Instancia');
+      opt.textContent = isVanilla ? `${displayName} (Vanilla${verSuffix})` : `${displayName} (${loaderName}${verSuffix})`;
       select.appendChild(opt);
     });
     // Restore selection if it still exists
@@ -8195,14 +8198,18 @@ function renderModpackItems(modpacks, list) {
   list.innerHTML = modpacks.map(m => {
     const isSelected = selectedFolderName === m.folderName;
     const safeId = m.folderName.replace(/[^a-zA-Z0-9]/g, '_');
-    const loaderLabel = m.loader.charAt(0).toUpperCase() + m.loader.slice(1);
+    const isVanilla = !m.loader || m.loader.toLowerCase() === 'vanilla';
+    const loaderLabel = isVanilla ? 'Vanilla' : (m.loader ? (m.loader.charAt(0).toUpperCase() + m.loader.slice(1)) : 'Fabric');
+    const rawVer = (m.mcVersion && m.mcVersion !== 'undefined' && m.mcVersion !== 'Desconocido') ? m.mcVersion : '';
+    const verBadgeText = rawVer ? `${loaderLabel} ${rawVer}` : loaderLabel;
+    const displayName = (m.name && m.name.trim() && m.name !== '—') ? m.name : (m.folderName || 'Instancia');
     
     return `<div class="vb-item installed ${isSelected ? 'selected' : ''}"
               id="vb-mp-${safeId}"
               onclick="vbSelectModpack('${m.folderName}')">
-      <span class="vb-item-name">${m.name}</span>
+      <span class="vb-item-name">${displayName}</span>
       <span class="vb-item-badges">
-        <span class="vb-badge vb-badge-installed" style="background:rgba(168,85,247,0.15);color:#c084fc;">${loaderLabel} ${m.mcVersion}</span>
+        <span class="vb-badge vb-badge-installed" style="background:rgba(168,85,247,0.15);color:#c084fc;">${verBadgeText}</span>
       </span>
       <button class="vb-action-btn vb-play-btn" onclick="event.stopPropagation();vbPlayModpack('${m.folderName}')">▶ Jugar</button>
     </div>`;
@@ -8358,7 +8365,12 @@ async function vbRenderList() {
         modpacks.forEach(m => {
           const opt = document.createElement('option');
           opt.value = m.folderName;
-          opt.textContent = `${m.name} (${m.loader.charAt(0).toUpperCase()+m.loader.slice(1)} ${m.mcVersion})`;
+          const isVanilla = !m.loader || m.loader.toLowerCase() === 'vanilla';
+          const loaderName = isVanilla ? 'Vanilla' : (m.loader ? (m.loader.charAt(0).toUpperCase() + m.loader.slice(1)) : 'Fabric');
+          const mcVer = (m.mcVersion && m.mcVersion !== 'undefined' && m.mcVersion !== 'Desconocido') ? m.mcVersion : '';
+          const verSuffix = mcVer ? ` ${mcVer}` : '';
+          const displayName = (m.name && m.name.trim() && m.name !== '—') ? m.name : (m.folderName || 'Instancia');
+          opt.textContent = isVanilla ? `${displayName} (Vanilla${verSuffix})` : `${displayName} (${loaderName}${verSuffix})`;
           mpSel.appendChild(opt);
         });
       }
@@ -8367,7 +8379,12 @@ async function vbRenderList() {
         return;
       }
       if (search) {
-        const filtered = modpacks.filter(m => m.name.toLowerCase().includes(search) || m.mcVersion.includes(search));
+        const sLower = search.toLowerCase();
+        const filtered = modpacks.filter(m => {
+          const nameMatch = (m.name || '').toLowerCase().includes(sLower);
+          const verMatch = (m.mcVersion && typeof m.mcVersion === 'string') ? m.mcVersion.toLowerCase().includes(sLower) : false;
+          return nameMatch || verMatch;
+        });
         if (filtered.length === 0) { list.innerHTML = '<div style="color:var(--text-dim);font-size:.72rem;text-align:center;padding:16px 8px;">No hay modpacks que coincidan.</div>'; return; }
         renderModpackItems(filtered, list);
       } else {
@@ -9773,13 +9790,19 @@ async function populateModsVersions() {
       // Hidden select
       const opt = document.createElement('option');
       opt.value = m.folderName;
-      opt.textContent = `${m.name} (${m.loader} ${m.mcVersion})`;
+      const isVanilla = !m.loader || m.loader.toLowerCase() === 'vanilla';
+      const loaderName = isVanilla ? 'Vanilla' : (m.loader ? (m.loader.charAt(0).toUpperCase() + m.loader.slice(1)) : 'Fabric');
+      const mcVer = (m.mcVersion && m.mcVersion !== 'undefined' && m.mcVersion !== 'Desconocido') ? m.mcVersion : '';
+      const verSuffix = mcVer ? ` ${mcVer}` : '';
+      const displayName = (m.name && m.name.trim() && m.name !== '—') ? m.name : (m.folderName || 'Instancia');
+      opt.textContent = isVanilla ? `${displayName} (Vanilla${verSuffix})` : `${displayName} (${loaderName}${verSuffix})`;
       sel.appendChild(opt);
       // Visual item
       const item = document.createElement('div');
       item.className = 'custom-select-item';
-      item.innerHTML = `<span class="custom-select-item-dot dot-modpack"></span><span>${m.name} <span style="font-size:.65rem;color:var(--text-dim)">MC ${m.mcVersion}</span></span>`;
-      item.onclick = () => selectModsVersion(m.folderName, `📦 ${m.name}`);
+      const mcBadge = mcVer ? `<span style="font-size:.65rem;color:var(--text-dim)">MC ${mcVer}</span>` : '';
+      item.innerHTML = `<span class="custom-select-item-dot dot-modpack"></span><span>${displayName} ${mcBadge}</span>`;
+      item.onclick = () => selectModsVersion(m.folderName, `📦 ${displayName}`);
       list.appendChild(item);
     });
   }
@@ -10333,9 +10356,11 @@ async function loadInstalledModpacks() {
       const iconSrc = normIcon ? ((normIcon.startsWith('http') || normIcon.startsWith('assets') || normIcon.startsWith('file://') || normIcon.startsWith('data:')) ? normIcon : `file:///${normIcon}`) : '';
       
       const isVanilla = !m.loader || m.loader.toLowerCase() === 'vanilla';
-      const loaderClass = isVanilla ? 'vanilla' : m.loader.toLowerCase();
-      const loaderName = isVanilla ? 'Vanilla' : (m.loader.charAt(0).toUpperCase() + m.loader.slice(1));
-      const loaderVerText = (isVanilla || !m.loaderVersion) ? '' : ` ${m.loaderVersion}`;
+      const loaderClass = isVanilla ? 'vanilla' : (m.loader ? m.loader.toLowerCase() : 'fabric');
+      const loaderName = isVanilla ? 'Vanilla' : (m.loader ? (m.loader.charAt(0).toUpperCase() + m.loader.slice(1)) : 'Fabric');
+      const loaderVerText = (isVanilla || !m.loaderVersion || m.loaderVersion === 'undefined') ? '' : ` ${m.loaderVersion}`;
+      const mcVerDisplay = (m.mcVersion && m.mcVersion !== 'undefined' && m.mcVersion !== 'Desconocido') ? `MC ${m.mcVersion}` : 'MC 1.20.1';
+      const cardTitle = (m.name && m.name.trim() && m.name !== '—') ? m.name : (m.folderName || 'Instancia');
       
       const iconHtml = iconSrc 
         ? `<img src="${iconSrc}" class="modpack-card-icon">`
@@ -10348,13 +10373,13 @@ async function loadInstalledModpacks() {
           <div class="modpack-card-content">
             <div class="modpack-card-header">
               ${iconHtml}
-              <div class="modpack-card-title">${m.name}</div>
+              <div class="modpack-card-title">${cardTitle}</div>
             </div>
             
             <p class="modpack-card-desc">${m.description || 'Sin descripción disponible.'}</p>
             
             <div class="modpack-card-meta">
-              <span>MC ${m.mcVersion}</span>
+              <span>${mcVerDisplay}</span>
               <span class="modpack-card-loader ${loaderClass}">${loaderName}${loaderVerText}</span>
             </div>
           </div>
@@ -18523,8 +18548,13 @@ function openAddOverlaySkinModal() {
 
     function populateCmVersions() {
       const sel = document.getElementById('cm-version-select');
+      if (!sel) return;
       sel.innerHTML = '';
-      const releaseVersions = allVer.filter(v => v.type === 'release');
+      let releaseVersions = (allVer || []).filter(v => v && v.type === 'release');
+      if (releaseVersions.length === 0) {
+        const fallbackReleases = ['1.21.4', '1.21.3', '1.21.1', '1.20.6', '1.20.4', '1.20.2', '1.20.1', '1.19.4', '1.18.2', '1.16.5', '1.12.2', '1.8.9'];
+        releaseVersions = fallbackReleases.map(id => ({ id, type: 'release' }));
+      }
       releaseVersions.forEach(v => {
         const opt = document.createElement('option');
         opt.value = v.id;
@@ -18537,24 +18567,25 @@ function openAddOverlaySkinModal() {
 
     async function getLatestLoaderVersion(loader, mcVersion) {
       if (loader === 'vanilla' || !loader) return '';
+      const safeMc = (mcVersion && mcVersion !== 'undefined') ? mcVersion : '1.20.1';
       try {
         if (loader === 'fabric') {
-          const res = await fetch(`https://meta.fabricmc.net/v2/versions/loader/${mcVersion}`);
+          const res = await fetch(`https://meta.fabricmc.net/v2/versions/loader/${safeMc}`);
           if (res.ok) {
             const arr = await res.json();
             if (arr.length > 0) return arr[0].loader.version;
           }
         } else if (loader === 'quilt') {
-          const res = await fetch(`https://meta.quiltmc.org/v3/versions/loader/${mcVersion}`);
+          const res = await fetch(`https://meta.quiltmc.org/v3/versions/loader/${safeMc}`);
           if (res.ok) {
             const arr = await res.json();
             if (arr.length > 0) return arr[0].loader.version;
           }
         } else if (loader === 'forge') {
-          const versions = await ipc.invoke('get-forge-versions', mcVersion);
+          const versions = await ipc.invoke('get-forge-versions', safeMc);
           if (versions && versions.length > 0) return versions[0];
         } else if (loader === 'neoforge') {
-          const versions = await ipc.invoke('get-neoforge-versions', mcVersion);
+          const versions = await ipc.invoke('get-neoforge-versions', safeMc);
           if (versions && versions.length > 0) return versions[0];
         }
       } catch (err) {
@@ -18569,7 +18600,8 @@ function openAddOverlaySkinModal() {
 
     async function getModDownloadUrl(projectId, mcVersion, loader) {
       try {
-        const res = await fetch(`https://api.modrinth.com/v2/project/${projectId}/version?loaders=["${loader}"]&game_versions=["${mcVersion}"]`);
+        const safeMc = (mcVersion && mcVersion !== 'undefined') ? mcVersion : '1.20.1';
+        const res = await fetch(`https://api.modrinth.com/v2/project/${projectId}/version?loaders=["${loader}"]&game_versions=["${safeMc}"]`);
         if (!res.ok) return null;
         const versions = await res.json();
         if (versions.length > 0) {
@@ -18586,15 +18618,23 @@ function openAddOverlaySkinModal() {
     }
 
     async function createCustomModpack() {
-      const name = document.getElementById('cm-name-input').value.trim();
+      const nameInput = document.getElementById('cm-name-input');
+      const rawName = nameInput ? nameInput.value.trim() : '';
       const description = document.getElementById('cm-desc-input').value.trim();
-      const mcVersion = document.getElementById('cm-version-select').value;
+      const versionSelect = document.getElementById('cm-version-select');
+      let mcVersion = versionSelect ? versionSelect.value : '';
       const loader = document.getElementById('cm-loader-select').value;
       const btn = document.getElementById('btn-cm-confirm');
       
-      if (!name) {
-        toast('Por favor, ingresa el nombre de la instancia.', 'error');
+      if (!rawName || rawName === '—' || rawName === '-' || rawName === '_') {
+        toast('Por favor, ingresa un nombre válido para la instancia.', 'error');
+        if (nameInput) nameInput.focus();
         return;
+      }
+      const name = rawName;
+
+      if (!mcVersion || mcVersion === 'undefined') {
+        mcVersion = '1.20.1';
       }
 
       if (loader === 'vanilla') {
