@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="../icon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
+  <title>Sodium vs OptiFine en CPU de 4 núcleos: pruebas en i7 4790 | Nebula Dev Studios</title>
+  <meta name="description" content="¿Sodium u OptiFine para un procesador de 4 núcleos? Analizamos la arquitectura de OpenGL, el cuello de botella de CPU y la configuración con Iris Shaders." />
+
+  <!-- Canonical URL & Metadatos Oficiales -->
+  <link rel="canonical" href="https://nebuladevstudios.com/guias/sodium-vs-optifine-procesadores-4-nucleos.html" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Nebula Dev Studios" />
+  <meta property="og:title" content="Sodium vs OptiFine en CPU de 4 núcleos: pruebas en i7 4790 | Nebula Dev Studios" />
+  <meta property="og:description" content="¿Sodium u OptiFine para un procesador de 4 núcleos? Analizamos la arquitectura de OpenGL, el cuello de botella de CPU y la configuración con Iris Shaders." />
+  <meta property="og:url" content="https://nebuladevstudios.com/guias/sodium-vs-optifine-procesadores-4-nucleos.html" />
+  <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Sodium vs OptiFine en CPU de 4 núcleos: pruebas en i7 4790 | Nebula Dev Studios" />
+  <meta name="twitter:description" content="¿Sodium u OptiFine para un procesador de 4 núcleos? Analizamos la arquitectura de OpenGL, el cuello de botella de CPU y la configuración con Iris Shaders." />
+  <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
+
+  <!-- Schema.org Datos Estructurados JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "headline": "Sodium vs OptiFine en procesadores de 4 núcleos: análisis en un i7 de 4ª generación",
+        "description": "¿Sodium u OptiFine para un procesador de 4 núcleos? Analizamos la arquitectura de OpenGL, el cuello de botella de CPU y la configuración con Iris Shaders.",
+        "url": "https://nebuladevstudios.com/guias/sodium-vs-optifine-procesadores-4-nucleos.html",
+        "author": {
+          "@type": "Person",
+          "name": "fondue_x",
+          "url": "https://github.com/fonduev"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Nebula Dev Studios",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://nebuladevstudios.com/icon.ico"
+          }
+        },
+        "datePublished": "2026-09-19",
+        "dateModified": "2026-09-19"
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {"@type": "Question", "name": "¿Puedo instalar Sodium y OptiFine al mismo tiempo?", "acceptedAnswer": {"@type": "Answer", "text": "No. Ambos intentan reescribir por completo el motor de renderizado de Minecraft a nivel de código fuente. Intentar instalarlos juntos provocará un cierre inmediato del juego con un error de inyección de Mixins."}},
+          {"@type": "Question", "name": "¿Cómo uso shaders en Minecraft si tengo Sodium en lugar de OptiFine?", "acceptedAnswer": {"@type": "Answer", "text": "Instalando el mod complementario Iris Shaders. Iris utiliza la misma tecnología de Sodium para el mundo y añade un menú para cargar paquetes de shaders (.zip) exactamente igual que OptiFine, pero con mayor tasa de cuadros por segundo."}},
+          {"@type": "Question", "name": "¿Por qué mis FPS son altos pero el juego se siente trabado con OptiFine?", "acceptedAnswer": {"@type": "Answer", "text": "Porque el contador de FPS solo muestra un promedio por segundo. Si el procesador sufre micro-congelamientos cada pocos milisegundos por una mala gestión de hilos, los fotogramas se entregan con retraso irregular (frametime inestable), generando una sensación de juego entrecortado."}}
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #05030d;
+      --bg-card: rgba(14, 10, 32, 0.7);
+      --accent-purple: #c084fc;
+      --accent-cyan: #38bdf8;
+      --accent-pink: #f472b6;
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-glow: rgba(192, 132, 252, 0.4);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: radial-gradient(circle at 50% -10%, #1c0e3d 0%, #080415 50%, var(--bg-dark) 100%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5, 3, 13, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 1rem 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+    .brand-logo-img { width: 36px; height: 36px; border-radius: 10px; }
+    .brand-name {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: 0.05em;
+    }
+    .nav-links { display: flex; gap: 1.8rem; list-style: none; align-items: center; }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-link:hover, .nav-link.active { color: #fff; }
+    .nav-btn {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      padding: 0.5rem 1.2rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .nav-btn:hover { opacity: 0.9; }
+
+    .article-container {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 5rem;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      margin-bottom: 1.5rem;
+    }
+    .breadcrumbs a { color: var(--accent-cyan); text-decoration: none; }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 9999px;
+      background: rgba(192, 132, 252, 0.1);
+      border: 1px solid var(--border-glow);
+      color: var(--accent-purple);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 4.5vw, 2.85rem);
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 1.2rem;
+      background: linear-gradient(135deg, #fff 40%, var(--accent-purple) 80%, var(--accent-pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border-glass);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .article-meta strong { color: #e2e8f0; }
+
+    .article-body {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 24px;
+      padding: 3rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+    .article-body h2 {
+      font-family: var(--font-heading);
+      font-size: 1.65rem;
+      color: #fff;
+      margin: 2.5rem 0 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.4rem;
+    }
+    .article-body h2:first-of-type { margin-top: 0; }
+    .article-body h3 {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      color: var(--accent-cyan);
+      margin: 1.6rem 0 0.8rem;
+    }
+    .article-body p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 1.02rem;
+    }
+    .article-body ul, .article-body ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-muted);
+    }
+    .article-body li { margin-bottom: 0.6rem; font-size: 1rem; }
+    .article-body strong { color: #fff; }
+    .article-body a { color: var(--accent-cyan); text-decoration: underline; }
+    .article-body a:hover { color: #fff; }
+
+    .article-body pre {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin: 1.2rem 0 1.5rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: #38bdf8;
+    }
+    .article-body code {
+      background: rgba(192, 132, 252, 0.12);
+      color: #e9d5ff;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+    }
+    .article-body pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+    }
+
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.8rem 0;
+      font-size: 0.92rem;
+    }
+    .article-body th {
+      background: rgba(192, 132, 252, 0.15);
+      color: #fff;
+      padding: 0.85rem 1rem;
+      font-family: var(--font-heading);
+      border: 1px solid var(--border-glass);
+      text-align: left;
+    }
+    .article-body td {
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border-glass);
+      color: var(--text-muted);
+    }
+
+    .author-box {
+      background: rgba(192, 132, 252, 0.08);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 1.8rem;
+      margin-top: 3.5rem;
+    }
+    .author-box h3 {
+      color: #fff;
+      font-size: 1.2rem;
+      margin-bottom: 0.6rem;
+      font-family: var(--font-heading);
+    }
+    .author-box p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .faq-section {
+      margin-top: 3rem;
+      border-top: 1px solid var(--border-glass);
+      padding-top: 2.2rem;
+    }
+    .faq-item {
+      margin-bottom: 1.8rem;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 1.2rem 1.4rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .faq-item h4 {
+      color: #fff;
+      font-size: 1.08rem;
+      margin-bottom: 0.5rem;
+      font-family: var(--font-heading);
+    }
+    .faq-item p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-glass);
+      padding: 3.5rem 6% 2rem;
+      background: rgba(5, 3, 13, 0.95);
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-top: 5rem;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 2.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .footer-col h4 {
+      font-family: var(--font-heading);
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 0.6rem; }
+    .footer-col a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--accent-cyan); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .cookie-banner {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(92%, 820px);
+      background: rgba(14, 10, 32, 0.95);
+      border: 1px solid var(--border-glow);
+      backdrop-filter: blur(25px);
+      padding: 1.2rem 1.6rem;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      transition: opacity 0.3s ease;
+    }
+    .cookie-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .cookie-content p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      flex: 1;
+      min-width: 280px;
+    }
+    .cookie-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn-cookie-accept {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-cookie-accept:hover { opacity: 0.9; }
+    .btn-cookie-reject {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #94a3b8;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cookie-reject:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 1rem 4%; }
+      .nav-links { display: none; }
+      .article-container { padding: 2.5rem 1rem 4rem; }
+      .article-body { padding: 1.8rem 1.2rem; }
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="../index.html" class="brand">
+      <img src="../icon.ico" class="brand-logo-img" alt="Nebula Dev Studios" />
+      <span class="brand-name">NEBULA DEV STUDIOS</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html" class="nav-link">Inicio</a></li>
+      <li><a href="../guias.html" class="nav-link active">Guías & Artículos</a></li>
+      <li><a href="../about.html" class="nav-link">Acerca de</a></li>
+      <li><a href="../metodologia.html" class="nav-link">Metodología</a></li>
+      <li><a href="../contact.html" class="nav-link">Contacto</a></li>
+    </ul>
+    <a href="../index.html#descargar" class="nav-btn">Descargar Launcher</a>
+  </nav>
+
+  <div class="article-container">
+    <nav class="breadcrumbs">
+      <a href="../index.html">Inicio</a> &rsaquo;
+      <a href="../guias.html">Guías</a> &rsaquo;
+      <span>Rendimiento</span>
+    </nav>
+
+    <div class="badge">Benchmark & Rendimiento</div>
+    <h1>Sodium vs OptiFine en procesadores de 4 núcleos: análisis en un i7 de 4ª generación</h1>
+
+    <div class="article-meta">
+      <span>✍️ Por <strong>fondue_x</strong></span>
+      <span>📅 19 de Septiembre, 2026</span>
+      <span>⏱️ 8 min de lectura</span>
+      <span>💻 Probado en Windows 11</span>
+    </div>
+
+    <article class="article-body">
+      <h2>El problema: la ilusión de los FPS y el cuello de botella de CPU en Minecraft moderno</h2>
+<p>Muchos jugadores que actualizan su tarjeta gráfica a un modelo moderno (como una Nvidia GeForce RTX 3050) pero conservan un procesador veterano de cuatro núcleos y ocho hilos (como un Intel Core i7-4790) se encuentran con una paradoja desconcertante al jugar a Minecraft moderno (1.20 o 1.21): el juego no supera los 50 o 60 cuadros por segundo, sufre tirones intermitentes y la tarjeta gráfica apenas registra un 25% de uso en el Administrador de tareas.</p>
+<p>Durante más de una década, la solución universal fue instalar <strong>OptiFine</strong>. Sin embargo, en las versiones actuales del juego, OptiFine con frecuencia empeora la situación en procesadores de cuatro núcleos, provocando caídas severas en los tiempos de cuadro (frametimes). Frente a esto, el motor de renderizado <strong>Sodium</strong> (en el ecosistema de Fabric y NeoForge) fue diseñado desde cero para cambiar radicalmente la forma en que el procesador se comunica con la tarjeta gráfica. Entender cómo gestiona cada uno las llamadas de dibujado de OpenGL y el uso de los núcleos de la CPU es la clave para desbloquear el verdadero rendimiento de tu equipo.</p>
+
+<h2>Arquitectura interna: Cómo dibuja los bloques cada optimizador</h2>
+<p>Minecraft no es un videojuego convencional con un mapa estático. Cada mundo está compuesto por millones de cubos individuales que pueden colocarse, destruirse o cambiar de estado en cualquier momento. La tarea más pesada del motor no es calcular las luces o las sombras, sino determinar qué caras de cada bloque son visibles para el ojo del jugador y comunicarle esa información a la tarjeta gráfica:</p>
+<ul>
+  <li><strong>El enfoque clásico de OptiFine:</strong> OptiFine divide el renderizado mediante técnicas diseñadas en la era de OpenGL 2.1. Aunque incluye opciones como <em>Carga Rápida de Chunks</em> o <em>Renderizado Multinúcleo</em>, su método base sigue enviando la información al procesador gráfico en miles de paquetes pequeños y secuenciales (llamados órdenes de dibujado o <em>Draw Calls</em>). En un procesador antiguo de cuatro núcleos, el hilo principal de la CPU se satura gestionando estas miles de órdenes, provocando un cuello de botella monohilo severo antes de que la tarjeta gráfica reciba el trabajo.</li>
+  <li><strong>El enfoque moderno de Sodium:</strong> Sodium reemplaza por completo el procesador de renderizado original de Minecraft por una estructura basada en OpenGL 4.6 moderno. En lugar de procesar cada cubo por separado, Sodium compacta las mallas geométricas de cientos de bloques en búferes de memoria unificados y utiliza la técnica <em>Multi-Draw Indirect</em>. Esto permite que el procesador ordene a la GPU dibujar cientos de miles de polígonos mediante una única instrucción, liberando a la CPU de una carga de trabajo gigantesca.</li>
+</ul>
+
+<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Comparativa de pantalla F3 con OptiFine frente a Sodium mostrando el porcentaje de uso de CPU y GPU</div>
+
+<h2>Comportamiento en procesadores de 4 núcleos y 8 hilos (Haswell / i7-4790)</h2>
+<p>Un procesador como el Intel Core i7-4790, aunque sigue siendo capaz para muchas tareas, cuenta con una arquitectura de cuatro núcleos físicos divididos en ocho hilos mediante Hyper-Threading, operando con memoria DDR3. En Minecraft moderno, la CPU debe atender simultáneamente:</p>
+<ol>
+  <li>El hilo lógico del juego (físicas de entidades, inteligencia artificial de criaturas y cálculos de red).</li>
+  <li>La generación procedural y descompresión de terreno en disco.</li>
+  <li>La recolección de basura de la máquina virtual de Java.</li>
+  <li>El hilo principal de renderizado gráfico.</li>
+</ol>
+<p>Cuando utilizas <strong>OptiFine</strong> en versiones modernas (1.20+), el intento de distribuir la carga gráfica entre varios hilos a menudo compite con el cálculo lógico del mundo. Esto produce el clásico síntoma de "FPS altos en el contador, pero juego con micro-congelamientos continuos".</p>
+<p>Por el contrario, <strong>Sodium</strong> delega casi la totalidad del cálculo de oclusión (determinar qué bloques están ocultos detrás de otros para no dibujarlos) en la tarjeta gráfica moderna mediante algoritmos geométricos compactos. Al liberar a los cuatro núcleos del procesador de esa tarea matemática, el i7-4790 puede dedicar sus hilos exclusivamente a la lógica del mapa y al procesamiento de chunks, eliminando los tirones de raíz.</p>
+
+<h2>Cuadro comparativo: OptiFine vs. Sodium en hardware real</h2>
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Característica técnica</th>
+      <th>OptiFine</th>
+      <th>Sodium (con ecosistema moderno)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Versión de OpenGL utilizada</strong></td>
+      <td>OpenGL 2.1 / 3.0 heredado</td>
+      <td>OpenGL 4.6 moderno con Multi-Draw Indirect</td>
+    </tr>
+    <tr>
+      <td><strong>Consumo de memoria RAM</strong></td>
+      <td>Moderado a alto</td>
+      <td>Muy bajo (especialmente junto a FerriteCore)</td>
+    </tr>
+    <tr>
+      <td><strong>Soporte de paquetes de shaders</strong></td>
+      <td>Nativo interno</td>
+      <td>Requiere el mod <strong>Iris</strong> (totalmente compatible)</td>
+    </tr>
+    <tr>
+      <td><strong>Compatibilidad con otros mods</strong></td>
+      <td>Baja: suele romper mods en Fabric y Forge moderno</td>
+      <td>Muy alta: es el estándar oficial de la comunidad</td>
+    </tr>
+    <tr>
+      <td><strong>Estabilidad de frametime (tirones)</strong></td>
+      <td>Inestable en Minecraft 1.18+</td>
+      <td>Extremadamente estable en procesadores clásicos</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Protocolo de 4 pasos para configurar el ecosistema Sodium en tu equipo</h2>
+<p>Para igualar y superar todas las funciones visuales clásicas de OptiFine (zoom, sombreadores, texturas conectadas y rendimiento) utilizando la tecnología moderna de Sodium, debes instalar un paquete modular coordinado:</p>
+
+<h3>Paso 1: Instalar el cargador Fabric o NeoForge</h3>
+<p>Descarga e instala el cargador de mods oficial de tu elección. En versiones modernas (1.20 y 1.21), Fabric es el entorno más pulido para maximizar cuadros por segundo con Sodium. Asegúrate de colocar siempre la biblioteca obligatoria <strong>Fabric API</strong> en la carpeta <code>mods</code>.</p>
+<p>En aplicaciones especializadas como Nebula Launcher, esta pila de rendimiento viene integrada en plantillas de un solo clic, instalando automáticamente el cargador y los módulos de optimización compatibles sin requerir descargas manuales.</p>
+
+<h3>Paso 2: Incorporar la tríada de rendimiento base</h3>
+<p>Descarga desde <a href="https://modrinth.com/" target="_blank" rel="noopener">Modrinth</a> los tres archivos fundamentales que transforman el motor del juego:</p>
+<ul>
+  <li><strong>Sodium:</strong> Sustituye el motor de renderizado del mundo y acelera el dibujado de bloques.</li>
+  <li><strong>Lithium:</strong> Optimiza la física general, la inteligencia artificial de los aldeanos y el cálculo de colisiones sin alterar la jugabilidad original (totalmente del lado del cliente y compatible con servidores).</li>
+  <li><strong>FerriteCore:</strong> Comprime el consumo de memoria RAM de los modelos de bloques, algo vital si cuentas con 8 GB o 16 GB de memoria en tu computadora.</li>
+</ul>
+
+<h3>Paso 3: Recuperar las funciones visuales de OptiFine con módulos modernos</h3>
+<p>OptiFine incluía muchas herramientas estéticas que Sodium, por filosofía de diseño, no incluye en su archivo base. Para recuperarlas con un rendimiento superior, añade estos complementos:</p>
+<ul>
+  <li><strong>Iris Shaders:</strong> Permite cargar cualquier sombreador gráfico (.zip) compatible con OptiFine, pero ejecutándolo sobre la tubería optimizada de Sodium. En una tarjeta de 6 GB como la RTX 3050, Iris duplica los fotogramas de OptiFine manteniendo la misma calidad visual.</li>
+  <li><strong>Continuity:</strong> Añade soporte para texturas conectadas de cristal y bloques de construcción (CTM). Requiere también el mod <em>Indium</em> para enlazar con la API de renderizado de Fabric.</li>
+  <li><strong>Zoomify:</strong> Proporciona la función de zoom cinematográfico con transiciones suaves y personalización de atajos de teclado.</li>
+  <li><strong>Entity Culling:</strong> Deja de renderizar entidades y criaturas que se encuentran detrás de paredes o bajo tierra fuera de tu vista, aliviando de trabajo a la tarjeta gráfica.</li>
+</ul>
+
+<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Menú de opciones de vídeo de Sodium con la pestaña de configuración avanzada de renderizado</div>
+
+<h3>Paso 4: Ajustar los parámetros críticos de Sodium para una CPU de 4 núcleos</h3>
+<p>Una vez dentro del menú de opciones de vídeo de Sodium, aplica estos ajustes diseñados para balancear un procesador de 4 núcleos:</p>
+<ol>
+  <li>En la pestaña <em>Rendimiento</em>, localiza la opción <strong>Subprocesos de actualización de fragmentos (Chunk Update Threads)</strong>. Por defecto viene configurado en automático. En un i7-4790, fíjalo manualmente en <strong>3 o 4</strong>. No lo pongas en 8, ya que saturarás los núcleos lógicos e interrumpirás el hilo principal de audio y controles.</li>
+  <li>En la opción <em>Calidad</em>, ajusta los <strong>Gráficos de hojas</strong> en "Rápidos" si juegas en biomas de jungla densos.</li>
+  <li>En la sección <em>Avanzado</em>, asegúrate de que el <strong>Procesamiento en CPU (CPU Render Ahead Limit)</strong> esté configurado en <strong>2 o 3 fotogramas</strong> para mantener a la tarjeta gráfica RTX 3050 alimentada continuamente sin retrasos de entrada (input lag).</li>
+</ol>
+
+<h2>El caso técnico raro: Cuándo OptiFine sigue siendo la única opción viable</h2>
+<p>A pesar de la superioridad demostrada de Sodium en versiones modernas, existen dos escenarios técnicos específicos donde OptiFine no solo es útil, sino estrictamente necesario:</p>
+<ol>
+  <li><strong>Versiones clásicas competitivas (Minecraft 1.8.9 y 1.12.2):</strong> Sodium fue concebido a partir de las versiones 1.15 y 1.16. Aunque existen adaptaciones retroactivas no oficiales de la comunidad para versiones antiguas, en Minecraft 1.8.9 OptiFine está completamente integrado y madurado en el código de los clientes de PvP. En la versión 1.8.9, OptiFine no compite con las APIs modernas de Java y proporciona un rendimiento impecable en procesadores de cuatro núcleos.</li>
+  <li><strong>Paquetes de texturas con modelos CIT hiper-complejos:</strong> Si juegas en servidores de rol o modpacks estéticos que utilizan paquetes de recursos que transforman espadas o armaduras según su nombre en el yunque utilizando funciones patentadas de MCPatcher/OptiFine (Custom Item Textures complejas con lógica condicional no estandarizada), muchas de esas propiedades solo se renderizan con precisión mediante el motor de OptiFine clásico.</li>
+</ol>
+
+<h2>Cómo comprobar que la transición ha sido exitosa</h2>
+<p>Para validar que has eliminado el cuello de botella en tu procesador:</p>
+<ol>
+  <li>Carga tu mundo habitual y presiona la combinación <code>F3 + 2</code> (o abre el gráfico de frametimes integrado en Sodium con la tecla <code>Shift + F3</code>).</li>
+  <li>Observa el gráfico inferior: una línea continua y delgada sin picos verticales hacia arriba confirma que no hay tropiezos de cuadros (stuttering).</li>
+  <li>Abre el Administrador de tareas en un segundo monitor o en segundo plano: deberías observar que el uso de la tarjeta gráfica RTX 3050 sube al 70% u 85% al utilizar shaders con Iris, demostrando que la GPU ahora sí está trabajando a su capacidad real y que el i7-4790 ya no retiene el flujo de datos.</li>
+</ol>
+
+<h2>Conclusión</h2>
+<p>En el Minecraft moderno de 2026, aferrarse a OptiFine por costumbre en procesadores de cuatro núcleos es limitar deliberadamente el potencial de tu hardware. La transición al ecosistema modular de Sodium e Iris no solo devuelve la fluidez al juego, sino que permite que una tarjeta gráfica moderna trabaje a plena potencia sin que el procesador se ahogue en el intento.</p>
+
+      <div class="author-box">
+        <h3>Sobre el autor: fondue_x</h3>
+        <p><strong>fondue_x</strong> es desarrollador independiente y jugador de Minecraft desde hace más de 5 años, especializado en optimización de rendimiento, arquitectura de instancias y resolución de incompatibilidades en Fabric, Forge y NeoForge. Es el creador de <a href="https://github.com/fonduev" target="_blank" rel="noopener">Nebula Launcher</a>. Todas sus guías se prueban de primera mano en bancos de pruebas reales con Windows 11. Puedes consultar nuestra <a href="../metodologia.html">metodología editorial y banco de pruebas</a>.</p>
+      </div>
+
+      <div class="faq-section">
+        <h2 style="margin-top:0;">Preguntas Frecuentes</h2>
+                <div class="faq-item">
+          <h4>¿Puedo instalar Sodium y OptiFine al mismo tiempo?</h4>
+          <p>No. Ambos intentan reescribir por completo el motor de renderizado de Minecraft a nivel de código fuente. Intentar instalarlos juntos provocará un cierre inmediato del juego con un error de inyección de Mixins.</p>
+        </div>
+        <div class="faq-item">
+          <h4>¿Cómo uso shaders en Minecraft si tengo Sodium en lugar de OptiFine?</h4>
+          <p>Instalando el mod complementario Iris Shaders. Iris utiliza la misma tecnología de Sodium para el mundo y añade un menú para cargar paquetes de shaders (.zip) exactamente igual que OptiFine, pero con mayor tasa de cuadros por segundo.</p>
+        </div>
+        <div class="faq-item">
+          <h4>¿Por qué mis FPS son altos pero el juego se siente trabado con OptiFine?</h4>
+          <p>Porque el contador de FPS solo muestra un promedio por segundo. Si el procesador sufre micro-congelamientos cada pocos milisegundos por una mala gestión de hilos, los fotogramas se entregan con retraso irregular (frametime inestable), generando una sensación de juego entrecortado.</p>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>NEBULA DEV STUDIOS</h4>
+        <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
+          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Navegación</h4>
+        <ul>
+          <li><a href="../index.html">Inicio</a></li>
+          <li><a href="../guias.html">Guías & Tutoriales</a></li>
+          <li><a href="../about.html">Acerca de</a></li>
+          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../contact.html">Contacto</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Guías Técnicas</h4>
+        <ul>
+          <li><a href="./como-leer-latest-log-crash-reports-minecraft.html">Diagnóstico de Logs</a></li>
+          <li><a href="./exit-code-1-minecraft-solucion.html">Solución Exit Code 1</a></li>
+          <li><a href="./optimizar-minecraft-disco-hdd.html">Optimización en HDD</a></li>
+          <li><a href="./argumentos-jvm-minecraft-mitos-realidad.html">Argumentos JVM</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="../privacy.html">Política de Privacidad</a></li>
+          <li><a href="../terms.html">Términos de Servicio</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Nebula Dev Studios. Todos los derechos reservados.</div>
+      <div style="font-size: 0.8rem; line-height: 1.6; text-align: center; width: 100%; margin-top: 0.5rem;">
+        <strong>NO ES UN PRODUCTO OFICIAL DE MINECRAFT. NO ESTÁ APROBADO NI ASOCIADO CON MOJANG O MICROSOFT.</strong><br>
+        Minecraft es una marca comercial registrada de Mojang Synergies AB / Microsoft Corporation.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Banner de Privacidad y Cookies -->
+  <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
+    <div class="cookie-content">
+      <p>
+        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+      </p>
+      <div class="cookie-buttons">
+        <button class="btn-cookie-reject" onclick="rejectCookieConsent()">Solo Necesarias</button>
+        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function initCookieConsent() {
+      if (!localStorage.getItem('nebula_cookie_consent')) {
+        const banner = document.getElementById('cookieConsentBanner');
+        if (banner) banner.style.display = 'block';
+      }
+    }
+    function acceptCookieConsent() {
+      localStorage.setItem('nebula_cookie_consent', 'accepted');
+      dismissCookieBanner();
+    }
+    function rejectCookieConsent() {
+      localStorage.setItem('nebula_cookie_consent', 'essential_only');
+      dismissCookieBanner();
+    }
+    function dismissCookieBanner() {
+      const banner = document.getElementById('cookieConsentBanner');
+      if (banner) {
+        banner.style.opacity = '0';
+        setTimeout(() => { banner.style.display = 'none'; }, 300);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', initCookieConsent);
+  </script>
+
+</body>
+</html>

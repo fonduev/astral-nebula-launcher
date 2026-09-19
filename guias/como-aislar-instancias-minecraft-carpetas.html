@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="../icon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
+  <title>Cómo crear instancias separadas en Minecraft y aislar mods | Nebula Dev Studios</title>
+  <meta name="description" content="Aprende a separar versiones en Minecraft con instancias independientes: protege tus mundos de la corrupción, evita errores de mods y mantén tus controles intactos." />
+
+  <!-- Canonical URL & Metadatos Oficiales -->
+  <link rel="canonical" href="https://nebuladevstudios.com/guias/como-aislar-instancias-minecraft-carpetas.html" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Nebula Dev Studios" />
+  <meta property="og:title" content="Cómo crear instancias separadas en Minecraft y aislar mods | Nebula Dev Studios" />
+  <meta property="og:description" content="Aprende a separar versiones en Minecraft con instancias independientes: protege tus mundos de la corrupción, evita errores de mods y mantén tus controles intactos." />
+  <meta property="og:url" content="https://nebuladevstudios.com/guias/como-aislar-instancias-minecraft-carpetas.html" />
+  <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Cómo crear instancias separadas en Minecraft y aislar mods | Nebula Dev Studios" />
+  <meta name="twitter:description" content="Aprende a separar versiones en Minecraft con instancias independientes: protege tus mundos de la corrupción, evita errores de mods y mantén tus controles intactos." />
+  <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
+
+  <!-- Schema.org Datos Estructurados JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "headline": "Cómo aislar versiones con instancias independientes en Minecraft",
+        "description": "Aprende a separar versiones en Minecraft con instancias independientes: protege tus mundos de la corrupción, evita errores de mods y mantén tus controles intactos.",
+        "url": "https://nebuladevstudios.com/guias/como-aislar-instancias-minecraft-carpetas.html",
+        "author": {
+          "@type": "Person",
+          "name": "fondue_x",
+          "url": "https://github.com/fonduev"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Nebula Dev Studios",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://nebuladevstudios.com/icon.ico"
+          }
+        },
+        "datePublished": "2026-09-19",
+        "dateModified": "2026-09-19"
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {"@type": "Question", "name": "¿Crear instancias separadas duplica el espacio que ocupa Minecraft en mi disco duro?", "acceptedAnswer": {"@type": "Answer", "text": "No de forma masiva. Los archivos más pesados del juego (los paquetes de audio, recursos globales y librerías de Java que pesan varios gigabytes) se conservan en la carpeta central y se comparten entre todas las instancias. La carpeta aislada solo almacena tus mods, mundos y configuraciones particulares."}},
+          {"@type": "Question", "name": "¿Puedo tener un perfil con Fabric y otro con Forge al mismo tiempo sin que choquen?", "acceptedAnswer": {"@type": "Answer", "text": "Sí, precisamente para eso sirve el aislamiento de instancias. Al asignar un directorio de juego distinto a cada perfil, los mods de Fabric residirán en su propia carpeta y Forge nunca intentará leerlos, evitando los cierres en el arranque."}},
+          {"@type": "Question", "name": "¿Dónde se guardan mis capturas de pantalla si juego en una instancia aislada?", "acceptedAnswer": {"@type": "Answer", "text": "Se guardan dentro de la subcarpeta screenshots de esa instancia específica (por ejemplo, en .minecraft/instances/[nombre_instancia]/screenshots), en lugar de almacenarse en el directorio raíz de .minecraft."}}
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #05030d;
+      --bg-card: rgba(14, 10, 32, 0.7);
+      --accent-purple: #c084fc;
+      --accent-cyan: #38bdf8;
+      --accent-pink: #f472b6;
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-glow: rgba(192, 132, 252, 0.4);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: radial-gradient(circle at 50% -10%, #1c0e3d 0%, #080415 50%, var(--bg-dark) 100%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5, 3, 13, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 1rem 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+    .brand-logo-img { width: 36px; height: 36px; border-radius: 10px; }
+    .brand-name {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: 0.05em;
+    }
+    .nav-links { display: flex; gap: 1.8rem; list-style: none; align-items: center; }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-link:hover, .nav-link.active { color: #fff; }
+    .nav-btn {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      padding: 0.5rem 1.2rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .nav-btn:hover { opacity: 0.9; }
+
+    .article-container {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 5rem;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      margin-bottom: 1.5rem;
+    }
+    .breadcrumbs a { color: var(--accent-cyan); text-decoration: none; }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 9999px;
+      background: rgba(192, 132, 252, 0.1);
+      border: 1px solid var(--border-glow);
+      color: var(--accent-purple);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 4.5vw, 2.85rem);
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 1.2rem;
+      background: linear-gradient(135deg, #fff 40%, var(--accent-purple) 80%, var(--accent-pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border-glass);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .article-meta strong { color: #e2e8f0; }
+
+    .article-body {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 24px;
+      padding: 3rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+    .article-body h2 {
+      font-family: var(--font-heading);
+      font-size: 1.65rem;
+      color: #fff;
+      margin: 2.5rem 0 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.4rem;
+    }
+    .article-body h2:first-of-type { margin-top: 0; }
+    .article-body h3 {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      color: var(--accent-cyan);
+      margin: 1.6rem 0 0.8rem;
+    }
+    .article-body p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 1.02rem;
+    }
+    .article-body ul, .article-body ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-muted);
+    }
+    .article-body li { margin-bottom: 0.6rem; font-size: 1rem; }
+    .article-body strong { color: #fff; }
+    .article-body a { color: var(--accent-cyan); text-decoration: underline; }
+    .article-body a:hover { color: #fff; }
+
+    .article-body pre {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin: 1.2rem 0 1.5rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: #38bdf8;
+    }
+    .article-body code {
+      background: rgba(192, 132, 252, 0.12);
+      color: #e9d5ff;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+    }
+    .article-body pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+    }
+
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.8rem 0;
+      font-size: 0.92rem;
+    }
+    .article-body th {
+      background: rgba(192, 132, 252, 0.15);
+      color: #fff;
+      padding: 0.85rem 1rem;
+      font-family: var(--font-heading);
+      border: 1px solid var(--border-glass);
+      text-align: left;
+    }
+    .article-body td {
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border-glass);
+      color: var(--text-muted);
+    }
+
+    .author-box {
+      background: rgba(192, 132, 252, 0.08);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 1.8rem;
+      margin-top: 3.5rem;
+    }
+    .author-box h3 {
+      color: #fff;
+      font-size: 1.2rem;
+      margin-bottom: 0.6rem;
+      font-family: var(--font-heading);
+    }
+    .author-box p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .faq-section {
+      margin-top: 3rem;
+      border-top: 1px solid var(--border-glass);
+      padding-top: 2.2rem;
+    }
+    .faq-item {
+      margin-bottom: 1.8rem;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 1.2rem 1.4rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .faq-item h4 {
+      color: #fff;
+      font-size: 1.08rem;
+      margin-bottom: 0.5rem;
+      font-family: var(--font-heading);
+    }
+    .faq-item p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-glass);
+      padding: 3.5rem 6% 2rem;
+      background: rgba(5, 3, 13, 0.95);
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-top: 5rem;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 2.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .footer-col h4 {
+      font-family: var(--font-heading);
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 0.6rem; }
+    .footer-col a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--accent-cyan); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .cookie-banner {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(92%, 820px);
+      background: rgba(14, 10, 32, 0.95);
+      border: 1px solid var(--border-glow);
+      backdrop-filter: blur(25px);
+      padding: 1.2rem 1.6rem;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      transition: opacity 0.3s ease;
+    }
+    .cookie-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .cookie-content p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      flex: 1;
+      min-width: 280px;
+    }
+    .cookie-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn-cookie-accept {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-cookie-accept:hover { opacity: 0.9; }
+    .btn-cookie-reject {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #94a3b8;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cookie-reject:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 1rem 4%; }
+      .nav-links { display: none; }
+      .article-container { padding: 2.5rem 1rem 4rem; }
+      .article-body { padding: 1.8rem 1.2rem; }
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="../index.html" class="brand">
+      <img src="../icon.ico" class="brand-logo-img" alt="Nebula Dev Studios" />
+      <span class="brand-name">NEBULA DEV STUDIOS</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html" class="nav-link">Inicio</a></li>
+      <li><a href="../guias.html" class="nav-link active">Guías & Artículos</a></li>
+      <li><a href="../about.html" class="nav-link">Acerca de</a></li>
+      <li><a href="../metodologia.html" class="nav-link">Metodología</a></li>
+      <li><a href="../contact.html" class="nav-link">Contacto</a></li>
+    </ul>
+    <a href="../index.html#descargar" class="nav-btn">Descargar Launcher</a>
+  </nav>
+
+  <div class="article-container">
+    <nav class="breadcrumbs">
+      <a href="../index.html">Inicio</a> &rsaquo;
+      <a href="../guias.html">Guías</a> &rsaquo;
+      <span>Organización</span>
+    </nav>
+
+    <div class="badge">Gestión de Instancias</div>
+    <h1>Cómo aislar versiones con instancias independientes en Minecraft</h1>
+
+    <div class="article-meta">
+      <span>✍️ Por <strong>fondue_x</strong></span>
+      <span>📅 19 de Septiembre, 2026</span>
+      <span>⏱️ 7 min de lectura</span>
+      <span>💻 Probado en Windows 11</span>
+    </div>
+
+    <article class="article-body">
+      <h2>El problema: el caos de ejecutar múltiples versiones en la misma carpeta .minecraft</h2>
+<p>La mayoría de los jugadores habituales de Minecraft no juegan a una única versión del juego. Es muy común alternar entre un cliente optimizado de PvP en la versión 1.8.9, un modpack técnico pesado en la 1.20.1 con Forge y una instalación limpia de la versión 1.21 con Fabric para jugar en servidores multijugador con amigos. Sin embargo, por defecto, el juego almacena todas las configuraciones, mundos, capturas y modificaciones dentro de un único directorio central: <code>%appdata%\.minecraft</code>.</p>
+<p>Compartir este directorio raíz entre distintas generaciones del juego provoca problemas graves de estabilidad:</p>
+<ul>
+  <li><strong>Incompatibilidad directa en la carpeta de mods:</strong> Si dejas mods de Fabric de la 1.21 dentro de <code>.minecraft\mods</code> e inicias un perfil de Forge 1.20.1, el cargador intentará leer todos los archivos <code>.jar</code> de la carpeta. Al detectar clases no reconocidas, el juego colapsará en el arranque con un Código de salida 1.</li>
+  <li><strong>Sobreescritura y reseteo de controles (options.txt):</strong> Las versiones modernas y clásicas utilizan sistemas de entrada completamente distintos. Abrir una versión moderna y luego una antigua en la misma carpeta borra las configuraciones de teclas, la sensibilidad del ratón y el campo de visión (FOV).</li>
+  <li><strong>El peor escenario: corrupción irreversible de mundos:</strong> Si por error abres tu mundo de supervivencia con mods de la 1.20.1 mientras tienes seleccionado un perfil de la 1.21 Vanilla, el motor del juego actualizará la cabecera del archivo <code>level.dat</code> y eliminará todos los bloques y objetos personalizados de los mods que no reconozca en el mapa, destruyendo meses de construcciones de forma irrecuperable.</li>
+</ul>
+<p>La solución técnica profesional para erradicar este problema es el <strong>aislamiento de entornos mediante instancias independientes</strong>.</p>
+
+<h2>El principio técnico del aislamiento: El parámetro --gameDir</h2>
+<p>Minecraft está diseñado para que todos sus subcomponentes (mundos, mods, configuraciones, paquetes de recursos y registros de registro) busquen sus datos relativos a un directorio de trabajo específico. Este directorio se define mediante el argumento de lanzamiento:</p>
+<pre><code>--gameDir "C:\Ruta\De\Tu\Instancia"</code></pre>
+<p>Cuando este parámetro se configura correctamente, ocurre algo fundamental para la economía de almacenamiento de tu computadora: <strong>los archivos pesados de assets (sonidos, texturas globales del juego) y las librerías base de Mojang se siguen compartiendo globalmente</strong> desde el directorio central, pero las carpetas individuales de mods, mundos guardados (<code>saves</code>) y opciones se crean y gestionan de forma 100% aislada dentro de su propia carpeta.</p>
+
+<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Comparativa de estructura de carpetas mostrando la carpeta global .minecraft frente a una carpeta de instancia aislada</div>
+
+<h2>Protocolo de 5 pasos para crear y aislar instancias en Windows</h2>
+
+<h3>Paso 1: Planificar una estructura limpia en el disco duro</h3>
+<p>Antes de modificar ningún perfil, crea una carpeta organizada donde se alojarán tus perfiles independientes. La mejor práctica es crear una subcarpeta llamada <code>instances</code> (instancias) dentro de tu directorio de usuario o dentro del propio <code>.minecraft</code>:</p>
+<pre><code>C:\Users\[TuUsuario]\AppData\Roaming\.minecraft\instances\
+    ├── 1.8.9_PvP\
+    ├── 1.20.1_Forge_Modpack\
+    └── 1.21.1_Fabric_VanillaPlus\</code></pre>
+<p><em>Regla técnica estricta:</em> Evita utilizar caracteres especiales, acentos, símbolos ortográficos o espacios excesivos en los nombres de las carpetas (utiliza guiones bajos en su lugar). Algunos cargadores de mods antiguos de Forge fallan al procesar rutas de archivos con caracteres no ASCII en Windows.</p>
+
+<h3>Paso 2: Configurar la directiva de directorio en el lanzador oficial</h3>
+<p>Si utilizas el lanzador oficial de Mojang:</p>
+<ol>
+  <li>Abre el lanzador y haz clic en la pestaña superior <strong>Instalaciones</strong>.</li>
+  <li>Pasa el cursor sobre la versión que deseas aislar y pulsa en los tres puntos (<code>...</code>) &gt; <strong>Editar</strong>.</li>
+  <li>Localiza el campo <strong>Directorio del juego</strong> (Game Directory). Por defecto estará marcado en "Usar directorio predeterminado".</li>
+  <li>Pulsa en <strong>Examinar</strong> y selecciona la carpeta específica que creaste para esa versión (por ejemplo, <code>C:\...\.minecraft\instances\1.20.1_Forge_Modpack</code>).</li>
+  <li>Guarda los cambios de la instalación.</li>
+</ol>
+<p>A partir de ese segundo, cuando presiones "Jugar", Minecraft creará automáticamente dentro de esa carpeta vacía sus propias subcarpetas <code>mods</code>, <code>saves</code>, <code>config</code> y su propio archivo <code>options.txt</code> exclusivo.</p>
+
+<h3>Paso 3: Migrar mundos y opciones de forma selectiva</h3>
+<p>Para transferir tus partidas antiguas a la nueva instancia sin contaminar el entorno, copia manualmente únicamente los archivos necesarios desde la carpeta central <code>.minecraft</code> hacia la carpeta de tu nueva instancia:</p>
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Carpeta / Archivo</th>
+      <th>Qué contiene</th>
+      <th>¿Se debe migrar a la nueva instancia?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>saves/</code></td>
+      <td>Tus mundos de un jugador.</td>
+      <td><strong>Sí:</strong> copia solo la carpeta del mundo específico que pertenezca a esa versión.</td>
+    </tr>
+    <tr>
+      <td><code>servers.dat</code></td>
+      <td>Tu lista de servidores multijugador guardados.</td>
+      <td><strong>Opcional:</strong> cópialo si deseas conservar las IPs de tus servidores favoritos.</td>
+    </tr>
+    <tr>
+      <td><code>options.txt</code></td>
+      <td>Configuración de teclas, FOV y volumen.</td>
+      <td><strong>No recomendado:</strong> es preferible configurarlo desde cero en la primera sesión para evitar conflictos de mapeo de GLFW.</td>
+    </tr>
+    <tr>
+      <td><code>resourcepacks/</code></td>
+      <td>Texturas y paquetes de sonido.</td>
+      <td><strong>Sí:</strong> copia únicamente los paquetes diseñados para esa versión.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Paso 4: Gestionar las modificaciones sin riesgo de interferencias</h3>
+<p>Con la instancia aislada, ahora puedes abrir la carpeta <code>.minecraft\instances\1.20.1_Forge_Modpack\mods</code> y colocar allí 150 modificaciones de Forge sin preocuparte de que afecten a tu versión de 1.8.9 o a tu cliente de 1.21. Si una modificación provoca un fallo catastrófico, el registro de errores quedará confinado exclusivamente en la subcarpeta <code>logs</code> de esa instancia, facilitando su diagnóstico inmediato.</p>
+
+<h3>Paso 5: Automatización mediante lanzadores modulares</h3>
+<p>Hacer este procedimiento de forma manual en el lanzador oficial funciona perfectamente, pero exige crear carpetas a mano y configurar rutas de Java para cada perfil. En lanzadores modernos de arquitectura modular (como Nebula Launcher, Prism Launcher o CurseForge App), este proceso viene completamente integrado en el núcleo del programa: cada vez que creas un modpack o instalas una versión, el software genera automáticamente una carpeta de instancia aislada en segundo plano y aplica el parámetro <code>--gameDir</code> de forma transparente, permitiendo incluso ejecutar múltiples instancias de diferentes versiones de Minecraft de forma simultánea sin que se bloqueen archivos entre sí.</p>
+
+<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Menú de edición de instalación en el lanzador de Minecraft mostrando el campo Directorio del juego con ruta personalizada</div>
+
+<h2>El caso raro: La corrupción de controles entre LWJGL 2 y GLFW</h2>
+<p>Muchos jugadores que alternan entre Minecraft 1.8.9 (la versión reina de las modalidades PvP de puentes, SkyWars y BedWars) y versiones modernas como 1.20 experimentan un fallo molesto y poco documentado: cada vez que vuelven a la 1.8.9, el botón izquierdo del ratón deja de golpear, la tecla de agacharse cambia de lugar o la sensibilidad del ratón se dispara al 200%.</p>
+<p>Este comportamiento no es un virus ni un error de Windows; es un conflicto de arquitectura binaria en el archivo <code>options.txt</code>:</p>
+<ol>
+  <li>Minecraft 1.8.9 utiliza la biblioteca <strong>LWJGL 2</strong> para comunicarse con el teclado y el ratón. En esta versión antigua, los códigos de tecla se graban como números enteros primitivos (por ejemplo, el clic izquierdo se guardaba bajo el código <code>key_key.attack:-100</code>).</li>
+  <li>A partir de Minecraft 1.13, Mojang migró todo el sistema de ventanas a la biblioteca moderna <strong>GLFW (LWJGL 3)</strong>, la cual adoptó una nomenclatura textual estandarizada (el clic izquierdo pasó a llamarse <code>key.mouse.left</code>).</li>
+</ol>
+<p>Si ambas versiones leen el mismo archivo <code>options.txt</code> dentro de la carpeta raíz compartida, la versión clásica no logra traducir los nombres modernos de GLFW, marca los controles como no asignados y los restablece a los valores de fábrica. Aislar ambas versiones en carpetas independientes es la única forma matemática de mantener intacta tu configuración de teclas competitiva sin tener que reasignarla en cada partida.</p>
+
+<h2>Cómo comprobar que tu instancia está completamente aislada</h2>
+<p>Para verificar con absoluta certeza técnica que tu perfil está operando dentro de su propio contenedor independiente y no está tocando los archivos generales de tu ordenador:</p>
+<ol>
+  <li>Inicia el perfil configurado y entra a cualquier mundo.</li>
+  <li>Presiona la tecla <code>F2</code> para tomar una captura de pantalla dentro del juego.</li>
+  <li>Abre el explorador de archivos de Windows y navega hasta la carpeta de tu instancia (por ejemplo, <code>.minecraft\instances\Tu_Instancia\screenshots</code>).</li>
+  <li>Comprueba que la captura de pantalla se haya guardado allí y no en la carpeta central <code>%appdata%\.minecraft\screenshots</code>.</li>
+  <li>Presiona <code>F3</code> dentro del juego y revisa en la parte superior izquierda de la pantalla la ruta de depuración: debe señalar directamente a la carpeta de tu instancia.</li>
+</ol>
+<p>Si las capturas y los registros se generan dentro de la subcarpeta designada, tu entorno está 100% aislado, blindado contra corrupciones de mundos y listo para recibir modificaciones con total seguridad.</p>
+
+<h2>Conclusión</h2>
+<p>El aislamiento de instancias es la línea divisoria entre una instalación de Minecraft desordenada y propensa a fallos inexplicables, y un entorno técnico profesional y estable. Dedicar dos minutos a configurar carpetas separadas garantiza que tus mundos de supervivencia permanezcan a salvo y que puedas saltar entre versiones clásicas y modernas con la tranquilidad de que cada configuración permanecerá en su lugar.</p>
+
+      <div class="author-box">
+        <h3>Sobre el autor: fondue_x</h3>
+        <p><strong>fondue_x</strong> es desarrollador independiente y jugador de Minecraft desde hace más de 5 años, especializado en optimización de rendimiento, arquitectura de instancias y resolución de incompatibilidades en Fabric, Forge y NeoForge. Es el creador de <a href="https://github.com/fonduev" target="_blank" rel="noopener">Nebula Launcher</a>. Todas sus guías se prueban de primera mano en bancos de pruebas reales con Windows 11. Puedes consultar nuestra <a href="../metodologia.html">metodología editorial y banco de pruebas</a>.</p>
+      </div>
+
+      <div class="faq-section">
+        <h2 style="margin-top:0;">Preguntas Frecuentes</h2>
+                <div class="faq-item">
+          <h4>¿Crear instancias separadas duplica el espacio que ocupa Minecraft en mi disco duro?</h4>
+          <p>No de forma masiva. Los archivos más pesados del juego (los paquetes de audio, recursos globales y librerías de Java que pesan varios gigabytes) se conservan en la carpeta central y se comparten entre todas las instancias. La carpeta aislada solo almacena tus mods, mundos y configuraciones particulares.</p>
+        </div>
+        <div class="faq-item">
+          <h4>¿Puedo tener un perfil con Fabric y otro con Forge al mismo tiempo sin que choquen?</h4>
+          <p>Sí, precisamente para eso sirve el aislamiento de instancias. Al asignar un directorio de juego distinto a cada perfil, los mods de Fabric residirán en su propia carpeta y Forge nunca intentará leerlos, evitando los cierres en el arranque.</p>
+        </div>
+        <div class="faq-item">
+          <h4>¿Dónde se guardan mis capturas de pantalla si juego en una instancia aislada?</h4>
+          <p>Se guardan dentro de la subcarpeta screenshots de esa instancia específica (por ejemplo, en .minecraft/instances/[nombre_instancia]/screenshots), en lugar de almacenarse en el directorio raíz de .minecraft.</p>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>NEBULA DEV STUDIOS</h4>
+        <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
+          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Navegación</h4>
+        <ul>
+          <li><a href="../index.html">Inicio</a></li>
+          <li><a href="../guias.html">Guías & Tutoriales</a></li>
+          <li><a href="../about.html">Acerca de</a></li>
+          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../contact.html">Contacto</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Guías Técnicas</h4>
+        <ul>
+          <li><a href="./como-leer-latest-log-crash-reports-minecraft.html">Diagnóstico de Logs</a></li>
+          <li><a href="./exit-code-1-minecraft-solucion.html">Solución Exit Code 1</a></li>
+          <li><a href="./optimizar-minecraft-disco-hdd.html">Optimización en HDD</a></li>
+          <li><a href="./argumentos-jvm-minecraft-mitos-realidad.html">Argumentos JVM</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="../privacy.html">Política de Privacidad</a></li>
+          <li><a href="../terms.html">Términos de Servicio</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Nebula Dev Studios. Todos los derechos reservados.</div>
+      <div style="font-size: 0.8rem; line-height: 1.6; text-align: center; width: 100%; margin-top: 0.5rem;">
+        <strong>NO ES UN PRODUCTO OFICIAL DE MINECRAFT. NO ESTÁ APROBADO NI ASOCIADO CON MOJANG O MICROSOFT.</strong><br>
+        Minecraft es una marca comercial registrada de Mojang Synergies AB / Microsoft Corporation.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Banner de Privacidad y Cookies -->
+  <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
+    <div class="cookie-content">
+      <p>
+        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+      </p>
+      <div class="cookie-buttons">
+        <button class="btn-cookie-reject" onclick="rejectCookieConsent()">Solo Necesarias</button>
+        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function initCookieConsent() {
+      if (!localStorage.getItem('nebula_cookie_consent')) {
+        const banner = document.getElementById('cookieConsentBanner');
+        if (banner) banner.style.display = 'block';
+      }
+    }
+    function acceptCookieConsent() {
+      localStorage.setItem('nebula_cookie_consent', 'accepted');
+      dismissCookieBanner();
+    }
+    function rejectCookieConsent() {
+      localStorage.setItem('nebula_cookie_consent', 'essential_only');
+      dismissCookieBanner();
+    }
+    function dismissCookieBanner() {
+      const banner = document.getElementById('cookieConsentBanner');
+      if (banner) {
+        banner.style.opacity = '0';
+        setTimeout(() => { banner.style.display = 'none'; }, 300);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', initCookieConsent);
+  </script>
+
+</body>
+</html>

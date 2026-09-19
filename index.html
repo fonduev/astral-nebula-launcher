@@ -1227,67 +1227,118 @@
 
   
   <!-- ── SECCIÓN CENTRO DE GUÍAS Y TUTORIALES (HIGH-VALUE CONTENT) ── -->
-  <section class="guides-section-home" id="guias" style="padding: 6rem 6% 4rem; position: relative; z-index: 1;">
-    <div style="text-align: center; max-width: 800px; margin: 0 auto 3.5rem;">
+      <section class="guides-section-home" id="guias" style="padding: 6rem 6% 4rem; position: relative; z-index: 1;">
+    <div style="text-align: center; max-width: 850px; margin: 0 auto 3.5rem;">
       <div class="hero-badge" style="margin-bottom: 1rem;">
-        <span class="hero-badge-star">✦</span> ARTÍCULOS TÉCNICOS & TUTORIALES
+        <span class="hero-badge-star">✦</span> CENTRO DE CONOCIMIENTO TÉCNICO
       </div>
       <h2 style="font-family: var(--font-heading); font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; color: #fff; margin-bottom: 1rem;">
-        Aprende, Optimiza & <span class="glow-text">Domina Minecraft</span>
+        Guías Técnicas & <span class="glow-text">Resolución de Crashes</span>
       </h2>
       <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6;">
-        Guías completas elaboradas por nuestro equipo técnico para exprimir al máximo tus FPS, evitar errores de memoria y configurar tus mods y shaders favoritos.
+        Documentación técnica profunda, análisis de bytecode, solución de cuellos de botella y protocolos de diagnóstico verificados en nuestro <a href="./metodologia.html" style="color:var(--accent-cyan); text-decoration:underline;">banco de pruebas de hardware</a>.
       </p>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto 3rem;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto 3rem;">
       
       <!-- Guía 1 -->
-      <a href="./guias/optimizar-minecraft-pc-bajos-recursos.html" style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 20px; padding: 2rem; backdrop-filter: blur(20px); text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='rgba(192, 132, 252, 0.5)'; this.style.boxShadow='0 16px 40px rgba(139, 92, 246, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255, 255, 255, 0.12)'; this.style.boxShadow='none';">
+      <a href="./guias/como-leer-latest-log-crash-reports-minecraft.html" style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 20px; padding: 2rem; backdrop-filter: blur(20px); text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='rgba(192, 132, 252, 0.5)'; this.style.boxShadow='0 16px 40px rgba(139, 92, 246, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255, 255, 255, 0.12)'; this.style.boxShadow='none';">
         <div>
           <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 9999px; background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3);">⚡ Rendimiento</span>
-            <span style="font-size: 0.8rem; color: var(--text-dim);">⏱️ 8 min</span>
+            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 9999px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);">🔍 Diagnóstico</span>
+            <span style="font-size: 0.8rem; color: var(--text-dim);">⏱️ 7 min</span>
           </div>
           <h3 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem; line-height: 1.3;">
-            Cómo Optimizar Minecraft en 2026 con Sodium & JVM
+            Cómo Leer latest.log y Crash Reports
           </h3>
           <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
-            Duplica tus FPS y elimina tirones usando el stack de Sodium, Lithium, FerriteCore y argumentos avanzados de recolección de basura.
+            Aprende a interpretar la traza de Java y encontrar la línea "Caused by:" para solucionar cierres sin desinstalar mods uno por uno.
           </p>
         </div>
         <div style="color: var(--accent-cyan); font-weight: 600; font-size: 0.9rem;">Leer Artículo Completo &rarr;</div>
       </a>
 
       <!-- Guía 2 -->
-      <a href="./guias/como-instalar-modpacks-mods-minecraft.html" style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 20px; padding: 2rem; backdrop-filter: blur(20px); text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='rgba(192, 132, 252, 0.5)'; this.style.boxShadow='0 16px 40px rgba(139, 92, 246, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255, 255, 255, 0.12)'; this.style.boxShadow='none';">
+      <a href="./guias/exit-code-1-minecraft-solucion.html" style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 20px; padding: 2rem; backdrop-filter: blur(20px); text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='rgba(192, 132, 252, 0.5)'; this.style.boxShadow='0 16px 40px rgba(139, 92, 246, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255, 255, 255, 0.12)'; this.style.boxShadow='none';">
         <div>
           <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 9999px; background: rgba(192, 132, 252, 0.15); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.3);">📦 Modding</span>
-            <span style="font-size: 0.8rem; color: var(--text-dim);">⏱️ 7 min</span>
+            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 9999px; background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3);">⚠️ Solución de Errores</span>
+            <span style="font-size: 0.8rem; color: var(--text-dim);">⏱️ 8 min</span>
           </div>
           <h3 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem; line-height: 1.3;">
-            Guía de Mods en Fabric, Forge y NeoForge
+            Exit Code 1: Protocolo de Descarte
           </h3>
           <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
-            Aprende a elegir el loader adecuado, resolver dependencias obligatorias y evitar conflictos entre mods para una partida estable.
+            Solución metódica al fallo más habitual: versiones de Java incompatibles, argumentos JVM corruptos y bibliotecas LWJGL rotas.
           </p>
         </div>
         <div style="color: var(--accent-cyan); font-weight: 600; font-size: 0.9rem;">Leer Artículo Completo &rarr;</div>
       </a>
 
       <!-- Guía 3 -->
-      <a href="./guias/solucion-errores-comunes-minecraft.html" style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 20px; padding: 2rem; backdrop-filter: blur(20px); text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='rgba(192, 132, 252, 0.5)'; this.style.boxShadow='0 16px 40px rgba(139, 92, 246, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255, 255, 255, 0.12)'; this.style.boxShadow='none';">
+      <a href="./guias/optimizar-minecraft-disco-hdd.html" style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 20px; padding: 2rem; backdrop-filter: blur(20px); text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='rgba(192, 132, 252, 0.5)'; this.style.boxShadow='0 16px 40px rgba(139, 92, 246, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255, 255, 255, 0.12)'; this.style.boxShadow='none';">
         <div>
           <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 9999px; background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3);">🛠️ Soporte</span>
+            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 9999px; background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3);">⚡ Rendimiento HDD</span>
             <span style="font-size: 0.8rem; color: var(--text-dim);">⏱️ 9 min</span>
           </div>
           <h3 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem; line-height: 1.3;">
-            Solución a Crashes y Código de Salida 1
+            Optimizar Minecraft en Discos Duros HDD
           </h3>
           <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
-            Guía paso a paso para diagnosticar crash-reports, solucionar OutOfMemoryError y resolver incompatibilidades de versiones de Java.
+            Técnicas de optimización de I/O, desfragmentación del formato Anvil y configuración en Windows 11 para eliminar micro-tirones.
+          </p>
+        </div>
+        <div style="color: var(--accent-cyan); font-weight: 600; font-size: 0.9rem;">Leer Artículo Completo &rarr;</div>
+      </a>
+
+      <!-- Guía 4 -->
+      <a href="./guias/argumentos-jvm-minecraft-mitos-realidad.html" style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 20px; padding: 2rem; backdrop-filter: blur(20px); text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='rgba(192, 132, 252, 0.5)'; this.style.boxShadow='0 16px 40px rgba(139, 92, 246, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255, 255, 255, 0.12)'; this.style.boxShadow='none';">
+        <div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 9999px; background: rgba(192, 132, 252, 0.15); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.3);">⚙️ Java & JVM</span>
+            <span style="font-size: 0.8rem; color: var(--text-dim);">⏱️ 8 min</span>
+          </div>
+          <h3 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem; line-height: 1.3;">
+            Argumentos JVM: Parámetros Reales vs Mitos
+          </h3>
+          <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
+            Desmitificamos la asignación excesiva de memoria RAM, banderas obsoletas y optimizamos G1GC y ZGC Generacional con base técnica.
+          </p>
+        </div>
+        <div style="color: var(--accent-cyan); font-weight: 600; font-size: 0.9rem;">Leer Artículo Completo &rarr;</div>
+      </a>
+
+      <!-- Guía 5 -->
+      <a href="./guias/versiones-java-minecraft-guia-completa.html" style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 20px; padding: 2rem; backdrop-filter: blur(20px); text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='rgba(192, 132, 252, 0.5)'; this.style.boxShadow='0 16px 40px rgba(139, 92, 246, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255, 255, 255, 0.12)'; this.style.boxShadow='none';">
+        <div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 9999px; background: rgba(251, 146, 60, 0.15); color: #fb923c; border: 1px solid rgba(251, 146, 60, 0.3);">☕ Compatibilidad</span>
+            <span style="font-size: 0.8rem; color: var(--text-dim);">⏱️ 7 min</span>
+          </div>
+          <h3 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem; line-height: 1.3;">
+            Java 8, 17 y 21: Requisitos por Versión
+          </h3>
+          <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
+            Matriz oficial de versiones de Java requeridas desde 1.8.9 hasta 1.21+, errores de bytecode y coexistencia limpia en Windows.
+          </p>
+        </div>
+        <div style="color: var(--accent-cyan); font-weight: 600; font-size: 0.9rem;">Leer Artículo Completo &rarr;</div>
+      </a>
+
+      <!-- Guía 6 -->
+      <a href="./guias/como-aislar-instancias-minecraft-carpetas.html" style="background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 20px; padding: 2rem; backdrop-filter: blur(20px); text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='rgba(192, 132, 252, 0.5)'; this.style.boxShadow='0 16px 40px rgba(139, 92, 246, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255, 255, 255, 0.12)'; this.style.boxShadow='none';">
+        <div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.75rem; border-radius: 9999px; background: rgba(168, 85, 247, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3);">📁 Instancias Aisladas</span>
+            <span style="font-size: 0.8rem; color: var(--text-dim);">⏱️ 7 min</span>
+          </div>
+          <h3 style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; color: #fff; margin-bottom: 0.75rem; line-height: 1.3;">
+            Aislar Versiones con Instancias Independientes
+          </h3>
+          <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
+            Cómo utilizar el parámetro --gameDir para evitar colisiones de mods, incompatibilidades de opciones y corrupción de mundos.
           </p>
         </div>
         <div style="color: var(--accent-cyan); font-weight: 600; font-size: 0.9rem;">Leer Artículo Completo &rarr;</div>
@@ -1297,7 +1348,7 @@
 
     <div style="text-align: center;">
       <a href="./guias.html" class="nav-btn" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.85rem 2rem; font-size: 1rem; border-radius: 14px;">
-        📚 Ver Todas las Guías & Artículos &rarr;
+        📚 Explorar Catálogo Completo de Guías ({len(guide_specs) + 5} Artículos) &rarr;
       </a>
     </div>
   </section>
@@ -1955,7 +2006,7 @@
   <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
     <div class="cookie-content">
       <p>
-        🍪 <strong>Preferencias de privacidad:</strong> Usamos almacenamiento local estrictamente necesario para recordar esta elección. Actualmente no cargamos publicidad de terceros. Consulta nuestra <a href="privacy.html" style="color:var(--accent-cyan); text-decoration:underline;">Política de Privacidad</a> y <a href="terms.html" style="color:var(--accent-cyan); text-decoration:underline;">Términos</a>.
+        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
       </p>
       <div class="cookie-buttons" style="display:flex; gap:10px; align-items:center;">
         <button class="btn-cookie-reject" onclick="rejectCookieConsent()" style="background:transparent; border:1px solid rgba(255,255,255,0.25); color:#94a3b8; padding:9px 18px; border-radius:10px; font-weight:600; font-size:0.84rem; cursor:pointer; transition:all 0.2s;">Solo Necesarias</button>

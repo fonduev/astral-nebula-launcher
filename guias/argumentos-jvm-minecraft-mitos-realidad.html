@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="../icon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
+  <title>Argumentos JVM para Minecraft: parámetros reales vs mitos | Nebula Dev Studios</title>
+  <meta name="description" content="Descubre qué argumentos JVM realmente optimizan Minecraft y cuáles provocan caídas de FPS. Configuración técnica probada de memoria, G1GC y ZGC." />
+
+  <!-- Canonical URL & Metadatos Oficiales -->
+  <link rel="canonical" href="https://nebuladevstudios.com/guias/argumentos-jvm-minecraft-mitos-realidad.html" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Nebula Dev Studios" />
+  <meta property="og:title" content="Argumentos JVM para Minecraft: parámetros reales vs mitos | Nebula Dev Studios" />
+  <meta property="og:description" content="Descubre qué argumentos JVM realmente optimizan Minecraft y cuáles provocan caídas de FPS. Configuración técnica probada de memoria, G1GC y ZGC." />
+  <meta property="og:url" content="https://nebuladevstudios.com/guias/argumentos-jvm-minecraft-mitos-realidad.html" />
+  <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Argumentos JVM para Minecraft: parámetros reales vs mitos | Nebula Dev Studios" />
+  <meta name="twitter:description" content="Descubre qué argumentos JVM realmente optimizan Minecraft y cuáles provocan caídas de FPS. Configuración técnica probada de memoria, G1GC y ZGC." />
+  <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
+
+  <!-- Schema.org Datos Estructurados JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "headline": "Argumentos JVM para Minecraft: qué parámetros funcionan y cuáles son mitos",
+        "description": "Descubre qué argumentos JVM realmente optimizan Minecraft y cuáles provocan caídas de FPS. Configuración técnica probada de memoria, G1GC y ZGC.",
+        "url": "https://nebuladevstudios.com/guias/argumentos-jvm-minecraft-mitos-realidad.html",
+        "author": {
+          "@type": "Person",
+          "name": "fondue_x",
+          "url": "https://github.com/fonduev"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Nebula Dev Studios",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://nebuladevstudios.com/icon.ico"
+          }
+        },
+        "datePublished": "2026-09-19",
+        "dateModified": "2026-09-19"
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {"@type": "Question", "name": "¿Qué sucede si asigno 12 GB de RAM a Minecraft en una PC con 16 GB?", "acceptedAnswer": {"@type": "Answer", "text": "El juego funcionará temporalmente, pero los procesos de Windows y los controladores gráficos se quedarán sin memoria física suficiente, provocando que el sistema recurra al archivo de paginación del disco duro y genere tirones severos (lag spikes)."}},
+          {"@type": "Question", "name": "¿Es mejor usar G1GC o ZGC para jugar con mods?", "acceptedAnswer": {"@type": "Answer", "text": "G1GC es el más estable y universal para la mayoría de versiones en Java 17. ZGC Generacional solo se recomienda si estás jugando en versiones modernas (1.20.5+) bajo Java 21 oficial y cuentas con un procesador con suficientes hilos libres."}},
+          {"@type": "Question", "name": "¿Por qué me aparece 'Unrecognized VM option' y el juego no abre?", "acceptedAnswer": {"@type": "Answer", "text": "Ese error significa que pegaste un argumento obsoleto que ya no existe en la versión de Java que estás ejecutando (como banderas antiguas de Java 8 en Java 17 o 21). Eliminar ese parámetro resuelve el cierre de inmediato."}}
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #05030d;
+      --bg-card: rgba(14, 10, 32, 0.7);
+      --accent-purple: #c084fc;
+      --accent-cyan: #38bdf8;
+      --accent-pink: #f472b6;
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-glow: rgba(192, 132, 252, 0.4);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: radial-gradient(circle at 50% -10%, #1c0e3d 0%, #080415 50%, var(--bg-dark) 100%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5, 3, 13, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 1rem 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+    .brand-logo-img { width: 36px; height: 36px; border-radius: 10px; }
+    .brand-name {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: 0.05em;
+    }
+    .nav-links { display: flex; gap: 1.8rem; list-style: none; align-items: center; }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-link:hover, .nav-link.active { color: #fff; }
+    .nav-btn {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      padding: 0.5rem 1.2rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .nav-btn:hover { opacity: 0.9; }
+
+    .article-container {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 5rem;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      margin-bottom: 1.5rem;
+    }
+    .breadcrumbs a { color: var(--accent-cyan); text-decoration: none; }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 9999px;
+      background: rgba(192, 132, 252, 0.1);
+      border: 1px solid var(--border-glow);
+      color: var(--accent-purple);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 4.5vw, 2.85rem);
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 1.2rem;
+      background: linear-gradient(135deg, #fff 40%, var(--accent-purple) 80%, var(--accent-pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border-glass);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .article-meta strong { color: #e2e8f0; }
+
+    .article-body {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 24px;
+      padding: 3rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+    .article-body h2 {
+      font-family: var(--font-heading);
+      font-size: 1.65rem;
+      color: #fff;
+      margin: 2.5rem 0 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.4rem;
+    }
+    .article-body h2:first-of-type { margin-top: 0; }
+    .article-body h3 {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      color: var(--accent-cyan);
+      margin: 1.6rem 0 0.8rem;
+    }
+    .article-body p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 1.02rem;
+    }
+    .article-body ul, .article-body ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-muted);
+    }
+    .article-body li { margin-bottom: 0.6rem; font-size: 1rem; }
+    .article-body strong { color: #fff; }
+    .article-body a { color: var(--accent-cyan); text-decoration: underline; }
+    .article-body a:hover { color: #fff; }
+
+    .article-body pre {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin: 1.2rem 0 1.5rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: #38bdf8;
+    }
+    .article-body code {
+      background: rgba(192, 132, 252, 0.12);
+      color: #e9d5ff;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+    }
+    .article-body pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+    }
+
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.8rem 0;
+      font-size: 0.92rem;
+    }
+    .article-body th {
+      background: rgba(192, 132, 252, 0.15);
+      color: #fff;
+      padding: 0.85rem 1rem;
+      font-family: var(--font-heading);
+      border: 1px solid var(--border-glass);
+      text-align: left;
+    }
+    .article-body td {
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border-glass);
+      color: var(--text-muted);
+    }
+
+    .author-box {
+      background: rgba(192, 132, 252, 0.08);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 1.8rem;
+      margin-top: 3.5rem;
+    }
+    .author-box h3 {
+      color: #fff;
+      font-size: 1.2rem;
+      margin-bottom: 0.6rem;
+      font-family: var(--font-heading);
+    }
+    .author-box p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .faq-section {
+      margin-top: 3rem;
+      border-top: 1px solid var(--border-glass);
+      padding-top: 2.2rem;
+    }
+    .faq-item {
+      margin-bottom: 1.8rem;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 1.2rem 1.4rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .faq-item h4 {
+      color: #fff;
+      font-size: 1.08rem;
+      margin-bottom: 0.5rem;
+      font-family: var(--font-heading);
+    }
+    .faq-item p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-glass);
+      padding: 3.5rem 6% 2rem;
+      background: rgba(5, 3, 13, 0.95);
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-top: 5rem;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 2.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .footer-col h4 {
+      font-family: var(--font-heading);
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 0.6rem; }
+    .footer-col a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--accent-cyan); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .cookie-banner {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(92%, 820px);
+      background: rgba(14, 10, 32, 0.95);
+      border: 1px solid var(--border-glow);
+      backdrop-filter: blur(25px);
+      padding: 1.2rem 1.6rem;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      transition: opacity 0.3s ease;
+    }
+    .cookie-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .cookie-content p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      flex: 1;
+      min-width: 280px;
+    }
+    .cookie-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn-cookie-accept {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-cookie-accept:hover { opacity: 0.9; }
+    .btn-cookie-reject {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #94a3b8;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cookie-reject:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 1rem 4%; }
+      .nav-links { display: none; }
+      .article-container { padding: 2.5rem 1rem 4rem; }
+      .article-body { padding: 1.8rem 1.2rem; }
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="../index.html" class="brand">
+      <img src="../icon.ico" class="brand-logo-img" alt="Nebula Dev Studios" />
+      <span class="brand-name">NEBULA DEV STUDIOS</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html" class="nav-link">Inicio</a></li>
+      <li><a href="../guias.html" class="nav-link active">Guías & Artículos</a></li>
+      <li><a href="../about.html" class="nav-link">Acerca de</a></li>
+      <li><a href="../metodologia.html" class="nav-link">Metodología</a></li>
+      <li><a href="../contact.html" class="nav-link">Contacto</a></li>
+    </ul>
+    <a href="../index.html#descargar" class="nav-btn">Descargar Launcher</a>
+  </nav>
+
+  <div class="article-container">
+    <nav class="breadcrumbs">
+      <a href="../index.html">Inicio</a> &rsaquo;
+      <a href="../guias.html">Guías</a> &rsaquo;
+      <span>Java & JVM</span>
+    </nav>
+
+    <div class="badge">Java & Optimización JVM</div>
+    <h1>Argumentos JVM para Minecraft: qué parámetros funcionan y cuáles son mitos</h1>
+
+    <div class="article-meta">
+      <span>✍️ Por <strong>fondue_x</strong></span>
+      <span>📅 19 de Septiembre, 2026</span>
+      <span>⏱️ 8 min de lectura</span>
+      <span>💻 Probado en Windows 11</span>
+    </div>
+
+    <article class="article-body">
+      <h2>El problema: la proliferación de listas de argumentos obsoletos para Java</h2>
+<p>En foros, servidores de Discord y vídeos de internet es común encontrar supuestas "líneas mágicas de argumentos JVM" que prometen duplicar los cuadros por segundo o eliminar por completo los tirones en Minecraft. La inmensa mayoría de estas cadenas de comandos son combinaciones de parámetros diseñadas hace más de ocho años para Java 8, adaptaciones ciegas de configuraciones pensadas exclusivamente para servidores dedicados de alto tráfico (como las banderas de Aikar para Paper), o directamente inventos que la máquina virtual de Java moderna ignora o rechaza.</p>
+<p>Copiar y pegar estas líneas sin comprender la función de cada variable suele provocar dos problemas graves: cierres inmediatos con Código de salida 1 (debido a parámetros eliminados en versiones modernas de Java) o pausas periódicas de congelamiento (lag spikes) provocadas por recolectores de basura mal configurados que detienen el hilo de renderizado del juego. Ajustar correctamente la máquina virtual de Java (JVM) no busca inventar rendimiento donde el hardware no lo permite, sino garantizar que la asignación de memoria y la recolección de residuos se ejecuten de manera predecible y sin interrumpir los fotogramas.</p>
+
+<h2>La base de todo: Cómo gestiona la memoria la JVM en Minecraft</h2>
+<p>Para entender qué argumentos son realmente útiles, es indispensable conocer cómo interactúa Minecraft con la memoria del ordenador:</p>
+<ul>
+  <li><strong>El montón de memoria (Java Heap Space):</strong> Es el área delimitada de memoria RAM física donde Minecraft almacena los objetos activos: entidades, bloques cargados, texturas y datos de sonido. Los argumentos <code>-Xmx</code> (límite máximo) y <code>-Xms</code> (asignación inicial) controlan estrictamente las dimensiones de este espacio.</li>
+  <li><strong>Memoria nativa fuera del montón (Off-Heap / Native Memory):</strong> Java no solo consume lo que le asignas en <code>-Xmx</code>. El motor gráfico de Minecraft (LWJGL, OpenGL o Vulkan) y los controladores de vídeo reservan memoria nativa adicional por fuera del montón. Si tienes 16 GB de RAM física en tu ordenador y le asignas 14 GB a Minecraft mediante <code>-Xmx14G</code>, la suma de la memoria nativa y los procesos del sistema operativo agotarán la memoria real, obligando a Windows a utilizar el disco como memoria virtual y destruyendo la fluidez del juego.</li>
+  <li><strong>El recolector de basura (Garbage Collector):</strong> A medida que juegas, destruyes bloques o te mueves por el mundo, miles de objetos dejan de ser útiles en la memoria. El recolector de basura es el subproceso encargado de identificar estos datos obsoletos y eliminarlos para liberar espacio. Si el recolector está mal configurado o la memoria asignada es excesiva, este proceso detendrá el juego durante medio segundo cada vez que se ejecute una limpieza completa.</li>
+</ul>
+
+<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Pantalla F3 de Minecraft señalando en la esquina superior derecha la memoria asignada y el porcentaje de uso oscilando</div>
+
+<h2>Los tres grandes mitos de los argumentos JVM desmentidos</h2>
+
+<h3>Mito 1: "Cuanta más memoria RAM asignes en los argumentos, más rápido irá el juego"</h3>
+<p>Asignar memoria en exceso es perjudicial para la estabilidad. En una instalación Vanilla o con pocos mods ligeros de optimización (como Sodium), Minecraft opera de forma holgada con entre 2 GB y 4 GB de RAM. Si a esa misma instalación le asignas 10 GB o 12 GB, el recolector de basura retrasará sus ciclos de limpieza porque verá abundante espacio disponible. Cuando la memoria finalmente se llene tras media hora de juego, el recolector se verá obligado a limpiar una montaña gigantesca de objetos huérfanos de golpe, congelando la pantalla por completo durante varios segundos (lo que en informática se conoce como pausa <em>Stop-the-World</em>). La regla técnica es asignar solo la cantidad de memoria que el paquete de mods realmente necesita para funcionar sin ahogarse.</p>
+
+<h3>Mito 2: "Los argumentos de Aikar para servidores deben usarse en el cliente"</h3>
+<p>Las famosas banderas de Aikar fueron diseñadas minuciosamente para servidores dedicados de Minecraft que procesan decenas de jugadores concurrentes, entidades lógicas complejas y transacciones continuas en segundo plano. Un servidor no dibuja gráficos en una pantalla ni sincroniza fotogramas a 60 o 144 Hz. Copiar argumentos agresivos de servidores en el cliente puede desequilibrar los subprocesos de la CPU, priorizando la limpieza de datos por encima del hilo que dibuja la imagen en tu monitor.</p>
+
+<h3>Mito 3: "Activar -XX:+UseConcMarkSweepGC mejora los FPS"</h3>
+<p>Este argumento activaba el recolector de basura CMS, un componente clásico de Java 8. Desde el lanzamiento de Java 9, CMS fue declarado obsoleto y en Java 14 fue eliminado definitivamente del código de OpenJDK. Si juegas en versiones modernas de Minecraft (1.18 a 1.21+) que operan sobre Java 17 o Java 21, colocar este argumento provocará que la máquina virtual aborte en el milisegundo cero, impidiendo que el juego llegue a abrirse.</p>
+
+<h2>Protocolo técnico: Qué argumentos sí funcionan y cómo configurarlos</h2>
+
+<h3>Paso 1: Establecer límites simétricos de memoria (-Xms y -Xmx)</h3>
+<p>Por defecto, muchos lanzadores configuran un <code>-Xms</code> bajo (por ejemplo, 512 MB) y un <code>-Xmx</code> alto (por ejemplo, 4 GB). Esto obliga a la máquina virtual a solicitar continuamente más memoria al sistema operativo en bloques pequeños a medida que el juego arranca, provocando micro-tirones durante la carga inicial.</p>
+<p>Al igualar ambos valores, o mantenerlos muy cercanos, obligas a Java a reservar el bloque de memoria de forma estable desde el inicio:</p>
+<pre><code>-Xms4G -Xmx4G</code></pre>
+<p><em>Pauta de dimensionamiento según tu equipo:</em></p>
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>RAM total en el PC</th>
+      <th>Tipo de instalación</th>
+      <th>Asignación recomendada (-Xmx)</th>
+      <th>Memoria libre para Windows</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>4 GB físicos</td>
+      <td>Vanilla o Fabric ligero (Sodium)</td>
+      <td>2 GB a 2.5 GB (máximo)</td>
+      <td>1.5 GB a 2 GB restantes.</td>
+    </tr>
+    <tr>
+      <td>8 GB físicos</td>
+      <td>Mods moderados (30-60 mods)</td>
+      <td>4 GB</td>
+      <td>4 GB restantes.</td>
+    </tr>
+    <tr>
+      <td>16 GB físicos</td>
+      <td>Modpacks pesados con shaders</td>
+      <td>6 GB a 8 GB</td>
+      <td>8 GB a 10 GB restantes.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Paso 2: Utilizar el recolector de basura adecuado según tu versión de Java</h3>
+<p>Para Java 17 (Minecraft 1.18 a 1.20.4), el recolector predeterminado más robusto y equilibrado es <strong>G1GC</strong>. Para garantizar que no genere pausas prolongadas mientras juegas, se añade una directiva que le indica el tiempo máximo que toleras que se detenga el juego para limpiar memoria:</p>
+<pre><code>-XX:+UseG1GC -XX:MaxGCPauseMillis=35 -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=20 -XX:G1ReservePercent=15</code></pre>
+<p>Si utilizas Minecraft 1.20.5, 1.21 o versiones más recientes ejecutadas bajo <strong>Java 21</strong>, existe una alternativa de vanguardia: <strong>Generational ZGC</strong>. Este recolector divide los objetos por antigüedad y ejecuta prácticamente todas sus operaciones de limpieza de forma paralela en segundo plano, reduciendo los tiempos de pausa a menos de un milisegundo:</p>
+<pre><code>-XX:+UseZGC -XX:+ZGenerational</code></pre>
+<p><em>Condición técnica estricta:</em> Solo debes utilizar <code>-XX:+ZGenerational</code> si tienes la certeza de que tu entorno está ejecutando Java 21 oficial compilado (verificable mediante <code>java -version</code> en terminal), ya que en Java 17 el modificador generacional de ZGC no existe y provocará un error de sintaxis.</p>
+
+<h3>Paso 3: Eliminar fallos de página durante la partida (-XX:+AlwaysPreTouch)</h3>
+<p>Cuando Windows asigna memoria RAM a una aplicación, inicialmente solo le entrega "direcciones virtuales". La memoria física real se asigna únicamente en el milisegundo exacto en que la aplicación escribe un dato en esa dirección por primera vez. Esto produce pequeños tropiezos de lectura (llamados <em>Page Faults</em>) mientras viajas por el mundo y se cargan nuevos bloques.</p>
+<p>Al incluir el argumento:</p>
+<pre><code>-XX:+AlwaysPreTouch</code></pre>
+<p>Obligas a la JVM a recorrer y reclamar físicamente cada byte de la memoria asignada en el instante en que presionas "Jugar". Esto añade entre uno y dos segundos al tiempo que tarda el lanzador en abrir la ventana, pero a cambio elimina por completo los tirones de asignación de memoria durante la partida.</p>
+
+<h3>Paso 4: Desactivar la telemetría compartida (-XX:+PerfDisableSharedMem)</h3>
+<p>Por defecto, la máquina virtual de Java escribe constantemente pequeñas estadísticas de rendimiento en un archivo temporal dentro del directorio del usuario para permitir que herramientas externas de diagnóstico monitoreen el proceso. En sistemas con almacenamiento bajo carga constante, estas operaciones de escritura silenciosas pueden causar micro-congelamientos esporádicos. El parámetro siguiente neutraliza este mecanismo secundario:</p>
+<pre><code>-XX:+PerfDisableSharedMem</code></pre>
+
+<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Campo de configuración de Argumentos JVM en el lanzador mostrando la línea optimizada limpia</div>
+
+<h2>Caso técnico poco documentado: El mito de -XX:+UseNUMA y la saturación de hilos en CPUs de escritorio</h2>
+<p>Es muy frecuente ver en configuraciones compartidas de internet el argumento <code>-XX:+UseNUMA</code>, acompañado de la afirmación de que "activa todos los núcleos de tu procesador".</p>
+<p>Desde el punto de vista de la arquitectura de computadores, esto es falso en un ordenador de escritorio convencional. NUMA (Non-Uniform Memory Access) es una tecnología diseñada exclusivamente para placas base empresariales de servidores que albergan dos o más zócalos de procesador independientes (múltiples procesadores físicos montados en la misma placa), donde cada chip tiene su propio canal de memoria cercano y debe comunicarse mediante un bus intermedio para acceder a la memoria del otro chip.</p>
+<p>En un procesador de consumo de un solo zócalo (como una CPU Intel Core i7, i5 o AMD Ryzen estándar de escritorio), la memoria es completamente uniforme (UMA). Si colocas <code>-XX:+UseNUMA</code> en un procesador de escritorio convencional de cuatro o seis núcleos, Java intentará consultar al sistema operativo por nodos de memoria que no existen físicamente, introduciendo comprobaciones inútiles en el kernel de Windows. Peor aún: si se acompaña de comandos como <code>-XX:ParallelGCThreads</code> fijados en el número total de hilos del procesador (por ejemplo, 8 hilos en un i7-4790), cada vez que el recolector de basura realice una operación, acaparará la totalidad de los núcleos lógicos de la CPU, dejando al hilo de audio y al hilo de renderizado sin tiempo de procesamiento y provocando un congelamiento de imagen audible.</p>
+<p>En procesadores de escritorio de 4 a 8 hilos, la recomendación técnica es no sobrecargar las directivas de hilos paralelos y dejar que el programador de tareas nativo de OpenJDK asigne los hilos de manera balanceada.</p>
+
+<h2>Cómo comprobar que la configuración de memoria es estable</h2>
+<p>Para verificar con datos objetivos que tus argumentos JVM están trabajando correctamente sin saturar el sistema:</p>
+<ol>
+  <li>Inicia Minecraft y entra a un mundo con tus mods habituales.</li>
+  <li>Presiona la tecla <code>F3</code> y observa el gráfico de memoria en la esquina superior derecha.</li>
+  <li>Inspecciona el patrón de consumo: la memoria en uso debe aumentar de forma progresiva y suave (por ejemplo, subir de 40% a 70%) y luego descender limpiamente sin que la pantalla se congele ni un solo milisegundo al bajar. Este patrón regular en forma de "dientes de sierra" confirma que el recolector de basura está realizando limpiezas parciales eficientes.</li>
+  <li>Abre el Administrador de tareas de Windows (<code>Ctrl + Shift + Esc</code>) en la pestaña <em>Rendimiento &gt; Memoria</em> y comprueba que la cantidad de "Memoria disponible" en el sistema operativo no baje nunca de 1.5 GB. Mientras Windows tenga margen de maniobra, Minecraft no sufrirá caídas de rendimiento externas.</li>
+</ol>
+
+<h2>Línea de argumentos recomendada lista para usar</h2>
+<p>Si buscas una configuración balanceada, probada y libre de parámetros obsoletos para jugar con mods en Java 17 o Java 21, utiliza esta base limpia (ajustando los 4G a 6G u 8G según la memoria de tu PC):</p>
+<pre><code>-Xms4G -Xmx4G -XX:+UseG1GC -XX:+AlwaysPreTouch -XX:+PerfDisableSharedMem</code></pre>
+<p>En lanzadores que permiten personalizar la instancia (como Nebula Launcher o perfiles avanzados de Mojang), este texto se introduce directamente en el campo <em>JVM Arguments</em> sin necesidad de alterar ningún archivo de configuración interno del sistema operativo.</p>
+
+<h2>Conclusión</h2>
+<p>La optimización de Java para Minecraft no consiste en acumular la mayor cantidad de comandos posibles, sino en aplicar los principios de la informática moderna: otorgar al juego la memoria justa que necesita, garantizar que Windows conserve recursos para sus controladores y permitir que los algoritmos modernos de recolección de residuos trabajen sin interferencias artificiales.</p>
+
+      <div class="author-box">
+        <h3>Sobre el autor: fondue_x</h3>
+        <p><strong>fondue_x</strong> es desarrollador independiente y jugador de Minecraft desde hace más de 5 años, especializado en optimización de rendimiento, arquitectura de instancias y resolución de incompatibilidades en Fabric, Forge y NeoForge. Es el creador de <a href="https://github.com/fonduev" target="_blank" rel="noopener">Nebula Launcher</a>. Todas sus guías se prueban de primera mano en bancos de pruebas reales con Windows 11. Puedes consultar nuestra <a href="../metodologia.html">metodología editorial y banco de pruebas</a>.</p>
+      </div>
+
+      <div class="faq-section">
+        <h2 style="margin-top:0;">Preguntas Frecuentes</h2>
+                <div class="faq-item">
+          <h4>¿Qué sucede si asigno 12 GB de RAM a Minecraft en una PC con 16 GB?</h4>
+          <p>El juego funcionará temporalmente, pero los procesos de Windows y los controladores gráficos se quedarán sin memoria física suficiente, provocando que el sistema recurra al archivo de paginación del disco duro y genere tirones severos (lag spikes).</p>
+        </div>
+        <div class="faq-item">
+          <h4>¿Es mejor usar G1GC o ZGC para jugar con mods?</h4>
+          <p>G1GC es el más estable y universal para la mayoría de versiones en Java 17. ZGC Generacional solo se recomienda si estás jugando en versiones modernas (1.20.5+) bajo Java 21 oficial y cuentas con un procesador con suficientes hilos libres.</p>
+        </div>
+        <div class="faq-item">
+          <h4>¿Por qué me aparece 'Unrecognized VM option' y el juego no abre?</h4>
+          <p>Ese error significa que pegaste un argumento obsoleto que ya no existe en la versión de Java que estás ejecutando (como banderas antiguas de Java 8 en Java 17 o 21). Eliminar ese parámetro resuelve el cierre de inmediato.</p>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>NEBULA DEV STUDIOS</h4>
+        <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
+          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Navegación</h4>
+        <ul>
+          <li><a href="../index.html">Inicio</a></li>
+          <li><a href="../guias.html">Guías & Tutoriales</a></li>
+          <li><a href="../about.html">Acerca de</a></li>
+          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../contact.html">Contacto</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Guías Técnicas</h4>
+        <ul>
+          <li><a href="./como-leer-latest-log-crash-reports-minecraft.html">Diagnóstico de Logs</a></li>
+          <li><a href="./exit-code-1-minecraft-solucion.html">Solución Exit Code 1</a></li>
+          <li><a href="./optimizar-minecraft-disco-hdd.html">Optimización en HDD</a></li>
+          <li><a href="./argumentos-jvm-minecraft-mitos-realidad.html">Argumentos JVM</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="../privacy.html">Política de Privacidad</a></li>
+          <li><a href="../terms.html">Términos de Servicio</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Nebula Dev Studios. Todos los derechos reservados.</div>
+      <div style="font-size: 0.8rem; line-height: 1.6; text-align: center; width: 100%; margin-top: 0.5rem;">
+        <strong>NO ES UN PRODUCTO OFICIAL DE MINECRAFT. NO ESTÁ APROBADO NI ASOCIADO CON MOJANG O MICROSOFT.</strong><br>
+        Minecraft es una marca comercial registrada de Mojang Synergies AB / Microsoft Corporation.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Banner de Privacidad y Cookies -->
+  <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
+    <div class="cookie-content">
+      <p>
+        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+      </p>
+      <div class="cookie-buttons">
+        <button class="btn-cookie-reject" onclick="rejectCookieConsent()">Solo Necesarias</button>
+        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function initCookieConsent() {
+      if (!localStorage.getItem('nebula_cookie_consent')) {
+        const banner = document.getElementById('cookieConsentBanner');
+        if (banner) banner.style.display = 'block';
+      }
+    }
+    function acceptCookieConsent() {
+      localStorage.setItem('nebula_cookie_consent', 'accepted');
+      dismissCookieBanner();
+    }
+    function rejectCookieConsent() {
+      localStorage.setItem('nebula_cookie_consent', 'essential_only');
+      dismissCookieBanner();
+    }
+    function dismissCookieBanner() {
+      const banner = document.getElementById('cookieConsentBanner');
+      if (banner) {
+        banner.style.opacity = '0';
+        setTimeout(() => { banner.style.display = 'none'; }, 300);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', initCookieConsent);
+  </script>
+
+</body>
+</html>

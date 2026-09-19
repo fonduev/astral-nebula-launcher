@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="./icon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
+  <title>Metodología Editorial y Banco de Pruebas | Nebula Dev Studios</title>
+  <meta name="description" content="Conoce nuestro protocolo de investigación empírica, banco de pruebas de hardware en Windows 11 y estándares técnicos de Nebula Dev Studios para guías de Minecraft." />
+
+  <!-- Canonical URL & Metadatos Oficiales -->
+  <link rel="canonical" href="https://nebuladevstudios.com/metodologia.html" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Nebula Dev Studios" />
+  <meta property="og:title" content="Metodología Editorial y Banco de Pruebas | Nebula Dev Studios" />
+  <meta property="og:description" content="Conoce nuestro protocolo de investigación empírica, banco de pruebas de hardware en Windows 11 y estándares técnicos de Nebula Dev Studios para guías de Minecraft." />
+  <meta property="og:url" content="https://nebuladevstudios.com/metodologia.html" />
+  <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Metodología Editorial y Banco de Pruebas | Nebula Dev Studios" />
+  <meta name="twitter:description" content="Conoce nuestro protocolo de investigación empírica, banco de pruebas de hardware en Windows 11 y estándares técnicos de Nebula Dev Studios para guías de Minecraft." />
+  <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
+
+  <!-- Schema.org Datos Estructurados JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "name": "Metodología Editorial y Banco de Pruebas de Nebula Dev Studios",
+    "description": "Protocolo técnico de investigación, reproducción de errores y pruebas de rendimiento en hardware real.",
+    "url": "https://nebuladevstudios.com/metodologia.html",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Nebula Dev Studios",
+      "url": "https://nebuladevstudios.com",
+      "logo": "https://nebuladevstudios.com/icon.ico"
+    }
+  }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #05030d;
+      --bg-card: rgba(14, 10, 32, 0.7);
+      --accent-purple: #c084fc;
+      --accent-cyan: #38bdf8;
+      --accent-pink: #f472b6;
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-glow: rgba(192, 132, 252, 0.4);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: radial-gradient(circle at 50% -10%, #1c0e3d 0%, #080415 50%, var(--bg-dark) 100%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5, 3, 13, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 1rem 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+    .brand-logo-img { width: 36px; height: 36px; border-radius: 10px; }
+    .brand-name {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: 0.05em;
+    }
+    .nav-links { display: flex; gap: 1.8rem; list-style: none; align-items: center; }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-link:hover, .nav-link.active { color: #fff; }
+    .nav-btn {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      padding: 0.5rem 1.2rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .article-container {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 9999px;
+      background: rgba(192, 132, 252, 0.1);
+      border: 1px solid var(--border-glow);
+      color: var(--accent-purple);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 4.5vw, 2.85rem);
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 1.2rem;
+      background: linear-gradient(135deg, #fff 40%, var(--accent-purple) 80%, var(--accent-pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .lead {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      line-height: 1.7;
+    }
+
+    .article-body {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 24px;
+      padding: 3rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+    .article-body h2 {
+      font-family: var(--font-heading);
+      font-size: 1.65rem;
+      color: #fff;
+      margin: 2.5rem 0 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.4rem;
+    }
+    .article-body h2:first-of-type { margin-top: 0; }
+    .article-body h3 {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      color: var(--accent-cyan);
+      margin: 1.6rem 0 0.8rem;
+    }
+    .article-body p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 1.02rem;
+    }
+    .article-body ul, .article-body ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-muted);
+    }
+    .article-body li { margin-bottom: 0.6rem; }
+    .article-body strong { color: #fff; }
+    .article-body a { color: var(--accent-cyan); text-decoration: underline; }
+
+    .hardware-card {
+      background: rgba(56, 189, 248, 0.06);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .hardware-card h4 {
+      color: var(--accent-cyan);
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      margin-bottom: 0.75rem;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-glass);
+      padding: 3.5rem 6% 2rem;
+      background: rgba(5, 3, 13, 0.95);
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-top: 5rem;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 2.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .footer-col h4 {
+      font-family: var(--font-heading);
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 0.6rem; }
+    .footer-col a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--accent-cyan); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .cookie-banner {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(92%, 820px);
+      background: rgba(14, 10, 32, 0.95);
+      border: 1px solid var(--border-glow);
+      backdrop-filter: blur(25px);
+      padding: 1.2rem 1.6rem;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      transition: opacity 0.3s ease;
+    }
+    .cookie-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .cookie-content p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      flex: 1;
+      min-width: 280px;
+    }
+    .cookie-buttons { display: flex; gap: 10px; align-items: center; }
+    .btn-cookie-accept {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+    }
+    .btn-cookie-reject {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #94a3b8;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 1rem 4%; }
+      .nav-links { display: none; }
+      .article-container { padding: 2.5rem 1rem 4rem; }
+      .article-body { padding: 1.8rem 1.2rem; }
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="./index.html" class="brand">
+      <img src="./icon.ico" class="brand-logo-img" alt="Nebula Dev Studios" />
+      <span class="brand-name">NEBULA DEV STUDIOS</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="./index.html" class="nav-link">Inicio</a></li>
+      <li><a href="./guias.html" class="nav-link">Guías & Artículos</a></li>
+      <li><a href="./about.html" class="nav-link">Acerca de</a></li>
+      <li><a href="./metodologia.html" class="nav-link active">Metodología</a></li>
+      <li><a href="./contact.html" class="nav-link">Contacto</a></li>
+    </ul>
+    <a href="./index.html#descargar" class="nav-btn">Descargar Launcher</a>
+  </nav>
+
+  <div class="article-container">
+    <div class="badge">E-E-A-T & RIGOR TÉCNICO</div>
+    <h1>Metodología Editorial y Banco de Pruebas</h1>
+    <p class="lead">
+      En Nebula Dev Studios aplicamos un protocolo estricto para asegurar que cada artículo aporte valor técnico genuino y resuelva problemas reales de los jugadores de Minecraft en PC.
+    </p>
+
+    <article class="article-body">
+      <h2>1. Identificación empírica del problema</h2>
+      <p>No redactamos artículos a partir de tendencias automáticas ni reescribimos notas de prensa genéricas. Los temas de nuestras guías surgen de tres vías directas:</p>
+      <ol>
+        <li>Errores críticos de compilación, inyección de Mixins y cierres de Java experimentados durante nuestras propias sesiones de juego o desarrollo en <a href="https://github.com/fonduev" target="_blank" rel="noopener">Nebula Launcher</a>.</li>
+        <li>Problemas de rendimiento medibles en hardware con discos mecánicos (HDD) o limitaciones de procesador y memoria RAM.</li>
+        <li>Dudas y cuellos de botella técnicos no resueltos adecuadamente en comunidades, foros y repositorios especializados.</li>
+      </ol>
+
+      <h2>2. Reproducción y aislamiento en banco de pruebas</h2>
+      <p>Antes de escribir una sola línea de solución, el error o la configuración se reproduce en nuestro entorno de pruebas de hardware:</p>
+      
+      <div class="hardware-card">
+        <h4>💻 Especificaciones de Nuestro Banco de Pruebas</h4>
+        <ul style="margin-bottom:0;">
+          <li><strong>Equipo principal de pruebas:</strong> Procesador Intel Core i7-4790 (4 núcleos / 8 hilos), tarjeta gráfica Nvidia GeForce RTX 3050 (6 GB VRAM), 16 GB de memoria RAM física y almacenamiento en disco duro tradicional (HDD mecánico 7200 RPM) bajo el sistema operativo Windows 11 de 64 bits.</li>
+          <li><strong>Equipo secundario (gama de entrada):</strong> Procesador Intel Core i5 de generación previa y 4 GB de memoria RAM física, utilizado específicamente para testear la viabilidad de mods ligeros y ajustes de asignación de memoria restrictivos.</li>
+        </ul>
+      </div>
+
+      <p>El protocolo de laboratorio incluye las siguientes fases:</p>
+      <ul>
+        <li>Se aíslan los mods en instancias independientes mediante el parámetro <code>--gameDir</code> para descartar interferencias de configuraciones previas.</li>
+        <li>Se comprueban los archivos <code>latest.log</code> y los volcados de <code>crash-reports</code> para identificar la línea exacta de la excepción de Java (<code>Caused by:</code>).</li>
+        <li>En pruebas de optimización, se analiza el comportamiento de la memoria mediante el visor F3 y el Administrador de tareas de Windows para confirmar que no existan pausas del recolector de basura (Garbage Collector).</li>
+      </ul>
+
+      <h2>3. Redacción técnica sin relleno</h2>
+      <p>Cada guía se redacta siguiendo un criterio de utilidad directa:</p>
+      <ul>
+        <li>Explicación del porqué técnico detrás del problema, sin rodeos introductorios.</li>
+        <li>Pasos numerados reproducibles por cualquier usuario en Windows 10 o Windows 11.</li>
+        <li>Inclusión de casos raros o errores poco documentados que las guías estándar suelen omitir (como colisiones de GLFW o corrupción de bibliotecas LWJGL).</li>
+        <li><strong>Cero promesas exageradas:</strong> no afirmamos cifras de rendimiento sin haberlas medido en nuestro propio hardware con cronómetro o capturas de frametime.</li>
+      </ul>
+
+      <h2>4. Fuentes oficiales y enlaces verificados</h2>
+      <p>Nuestras recomendaciones de software enlazan única y exclusivamente a los repositorios oficiales y verificados de cada proyecto:</p>
+      <ul>
+        <li><strong>Motor del juego y lanzador:</strong> Mojang Studios / Minecraft.net.</li>
+        <li><strong>Cargadores de mods:</strong> FabricMC (fabricmc.net), NeoForged (neoforged.net) y Minecraft Forge.</li>
+        <li><strong>Entornos de ejecución Java:</strong> Adoptium (Eclipse Temurin) y documentación oficial de OpenJDK.</li>
+        <li><strong>Descarga de modificaciones y shaders:</strong> Modrinth y CurseForge (perfiles verificados por los autores originales).</li>
+      </ul>
+
+      <h2>5. Actualización continua del contenido</h2>
+      <p>Cuando una nueva versión de Minecraft (como los saltos de 1.20 a 1.21) modifica la versión requerida de Java (de Java 17 a Java 21) o altera la sintaxis de los argumentos JVM, revisamos las guías correspondientes para actualizar las tablas de compatibilidad y marcar advertencias de obsolescencia.</p>
+
+      <h2>Política de corrección de errores y contacto</h2>
+      <p>Si detectas un error técnico en alguna de nuestras guías, una incompatibilidad de versión no registrada o deseas aportar nuevos datos de pruebas:</p>
+      <ul>
+        <li><strong>Repositorio y reporte de incidencias:</strong> <a href="https://github.com/fonduev" target="_blank" rel="noopener">GitHub Issues (fonduev)</a></li>
+        <li><strong>Correo electrónico de contacto:</strong> <a href="mailto:soporte@nebuladevstudios.com">soporte@nebuladevstudios.com</a></li>
+      </ul>
+    </article>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>NEBULA DEV STUDIOS</h4>
+        <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
+          Portal oficial de guías, herramientas y lanzador de alto rendimiento para Minecraft en PC.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Navegación</h4>
+        <ul>
+          <li><a href="./index.html">Inicio</a></li>
+          <li><a href="./guias.html">Guías & Tutoriales</a></li>
+          <li><a href="./about.html">Acerca de</a></li>
+          <li><a href="./metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="./contact.html">Contacto</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Guías Técnicas</h4>
+        <ul>
+          <li><a href="./guias/como-leer-latest-log-crash-reports-minecraft.html">Diagnóstico de Logs</a></li>
+          <li><a href="./guias/exit-code-1-minecraft-solucion.html">Solución Exit Code 1</a></li>
+          <li><a href="./guias/optimizar-minecraft-disco-hdd.html">Optimización en HDD</a></li>
+          <li><a href="./guias/argumentos-jvm-minecraft-mitos-realidad.html">Argumentos JVM</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="./privacy.html">Política de Privacidad</a></li>
+          <li><a href="./terms.html">Términos de Servicio</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Nebula Dev Studios. Todos los derechos reservados.</div>
+      <div style="font-size: 0.8rem; line-height: 1.6; text-align: center; width: 100%; margin-top: 0.5rem;">
+        <strong>NO ES UN PRODUCTO OFICIAL DE MINECRAFT. NO ESTÁ APROBADO NI ASOCIADO CON MOJANG O MICROSOFT.</strong><br>
+        Minecraft es una marca comercial registrada de Mojang Synergies AB / Microsoft Corporation.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Banner de Privacidad y Cookies -->
+  <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
+    <div class="cookie-content">
+      <p>
+        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+      </p>
+      <div class="cookie-buttons">
+        <button class="btn-cookie-reject" onclick="rejectCookieConsent()">Solo Necesarias</button>
+        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function initCookieConsent() {
+      if (!localStorage.getItem('nebula_cookie_consent')) {
+        const banner = document.getElementById('cookieConsentBanner');
+        if (banner) banner.style.display = 'block';
+      }
+    }
+    function acceptCookieConsent() {
+      localStorage.setItem('nebula_cookie_consent', 'accepted');
+      dismissCookieBanner();
+    }
+    function rejectCookieConsent() {
+      localStorage.setItem('nebula_cookie_consent', 'essential_only');
+      dismissCookieBanner();
+    }
+    function dismissCookieBanner() {
+      const banner = document.getElementById('cookieConsentBanner');
+      if (banner) {
+        banner.style.opacity = '0';
+        setTimeout(() => { banner.style.display = 'none'; }, 300);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', initCookieConsent);
+  </script>
+
+</body>
+</html>

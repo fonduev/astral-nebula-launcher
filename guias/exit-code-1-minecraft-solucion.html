@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="../icon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
+  <title>Exit Code 1 en Minecraft: causas reales y solución paso a paso | Nebula Dev Studios</title>
+  <meta name="description" content="Aprende a solucionar el Código de salida 1 en Minecraft con mods: incompatibilidades de Java, argumentos JVM erróneos y bibliotecas nativas dañadas." />
+
+  <!-- Canonical URL & Metadatos Oficiales -->
+  <link rel="canonical" href="https://nebuladevstudios.com/guias/exit-code-1-minecraft-solucion.html" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Nebula Dev Studios" />
+  <meta property="og:title" content="Exit Code 1 en Minecraft: causas reales y solución paso a paso | Nebula Dev Studios" />
+  <meta property="og:description" content="Aprende a solucionar el Código de salida 1 en Minecraft con mods: incompatibilidades de Java, argumentos JVM erróneos y bibliotecas nativas dañadas." />
+  <meta property="og:url" content="https://nebuladevstudios.com/guias/exit-code-1-minecraft-solucion.html" />
+  <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Exit Code 1 en Minecraft: causas reales y solución paso a paso | Nebula Dev Studios" />
+  <meta name="twitter:description" content="Aprende a solucionar el Código de salida 1 en Minecraft con mods: incompatibilidades de Java, argumentos JVM erróneos y bibliotecas nativas dañadas." />
+  <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
+
+  <!-- Schema.org Datos Estructurados JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "headline": "Exit Code 1 en Minecraft con mods: causas reales y protocolo de descarte",
+        "description": "Aprende a solucionar el Código de salida 1 en Minecraft con mods: incompatibilidades de Java, argumentos JVM erróneos y bibliotecas nativas dañadas.",
+        "url": "https://nebuladevstudios.com/guias/exit-code-1-minecraft-solucion.html",
+        "author": {
+          "@type": "Person",
+          "name": "fondue_x",
+          "url": "https://github.com/fonduev"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Nebula Dev Studios",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://nebuladevstudios.com/icon.ico"
+          }
+        },
+        "datePublished": "2026-09-19",
+        "dateModified": "2026-09-19"
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {"@type": "Question", "name": "¿Por qué me sale el Código de salida 1 si no he instalado ningún mod nuevo?", "acceptedAnswer": {"@type": "Answer", "text": "Puede deberse a una actualización automática del lanzador que cambió la versión interna de Java asignada al perfil, o a argumentos JVM obsoletos que entraron en conflicto tras un parche del juego."}},
+          {"@type": "Question", "name": "¿Reinstalar Minecraft borra mis mundos guardados?", "acceptedAnswer": {"@type": "Answer", "text": "Si desinstalas el juego por completo a través del panel de control de Windows, sí corres el riesgo de perderlos si se elimina la carpeta .minecraft. Por ello, siempre debes respaldar la subcarpeta saves antes de realizar limpiezas profundas."}},
+          {"@type": "Question", "name": "¿Sirve de algo actualizar los drivers de la tarjeta gráfica para el error 1?", "acceptedAnswer": {"@type": "Answer", "text": "Solo si el informe de fallo especifica un fallo en archivos DLL del controlador (como nvoglv64.dll para Nvidia o atig6pxx.dll para AMD). Si el error ocurre por dependencias de mods o versiones de Java, actualizar el controlador gráfico no tendrá ningún efecto."}}
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #05030d;
+      --bg-card: rgba(14, 10, 32, 0.7);
+      --accent-purple: #c084fc;
+      --accent-cyan: #38bdf8;
+      --accent-pink: #f472b6;
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-glow: rgba(192, 132, 252, 0.4);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: radial-gradient(circle at 50% -10%, #1c0e3d 0%, #080415 50%, var(--bg-dark) 100%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5, 3, 13, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 1rem 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+    .brand-logo-img { width: 36px; height: 36px; border-radius: 10px; }
+    .brand-name {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: 0.05em;
+    }
+    .nav-links { display: flex; gap: 1.8rem; list-style: none; align-items: center; }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-link:hover, .nav-link.active { color: #fff; }
+    .nav-btn {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      padding: 0.5rem 1.2rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .nav-btn:hover { opacity: 0.9; }
+
+    .article-container {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 5rem;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      margin-bottom: 1.5rem;
+    }
+    .breadcrumbs a { color: var(--accent-cyan); text-decoration: none; }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 9999px;
+      background: rgba(192, 132, 252, 0.1);
+      border: 1px solid var(--border-glow);
+      color: var(--accent-purple);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 4.5vw, 2.85rem);
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 1.2rem;
+      background: linear-gradient(135deg, #fff 40%, var(--accent-purple) 80%, var(--accent-pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border-glass);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .article-meta strong { color: #e2e8f0; }
+
+    .article-body {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 24px;
+      padding: 3rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+    .article-body h2 {
+      font-family: var(--font-heading);
+      font-size: 1.65rem;
+      color: #fff;
+      margin: 2.5rem 0 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.4rem;
+    }
+    .article-body h2:first-of-type { margin-top: 0; }
+    .article-body h3 {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      color: var(--accent-cyan);
+      margin: 1.6rem 0 0.8rem;
+    }
+    .article-body p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 1.02rem;
+    }
+    .article-body ul, .article-body ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-muted);
+    }
+    .article-body li { margin-bottom: 0.6rem; font-size: 1rem; }
+    .article-body strong { color: #fff; }
+    .article-body a { color: var(--accent-cyan); text-decoration: underline; }
+    .article-body a:hover { color: #fff; }
+
+    .article-body pre {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin: 1.2rem 0 1.5rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: #38bdf8;
+    }
+    .article-body code {
+      background: rgba(192, 132, 252, 0.12);
+      color: #e9d5ff;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+    }
+    .article-body pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+    }
+
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.8rem 0;
+      font-size: 0.92rem;
+    }
+    .article-body th {
+      background: rgba(192, 132, 252, 0.15);
+      color: #fff;
+      padding: 0.85rem 1rem;
+      font-family: var(--font-heading);
+      border: 1px solid var(--border-glass);
+      text-align: left;
+    }
+    .article-body td {
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border-glass);
+      color: var(--text-muted);
+    }
+
+    .author-box {
+      background: rgba(192, 132, 252, 0.08);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 1.8rem;
+      margin-top: 3.5rem;
+    }
+    .author-box h3 {
+      color: #fff;
+      font-size: 1.2rem;
+      margin-bottom: 0.6rem;
+      font-family: var(--font-heading);
+    }
+    .author-box p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .faq-section {
+      margin-top: 3rem;
+      border-top: 1px solid var(--border-glass);
+      padding-top: 2.2rem;
+    }
+    .faq-item {
+      margin-bottom: 1.8rem;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 1.2rem 1.4rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .faq-item h4 {
+      color: #fff;
+      font-size: 1.08rem;
+      margin-bottom: 0.5rem;
+      font-family: var(--font-heading);
+    }
+    .faq-item p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-glass);
+      padding: 3.5rem 6% 2rem;
+      background: rgba(5, 3, 13, 0.95);
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-top: 5rem;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 2.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .footer-col h4 {
+      font-family: var(--font-heading);
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 0.6rem; }
+    .footer-col a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--accent-cyan); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .cookie-banner {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(92%, 820px);
+      background: rgba(14, 10, 32, 0.95);
+      border: 1px solid var(--border-glow);
+      backdrop-filter: blur(25px);
+      padding: 1.2rem 1.6rem;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      transition: opacity 0.3s ease;
+    }
+    .cookie-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .cookie-content p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      flex: 1;
+      min-width: 280px;
+    }
+    .cookie-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn-cookie-accept {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-cookie-accept:hover { opacity: 0.9; }
+    .btn-cookie-reject {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #94a3b8;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cookie-reject:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 1rem 4%; }
+      .nav-links { display: none; }
+      .article-container { padding: 2.5rem 1rem 4rem; }
+      .article-body { padding: 1.8rem 1.2rem; }
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="../index.html" class="brand">
+      <img src="../icon.ico" class="brand-logo-img" alt="Nebula Dev Studios" />
+      <span class="brand-name">NEBULA DEV STUDIOS</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html" class="nav-link">Inicio</a></li>
+      <li><a href="../guias.html" class="nav-link active">Guías & Artículos</a></li>
+      <li><a href="../about.html" class="nav-link">Acerca de</a></li>
+      <li><a href="../metodologia.html" class="nav-link">Metodología</a></li>
+      <li><a href="../contact.html" class="nav-link">Contacto</a></li>
+    </ul>
+    <a href="../index.html#descargar" class="nav-btn">Descargar Launcher</a>
+  </nav>
+
+  <div class="article-container">
+    <nav class="breadcrumbs">
+      <a href="../index.html">Inicio</a> &rsaquo;
+      <a href="../guias.html">Guías</a> &rsaquo;
+      <span>Errores</span>
+    </nav>
+
+    <div class="badge">Solución de Errores</div>
+    <h1>Exit Code 1 en Minecraft con mods: causas reales y protocolo de descarte</h1>
+
+    <div class="article-meta">
+      <span>✍️ Por <strong>fondue_x</strong></span>
+      <span>📅 19 de Septiembre, 2026</span>
+      <span>⏱️ 8 min de lectura</span>
+      <span>💻 Probado en Windows 11</span>
+    </div>
+
+    <article class="article-body">
+      <h2>El problema: la ambigüedad del Código de salida 1 en Minecraft</h2>
+<p>El mensaje <em>"Se ha producido un error inesperado y el juego ha fallado. Código de salida: 1"</em> (o <em>Exit Code: 1</em>) es una de las notificaciones más frecuentes y a la vez menos explicativas que puede mostrar el lanzador de Minecraft. A diferencia de errores específicos como la falta de memoria física o fallos de red, el código de salida 1 es una señal genérica del entorno de ejecución de Java (JVM) que significa únicamente que el proceso terminó con un estado de error no controlado por el sistema.</p>
+<p>En internet abundan tutoriales que recomiendan reinstalar el juego completo o actualizar indiscriminadamente los controladores gráficos como primera opción. Aunque en casos aislados esto puede coincidir con la solución, casi nunca ataca la causa raíz cuando juegas con modificaciones. En una instalación con modloaders (Fabric, Forge, NeoForge o Quilt), el Código de salida 1 se debe en más del 90% de los casos a tres factores concretos: discrepancia en la versión del entorno Java, incompatibilidad de dependencias básicas del cargador de mods, o argumentos de inicio (JVM flags) mal estructurados.</p>
+
+<h2>Diferenciar el fallo de Java del fallo del modloader</h2>
+<p>Para no perder tiempo probando soluciones al azar, el primer paso técnico consiste en determinar en qué fase del arranque ocurrió el colapso:</p>
+<ul>
+  <li><strong>Fallo en la fase previa a la ventana (Pre-launch / JVM Init):</strong> Si presionas "Jugar", el botón cambia brevemente a "Cargando" y, tras dos o tres segundos, el juego se cierra sin que llegue a abrirse ninguna ventana negra ni aparezca el logotipo de Mojang Studios, el fallo ocurrió antes de que el motor de Minecraft se cargara en memoria. Esto señala casi invariablemente a una incompatibilidad entre la versión de Java configurada y los argumentos JVM pasados por el lanzador, o a una biblioteca nativa (archivo .dll en Windows) corrupta.</li>
+  <li><strong>Fallo durante la barra de carga de Mojang (Early Initialization):</strong> Si la ventana del juego se abre, muestra la barra roja o el fondo de carga y se cierra a mitad del progreso, el entorno Java es correcto, pero el cargador de mods colapsó al intentar inyectar código (Mixins) o al registrar bloques, ítems o entidades de un archivo .jar específico.</li>
+</ul>
+
+<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Ventana del lanzador mostrando el mensaje de Código de salida: 1 tras un cierre inesperado</div>
+
+<h2>Protocolo metódico de 5 pasos para solucionar el Exit Code 1</h2>
+
+<h3>Paso 1: Verificar la correlación estricta entre la versión de Minecraft y Java</h3>
+<p>Minecraft ha evolucionado sus requisitos de compilación de Java a lo largo del tiempo. Ejecutar una versión moderna con un binario clásico provoca que la máquina virtual aborte de inmediato con un Código de salida 1 debido a que las clases están compiladas en un formato de bytecode superior (error interno de tipo <code>UnsupportedClassVersionError</code>).</p>
+<p>Comprueba que tu perfil utiliza el entorno oficial requerido según la versión a la que juegues:</p>
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Versión de Minecraft</th>
+      <th>Versión de Java requerida</th>
+      <th>Versión interna de clase</th>
+      <th>Compatibilidad</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1.8.9 a 1.16.5</td>
+      <td>Java 8 (OpenJDK 1.8)</td>
+      <td>Clase v52</td>
+      <td>Obligatorio para Forge clásico (1.8 - 1.12.2).</td>
+    </tr>
+    <tr>
+      <td>1.17 y 1.17.1</td>
+      <td>Java 16</td>
+      <td>Clase v60</td>
+      <td>Versión de transición; funciona también sobre Java 17.</td>
+    </tr>
+    <tr>
+      <td>1.18 a 1.20.4</td>
+      <td>Java 17</td>
+      <td>Clase v61</td>
+      <td>Estándar para la mayoría de modpacks modernos de Fabric y Forge.</td>
+    </tr>
+    <tr>
+      <td>1.20.5 en adelante (1.21+)</td>
+      <td>Java 21</td>
+      <td>Clase v65</td>
+      <td>Obligatorio. No inicia con Java 17 ni versiones previas.</td>
+    </tr>
+  </tbody>
+</table>
+<p>Si utilizas un binario externo de Java, asegúrate de descargarlo de distribuidores oficiales y limpios de telemetría corporativa como <a href="https://adoptium.net/" target="_blank" rel="noopener">Adoptium (Eclipse Temurin)</a>, verificando que sea siempre la arquitectura de 64 bits (x64) para Windows.</p>
+
+<h3>Paso 2: Depurar los argumentos JVM y descartar parámetros obsoletos</h3>
+<p>Es común copiar listas largas de "argumentos mágicos de optimización" extraídas de foros antiguos. Muchos de estos comandos fueron diseñados exclusivamente para el recolector de basura CMS de Java 8, el cual fue eliminado por completo en las versiones modernas de Java.</p>
+<p>Si tienes configurados argumentos como <code>-XX:+UseConcMarkSweepGC</code> o <code>-XX:+CMSIncrementalMode</code> en un perfil que ejecuta Java 17 o Java 21, la máquina virtual rechazará el inicio de inmediato y devolverá un Código de salida 1. Para comprobar si este es tu problema:</p>
+<ol>
+  <li>Accede a la configuración de la versión en tu lanzador.</li>
+  <li>Localiza el campo de <em>Argumentos JVM</em>.</li>
+  <li>Elimina todas las directivas personalizadas excepto la asignación de memoria obligatoria, dejando únicamente la estructura base: <code>-Xmx4G -Xms2G</code> (ajustando los gigabytes a la capacidad física de tu equipo).</li>
+  <li>Intenta iniciar el juego. Si arranca, uno de los argumentos eliminados era la causa del conflicto.</li>
+</ol>
+
+<h3>Paso 3: Actualizar las bibliotecas base del ecosistema (Fabric API, Architectury, Cloth Config)</h3>
+<p>En modloaders modulares como Fabric o Quilt, el núcleo del cargador solo provee las herramientas mínimas de inyección. La inmensa mayoría de mods de contenido y rendimiento dependen de una biblioteca central llamada <strong>Fabric API</strong> (o <strong>NeoForge API</strong> en su entorno respectivo).</p>
+<p>Si instalas mods desarrollados para Minecraft 1.21.1 pero olvidas instalar Fabric API, o colocas una versión de Fabric API diseñada para 1.20, se produce un error crítico de enlace en tiempo de compilación. En lanzadores modernos o modulares como Nebula Launcher o Prism, la consola de depuración en tiempo real permite observar este problema al instante mediante advertencias de tipo <code>Missing or incomplete dependency</code> justo antes de emitir el código 1. Descarga siempre la versión exacta de estas bibliotecas base desde repositorios comunitarios verificados como <a href="https://modrinth.com/" target="_blank" rel="noopener">Modrinth</a>.</p>
+
+<h3>Paso 4: Comprobar el aislamiento de versiones menores (Minor Version Mismatch)</h3>
+<p>Un error conceptual habitual es suponer que un mod programado para la versión 1.20.1 funcionará sin problemas en 1.20.2 o 1.20.4. Aunque el primer y segundo dígito coincidan, las versiones menores de Minecraft con frecuencia introducen cambios estructurales profundos en la lógica de red del servidor, el renderizado de bloques o los mapeos internos de métodos.</p>
+<p>Colocar un mod de 1.20.1 en un perfil de 1.20.4 suele arrojar una excepción <code>NoSuchMethodError</code> durante la pantalla de carga, derivando en el Código de salida 1. Revisa que cada archivo dentro de la carpeta <code>mods</code> declare compatibilidad explícita con la subversión que estás ejecutando.</p>
+
+<h3>Paso 5: Aplicar el método de bisección para aislar el archivo dañado</h3>
+<p>Si los pasos anteriores no revelan al culpable, el método más rápido y riguroso para identificar el mod conflictivo no es probarlos de uno en uno, sino dividir la carga:</p>
+<ol>
+  <li>Cierra Minecraft y abre la carpeta <code>mods</code> del perfil afectado.</li>
+  <li>Crea una carpeta temporal en el escritorio llamada <code>Mods_Prueba</code>.</li>
+  <li>Mueve la mitad exacta de tus mods a esa carpeta temporal, conservando en el juego las dependencias obligatorias (Fabric API o similares).</li>
+  <li>Inicia el juego. Si el juego arranca con éxito, el mod causante se encuentra en la mitad que retiraste. Si el juego vuelve a fallar con Código de salida 1, el mod causante está en la mitad que dejaste dentro.</li>
+  <li>Repite el proceso dividiendo sucesivamente el grupo problemático en mitades. Con este sistema, en un paquete de 64 mods encontrarás el archivo exacto en solo 6 intentos de inicio.</li>
+</ol>
+
+<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Proceso de división de mods en el explorador de archivos aplicando el método de bisección</div>
+
+<h2>El caso raro: Incompatibilidad de binarios nativos y corrupción de caché</h2>
+<p>Existe un escenario poco documentado donde el Código de salida 1 persiste incluso después de vaciar completamente la carpeta <code>mods</code> e iniciar el perfil totalmente limpio. Esto suele llevar a los usuarios a pensar que su tarjeta gráfica o su sistema operativo están dañados.</p>
+<p>La causa real en este caso reside en la corrupción de las bibliotecas nativas de C++ que Minecraft descarga en segundo plano para comunicarse con el hardware de audio y gráficos (específicamente OpenAL y GLFW). Cuando el juego descarga estos archivos a través de una conexión inestable o con microcortes en el disco, los archivos <code>.dll</code> quedan a cero bytes o con firmas hash truncadas en la ruta de caché.</p>
+<p>Para resolver este fallo invisible:</p>
+<ol>
+  <li>Cierra todos los procesos del lanzador y de Java desde el Administrador de tareas de Windows.</li>
+  <li>Navega hasta <code>%appdata%\.minecraft\libraries</code>.</li>
+  <li>Localiza las subcarpetas <code>org\lwjgl</code> y elimínalas por completo.</li>
+  <li>Si utilizas Fabric, elimina también la carpeta temporal <code>.minecraft\.fabric</code>.</li>
+  <li>Inicia nuevamente el juego. El lanzador detectará la ausencia de las bibliotecas nativas de bajo nivel y forzará una descarga limpia y verificada desde los servidores oficiales de Mojang, reconstruyendo el enlace gráfico de GLFW sin errores.</li>
+</ol>
+
+<h2>Cómo comprobar que el entorno ha quedado estabilizado</h2>
+<p>Para tener certeza absoluta de que el Código de salida 1 ha quedado erradicado y no volverá a presentarse a mitad de una partida:</p>
+<ol>
+  <li>Inicia el perfil y deja que cargue el menú principal.</li>
+  <li>Crea un mundo nuevo en modo Un jugador (Singleplayer) o ingresa a una partida existente. Esto es indispensable: muchos errores de inicialización tardía solo se disparan cuando el motor carga los generadores de terreno y las entidades en memoria.</li>
+  <li>Presiona la tecla <code>F3</code> en tu teclado y observa la esquina superior derecha: confirma que la línea de Java reporte la versión correcta (por ejemplo, <em>Java 21.0.x 64bit</em>) y que el consumo de memoria asignada fluctúe normalmente sin quedarse estancado en el 100%.</li>
+  <li>Cierra el juego de forma ordenada desde el botón "Guardar y salir al menú principal" y luego "Salir del juego". Si la ventana se cierra limpiamente y el lanzador no reaparece con códigos de advertencia, el entorno está completamente saneado.</li>
+</ol>
+
+<h2>Conclusión</h2>
+<p>El Código de salida 1 no es un problema insalvable ni un fallo misterioso de hardware; es una señal técnica de interrupción que requiere orden lógico. Al descartar metódicamente la versión de Java, limpiar argumentos obsoletos de la JVM y verificar la sincronización de versiones menores en las modificaciones, cualquier jugador puede restaurar la estabilidad de su instalación en pocos minutos sin perder mundos ni partidas guardadas.</p>
+
+      <div class="author-box">
+        <h3>Sobre el autor: fondue_x</h3>
+        <p><strong>fondue_x</strong> es desarrollador independiente y jugador de Minecraft desde hace más de 5 años, especializado en optimización de rendimiento, arquitectura de instancias y resolución de incompatibilidades en Fabric, Forge y NeoForge. Es el creador de <a href="https://github.com/fonduev" target="_blank" rel="noopener">Nebula Launcher</a>. Todas sus guías se prueban de primera mano en bancos de pruebas reales con Windows 11. Puedes consultar nuestra <a href="../metodologia.html">metodología editorial y banco de pruebas</a>.</p>
+      </div>
+
+      <div class="faq-section">
+        <h2 style="margin-top:0;">Preguntas Frecuentes</h2>
+                <div class="faq-item">
+          <h4>¿Por qué me sale el Código de salida 1 si no he instalado ningún mod nuevo?</h4>
+          <p>Puede deberse a una actualización automática del lanzador que cambió la versión interna de Java asignada al perfil, o a argumentos JVM obsoletos que entraron en conflicto tras un parche del juego.</p>
+        </div>
+        <div class="faq-item">
+          <h4>¿Reinstalar Minecraft borra mis mundos guardados?</h4>
+          <p>Si desinstalas el juego por completo a través del panel de control de Windows, sí corres el riesgo de perderlos si se elimina la carpeta .minecraft. Por ello, siempre debes respaldar la subcarpeta saves antes de realizar limpiezas profundas.</p>
+        </div>
+        <div class="faq-item">
+          <h4>¿Sirve de algo actualizar los drivers de la tarjeta gráfica para el error 1?</h4>
+          <p>Solo si el informe de fallo especifica un fallo en archivos DLL del controlador (como nvoglv64.dll para Nvidia o atig6pxx.dll para AMD). Si el error ocurre por dependencias de mods o versiones de Java, actualizar el controlador gráfico no tendrá ningún efecto.</p>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>NEBULA DEV STUDIOS</h4>
+        <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
+          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Navegación</h4>
+        <ul>
+          <li><a href="../index.html">Inicio</a></li>
+          <li><a href="../guias.html">Guías & Tutoriales</a></li>
+          <li><a href="../about.html">Acerca de</a></li>
+          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../contact.html">Contacto</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Guías Técnicas</h4>
+        <ul>
+          <li><a href="./como-leer-latest-log-crash-reports-minecraft.html">Diagnóstico de Logs</a></li>
+          <li><a href="./exit-code-1-minecraft-solucion.html">Solución Exit Code 1</a></li>
+          <li><a href="./optimizar-minecraft-disco-hdd.html">Optimización en HDD</a></li>
+          <li><a href="./argumentos-jvm-minecraft-mitos-realidad.html">Argumentos JVM</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="../privacy.html">Política de Privacidad</a></li>
+          <li><a href="../terms.html">Términos de Servicio</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Nebula Dev Studios. Todos los derechos reservados.</div>
+      <div style="font-size: 0.8rem; line-height: 1.6; text-align: center; width: 100%; margin-top: 0.5rem;">
+        <strong>NO ES UN PRODUCTO OFICIAL DE MINECRAFT. NO ESTÁ APROBADO NI ASOCIADO CON MOJANG O MICROSOFT.</strong><br>
+        Minecraft es una marca comercial registrada de Mojang Synergies AB / Microsoft Corporation.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Banner de Privacidad y Cookies -->
+  <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
+    <div class="cookie-content">
+      <p>
+        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+      </p>
+      <div class="cookie-buttons">
+        <button class="btn-cookie-reject" onclick="rejectCookieConsent()">Solo Necesarias</button>
+        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function initCookieConsent() {
+      if (!localStorage.getItem('nebula_cookie_consent')) {
+        const banner = document.getElementById('cookieConsentBanner');
+        if (banner) banner.style.display = 'block';
+      }
+    }
+    function acceptCookieConsent() {
+      localStorage.setItem('nebula_cookie_consent', 'accepted');
+      dismissCookieBanner();
+    }
+    function rejectCookieConsent() {
+      localStorage.setItem('nebula_cookie_consent', 'essential_only');
+      dismissCookieBanner();
+    }
+    function dismissCookieBanner() {
+      const banner = document.getElementById('cookieConsentBanner');
+      if (banner) {
+        banner.style.opacity = '0';
+        setTimeout(() => { banner.style.display = 'none'; }, 300);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', initCookieConsent);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="../icon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
+  <title>Java para Minecraft: qué versión usar (Java 8, 17 o 21) | Nebula Dev Studios</title>
+  <meta name="description" content="Descubre qué versión de Java necesita tu Minecraft: tabla de compatibilidad oficial (Java 8, 17 y 21), solución al error de bytecode y configuración en Windows." />
+
+  <!-- Canonical URL & Metadatos Oficiales -->
+  <link rel="canonical" href="https://nebuladevstudios.com/guias/versiones-java-minecraft-guia-completa.html" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="Nebula Dev Studios" />
+  <meta property="og:title" content="Java para Minecraft: qué versión usar (Java 8, 17 o 21) | Nebula Dev Studios" />
+  <meta property="og:description" content="Descubre qué versión de Java necesita tu Minecraft: tabla de compatibilidad oficial (Java 8, 17 y 21), solución al error de bytecode y configuración en Windows." />
+  <meta property="og:url" content="https://nebuladevstudios.com/guias/versiones-java-minecraft-guia-completa.html" />
+  <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Java para Minecraft: qué versión usar (Java 8, 17 o 21) | Nebula Dev Studios" />
+  <meta name="twitter:description" content="Descubre qué versión de Java necesita tu Minecraft: tabla de compatibilidad oficial (Java 8, 17 y 21), solución al error de bytecode y configuración en Windows." />
+  <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
+
+  <!-- Schema.org Datos Estructurados JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "headline": "Java 8, Java 17 y Java 21 en Minecraft: requisitos por versión y solución de errores",
+        "description": "Descubre qué versión de Java necesita tu Minecraft: tabla de compatibilidad oficial (Java 8, 17 y 21), solución al error de bytecode y configuración en Windows.",
+        "url": "https://nebuladevstudios.com/guias/versiones-java-minecraft-guia-completa.html",
+        "author": {
+          "@type": "Person",
+          "name": "fondue_x",
+          "url": "https://github.com/fonduev"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Nebula Dev Studios",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://nebuladevstudios.com/icon.ico"
+          }
+        },
+        "datePublished": "2026-09-19",
+        "dateModified": "2026-09-19"
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {"@type": "Question", "name": "¿Puedo tener instalados Java 8, Java 17 y Java 21 al mismo tiempo en mi PC?", "acceptedAnswer": {"@type": "Answer", "text": "Sí, sin ningún inconveniente. Puedes instalar múltiples versiones de OpenJDK en tu computadora; cada una residirá en su propia carpeta en Archivos de programa y solo se activará en el perfil de Minecraft al que le asignes su ruta específica."}},
+          {"@type": "Question", "name": "¿Qué pasa si intento jugar Minecraft 1.21 con Java 8?", "acceptedAnswer": {"@type": "Answer", "text": "El juego no iniciará y se cerrará de inmediato arrojando el error UnsupportedClassVersionError (class file version 65.0). Minecraft 1.21 requiere obligatoriamente Java 21 para poder ejecutarse."}},
+          {"@type": "Question", "name": "¿Cuál es la diferencia entre el archivo java.exe y javaw.exe?", "acceptedAnswer": {"@type": "Answer", "text": "java.exe abre una ventana de terminal de comandos visible que consume recursos secundarios mientras juegas. javaw.exe ejecuta la aplicación directamente en segundo plano sin ventana de consola acoplada, por lo que es el archivo que siempre debes seleccionar para jugar."}}
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #05030d;
+      --bg-card: rgba(14, 10, 32, 0.7);
+      --accent-purple: #c084fc;
+      --accent-cyan: #38bdf8;
+      --accent-pink: #f472b6;
+      --border-glass: rgba(255, 255, 255, 0.1);
+      --border-glow: rgba(192, 132, 252, 0.4);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: radial-gradient(circle at 50% -10%, #1c0e3d 0%, #080415 50%, var(--bg-dark) 100%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5, 3, 13, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 1rem 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+    .brand-logo-img { width: 36px; height: 36px; border-radius: 10px; }
+    .brand-name {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: 0.05em;
+    }
+    .nav-links { display: flex; gap: 1.8rem; list-style: none; align-items: center; }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-link:hover, .nav-link.active { color: #fff; }
+    .nav-btn {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      padding: 0.5rem 1.2rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .nav-btn:hover { opacity: 0.9; }
+
+    .article-container {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 5rem;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      margin-bottom: 1.5rem;
+    }
+    .breadcrumbs a { color: var(--accent-cyan); text-decoration: none; }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 9999px;
+      background: rgba(192, 132, 252, 0.1);
+      border: 1px solid var(--border-glow);
+      color: var(--accent-purple);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 4.5vw, 2.85rem);
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 1.2rem;
+      background: linear-gradient(135deg, #fff 40%, var(--accent-purple) 80%, var(--accent-pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border-glass);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .article-meta strong { color: #e2e8f0; }
+
+    .article-body {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 24px;
+      padding: 3rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+    .article-body h2 {
+      font-family: var(--font-heading);
+      font-size: 1.65rem;
+      color: #fff;
+      margin: 2.5rem 0 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.4rem;
+    }
+    .article-body h2:first-of-type { margin-top: 0; }
+    .article-body h3 {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      color: var(--accent-cyan);
+      margin: 1.6rem 0 0.8rem;
+    }
+    .article-body p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 1.02rem;
+    }
+    .article-body ul, .article-body ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-muted);
+    }
+    .article-body li { margin-bottom: 0.6rem; font-size: 1rem; }
+    .article-body strong { color: #fff; }
+    .article-body a { color: var(--accent-cyan); text-decoration: underline; }
+    .article-body a:hover { color: #fff; }
+
+    .article-body pre {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin: 1.2rem 0 1.5rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: #38bdf8;
+    }
+    .article-body code {
+      background: rgba(192, 132, 252, 0.12);
+      color: #e9d5ff;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+    }
+    .article-body pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+    }
+
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.8rem 0;
+      font-size: 0.92rem;
+    }
+    .article-body th {
+      background: rgba(192, 132, 252, 0.15);
+      color: #fff;
+      padding: 0.85rem 1rem;
+      font-family: var(--font-heading);
+      border: 1px solid var(--border-glass);
+      text-align: left;
+    }
+    .article-body td {
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border-glass);
+      color: var(--text-muted);
+    }
+
+    .author-box {
+      background: rgba(192, 132, 252, 0.08);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 1.8rem;
+      margin-top: 3.5rem;
+    }
+    .author-box h3 {
+      color: #fff;
+      font-size: 1.2rem;
+      margin-bottom: 0.6rem;
+      font-family: var(--font-heading);
+    }
+    .author-box p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .faq-section {
+      margin-top: 3rem;
+      border-top: 1px solid var(--border-glass);
+      padding-top: 2.2rem;
+    }
+    .faq-item {
+      margin-bottom: 1.8rem;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 1.2rem 1.4rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .faq-item h4 {
+      color: #fff;
+      font-size: 1.08rem;
+      margin-bottom: 0.5rem;
+      font-family: var(--font-heading);
+    }
+    .faq-item p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-glass);
+      padding: 3.5rem 6% 2rem;
+      background: rgba(5, 3, 13, 0.95);
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-top: 5rem;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 2.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .footer-col h4 {
+      font-family: var(--font-heading);
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col li { margin-bottom: 0.6rem; }
+    .footer-col a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--accent-cyan); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .cookie-banner {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(92%, 820px);
+      background: rgba(14, 10, 32, 0.95);
+      border: 1px solid var(--border-glow);
+      backdrop-filter: blur(25px);
+      padding: 1.2rem 1.6rem;
+      border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      transition: opacity 0.3s ease;
+    }
+    .cookie-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .cookie-content p {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      flex: 1;
+      min-width: 280px;
+    }
+    .cookie-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn-cookie-accept {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-cookie-accept:hover { opacity: 0.9; }
+    .btn-cookie-reject {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #94a3b8;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cookie-reject:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 1rem 4%; }
+      .nav-links { display: none; }
+      .article-container { padding: 2.5rem 1rem 4rem; }
+      .article-body { padding: 1.8rem 1.2rem; }
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="../index.html" class="brand">
+      <img src="../icon.ico" class="brand-logo-img" alt="Nebula Dev Studios" />
+      <span class="brand-name">NEBULA DEV STUDIOS</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html" class="nav-link">Inicio</a></li>
+      <li><a href="../guias.html" class="nav-link active">Guías & Artículos</a></li>
+      <li><a href="../about.html" class="nav-link">Acerca de</a></li>
+      <li><a href="../metodologia.html" class="nav-link">Metodología</a></li>
+      <li><a href="../contact.html" class="nav-link">Contacto</a></li>
+    </ul>
+    <a href="../index.html#descargar" class="nav-btn">Descargar Launcher</a>
+  </nav>
+
+  <div class="article-container">
+    <nav class="breadcrumbs">
+      <a href="../index.html">Inicio</a> &rsaquo;
+      <a href="../guias.html">Guías</a> &rsaquo;
+      <span>Java & JVM</span>
+    </nav>
+
+    <div class="badge">Compatibilidad de Entornos</div>
+    <h1>Java 8, Java 17 y Java 21 en Minecraft: requisitos por versión y solución de errores</h1>
+
+    <div class="article-meta">
+      <span>✍️ Por <strong>fondue_x</strong></span>
+      <span>📅 19 de Septiembre, 2026</span>
+      <span>⏱️ 7 min de lectura</span>
+      <span>💻 Probado en Windows 11</span>
+    </div>
+
+    <article class="article-body">
+      <h2>El problema: por qué ya no existe "un solo Java" para jugar a Minecraft</h2>
+<p>Durante más de diez años, la recomendación habitual para cualquier jugador que experimentaba problemas de inicio en Minecraft era ingresar a la web oficial de Java, pulsar el botón de descarga e instalar el archivo sugerido. Ese procedimiento correspondía a la época en que todas las versiones del juego, desde la versión Beta hasta Minecraft 1.16.5, estaban compiladas sobre el entorno de Java 8.</p>
+<p>Hoy en día, esa práctica es la causa directa de que miles de jugadores no puedan iniciar el juego. Minecraft ha dejado de ser un software anclado en tecnologías heredadas. Para aprovechar las mejoras de seguridad, el rendimiento de los procesadores multinúcleo y las nuevas funciones del lenguaje, Mojang Studios actualizó progresivamente el motor del juego para exigir entornos de ejecución mucho más modernos: primero Java 16 en la versión 1.17, luego Java 17 en la 1.18, y finalmente Java 21 a partir de la versión 1.20.5.</p>
+<p>Si intentas ejecutar un cliente de PvP en Minecraft 1.8.9 utilizando Java 21, o si intentas cargar un modpack moderno de la 1.21 teniendo únicamente Java 8 en tu sistema, el juego ni siquiera llegará a abrir la ventana gráfica. La máquina virtual abortará el proceso de forma inmediata arrojando un error de compatibilidad de clases.</p>
+
+<h2>La raíz técnica: Versiones de Bytecode y la excepción UnsupportedClassVersionError</h2>
+<p>Cuando un desarrollador compila el código de Minecraft o de un mod, el compilador traduce el texto escrito en Java a un formato binario intermedio denominado <em>Bytecode</em>, el cual se empaqueta dentro de los archivos <code>.jar</code>. Cada versión mayor de Java define un número estricto de versión interna para este formato binario.</p>
+<p>La máquina virtual de Java (JVM) posee una regla inquebrantable de retrocompatibilidad: un entorno moderno puede (en la mayoría de los casos) ejecutar código compilado en versiones antiguas, pero un entorno antiguo jamás puede interpretar código compilado para una versión superior. Si la JVM encuentra una clase con una versión de bytecode más reciente que la que ella puede procesar, el juego colapsa instantáneamente con la siguiente excepción en el registro:</p>
+<pre><code>java.lang.UnsupportedClassVersionError: net/minecraft/client/main/Main has been compiled by a more recent version of the Java Runtime (class file version 65.0), this version of the Java Runtime only recognizes class file versions up to 61.0</code></pre>
+<p>El número que aparece entre paréntesis identifica de forma matemática qué versión de Java compiló el archivo y cuál lo está intentando ejecutar:</p>
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Versión de Java</th>
+      <th>Versión de Bytecode (Class Format)</th>
+      <th>Versiones oficiales de Minecraft compatibles</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Java 8</strong></td>
+      <td>52.0</td>
+      <td>Minecraft 1.0 hasta 1.16.5 (Obligatorio en 1.7.10, 1.8.9 y 1.12.2).</td>
+    </tr>
+    <tr>
+      <td><strong>Java 16</strong></td>
+      <td>60.0</td>
+      <td>Minecraft 1.17 y 1.17.1 (Versión de transición).</td>
+    </tr>
+    <tr>
+      <td><strong>Java 17</strong></td>
+      <td>61.0</td>
+      <td>Minecraft 1.18 hasta 1.20.4 (El estándar de modpacks modernos LTS).</td>
+    </tr>
+    <tr>
+      <td><strong>Java 21</strong></td>
+      <td>65.0</td>
+      <td>Minecraft 1.20.5 en adelante (1.21, 1.21.1 y versiones superiores).</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Terminal de Windows mostrando la ejecución del comando java -version con salida de Java 21 y Java 17</div>
+
+<h2>Protocolo de 4 pasos para configurar múltiples entornos Java en Windows</h2>
+
+<h3>Paso 1: Descargar binarios oficiales de OpenJDK limpios</h3>
+<p>Evita descargar Java desde portales comerciales genéricos que a menudo distribuyen instaladores desactualizados de 32 bits con telemetría comercial. El estándar abierto utilizado por la industria y por la propia Mojang es <strong>Eclipse Temurin</strong>, mantenido por la fundación comunitaria <a href="https://adoptium.net/" target="_blank" rel="noopener">Adoptium</a>.</p>
+<p>Si juegas a diferentes épocas de Minecraft (por ejemplo, modalidades competitivas de PvP en 1.8.9 y mundos técnicos con mods en 1.21), debes descargar e instalar dos o tres paquetes específicos en su variante <strong>Windows x64 (64-bit)</strong>:</p>
+<ul>
+  <li>Temurin 8 (OpenJDK 8u) para versiones clásicas (1.8.9 / 1.12.2).</li>
+  <li>Temurin 17 (OpenJDK 17 LTS) para versiones entre 1.18 y 1.20.4.</li>
+  <li>Temurin 21 (OpenJDK 21 LTS) para Minecraft 1.20.5, 1.21 y posteriores.</li>
+</ul>
+
+<h3>Paso 2: Localizar la ruta exacta del ejecutable javaw.exe</h3>
+<p>Al instalar las versiones desde Adoptium, cada una se almacena en su propio directorio independiente dentro del disco duro sin sobreescribir a las demás. Las rutas predeterminadas en Windows 11 son:</p>
+<pre><code>C:\Program Files\Eclipse Adoptium\jdk-8.x.x-hotspot\bin\javaw.exe
+C:\Program Files\Eclipse Adoptium\jdk-17.x.x-hotspot\bin\javaw.exe
+C:\Program Files\Eclipse Adoptium\jdk-21.x.x-hotspot\bin\javaw.exe</code></pre>
+<p><em>Nota técnica indispensable:</em> Debes seleccionar siempre el archivo <code>javaw.exe</code> (con 'w' al final), no <code>java.exe</code>. El ejecutable <code>java.exe</code> abre una ventana negra de consola de comandos en segundo plano que consume ciclos de CPU innecesarios, mientras que <code>javaw.exe</code> lanza el juego sin ventana de terminal acoplada.</p>
+
+<h3>Paso 3: Asignar la ruta de Java directamente en el perfil del lanzador</h3>
+<p>Para evitar conflictos en Windows, nunca debes alterar manualmente la variable de entorno global <code>PATH</code> del sistema, ya que esto rompería otras aplicaciones de tu computadora. El método profesional consiste en indicarle a cada perfil de Minecraft qué binario exacto debe ejecutar:</p>
+<ol>
+  <li>Abre tu lanzador de Minecraft.</li>
+  <li>Accede a la pestaña de <em>Instalaciones</em> o <em>Perfiles</em>.</li>
+  <li>Edita el perfil correspondiente a tu versión (por ejemplo, tu perfil de 1.8.9).</li>
+  <li>Despliega las opciones avanzadas y localiza el apartado <strong>Java Executable</strong> (Ejecutable de Java).</li>
+  <li>Cambia la opción de "Automático" a "Examinar" y pega la ruta completa al archivo <code>javaw.exe</code> de la versión correspondiente (Java 8 para 1.8.9; Java 21 para 1.21).</li>
+  <li>Guarda los cambios del perfil.</li>
+</ol>
+<p>En aplicaciones modernas con arquitectura modular (como Nebula Launcher o Prism), este proceso suele venir integrado internamente, permitiendo descargar y asignar automáticamente los entornos de ejecución aislados de Java 8, 17 y 21 sin que el usuario deba rastrear manualmente las rutas del sistema operativo.</p>
+
+<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Menú de configuración de perfil en el lanzador mostrando la ruta personalizada asignada a javaw.exe</div>
+
+<h3>Paso 4: Comprobar la arquitectura de 64 bits</h3>
+<p>Si instalas por error un paquete de Java de 32 bits (x86), el sistema operativo limitará estrictamente la cantidad de memoria que el juego puede reclamar a un máximo de aproximadamente 1.5 GB, independientemente de que tu ordenador tenga 16 GB de RAM física instalada. Esto provocará cuelgues por <code>OutOfMemoryError</code> casi de inmediato al instalar mods o texturas.</p>
+<p>Para comprobar que tu instalación es de 64 bits, abre la consola de comandos de Windows (<code>cmd.exe</code>) y ejecuta:</p>
+<pre><code>"C:\Ruta\Hacia\Tu\bin\java.exe" -version</code></pre>
+<p>La salida debe incluir explícitamente la leyenda <strong>64-Bit Server VM</strong>. Si menciona 32-Bit, desinstala ese binario y descarga la versión x64.</p>
+
+<h2>Caso técnico especial: Por qué los modpacks antiguos de Forge (1.7.10 y 1.12.2) colapsan en Java 9 o superior</h2>
+<p>Un error conceptual común entre jugadores experimentados es pensar: <em>"Si Java 21 es más moderno y rápido, forzaré a mi Minecraft 1.12.2 de Forge a ejecutarse con Java 21 para tener más FPS"</em>. Al intentarlo, el juego se cierra de inmediato en el segundo cero sin siquiera mostrar la pantalla de carga.</p>
+<p>La razón de este fallo no reside en el código base de Minecraft, sino en la arquitectura de <strong>Forge clásico</strong> y en las reformas estructurales que Oracle introdujo en la plataforma Java a partir de Java 9:</p>
+<ol>
+  <li><strong>El sistema de módulos de Java (Proyecto Jigsaw):</strong> A partir de Java 9, la máquina virtual encapsuló de forma estricta los paquetes internos del sistema (<code>java.lang</code>, <code>sun.misc</code>). En Java 8, el cargador de mods de Forge utilizaba reflexión no restringida para modificar variables protegidas de la JVM y cargar bibliotecas en memoria dinámicamente. Al intentar hacer esto en Java 17 o 21, la máquina virtual bloquea el acceso por motivos de seguridad y mata el proceso con una excepción de tipo <code>IllegalAccessException</code>.</li>
+  <li><strong>Eliminación del gestor de seguridad (SecurityManager):</strong> Métodos y clases fundamentales en las que se apoyaba el sistema de lanzamiento de Forge 1.12.2 han sido marcados como obsoletos o eliminados por completo en Java 21.</li>
+</ol>
+<p>Por este motivo, para jugar a versiones legendarias con mods como 1.7.10 o 1.12.2, <strong>es un requisito técnico absoluto utilizar Java 8 de 64 bits</strong>. Ningún argumento de optimización puede saltarse estas restricciones estructurales de la máquina virtual.</p>
+
+<h2>Cómo comprobar que Minecraft está utilizando la versión correcta de Java</h2>
+<p>Para confirmar de forma irrefutable qué entorno de Java está controlando tu partida sin fiarte de lo que indica el lanzador:</p>
+<ol>
+  <li>Inicia el perfil configurado y entra a cualquier mundo o servidor.</li>
+  <li>Presiona la tecla <code>F3</code> para desplegar la pantalla de telemetría de depuración.</li>
+  <li>Dirige tu mirada a la esquina superior derecha, en las primeras líneas de texto.</li>
+  <li>Localiza la línea que comienza por <strong>Java:</strong>. Allí se mostrará la versión exacta en ejecución, la arquitectura y el proveedor del binario (por ejemplo: <code>Java: 21.0.3 64bit</code> o <code>Java: 1.8.0_412 64bit</code>).</li>
+  <li>Si la versión mostrada coincide con los requisitos de la tabla técnica de esta guía, tu instalación está operando con total estabilidad y sin incompatibilidades de bytecode.</li>
+</ol>
+
+<h2>Conclusión</h2>
+<p>Comprender la coexistencia de Java 8, Java 17 y Java 21 es indispensable para cualquier jugador de Minecraft en la actualidad. Asignar el binario adecuado de forma quirúrgica a cada perfil elimina de raíz los cierres inesperados por versiones de clase y garantiza que cada generación del juego funcione exactamente bajo los estándares para los que fue programada.</p>
+
+      <div class="author-box">
+        <h3>Sobre el autor: fondue_x</h3>
+        <p><strong>fondue_x</strong> es desarrollador independiente y jugador de Minecraft desde hace más de 5 años, especializado en optimización de rendimiento, arquitectura de instancias y resolución de incompatibilidades en Fabric, Forge y NeoForge. Es el creador de <a href="https://github.com/fonduev" target="_blank" rel="noopener">Nebula Launcher</a>. Todas sus guías se prueban de primera mano en bancos de pruebas reales con Windows 11. Puedes consultar nuestra <a href="../metodologia.html">metodología editorial y banco de pruebas</a>.</p>
+      </div>
+
+      <div class="faq-section">
+        <h2 style="margin-top:0;">Preguntas Frecuentes</h2>
+                <div class="faq-item">
+          <h4>¿Puedo tener instalados Java 8, Java 17 y Java 21 al mismo tiempo en mi PC?</h4>
+          <p>Sí, sin ningún inconveniente. Puedes instalar múltiples versiones de OpenJDK en tu computadora; cada una residirá en su propia carpeta en Archivos de programa y solo se activará en el perfil de Minecraft al que le asignes su ruta específica.</p>
+        </div>
+        <div class="faq-item">
+          <h4>¿Qué pasa si intento jugar Minecraft 1.21 con Java 8?</h4>
+          <p>El juego no iniciará y se cerrará de inmediato arrojando el error UnsupportedClassVersionError (class file version 65.0). Minecraft 1.21 requiere obligatoriamente Java 21 para poder ejecutarse.</p>
+        </div>
+        <div class="faq-item">
+          <h4>¿Cuál es la diferencia entre el archivo java.exe y javaw.exe?</h4>
+          <p>java.exe abre una ventana de terminal de comandos visible que consume recursos secundarios mientras juegas. javaw.exe ejecuta la aplicación directamente en segundo plano sin ventana de consola acoplada, por lo que es el archivo que siempre debes seleccionar para jugar.</p>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>NEBULA DEV STUDIOS</h4>
+        <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
+          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Navegación</h4>
+        <ul>
+          <li><a href="../index.html">Inicio</a></li>
+          <li><a href="../guias.html">Guías & Tutoriales</a></li>
+          <li><a href="../about.html">Acerca de</a></li>
+          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../contact.html">Contacto</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Guías Técnicas</h4>
+        <ul>
+          <li><a href="./como-leer-latest-log-crash-reports-minecraft.html">Diagnóstico de Logs</a></li>
+          <li><a href="./exit-code-1-minecraft-solucion.html">Solución Exit Code 1</a></li>
+          <li><a href="./optimizar-minecraft-disco-hdd.html">Optimización en HDD</a></li>
+          <li><a href="./argumentos-jvm-minecraft-mitos-realidad.html">Argumentos JVM</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="../privacy.html">Política de Privacidad</a></li>
+          <li><a href="../terms.html">Términos de Servicio</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Nebula Dev Studios. Todos los derechos reservados.</div>
+      <div style="font-size: 0.8rem; line-height: 1.6; text-align: center; width: 100%; margin-top: 0.5rem;">
+        <strong>NO ES UN PRODUCTO OFICIAL DE MINECRAFT. NO ESTÁ APROBADO NI ASOCIADO CON MOJANG O MICROSOFT.</strong><br>
+        Minecraft es una marca comercial registrada de Mojang Synergies AB / Microsoft Corporation.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Banner de Privacidad y Cookies -->
+  <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
+    <div class="cookie-content">
+      <p>
+        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+      </p>
+      <div class="cookie-buttons">
+        <button class="btn-cookie-reject" onclick="rejectCookieConsent()">Solo Necesarias</button>
+        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function initCookieConsent() {
+      if (!localStorage.getItem('nebula_cookie_consent')) {
+        const banner = document.getElementById('cookieConsentBanner');
+        if (banner) banner.style.display = 'block';
+      }
+    }
+    function acceptCookieConsent() {
+      localStorage.setItem('nebula_cookie_consent', 'accepted');
+      dismissCookieBanner();
+    }
+    function rejectCookieConsent() {
+      localStorage.setItem('nebula_cookie_consent', 'essential_only');
+      dismissCookieBanner();
+    }
+    function dismissCookieBanner() {
+      const banner = document.getElementById('cookieConsentBanner');
+      if (banner) {
+        banner.style.opacity = '0';
+        setTimeout(() => { banner.style.display = 'none'; }, 300);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', initCookieConsent);
+  </script>
+
+</body>
+</html>
