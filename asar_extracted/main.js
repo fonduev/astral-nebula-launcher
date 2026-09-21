@@ -857,8 +857,20 @@ function findJavaExe(dir) {
 }
 
 function requiredJavaVersion(mcVer) {
+    if (!mcVer) return 21;
+    let cleanVer = String(mcVer).trim();
+    // Extraer versión base si se envió un ID completo de modloader (ej. fabric-loader-0.19.5-26.3)
+    if (cleanVer.includes('fabric-loader-') || cleanVer.includes('quilt-loader-')) {
+        const m = cleanVer.match(/(?:fabric|quilt)-loader-[^\-]+-(.+)$/i);
+        if (m) cleanVer = m[1];
+    } else if (cleanVer.includes('-')) {
+        const subParts = cleanVer.split('-');
+        const lastPart = subParts[subParts.length - 1];
+        if (/^\d+\.\d+/.test(lastPart)) cleanVer = lastPart;
+    }
+
     // Snapshots con formato "26w15a", "25w01a", etc.
-    const snapshotMatch = mcVer.match(/^(\d{2})w\d+/);
+    const snapshotMatch = cleanVer.match(/(\d{2})w\d+/i);
     if (snapshotMatch) {
         const year = parseInt(snapshotMatch[1]);
         if (year >= 25) return 25;   // Snapshots 2025+ necesitan Java 25
@@ -867,8 +879,13 @@ function requiredJavaVersion(mcVer) {
         return 8;
     }
 
+    // Comprobación directa para versiones 26.x en adelante
+    if (/\b2[6-9]\.\d+/i.test(cleanVer) || /\b\d{3,}\.\d+/i.test(cleanVer)) {
+        return 25;
+    }
+
     // Versiones con formato numérico: "1.21.4", "26.1", etc.
-    const parts = mcVer.replace(/[^0-9.]/g, '').split('.').map(Number);
+    const parts = cleanVer.replace(/[^0-9.]/g, '').split('.').map(Number);
     const major = parts[0] ?? 0;
     const minor = parts[1] ?? 0;
     const patch = parts[2] ?? 0;
@@ -1649,7 +1666,14 @@ async function ensureMinecraftBase(mcVersion, mcPath) {
     }
     const manifest = JSON.parse(manifestData);
     const versionMeta = manifest.versions.find(v => v.id === mcVersion);
-    if (!versionMeta) throw new Error(`No se encontró "${mcVersion}" en el manifest de Mojang`);
+    if (!versionMeta) {
+        if (jsonOk && jarOk) {
+            sendLog(`ℹ️ "${mcVersion}" no está en el catálogo de Mojang pero los archivos locales existen.`);
+            return;
+        }
+        sendLog(`ℹ️ "${mcVersion}" no figura en el catálogo oficial de Mojang (versión modificada/custom). Continuando...`);
+        return;
+    }
 
     // 2. Descargar JSON de la versión si no existe
     if (!jsonOk) {
@@ -6936,20 +6960,19 @@ ipcMain.on('launch-game', async (event, data) => {
         let modpackDispName = '';
         let modpackIconUrl = null;
 
-        // Auto-detect: si la versión enviada ES un ID de loader (fabric-loader-x-MC, etc.),
-        // extraer correctamente la versión base de MC y el custom mod ID.
-        if (!launchModId && launchVersion) {
-            const vLow = launchVersion.toLowerCase();
+        // Auto-detect robusto: asegurar separación de versión base de MC y loader ID
+        let candidateLoader = launchModId || launchVersion;
+        if (candidateLoader) {
+            const cLow = candidateLoader.toLowerCase();
             let extractedMc = null;
-            if (vLow.startsWith('fabric-loader-')) {
-                const m = launchVersion.match(/^fabric-loader-[^\-]+-(.+)$/);
+            if (cLow.startsWith('fabric-loader-')) {
+                const m = candidateLoader.match(/^fabric-loader-[^\-]+-(.+)$/i);
                 if (m) { extractedMc = m[1]; }
-            } else if (vLow.startsWith('quilt-loader-')) {
-                const m = launchVersion.match(/^quilt-loader-[^\-]+-(.+)$/);
+            } else if (cLow.startsWith('quilt-loader-')) {
+                const m = candidateLoader.match(/^quilt-loader-[^\-]+-(.+)$/i);
                 if (m) { extractedMc = m[1]; }
-            } else if (vLow.includes('forge') || vLow.includes('neoforge') || vLow.includes('optifine')) {
-                // For forge/neoforge/optifine: the JSON's inheritsFrom is the base version
-                const verJsonPath = path.join(mcPath, 'versions', launchVersion, launchVersion + '.json');
+            } else if (cLow.includes('forge') || cLow.includes('neoforge') || cLow.includes('optifine')) {
+                const verJsonPath = path.join(mcPath, 'versions', candidateLoader, candidateLoader + '.json');
                 if (fs.existsSync(verJsonPath)) {
                     try {
                         const vData = JSON.parse(fs.readFileSync(verJsonPath, 'utf8'));
@@ -6957,14 +6980,23 @@ ipcMain.on('launch-game', async (event, data) => {
                     } catch(e) {}
                 }
                 if (!extractedMc) {
-                    const m = launchVersion.match(/^(\d+\.\d+(?:\.\d+)?)/);
+                    const m = candidateLoader.match(/^(\d+\.\d+(?:\.\d+)?)/);
                     if (m) extractedMc = m[1];
                 }
             }
             if (extractedMc) {
-                sendLog(`🔧 Auto-detect: versión loader "${launchVersion}" → MC ${extractedMc} + custom`);
-                launchModId = launchVersion;
+                sendLog(`🔧 Auto-detect: perfil loader "${candidateLoader}" → MC ${extractedMc} + custom`);
+                launchModId = candidateLoader;
                 launchVersion = extractedMc;
+            }
+        }
+
+        // Si launchVersion todavía contiene el identificador de loader, forzar la versión base
+        if (launchVersion && (launchVersion.startsWith('fabric-loader-') || launchVersion.startsWith('quilt-loader-'))) {
+            const m = launchVersion.match(/^[a-z]+-loader-[^\-]+-(.+)$/i);
+            if (m) {
+                if (!launchModId) launchModId = launchVersion;
+                launchVersion = m[1];
             }
         }
 
@@ -7102,7 +7134,7 @@ ipcMain.on('launch-game', async (event, data) => {
             try {
                 const files = fs.readdirSync(mDir);
                 const verStr = `${launchVersion || ''} ${launchModId || ''} ${data.version || ''}`;
-                const isSnapshot26 = verStr.includes('26.');
+                const isSnapshot26 = /\b26w\d+/i.test(verStr);
                 const hasVulkanMod = files.some(f => f.toLowerCase().includes('vulkanmod') && !f.toLowerCase().endsWith('.disabled'));
                 const hasMoreCulling = files.some(f => f.toLowerCase().includes('moreculling') && !f.toLowerCase().endsWith('.disabled'));
                 for (const f of files) {
@@ -7257,13 +7289,17 @@ ipcMain.on('launch-game', async (event, data) => {
         });
         launcher.on('debug', e => { const dbgStr = String(e); if (dbgStr.length < 300) sendLog(dbgStr); });
 
-        // Ocultar launcher a la bandeja SOLO cuando Minecraft ya esté corriendo
-        // (primer output de datos del proceso Java = juego iniciado)
+        // Ocultar launcher a la bandeja SOLO cuando Minecraft ya haya inicializado su ventana/render
         let trayHiddenThisInstance = false;
         launcher.on('data', e => {
             const rawStr = String(e);
             sendLog(rawStr);
-            if (!trayHiddenThisInstance && s.minimizeToTrayOnGameLaunch !== false && win && win.isVisible()) {
+            const isGameWindowReady = rawStr.includes('Created window') || 
+                                      rawStr.includes('Backend library: LWJGL') || 
+                                      rawStr.includes('Setting user:') || 
+                                      rawStr.includes('OpenAL initialized') ||
+                                      rawStr.includes('Reloading ResourceManager');
+            if (!trayHiddenThisInstance && s.minimizeToTrayOnGameLaunch !== false && win && win.isVisible() && isGameWindowReady) {
                 trayHiddenThisInstance = true;
                 win.hide();
                 if (tray) {

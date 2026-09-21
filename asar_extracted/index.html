@@ -8920,6 +8920,58 @@ async function vbInstall(mcId) {
       toast(`❌ ${result.error}`, 'error');
       if (btn) { btn.textContent = '⬇'; btn.disabled = false; }
     }
+  } else if (modifier === 'fabric') {
+    const btn = document.querySelector(`#vbi-${mcId.replace(/\./g,'_')} .vb-install-btn`);
+    if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+    showAbortButton();
+    toast(`⬇️ Instalando Fabric + Sodium para ${mcId}...`, 'info');
+    try {
+      const result = await ipc.invoke('auto-install-sodium', mcId);
+      hideAbortButton();
+      if (result.success) {
+        toast(`✅ Fabric + Sodium instalado para ${mcId}! Iniciando...`, 'success');
+        installedMeta = await ipc.invoke('get-installed-versions');
+        installed = new Set(installedMeta.map(v => v.id));
+        populateVersions();
+        loadVersionsList();
+        vbSetHiddenSelect(mcId, 'fabric');
+        showTab('play');
+        launchGame();
+      } else {
+        toast(`❌ ${result.error}`, 'error');
+        if (btn) { btn.textContent = '⬇'; btn.disabled = false; }
+      }
+    } catch(err) {
+      hideAbortButton();
+      toast(`❌ Error: ${err.message}`, 'error');
+      if (btn) { btn.textContent = '⬇'; btn.disabled = false; }
+    }
+  } else if (modifier === 'quilt') {
+    const btn = document.querySelector(`#vbi-${mcId.replace(/\./g,'_')} .vb-install-btn`);
+    if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+    showAbortButton();
+    toast(`⬇️ Instalando Quilt para ${mcId}...`, 'info');
+    try {
+      const result = await ipc.invoke('auto-install-quilt', mcId);
+      hideAbortButton();
+      if (result.success) {
+        toast(`✅ Quilt instalado para ${mcId}! Iniciando...`, 'success');
+        installedMeta = await ipc.invoke('get-installed-versions');
+        installed = new Set(installedMeta.map(v => v.id));
+        populateVersions();
+        loadVersionsList();
+        vbSetHiddenSelect(mcId, 'quilt');
+        showTab('play');
+        launchGame();
+      } else {
+        toast(`❌ ${result.error}`, 'error');
+        if (btn) { btn.textContent = '⬇'; btn.disabled = false; }
+      }
+    } catch(err) {
+      hideAbortButton();
+      toast(`❌ Error: ${err.message}`, 'error');
+      if (btn) { btn.textContent = '⬇'; btn.disabled = false; }
+    }
   } else {
     // Loader: open loader panel for 2-step install
     vbSelectVersion(mcId);
@@ -9047,11 +9099,89 @@ function directPlayVersion(versionId) {
     else if (match.type === 'quilt') setPlayModifier('quilt');
     else setPlayModifier('vanilla');
     vbSetHiddenSelect(match.id, match.type);
-    toast(`🎮 Seleccionado: ${match.displayName || versionId}`, 'success');
+    toast(`🎮 Iniciando: ${match.displayName || versionId}`, 'info');
+    launchGame();
   } else {
     setPlayModifier('vanilla');
     vbSetHiddenSelect(versionId, 'vanilla');
-    toast(`🎮 Seleccionado: ${versionId}`, 'success');
+    toast(`🎮 Iniciando: ${versionId}`, 'info');
+    launchGame();
+  }
+}
+
+async function directInstallAndPlayVersion(versionId, versionType) {
+  const modifier = (versionType === 'snapshot' || versionType === 'release' || versionType === 'vanilla' || !versionType) ? 'vanilla' : versionType;
+  showTab('play');
+  setPlayModifier(modifier);
+  vbSelectVersion(versionId);
+
+  if (modifier === 'vanilla') {
+    await vbInstallVanilla(versionId);
+  } else if (modifier === 'fabric') {
+    showAbortButton();
+    toast(`⬇️ Descargando e instalando Fabric para ${versionId}...`, 'info');
+    try {
+      const result = await ipc.invoke('auto-install-sodium', versionId);
+      hideAbortButton();
+      if (result.success) {
+        toast(`✅ Fabric + Sodium instalado para ${versionId}! Iniciando juego...`, 'success');
+        installedMeta = await ipc.invoke('get-installed-versions');
+        installed = new Set(installedMeta.map(v => v.id));
+        populateVersions();
+        loadVersionsList();
+        vbSetHiddenSelect(versionId, 'fabric');
+        launchGame();
+      } else {
+        toast(`❌ Error: ${result.error}`, 'error');
+      }
+    } catch (e) {
+      hideAbortButton();
+      toast(`❌ Error instalando Fabric: ${e.message}`, 'error');
+    }
+  } else if (modifier === 'optifine') {
+    showAbortButton();
+    toast(`⬇️ Descargando e instalando OptiFine para ${versionId}...`, 'info');
+    try {
+      const result = await ipc.invoke('auto-install-optifine', versionId);
+      hideAbortButton();
+      if (result.success) {
+        toast(`✅ OptiFine instalado para ${versionId}! Iniciando juego...`, 'success');
+        installedMeta = await ipc.invoke('get-installed-versions');
+        installed = new Set(installedMeta.map(v => v.id));
+        populateVersions();
+        loadVersionsList();
+        vbSetHiddenSelect(versionId, 'optifine');
+        launchGame();
+      } else {
+        toast(`❌ Error: ${result.error}`, 'error');
+      }
+    } catch (e) {
+      hideAbortButton();
+      toast(`❌ Error instalando OptiFine: ${e.message}`, 'error');
+    }
+  } else if (modifier === 'quilt') {
+    showAbortButton();
+    toast(`⬇️ Descargando e instalando Quilt para ${versionId}...`, 'info');
+    try {
+      const result = await ipc.invoke('auto-install-quilt', versionId);
+      hideAbortButton();
+      if (result.success) {
+        toast(`✅ Quilt instalado para ${versionId}! Iniciando juego...`, 'success');
+        installedMeta = await ipc.invoke('get-installed-versions');
+        installed = new Set(installedMeta.map(v => v.id));
+        populateVersions();
+        loadVersionsList();
+        vbSetHiddenSelect(versionId, 'quilt');
+        launchGame();
+      } else {
+        toast(`❌ Error: ${result.error}`, 'error');
+      }
+    } catch (e) {
+      hideAbortButton();
+      toast(`❌ Error instalando Quilt: ${e.message}`, 'error');
+    }
+  } else {
+    vbOpenLoaderPanel(versionId, modifier);
   }
 }
 
@@ -9205,7 +9335,7 @@ function loadVersionsList() {
         <div style="display:flex;align-items:center;gap:8px;">
           ${isInstalled
             ? `<button class="btn btn-primary btn-sm" onclick="directPlayVersion(decodeURIComponent('${encodedId}'))" style="padding:6px 14px;font-weight:700;cursor:pointer;">▶ Jugar</button>`
-            : `<button class="btn btn-glass btn-sm" onclick="showTab('play'); setPlayModifier('${v.type === 'snapshot' || v.type === 'release' ? 'vanilla' : v.type}'); vbSelectVersion(decodeURIComponent('${encodedId}'));" style="padding:6px 14px;cursor:pointer;">⬇ Instalar</button>`
+            : `<button class="btn btn-glass btn-sm" onclick="directInstallAndPlayVersion(decodeURIComponent('${encodedId}'), '${v.type}')" style="padding:6px 14px;cursor:pointer;">⬇ Instalar</button>`
           }
         </div>
       </div>
@@ -10104,13 +10234,14 @@ async function launchGame() {
   // Mostrar abort y preparar UI
   showAbortButton('⏹️ Cancelar');
   btn.disabled = true;
-  btn.textContent = '⏳ SALTANDO...';
-
   const selectedModText = modSelect.value ? `+ ${modSelect.options[modSelect.selectedIndex].text}` : '';
   const displayName = `Minecraft ${ver} ${selectedModText}`.trim();
   setLaunchState('loading', displayName);
 
-  ipc.send('launch-game', { version:ver, ram:parseInt(ram), username:authUser, type:authType, auth:authData, modId:mod });
+  const finalUser = authUser || (settings && settings.lastAuthUser) || 'Jugador';
+  const finalType = authType || (finalUser === 'Jugador' ? 'offline' : (settings && settings.lastAuthType) || 'offline');
+  const finalAuth = authData || (settings && settings.lastAuthData) || null;
+  ipc.send('launch-game', { version: ver, ram: parseInt(ram), username: finalUser, type: finalType, auth: finalAuth, modId: mod });
 }
 
 ipc.on('reset-ui', () => {
