@@ -7173,34 +7173,24 @@ ipcMain.on('launch-game', async (event, data) => {
             cleanIncompatibleMods(path.join(instanceDir, 'mods'));
         }
 
-        // Sanitizar opciones gráficas: Sodium e Iris solo soportan OpenGL.
-        // Si el usuario activó "vulkan" en MC 26.3+, Sodium/Iris crashean o cierran el juego al abrir Opciones.
-        const sanitizeGraphicsBackend = (dir) => {
+        // Soporte de Vulkan y entorno gráfico seguro
+        process.env['DISABLE_VK_LAYER_reshade_1'] = '1'; // Evitar fallo WinError 1114 con ReShade Vulkan
+        const checkGraphicsBackend = (dir) => {
             try {
                 const optPath = path.join(dir, 'options.txt');
                 if (!fs.existsSync(optPath)) return;
-                const mDir = path.join(dir, 'mods');
-                let hasSodiumOrIris = false;
-                if (fs.existsSync(mDir)) {
-                    const mFiles = fs.readdirSync(mDir).map(f => f.toLowerCase());
-                    hasSodiumOrIris = mFiles.some(f => (f.includes('sodium') || f.includes('iris')) && !f.endsWith('.disabled'));
-                }
-                if (hasSodiumOrIris || isFabric || isQuilt) {
-                    let optContent = fs.readFileSync(optPath, 'utf8');
-                    if (optContent.includes('preferredGraphicsBackend:"vulkan"')) {
-                        optContent = optContent.replace(/preferredGraphicsBackend:"vulkan"/g, 'preferredGraphicsBackend:"opengl"');
-                        fs.writeFileSync(optPath, optContent, 'utf8');
-                        sendLog(`🛡️ Modo gráfico restablecido a OpenGL en ${path.basename(dir)} (Sodium e Iris requieren OpenGL).`);
-                    }
+                const optContent = fs.readFileSync(optPath, 'utf8');
+                if (optContent.includes('preferredGraphicsBackend:"vulkan"')) {
+                    sendLog(`🚀 [Vulkan Engine] Motor Vulkan activo en ${path.basename(dir)}. Sodium ejecutará renderizado Vulkan nativo.`);
                 }
             } catch (err) {
-                console.error('[GraphicsBackendSanitizer] Error:', err);
+                console.error('[GraphicsBackend] Error:', err);
             }
         };
 
-        sanitizeGraphicsBackend(instanceDir);
+        checkGraphicsBackend(instanceDir);
         if (instanceDir !== mcPath) {
-            sanitizeGraphicsBackend(mcPath);
+            checkGraphicsBackend(mcPath);
         }
 
         if (instanceDir !== mcPath) {
