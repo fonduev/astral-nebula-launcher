@@ -8881,6 +8881,8 @@ async function vbInstallLoader() {
       // Auto-select and play
       vbSetHiddenSelect(mcId, modifier);
       vbOpenLoaderPanel(mcId, modifier);
+      showTab('play');
+      launchGame();
     } else {
       toast(`❌ ${result?.error || 'Error desconocido'}`, 'error');
       btn.disabled = false;
@@ -8910,6 +8912,10 @@ async function vbInstall(mcId) {
       installedMeta = await ipc.invoke('get-installed-versions');
       installed = new Set(installedMeta.map(v => v.id));
       populateVersions();
+      loadVersionsList();
+      vbSetHiddenSelect(mcId, 'optifine');
+      showTab('play');
+      launchGame();
     } else {
       toast(`❌ ${result.error}`, 'error');
       if (btn) { btn.textContent = '⬇'; btn.disabled = false; }
@@ -8940,6 +8946,9 @@ async function vbInstallVanilla(mcId) {
       installed = new Set(installedMeta.map(v => v.id));
       populateVersions();
       loadVersionsList();
+      vbSetHiddenSelect(mcId, 'vanilla');
+      showTab('play');
+      launchGame();
     } else {
       toast(`❌ ${result?.error || 'Error descargando versión'}`, 'error');
       if (btn) { btn.textContent = '⬇'; btn.disabled = false; }
@@ -9371,6 +9380,9 @@ async function installOptiFine() {
     populateVersions();
     loadVersionsList();
     refreshModSelect();
+    vbSetHiddenSelect(mcVer, 'optifine');
+    showTab('play');
+    launchGame();
   } else {
     toast(`❌ ${result.error}`, 'error');
   }
@@ -9386,7 +9398,17 @@ async function installSodium() {
   btn.textContent='⏳ Instalando...'; showAbortButton();
   const result = await ipc.invoke('auto-install-sodium', mcVer);
   hideAbortButton(); btn.disabled=false; btn.textContent='⬇ Instalar Sodium + Fabric';
-  if (result.success) { toast(`✅ Sodium + Fabric instalado!`,'success'); installedMeta = await ipc.invoke('get-installed-versions'); installed = new Set(installedMeta.map(v=>v.id)); populateVersions(); loadVersionsList(); loadFabricInstalledVersions(); } else toast(`❌ ${result.error}`,'error');
+  if (result.success) {
+    toast(`✅ Sodium + Fabric instalado!`,'success');
+    installedMeta = await ipc.invoke('get-installed-versions');
+    installed = new Set(installedMeta.map(v=>v.id));
+    populateVersions();
+    loadVersionsList();
+    loadFabricInstalledVersions();
+    vbSetHiddenSelect(mcVer, 'fabric');
+    showTab('play');
+    launchGame();
+  } else toast(`❌ ${result.error}`,'error');
 }
 
 function populateQuiltVersions() {
@@ -9405,7 +9427,17 @@ async function installQuilt() {
   btn.textContent='⏳ Instalando...'; showAbortButton();
   const result = await ipc.invoke('auto-install-quilt', mcVer);
   hideAbortButton(); btn.disabled=false; btn.textContent='🔮 Instalar Quilt Loader';
-  if (result.success) { toast(`✅ Quilt Loader instalado!`,'success'); installedMeta = await ipc.invoke('get-installed-versions'); installed = new Set(installedMeta.map(v=>v.id)); populateVersions(); loadVersionsList(); loadQuiltInstalledVersions(); } else toast(`❌ ${result.error}`,'error');
+  if (result.success) {
+    toast(`✅ Quilt Loader instalado!`,'success');
+    installedMeta = await ipc.invoke('get-installed-versions');
+    installed = new Set(installedMeta.map(v=>v.id));
+    populateVersions();
+    loadVersionsList();
+    loadQuiltInstalledVersions();
+    vbSetHiddenSelect(mcVer, 'quilt');
+    showTab('play');
+    launchGame();
+  } else toast(`❌ ${result.error}`,'error');
 }
 
 // ═══════ FORGE ═══════
@@ -9491,7 +9523,17 @@ async function installForge() {
   showAbortButton();
   const result = await ipc.invoke('install-forge', forgeData);
   hideAbortButton(); btn.disabled=false; btn.textContent='🔥 Instalar Forge';
-  if (result.success) { toast(`✅ Forge instalado!`,'success'); installedMeta = await ipc.invoke('get-installed-versions'); installed = new Set(installedMeta.map(v=>v.id)); populateVersions(); loadForgeInstalledVersions(); loadVersionsList(); } else toast(`❌ Error: ${result.error}`,'error');
+  if (result.success) {
+    toast(`✅ Forge instalado!`,'success');
+    installedMeta = await ipc.invoke('get-installed-versions');
+    installed = new Set(installedMeta.map(v=>v.id));
+    populateVersions();
+    loadForgeInstalledVersions();
+    loadVersionsList();
+    vbSetHiddenSelect(forgeData.mcVersion, 'forge');
+    showTab('play');
+    launchGame();
+  } else toast(`❌ Error: ${result.error}`,'error');
 }
 
 // ═══════ NEOFORGE ═══════
@@ -9566,6 +9608,9 @@ async function installNeoForge() {
     populateVersions();
     loadNeoForgeInstalledVersions();
     loadVersionsList();
+    vbSetHiddenSelect(nfData.mcVersion, 'neoforge');
+    showTab('play');
+    launchGame();
   } else {
     toast(`❌ Error: ${result.error}`, 'error');
   }
@@ -10685,6 +10730,10 @@ async function installModpackFromSearch(projectId, title, iconUrl, screenshotUrl
       toast(`✅ "${title}" instalado correctamente!`, 'success');
       switchModpacksView('my');
       populateInstalledModpacksSelect();
+      if (result.folderName) {
+        showTab('play');
+        launchModpack(result.folderName);
+      }
     } else {
       toast(`❌ Error instalando modpack: ${result.error}`, 'error');
     }
@@ -10702,6 +10751,10 @@ async function importModpackLocal() {
     toast(`✅ Modpack "${result.name}" importado correctamente!`, 'success');
     switchModpacksView('my');
     populateInstalledModpacksSelect();
+    if (result.folderName) {
+      showTab('play');
+      launchModpack(result.folderName);
+    }
   } else if (result && !result.success && result.error !== 'Cancelado') {
     toast(`❌ Error al importar: ${result.error}`, 'error');
   }

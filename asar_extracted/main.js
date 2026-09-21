@@ -902,7 +902,7 @@ async function ensureJava(mcVersion, customJava) {
         sendLog(`☕ Java ${jv} — buscando Liberica JDK Full (incluye JavaFX)...`);
         try {
             const apiResp = await httpsGet(
-                `https://api.bell-sw.com/v1/liberica/releases?arch=amd64&os=windows` +
+                `https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=windows` +
                 `&package-type=zip&bundle-type=jdk-full&version-feature=${jv}&version-modifier=latest`
             );
             const releases = JSON.parse(apiResp);
@@ -2721,6 +2721,7 @@ ipcMain.handle('auto-install-sodium', async (event, mcVersion) => {
 
             // Install Fabric
             ensureLauncherProfiles(mcPath);
+            await ensureMinecraftBase(mcVersion, mcPath);
             sendProgress(50, 'Instalando Fabric...');
             sendLog('🔧 Ejecutando instalador de Fabric...');
 
@@ -2945,6 +2946,7 @@ ipcMain.handle('auto-install-quilt', async (event, mcVersion) => {
 
             // Install Quilt
             ensureLauncherProfiles(mcPath);
+            await ensureMinecraftBase(mcVersion, mcPath);
             sendProgress(50, 'Instalando Quilt...');
             sendLog('🔧 Ejecutando instalador de Quilt...');
 
@@ -3503,6 +3505,7 @@ ipcMain.handle('import-modpack', async (event) => {
             return {
                 success: true,
                 name: instanceName,
+                folderName: instanceFolder,
                 mcVersion,
                 forgeVersion,
                 path: instancePath
@@ -5332,7 +5335,7 @@ ipcMain.handle('install-modpack-from-search', async (event, { projectId, title, 
         sendLog(`✅ Modpack "${title}" instalado correctamente.`);
         sendProgress(100, 'Instalación completada ✓');
         currentOperation = null;
-        return { success: true, name: title };
+        return { success: true, name: title, folderName };
 
     } catch (err) {
         sendLog(`❌ Error instalando modpack: ${err.message}`, 'error');
@@ -7035,6 +7038,9 @@ ipcMain.on('launch-game', async (event, data) => {
         const displayVersion = launchModId || launchVersion;
         sendLog(`🚀 Preparando ${displayVersion}…`);
         sendProgress(0, 'Preparando…');
+
+        // Asegurar que los archivos base de la versión de Minecraft (JSON y JAR) existan
+        await ensureMinecraftBase(launchVersion, mcPath);
 
         const javaExe = await ensureJava(launchVersion, s.javaPath);
 
