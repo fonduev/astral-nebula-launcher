@@ -2817,19 +2817,15 @@ ipcMain.handle('auto-install-sodium', async (event, mcVersion) => {
         sendLog(`📂 Mods Fabric en: ${modsDir}`);
 
         // Para snapshots 26.x (versiones preview): usar mods de optimización estables (Lithium, ImmediatelyFast, etc.)
-        // Para versiones estables (1.20.1, 1.21.1, etc.): Sodium + Iris Shaders + Indium + Lithium
-        const isSnapshot26 = mcVersion && mcVersion.startsWith('26.');
-        const modsToInstall = isSnapshot26 ? [
-            { slug: 'fabric-api', name: 'Fabric API' },
-            { slug: 'lithium', name: 'Lithium (Optimización Ticks)' },
-            { slug: 'immediatelyfast', name: 'ImmediatelyFast (FPS & Rendering)' },
-            { slug: 'modmenu', name: 'Mod Menu' }
-        ] : [
+        // Paquete de optimización completo: Fabric API, Sodium, Iris, Lithium, ImmediatelyFast, Indium y Mod Menu.
+        // Si algún mod aún no tiene build para la versión dada en Modrinth, se reporta y continúa sin error.
+        const modsToInstall = [
             { slug: 'fabric-api', name: 'Fabric API' },
             { slug: 'sodium', name: 'Sodium' },
-            { slug: 'indium', name: 'Indium' },
             { slug: 'iris', name: 'Iris Shaders' },
-            { slug: 'lithium', name: 'Lithium' },
+            { slug: 'lithium', name: 'Lithium (Optimización Ticks)' },
+            { slug: 'immediatelyfast', name: 'ImmediatelyFast (FPS & Rendering)' },
+            { slug: 'indium', name: 'Indium' },
             { slug: 'modmenu', name: 'Mod Menu' }
         ];
 
