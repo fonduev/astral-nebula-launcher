@@ -228,6 +228,7 @@
     .cat-errors { background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
     .cat-shaders { background: rgba(251, 191, 36, 0.15); color: var(--accent-amber); border: 1px solid rgba(251, 191, 36, 0.3); }
     .cat-java { background: rgba(129, 140, 248, 0.15); color: #818cf8; border: 1px solid rgba(129, 140, 248, 0.3); }
+    .cat-server { background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); border: 1px solid rgba(56, 189, 248, 0.3); }
 
     .read-time {
       font-size: 0.82rem;
@@ -298,6 +299,25 @@
       .nav-links { display: none; }
       .footer-grid { grid-template-columns: 1fr; }
     }
+  
+    .filter-btn {
+      background: rgba(14, 10, 32, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #94a3b8;
+      padding: 0.55rem 1.25rem;
+      border-radius: 9999px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: linear-gradient(135deg, rgba(192, 132, 252, 0.25), rgba(56, 189, 248, 0.25));
+      border-color: #c084fc;
+      color: #fff;
+      box-shadow: 0 0 15px rgba(192, 132, 252, 0.3);
+    }
+
   </style>
 
   <style>
@@ -384,203 +404,361 @@
       </p>
     </div>
 
+    
+    <!-- Filtros de Categoría -->
+    <div class="filter-container" style="display:flex; flex-wrap:wrap; gap:0.6rem; justify-content:center; margin: 2.5rem 0 3rem;">
+      <button class="filter-btn active" onclick="filterGuides('all', this)">✦ Todos los Artículos (25)</button>
+      <button class="filter-btn" onclick="filterGuides('fps', this)">⚡ Rendimiento & FPS</button>
+      <button class="filter-btn" onclick="filterGuides('errors', this)">🛠️ Soporte & Logs</button>
+      <button class="filter-btn" onclick="filterGuides('java', this)">☕ Java & JVM</button>
+      <button class="filter-btn" onclick="filterGuides('mods', this)">📦 Mods & NeoForge</button>
+      <button class="filter-btn" onclick="filterGuides('shaders', this)">🎨 Shaders</button>
+      <button class="filter-btn" onclick="filterGuides('server', this)">🌐 Servidores</button>
+    </div>
+
     <div class="guides-grid">
-      <!-- Guía 1 -->
-      <a href="./guias/optimizar-minecraft-pc-bajos-recursos.html" class="guide-card">
+      <!-- Cómo Optimizar Minecraft en 2026: Guía Definitiva con Sodium y JVM -->
+      <a href="./guias/optimizar-minecraft-pc-bajos-recursos.html" class="guide-card" data-tag="fps">
         <div>
           <div class="guide-top">
             <span class="cat-tag cat-fps">⚡ Rendimiento & FPS</span>
             <span class="read-time">⏱️ 8 min</span>
           </div>
           <h3>Cómo Optimizar Minecraft en 2026: Guía Definitiva con Sodium y JVM</h3>
-          <p>
-            Duplica tus fotogramas por segundo y elimina los molestos micro-tirones con el stack moderno de Sodium, Lithium, FerriteCore y argumentos JVM optimizados.
-          </p>
+          <p>Duplica tus FPS y elimina tirones con el stack moderno de Sodium, Lithium, FerriteCore y argumentos JVM optimizados para PCs modestas.</p>
         </div>
         <div class="read-more">Leer Guía Completa &rarr;</div>
       </a>
 
-      <!-- Guía 2 -->
-      <a href="./guias/como-instalar-modpacks-mods-minecraft.html" class="guide-card">
+      <!-- Los 10 Mejores Mods de Rendimiento para Fabric en 2026 Más Allá de Sodium -->
+      <a href="./guias/mejores-mods-rendimiento-fabric-2026.html" class="guide-card" data-tag="fps">
         <div>
           <div class="guide-top">
-            <span class="cat-tag cat-mods">📦 Mods & Loaders</span>
-            <span class="read-time">⏱️ 7 min</span>
+            <span class="cat-tag cat-fps">⚡ Rendimiento & FPS</span>
+            <span class="read-time">⏱️ 12 min</span>
           </div>
-          <h3>Cómo Instalar y Administrar Mods en Fabric, Forge y NeoForge</h3>
-          <p>
-            Descubre las diferencias entre los cargadores modernos de mods, cómo resolver dependencias obligatorias y cómo evitar que tus partidas crasheen.
-          </p>
+          <h3>Los 10 Mejores Mods de Rendimiento para Fabric en 2026 Más Allá de Sodium</h3>
+          <p>El stack completo de optimización: FerriteCore, Lithium, ImmediatelyFast, ModernFix, Entity Culling y Memory Leak Fix.</p>
         </div>
         <div class="read-more">Leer Guía Completa &rarr;</div>
       </a>
 
-      <!-- Guía 3 -->
-      <a href="./guias/solucion-errores-comunes-minecraft.html" class="guide-card">
+      <!-- Cuánta Memoria RAM Asignar a Minecraft: Por Qué Asignar de Más Provoca Lag Spikes -->
+      <a href="./guias/como-asignar-mas-ram-minecraft-sin-crashes.html" class="guide-card" data-tag="fps">
         <div>
           <div class="guide-top">
-            <span class="cat-tag cat-errors">🛠️ Soporte Técnico</span>
-            <span class="read-time">⏱️ 9 min</span>
+            <span class="cat-tag cat-fps">⚡ Memoria RAM</span>
+            <span class="read-time">⏱️ 10 min</span>
           </div>
-          <h3>Solución a Errores de Minecraft: Código de Salida 1, Crashes y Java</h3>
-          <p>
-            Aprende a diagnosticar y reparar los fallos más comunes al abrir Minecraft, desde falta de memoria RAM hasta incompatibilidad de librerías y drivers.
-          </p>
+          <h3>Cuánta Memoria RAM Asignar a Minecraft: Por Qué Asignar de Más Provoca Lag Spikes</h3>
+          <p>Descubre la cantidad exacta de RAM que necesita tu versión y por qué asignar 10 GB o 16 GB causa congelamientos por Garbage Collection.</p>
         </div>
         <div class="read-more">Leer Guía Completa &rarr;</div>
       </a>
 
-      <!-- Guía 4 -->
-      <a href="./guias/mejores-shaders-para-minecraft.html" class="guide-card">
+      <!-- Cómo Jugar Minecraft en PC de 4 GB de RAM sin Cierres ni Lag -->
+      <a href="./guias/jugar-minecraft-pc-4gb-ram-sin-lag.html" class="guide-card" data-tag="fps">
         <div>
           <div class="guide-top">
-            <span class="cat-tag cat-shaders">🎨 Gráficos & Shaders</span>
+            <span class="cat-tag cat-fps">⚡ Optimización 4 GB</span>
             <span class="read-time">⏱️ 8 min</span>
           </div>
-          <h3>Top Mejores Shaders para Minecraft 2026: Belleza y Altos FPS</h3>
-          <p>
-            Comparativa detallada de Complementary Reimagined, BSL, MakeUp Ultra Fast y Photon Shaders en Iris para jugar con gráficos de cine sin perder fluidez.
-          </p>
+          <h3>Cómo Jugar Minecraft en PC de 4 GB de RAM sin Cierres ni Lag</h3>
+          <p>Estrategia matemática de asignación de memoria JVM, eliminación del OutOfMemoryError, compresión con FerriteCore y Mipmaps a cero.</p>
         </div>
         <div class="read-more">Leer Guía Completa &rarr;</div>
       </a>
 
-      <!-- Guía 5 -->
-      <a href="./guias/guia-java-para-minecraft-versiones.html" class="guide-card">
+      <!-- Cómo Optimizar Minecraft en Discos Duros HDD Tradicionales -->
+      <a href="./guias/optimizar-minecraft-disco-hdd.html" class="guide-card" data-tag="fps">
         <div>
           <div class="guide-top">
-            <span class="cat-tag cat-java">☕ Entorno de Ejecución</span>
-            <span class="read-time">⏱️ 7 min</span>
+            <span class="cat-tag cat-fps">⚡ Optimización HDD</span>
+            <span class="read-time">⏱️ 9 min</span>
           </div>
-          <h3>Guía de Versiones de Java para Minecraft: Java 8 vs 17 vs 21</h3>
-          <p>
-            Todo lo que necesitas saber sobre la matriz de compatibilidad de Java, JDKs modernos de alto rendimiento (Temurin, GraalVM) y recolección de basura.
-          </p>
+          <h3>Cómo Optimizar Minecraft en Discos Duros HDD Tradicionales</h3>
+          <p>Reduce a la mitad los tiempos de carga y elimina los tirones en discos mecánicos: I/O de chunks, formato Anvil y exclusiones de Windows.</p>
         </div>
         <div class="read-more">Leer Guía Completa &rarr;</div>
       </a>
-          <!-- Cómo Leer latest.log y Crash Reports en Minecraft con Mods -->
-      <a href="./guias/como-leer-latest-log-crash-reports-minecraft.html" class="guide-card">
+
+      <!-- Sodium vs. OptiFine en CPUs de 4 Núcleos: Benchmark en i7 y Ryzen -->
+      <a href="./guias/sodium-vs-optifine-procesadores-4-nucleos.html" class="guide-card" data-tag="fps">
+        <div>
+          <div class="guide-top">
+            <span class="cat-tag cat-fps">⚡ Benchmarks</span>
+            <span class="read-time">⏱️ 8 min</span>
+          </div>
+          <h3>Sodium vs. OptiFine en CPUs de 4 Núcleos: Benchmark en i7 y Ryzen</h3>
+          <p>Análisis técnico de draw calls, arquitectura de renderizado por lotes y consistencia de frametime en procesadores quad-core.</p>
+        </div>
+        <div class="read-more">Leer Guía Completa &rarr;</div>
+      </a>
+
+      <!-- Distancia de Simulación vs Distancia de Renderizado: Impacto en Rendimiento -->
+      <a href="./guias/distancia-simulacion-vs-renderizado-minecraft.html" class="guide-card" data-tag="fps">
+        <div>
+          <div class="guide-top">
+            <span class="cat-tag cat-fps">⚡ Configuración Gráfica</span>
+            <span class="read-time">⏱️ 9 min</span>
+          </div>
+          <h3>Distancia de Simulación vs Distancia de Renderizado: Impacto en Rendimiento</h3>
+          <p>Aprende qué diferencia la distancia de simulación de la de renderizado para ver paisajes lejanos sin sobrecargar la CPU.</p>
+        </div>
+        <div class="read-more">Leer Guía Completa &rarr;</div>
+      </a>
+
+      <!-- Exit Code 1 en Minecraft con Mods: Causas Reales y Protocolo de Descarte -->
+      <a href="./guias/exit-code-1-minecraft-solucion.html" class="guide-card" data-tag="errors">
+        <div>
+          <div class="guide-top">
+            <span class="cat-tag cat-errors">🛠️ Solución Exit Code 1</span>
+            <span class="read-time">⏱️ 8 min</span>
+          </div>
+          <h3>Exit Code 1 en Minecraft con Mods: Causas Reales y Protocolo de Descarte</h3>
+          <p>Protocolo metódico de 6 pasos para solucionar el código de error más frecuente: versiones de Java incorrectas, mods rotos y caché corrupta.</p>
+        </div>
+        <div class="read-more">Leer Guía Completa &rarr;</div>
+      </a>
+
+      <!-- Cómo Leer latest.log y Crash Reports en Minecraft con Mods -->
+      <a href="./guias/como-leer-latest-log-crash-reports-minecraft.html" class="guide-card" data-tag="errors">
         <div>
           <div class="guide-top">
             <span class="cat-tag cat-errors">🔍 Diagnóstico de Logs</span>
             <span class="read-time">⏱️ 7 min</span>
           </div>
           <h3>Cómo Leer latest.log y Crash Reports en Minecraft con Mods</h3>
-          <p>
-            Aprende a interpretar los logs de Java, ubicar la excepción raíz (Caused by) e identificar el mod o conflicto de bibliotecas sin desinstalar mods a ciegas.
-          </p>
+          <p>Aprende a interpretar los logs de Java, ubicar la excepción raíz (Caused by) e identificar el mod en conflicto sin desinstalar a ciegas.</p>
         </div>
         <div class="read-more">Leer Guía Completa &rarr;</div>
       </a>
 
-      <!-- Exit Code 1 en Minecraft con Mods: Causas Reales y Protocolo de Descarte -->
-      <a href="./guias/exit-code-1-minecraft-solucion.html" class="guide-card">
+      <!-- Solución a Errores de Minecraft: Crashes, Java y Pantalla Negra -->
+      <a href="./guias/solucion-errores-comunes-minecraft.html" class="guide-card" data-tag="errors">
         <div>
           <div class="guide-top">
-            <span class="cat-tag cat-errors">⚠️ Solución Exit Code 1</span>
-            <span class="read-time">⏱️ 8 min</span>
-          </div>
-          <h3>Exit Code 1 en Minecraft con Mods: Causas Reales y Protocolo de Descarte</h3>
-          <p>
-            Protocolo metódico de 6 pasos para solucionar el código de error más frecuente: versiones de Java incorrectas, argumentos JVM rotos y caché corrupta de LWJGL.
-          </p>
-        </div>
-        <div class="read-more">Leer Guía Completa &rarr;</div>
-      </a>
-
-      <!-- Cómo Optimizar Minecraft en Discos Duros HDD Tradicionales -->
-      <a href="./guias/optimizar-minecraft-disco-hdd.html" class="guide-card">
-        <div>
-          <div class="guide-top">
-            <span class="cat-tag cat-fps">⚡ Optimización en HDD</span>
+            <span class="cat-tag cat-errors">🛠️ Soporte Técnico</span>
             <span class="read-time">⏱️ 9 min</span>
           </div>
-          <h3>Cómo Optimizar Minecraft en Discos Duros HDD Tradicionales</h3>
-          <p>
-            Reduce a la mitad los tiempos de carga y elimina los tirones en discos mecánicos: I/O de chunks, desfragmentación del formato Anvil y exclusiones en Windows 11.
-          </p>
+          <h3>Solución a Errores de Minecraft: Crashes, Java y Pantalla Negra</h3>
+          <p>Aprende a diagnosticar y reparar los fallos más comunes al abrir Minecraft, desde falta de memoria hasta incompatibilidad de librerías.</p>
         </div>
         <div class="read-more">Leer Guía Completa &rarr;</div>
       </a>
 
-      <!-- Argumentos JVM para Minecraft: Parámetros Reales vs Mitos -->
-      <a href="./guias/argumentos-jvm-minecraft-mitos-realidad.html" class="guide-card">
+      <!-- Solución a Pantalla Blanca y Errores de OpenGL 65542 / 65543 en Minecraft -->
+      <a href="./guias/solucion-pantalla-blanca-opengl-minecraft.html" class="guide-card" data-tag="errors">
         <div>
           <div class="guide-top">
-            <span class="cat-tag cat-java">⚙️ Argumentos JVM</span>
-            <span class="read-time">⏱️ 8 min</span>
+            <span class="cat-tag cat-errors">🛠️ Error OpenGL</span>
+            <span class="read-time">⏱️ 11 min</span>
           </div>
-          <h3>Argumentos JVM para Minecraft: Parámetros Reales vs Mitos</h3>
-          <p>
-            Desmitificamos el mito de los 12 GB de RAM, la bandera inútil UseNUMA y configuramos correctamente la recolección de basura con G1GC y ZGC Generacional.
-          </p>
+          <h3>Solución a Pantalla Blanca y Errores de OpenGL 65542 / 65543 en Minecraft</h3>
+          <p>Repara el error GLFW 65542 'The driver does not appear to support OpenGL' y la pantalla blanca al iniciar en Windows 10 y 11.</p>
+        </div>
+        <div class="read-more">Leer Guía Completa &rarr;</div>
+      </a>
+
+      <!-- Fugas de Memoria en Minecraft con Mods: Diagnóstico con VisualVM y Spark -->
+      <a href="./guias/solucion-crashes-java-memory-leak-minecraft.html" class="guide-card" data-tag="errors">
+        <div>
+          <div class="guide-top">
+            <span class="cat-tag cat-errors">🛠️ Fugas de Memoria</span>
+            <span class="read-time">⏱️ 13 min</span>
+          </div>
+          <h3>Fugas de Memoria en Minecraft con Mods: Diagnóstico con VisualVM y Spark</h3>
+          <p>Aprende por qué tu juego empieza fluido a 140 FPS y tras 30 minutos cae a 15 FPS o crashea con OutOfMemoryError.</p>
+        </div>
+        <div class="read-more">Leer Guía Completa &rarr;</div>
+      </a>
+
+      <!-- Diferencia entre TPS, MSPT y FPS en Minecraft: Cómo Diagnosticar el Lag Real -->
+      <a href="./guias/diferencia-tps-mspt-fps-minecraft.html" class="guide-card" data-tag="errors">
+        <div>
+          <div class="guide-top">
+            <span class="cat-tag cat-errors">🔍 Diagnóstico de Lag</span>
+            <span class="read-time">⏱️ 9 min</span>
+          </div>
+          <h3>Diferencia entre TPS, MSPT y FPS en Minecraft: Cómo Diagnosticar el Lag Real</h3>
+          <p>Diferencia el lag visual de tu monitor del lag de simulación del mundo para saber qué componente de tu PC o servidor está fallando.</p>
+        </div>
+        <div class="read-more">Leer Guía Completa &rarr;</div>
+      </a>
+
+      <!-- Guía de Versiones de Java para Minecraft: Java 8 vs 17 vs 21 -->
+      <a href="./guias/guia-java-para-minecraft-versiones.html" class="guide-card" data-tag="java">
+        <div>
+          <div class="guide-top">
+            <span class="cat-tag cat-java">☕ Entorno Java</span>
+            <span class="read-time">⏱️ 7 min</span>
+          </div>
+          <h3>Guía de Versiones de Java para Minecraft: Java 8 vs 17 vs 21</h3>
+          <p>Matriz de compatibilidad de Java por versión de Minecraft, JDKs de alto rendimiento (Temurin, GraalVM) y recolección de basura.</p>
         </div>
         <div class="read-more">Leer Guía Completa &rarr;</div>
       </a>
 
       <!-- Java 8, Java 17 y Java 21 en Minecraft: Requisitos y Compatibilidad -->
-      <a href="./guias/versiones-java-minecraft-guia-completa.html" class="guide-card">
+      <a href="./guias/versiones-java-minecraft-guia-completa.html" class="guide-card" data-tag="java">
         <div>
           <div class="guide-top">
-            <span class="cat-tag cat-java">☕ Versiones de Java</span>
+            <span class="cat-tag cat-java">☕ Compatibilidad Java</span>
             <span class="read-time">⏱️ 7 min</span>
           </div>
           <h3>Java 8, Java 17 y Java 21 en Minecraft: Requisitos y Compatibilidad</h3>
-          <p>
-            Tabla completa de compatibilidad de Java por versión de Minecraft (de la 1.8.9 a la 1.21+), solución a UnsupportedClassVersionError y configuración en Windows.
-          </p>
+          <p>Tabla completa de compatibilidad de Java de la 1.8.9 a la 1.21+, solución a UnsupportedClassVersionError y variables de entorno.</p>
+        </div>
+        <div class="read-more">Leer Guía Completa &rarr;</div>
+      </a>
+
+      <!-- Argumentos JVM para Minecraft: Parámetros Reales vs Mitos -->
+      <a href="./guias/argumentos-jvm-minecraft-mitos-realidad.html" class="guide-card" data-tag="java">
+        <div>
+          <div class="guide-top">
+            <span class="cat-tag cat-java">⚙️ Flags JVM</span>
+            <span class="read-time">⏱️ 8 min</span>
+          </div>
+          <h3>Argumentos JVM para Minecraft: Parámetros Reales vs Mitos</h3>
+          <p>Desmitificamos la bandera inútil UseNUMA y configuramos correctamente la recolección de basura con G1GC y ZGC Generacional.</p>
+        </div>
+        <div class="read-more">Leer Guía Completa &rarr;</div>
+      </a>
+
+      <!-- ZGC Generacional vs G1GC en Minecraft: Análisis de Pausas en Java 21 y 25 -->
+      <a href="./guias/configuracion-zgc-vs-g1gc-minecraft.html" class="guide-card" data-tag="java">
+        <div>
+          <div class="guide-top">
+            <span class="cat-tag cat-java">☕ ZGC vs G1GC</span>
+            <span class="read-time">⏱️ 13 min</span>
+          </div>
+          <h3>ZGC Generacional vs G1GC en Minecraft: Análisis de Pausas en Java 21 y 25</h3>
+          <p>Benchmark técnico del recolector ZGC Generacional (-XX:+UseZGC -XX:+ZGenerational) frente a los flags G1GC de Aikar.</p>
+        </div>
+        <div class="read-more">Leer Guía Completa &rarr;</div>
+      </a>
+
+      <!-- Cómo Instalar y Administrar Mods en Fabric, Forge y NeoForge -->
+      <a href="./guias/como-instalar-modpacks-mods-minecraft.html" class="guide-card" data-tag="mods">
+        <div>
+          <div class="guide-top">
+            <span class="cat-tag cat-mods">📦 Mods & Loaders</span>
+            <span class="read-time">⏱️ 7 min</span>
+          </div>
+          <h3>Cómo Instalar y Administrar Mods en Fabric, Forge y NeoForge</h3>
+          <p>Diferencias entre los cargadores modernos, resolución de dependencias obligatorias y cómo evitar que tus partidas crasheen.</p>
+        </div>
+        <div class="read-more">Leer Guía Completa &rarr;</div>
+      </a>
+
+      <!-- NeoForge vs Fabric en 2026: ¿Cuál Elegir para tus Modpacks y Shaders? -->
+      <a href="./guias/guia-modding-neoforge-vs-fabric.html" class="guide-card" data-tag="mods">
+        <div>
+          <div class="guide-top">
+            <span class="cat-tag cat-mods">📦 NeoForge vs Fabric</span>
+            <span class="read-time">⏱️ 11 min</span>
+          </div>
+          <h3>NeoForge vs Fabric en 2026: ¿Cuál Elegir para tus Modpacks y Shaders?</h3>
+          <p>Comparativa técnica entre NeoForge y Fabric en versiones modernas: consumo de memoria, compatibilidad de mods y tiempos de carga.</p>
         </div>
         <div class="read-more">Leer Guía Completa &rarr;</div>
       </a>
 
       <!-- Cómo Crear Instancias Separadas en Minecraft y Aislar Mods -->
-      <a href="./guias/como-aislar-instancias-minecraft-carpetas.html" class="guide-card">
+      <a href="./guias/como-aislar-instancias-minecraft-carpetas.html" class="guide-card" data-tag="mods">
         <div>
           <div class="guide-top">
-            <span class="cat-tag cat-mods">📁 Aislamiento de Instancias</span>
+            <span class="cat-tag cat-mods">📁 Aislamiento Instancias</span>
             <span class="read-time">⏱️ 7 min</span>
           </div>
           <h3>Cómo Crear Instancias Separadas en Minecraft y Aislar Mods</h3>
-          <p>
-            Configura el parámetro --gameDir para evitar que tus mods de distintas versiones colisionen, sobrescriban archivos options.txt o corrompan tus mundos.
-          </p>
+          <p>Configura el parámetro --gameDir para evitar que mods de distintas versiones colisionen, sobrescriban opciones o corrompan mundos.</p>
         </div>
         <div class="read-more">Leer Guía Completa &rarr;</div>
       </a>
 
-      <!-- Sodium vs. OptiFine en CPUs de 4 Núcleos: Benchmark en i7 4790 -->
-      <a href="./guias/sodium-vs-optifine-procesadores-4-nucleos.html" class="guide-card">
+      <!-- Top Mejores Shaders para Minecraft 2026: Belleza y Altos FPS -->
+      <a href="./guias/mejores-shaders-para-minecraft.html" class="guide-card" data-tag="shaders">
         <div>
           <div class="guide-top">
-            <span class="cat-tag cat-fps">🚀 Sodium vs OptiFine</span>
+            <span class="cat-tag cat-shaders">🎨 Shaders & Gráficos</span>
             <span class="read-time">⏱️ 8 min</span>
           </div>
-          <h3>Sodium vs. OptiFine en CPUs de 4 Núcleos: Benchmark en i7 4790</h3>
-          <p>
-            Análisis técnico de draw calls, arquitectura de renderizado por lotes y consistencia de frametime en procesadores quad-core con GPU Nvidia GeForce.
-          </p>
+          <h3>Top Mejores Shaders para Minecraft 2026: Belleza y Altos FPS</h3>
+          <p>Comparativa de Complementary Reimagined, BSL, MakeUp Ultra Fast y Photon Shaders en Iris para gráficos de cine con fluidez.</p>
         </div>
         <div class="read-more">Leer Guía Completa &rarr;</div>
       </a>
 
-      <!-- Cómo Jugar Minecraft en PC de 4 GB de RAM sin Cierres ni Lag -->
-      <a href="./guias/jugar-minecraft-pc-4gb-ram-sin-lag.html" class="guide-card">
+      <!-- Mejores Shaders para Gráficas Integradas Intel UHD, Iris Xe y AMD Vega -->
+      <a href="./guias/shaders-gpus-integradas-intel-amd.html" class="guide-card" data-tag="shaders">
         <div>
           <div class="guide-top">
-            <span class="cat-tag cat-fps">💾 Optimización 4 GB RAM</span>
-            <span class="read-time">⏱️ 8 min</span>
+            <span class="cat-tag cat-shaders">🎨 Shaders Integradas</span>
+            <span class="read-time">⏱️ 10 min</span>
           </div>
-          <h3>Cómo Jugar Minecraft en PC de 4 GB de RAM sin Cierres ni Lag</h3>
-          <p>
-            Estrategia matemática de asignación de memoria JVM, eliminación del OutOfMemoryError, compresión de memoria con FerriteCore y ajuste de Mipmaps a cero.
-          </p>
+          <h3>Mejores Shaders para Gráficas Integradas Intel UHD, Iris Xe y AMD Vega</h3>
+          <p>Descubre qué paquetes de shaders funcionan con más de 60 FPS en procesadores con gráficos integrados Intel y AMD Ryzen.</p>
         </div>
         <div class="read-more">Leer Guía Completa &rarr;</div>
       </a>
 
+      <!-- OptiFine en Versiones Modernas: Por Qué Sodium e Iris lo Reemplazaron en 2026 -->
+      <a href="./guias/como-instalar-optifine-y-alternativas.html" class="guide-card" data-tag="shaders">
+        <div>
+          <div class="guide-top">
+            <span class="cat-tag cat-shaders">🎨 Alternativas OptiFine</span>
+            <span class="read-time">⏱️ 11 min</span>
+          </div>
+          <h3>OptiFine en Versiones Modernas: Por Qué Sodium e Iris lo Reemplazaron en 2026</h3>
+          <p>Análisis técnico de por qué OptiFine genera incompatibilidades y lista de mods que reemplazan todas sus funciones con 3x más FPS.</p>
+        </div>
+        <div class="read-more">Leer Guía Completa &rarr;</div>
+      </a>
+
+      <!-- Cómo Crear un Servidor de Minecraft en 2026: Guía Completa de Paper y Purpur -->
+      <a href="./guias/como-crear-servidor-minecraft-2026.html" class="guide-card" data-tag="server">
+        <div>
+          <div class="guide-top">
+            <span class="cat-tag cat-server">🌐 Servidores Paper/Purpur</span>
+            <span class="read-time">⏱️ 12 min</span>
+          </div>
+          <h3>Cómo Crear un Servidor de Minecraft en 2026: Guía Completa de Paper y Purpur</h3>
+          <p>Crea y configura tu propio servidor con Paper o Purpur, apertura segura de puertos, flags JVM de arranque y plugins de rendimiento.</p>
+        </div>
+        <div class="read-more">Leer Guía Completa &rarr;</div>
+      </a>
+
+      <!-- Optimización Extrema de Servidores Minecraft: server.properties, paper y purpur -->
+      <a href="./guias/optimizar-servidor-minecraft-sin-lag.html" class="guide-card" data-tag="server">
+        <div>
+          <div class="guide-top">
+            <span class="cat-tag cat-server">🌐 Optimización Servidor</span>
+            <span class="read-time">⏱️ 14 min</span>
+          </div>
+          <h3>Optimización Extrema de Servidores Minecraft: server.properties, paper y purpur</h3>
+          <p>Ajustes de ticks y reducción de MSPT para servidores Paper, Purpur y Spigot. Valores exactos para eliminar el lag sin arruinar la experiencia.</p>
+        </div>
+        <div class="read-more">Leer Guía Completa &rarr;</div>
+      </a>
     </div>
   </div>
+
+  <!-- Script de Filtrado -->
+  <script>
+    function filterGuides(tag, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const cards = document.querySelectorAll('.guide-card');
+      cards.forEach(card => {
+        if (tag === 'all' || card.getAttribute('data-tag') === tag) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+  </script>
 
   <!-- Footer -->
   <footer>
