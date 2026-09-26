@@ -39,3 +39,6 @@ app.asar
 *.7z
 .env
 backup_asar_extracted_*/
+dist/
+cache/
+*.tar.gz

@@ -402,8 +402,12 @@ function stopLogWatcher() {
 function checkRunningGameOnStartup() {
     try {
         const cp = require('child_process');
-        cp.exec('tasklist /FI "IMAGENAME eq javaw.exe" /NH', (err, stdout) => {
-            if (!stdout || !stdout.toLowerCase().includes('javaw.exe')) return;
+        const checkCmd = process.platform === 'win32'
+            ? 'tasklist /FI "IMAGENAME eq javaw.exe" /NH'
+            : 'pgrep -f "java" || ps -C java -o pid=';
+        cp.exec(checkCmd, (err, stdout) => {
+            if (!stdout || stdout.trim().length === 0) return;
+            if (process.platform === 'win32' && !stdout.toLowerCase().includes('javaw.exe')) return;
 
             const mcDir = path.join(BASE_DATA_DIR, '.minecraft');
             const logPath = path.join(mcDir, 'logs', 'latest.log');
@@ -501,7 +505,12 @@ let currentOperation = null;
 function initSystemTray() {
     if (tray) return;
     try {
-        const iconPath = path.join(__dirname, 'icon.ico');
+        const iconName = process.platform === 'win32' ? 'icon.ico' : 'icon.png';
+        let iconPath = path.join(__dirname, iconName);
+        if (!fs.existsSync(iconPath)) {
+            iconPath = path.join(__dirname, 'icon.png');
+            if (!fs.existsSync(iconPath)) iconPath = path.join(__dirname, 'icon.ico');
+        }
         if (!fs.existsSync(iconPath)) return;
         tray = new Tray(iconPath);
         tray.setToolTip('Nebula Launcher — El Cosmos de Minecraft');
@@ -590,6 +599,7 @@ function createWindow() {
         width: 1360, height: 800,
         minWidth: 1080, minHeight: 680,
         frame: false,
+        icon: path.join(__dirname, process.platform === 'win32' ? 'icon.ico' : 'icon.png'),
         transparent: false,
         resizable: true, hasShadow: true,
         show: false,
@@ -809,7 +819,7 @@ function startTelemetry() {
 
 app.whenReady().then(() => {
     try {
-        fs.writeFileSync('C:\\Users\\renee\\Documents\\Web\\xd\\launcher_startup_log.txt', `Launcher started successfully at ${new Date().toISOString()}\n`);
+        fs.writeFileSync(path.join(BASE_DATA_DIR, 'launcher_startup_log.txt'), `Launcher started successfully at ${new Date().toISOString()}\n`);
     } catch(e) {}
     
     // Abrir ventana principal al instante
@@ -849,7 +859,12 @@ function findJavaExe(dir) {
                 if (fs.statSync(full).isDirectory()) {
                     const found = findJavaExe(full);
                     if (found) return found;
-                } else if (f.toLowerCase() === 'java.exe' || f.toLowerCase() === 'java') return full;
+                } else if (f.toLowerCase() === 'java.exe' || f.toLowerCase() === 'java') {
+                    if (process.platform !== 'win32') {
+                        try { fs.chmodSync(full, 0o755); } catch {}
+                    }
+                    return full;
+                }
             } catch { }
         }
     } catch { }
@@ -901,7 +916,12 @@ function requiredJavaVersion(mcVer) {
 }
 
 async function ensureJava(mcVersion, customJava) {
-    if (customJava && fs.existsSync(customJava)) return customJava;
+    if (customJava && fs.existsSync(customJava)) {
+        if (process.platform !== 'win32') {
+            try { fs.chmodSync(customJava, 0o755); } catch {}
+        }
+        return customJava;
+    }
     const jv = requiredJavaVersion(mcVersion);
     const javaDir = path.join(BASE_DATA_DIR, 'runtimes', `java${jv}`);
     let exe = findJavaExe(javaDir);
@@ -909,18 +929,22 @@ async function ensureJava(mcVersion, customJava) {
     sendLog(`☕ Descargando Java ${jv}…`);
     sendProgress(0, `Descargando Java ${jv}…`);
     fs.mkdirSync(javaDir, { recursive: true });
-    const zipPath = path.join(BASE_DATA_DIR, 'runtimes', `java${jv}.zip`);
+
+    const isWin = process.platform === 'win32';
+    const osType = isWin ? 'windows' : (process.platform === 'darwin' ? 'mac' : 'linux');
+    const pkgType = isWin ? 'zip' : 'tar.gz';
+    const archivePath = path.join(BASE_DATA_DIR, 'runtimes', `java${jv}.${pkgType}`);
 
     let url;
 
     if (jv >= 25) {
         // Java 25+: MC 26.x requiere JavaFX.
         // Liberica JDK Full = OpenJDK + JavaFX bundled (igual que el JDK oficial de Mojang)
-        sendLog(`☕ Java ${jv} — buscando Liberica JDK Full (incluye JavaFX)...`);
+        sendLog(`☕ Java ${jv} — buscando Liberica JDK Full (${osType}, incluye JavaFX)...`);
         try {
             const apiResp = await httpsGet(
-                `https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=windows` +
-                `&package-type=zip&bundle-type=jdk-full&version-feature=${jv}&version-modifier=latest`
+                `https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=${osType}` +
+                `&package-type=${pkgType}&bundle-type=jdk-full&version-feature=${jv}&version-modifier=latest`
             );
             const releases = JSON.parse(apiResp);
             if (releases && releases.length > 0 && releases[0].downloadUrl) {
@@ -932,20 +956,23 @@ async function ensureJava(mcVersion, customJava) {
         }
         // Fallback: Adoptium sin JavaFX (puede no funcionar en MC 26.x)
         if (!url) {
-            url = `https://api.adoptium.net/v3/binary/latest/${jv}/ga/windows/x64/jdk/hotspot/normal/eclipse`;
+            url = `https://api.adoptium.net/v3/binary/latest/${jv}/ga/${osType}/x64/jdk/hotspot/normal/eclipse`;
             sendLog(`☕ Java ${jv} — Adoptium (sin JavaFX, puede fallar en MC 26.x)`);
         }
     } else {
         // Java 8, 17, 21: Adoptium es suficiente (no necesitan JavaFX)
-        url = `https://api.adoptium.net/v3/binary/latest/${jv}/ga/windows/x64/jdk/hotspot/normal/eclipse`;
+        url = `https://api.adoptium.net/v3/binary/latest/${jv}/ga/${osType}/x64/jdk/hotspot/normal/eclipse`;
     }
 
-    await downloadFile(url, zipPath, p => sendProgress(Math.floor(p * 0.8), `Java ${jv}: ${p}%`));
+    await downloadFile(url, archivePath, p => sendProgress(Math.floor(p * 0.8), `Java ${jv}: ${p}%`));
     sendLog('Extrayendo Java…');
-    execSync(`tar -xf "${zipPath}" -C "${javaDir}"`, { windowsHide: true });
-    try { fs.unlinkSync(zipPath); } catch { }
+    execSync(`tar -xf "${archivePath}" -C "${javaDir}"`, { windowsHide: true });
+    try { fs.unlinkSync(archivePath); } catch { }
     exe = findJavaExe(javaDir);
     if (!exe) throw new Error(`No se pudo instalar Java ${jv}`);
+    if (process.platform !== 'win32') {
+        try { fs.chmodSync(exe, 0o755); } catch {}
+    }
     sendProgress(100, `Java ${jv} listo ✓`);
     return exe;
 }
@@ -1932,7 +1959,9 @@ ipcMain.handle('auto-install-optifine', async (event, mcVersion) => {
         sendProgress(75, 'Instalando OptiFine...');
         sendLog('⚙️ Ejecutando instalador oficial de OptiFine...');
 
-        const defaultMcDir = path.join(process.env.APPDATA || '', '.minecraft');
+        const defaultMcDir = process.platform === 'win32'
+            ? path.join(process.env.APPDATA || '', '.minecraft')
+            : path.join(require('os').homedir(), '.minecraft');
         const defaultVersions = path.join(defaultMcDir, 'versions');
         const usingCustomDir = path.resolve(mcPath) !== path.resolve(defaultMcDir);
 
@@ -2037,7 +2066,13 @@ ipcMain.handle('auto-install-optifine', async (event, mcVersion) => {
                     const dstLibs = path.join(mcPath, 'libraries', 'optifine');
                     if (fs.existsSync(srcLibs)) {
                         fs.mkdirSync(dstLibs, { recursive: true });
-                        execSync(`xcopy "${srcLibs}" "${dstLibs}" /E /I /Y /Q`, { stdio: 'ignore', windowsHide: true });
+                        try {
+                            fs.cpSync(srcLibs, dstLibs, { recursive: true, force: true });
+                        } catch {
+                            if (process.platform === 'win32') {
+                                execSync(`xcopy "${srcLibs}" "${dstLibs}" /E /I /Y /Q`, { stdio: 'ignore', windowsHide: true });
+                            }
+                        }
                     }
                     sendLog(`✅ OptiFine instalado: ${vid}`);
                     enrichOptiFineVersionJson(path.join(dstDir, `${vid}.json`), mcPath, sendLog);
@@ -3626,14 +3661,28 @@ ipcMain.handle('install-sponsored-server', async (event, serverId) => {
         sendLog('📦 Extrayendo archivos del servidor...');
         const { execFileSync } = require('child_process');
         fs.mkdirSync(serverDir, { recursive: true });
-        const zipSrc = tempZipPath.replace(/\\/g, '\\\\');
-        const zipDest = serverDir.replace(/\\/g, '\\\\');
-        const psScript = `$ErrorActionPreference='Stop'; Expand-Archive -Path '${zipSrc}' -DestinationPath '${zipDest}' -Force`;
-        const psExe = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
-        try {
-            execFileSync(psExe, ['-NoProfile', '-NonInteractive', '-Command', psScript], { timeout: 1800000 });
-        } catch (psErr) {
-            execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', psScript], { timeout: 1800000 });
+        if (process.platform === 'win32') {
+            const zipSrc = tempZipPath.replace(/\\/g, '\\\\');
+            const zipDest = serverDir.replace(/\\/g, '\\\\');
+            const psScript = `$ErrorActionPreference='Stop'; Expand-Archive -Path '${zipSrc}' -DestinationPath '${zipDest}' -Force`;
+            const psExe = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
+            try {
+                execFileSync(psExe, ['-NoProfile', '-NonInteractive', '-Command', psScript], { timeout: 1800000 });
+            } catch (psErr) {
+                try {
+                    execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', psScript], { timeout: 1800000 });
+                } catch {
+                    const zip = new AdmZip(tempZipPath);
+                    zip.extractAllTo(serverDir, true);
+                }
+            }
+        } else {
+            try {
+                execSync(`tar -xf "${tempZipPath}" -C "${serverDir}"`, { stdio: 'ignore' });
+            } catch {
+                const zip = new AdmZip(tempZipPath);
+                zip.extractAllTo(serverDir, true);
+            }
         }
 
         try { fs.unlinkSync(tempZipPath); } catch {}
@@ -4084,7 +4133,7 @@ async function installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl
 
 ipcMain.handle('search-modpacks', async (event, { query, platform = 'all' }) => {
     const results = [];
-    const debugPath = 'C:\\Users\\renee\\Documents\\Web\\xd\\search_debug.txt';
+    const debugPath = path.join(BASE_DATA_DIR, 'search_debug.txt');
     
     const logDebug = (msg) => {
         try {
@@ -6042,6 +6091,8 @@ function getAllScreenshotDirectories() {
         const nebulaMc = path.resolve(path.join(process.env.APPDATA, 'astral-nebula-launcher', '.minecraft'));
         if (fs.existsSync(nebulaMc)) candidateRoots.add(nebulaMc);
     }
+    const homeMc = path.resolve(path.join(require('os').homedir(), '.minecraft'));
+    if (fs.existsSync(homeMc)) candidateRoots.add(homeMc);
 
     const directories = [];
     const seenDirs = new Set();
@@ -7398,12 +7449,13 @@ ipcMain.on('launch-game', async (event, data) => {
                         while (i < jvmArr.length) {
                             const arg = jvmArr[i];
                             if (typeof arg === 'string') {
+                                const cpSep = process.platform === 'win32' ? ';' : ':';
                                 let resolved = arg.replace(/\$\{library_directory\}/g, path.join(mcPath, 'libraries'))
-                                                  .replace(/\$\{classpath_separator\}/g, ';');
+                                                  .replace(/\$\{classpath_separator\}/g, cpSep);
                                 
                                 if (pairwiseFlags.includes(resolved) && i + 1 < jvmArr.length && typeof jvmArr[i+1] === 'string') {
                                     let nextResolved = jvmArr[i+1].replace(/\$\{library_directory\}/g, path.join(mcPath, 'libraries'))
-                                                                  .replace(/\$\{classpath_separator\}/g, ';');
+                                                                  .replace(/\$\{classpath_separator\}/g, cpSep);
                                     
                                     let pairExists = false;
                                     for (let j = 0; j < opts.customArgs.length - 1; j++) {
@@ -7425,8 +7477,9 @@ ipcMain.on('launch-game', async (event, data) => {
                             } else if (arg && typeof arg === 'object' && Array.isArray(arg.value)) {
                                 let allowed = true;
                                 if (arg.rules) {
+                                    const currentOs = process.platform === 'win32' ? 'windows' : (process.platform === 'darwin' ? 'osx' : 'linux');
                                     for (const rule of arg.rules) {
-                                        if (rule.action === 'disallow' && rule.os && rule.os.name === 'windows') {
+                                        if (rule.action === 'disallow' && rule.os && rule.os.name === currentOs) {
                                             allowed = false;
                                         }
                                     }
@@ -7507,13 +7560,18 @@ ipcMain.on('launch-game', async (event, data) => {
         // Registrar instancia activa
         const instanceDisplayName = data.modpackName ? modpackDispName : `Minecraft ${launchVersion}${launchModId && launchModId !== launchVersion ? ` (${launchModId})` : ''}`;
         
-        // Elevar prioridad del proceso de Minecraft a ALTA en Windows
+        // Elevar prioridad del proceso de Minecraft a ALTA en Windows / renice en Linux
         try {
             launcher.on('spawn', (childProc) => {
                 if (childProc && childProc.pid) {
-                    const psCmd = `Get-Process -Id ${childProc.pid} -ErrorAction SilentlyContinue | ForEach-Object { $_.PriorityClass = 'High' }`;
-                    require('child_process').spawn('powershell', ['-NoProfile', '-NonInteractive', '-Command', psCmd], { detached: true, stdio: 'ignore' });
-                    sendLog(`⚡ Prioridad de Minecraft (PID: ${childProc.pid}) elevada a ALTA en Windows.`);
+                    if (process.platform === 'win32') {
+                        const psCmd = `Get-Process -Id ${childProc.pid} -ErrorAction SilentlyContinue | ForEach-Object { $_.PriorityClass = 'High' }`;
+                        require('child_process').spawn('powershell', ['-NoProfile', '-NonInteractive', '-Command', psCmd], { detached: true, stdio: 'ignore' });
+                        sendLog(`⚡ Prioridad de Minecraft (PID: ${childProc.pid}) elevada a ALTA en Windows.`);
+                    } else if (process.platform === 'linux') {
+                        require('child_process').spawn('renice', ['-n', '-5', '-p', String(childProc.pid)], { detached: true, stdio: 'ignore' });
+                        sendLog(`⚡ Prioridad de Minecraft (PID: ${childProc.pid}) ajustada con renice.`);
+                    }
                 }
             });
         } catch {}
@@ -7692,73 +7750,95 @@ ipcMain.on('apply-update', () => {
     const updateAsar = path.join(resourcesDir, 'app.asar.update');
     const currentAsar = path.join(resourcesDir, 'app.asar');
     const currentAppDir = path.join(resourcesDir, 'app');
-    const scriptPath = path.join(resourcesDir, 'apply_update.js');
 
-    const scriptContent = [
-        'var shell = WScript.CreateObject("WScript.Shell");',
-        'var fso = WScript.CreateObject("Scripting.FileSystemObject");',
-        '',
-        '// Matar el proceso del launcher',
-        'try {',
-        '    shell.Run("taskkill /f /im \\"Nebula Launcher.exe\\"", 0, true);',
-        '} catch(e) {}',
-        'WScript.Sleep(1500);',
-        '',
-        'var currentAsar = WScript.Arguments(0);',
-        'var updateAsar = WScript.Arguments(1);',
-        'var appDir = WScript.Arguments(2);',
-        'var exePath = WScript.Arguments(3);',
-        '',
-        '// Esperar y reemplazar',
-        'var retries = 0;',
-        'var success = false;',
-        'while (retries < 15) {',
-        '    try {',
-        '        if (fso.FileExists(currentAsar)) {',
-        '            fso.DeleteFile(currentAsar, true);',
-        '        }',
-        '        if (fso.FolderExists(appDir)) {',
-        '            fso.DeleteFolder(appDir, true);',
-        '        }',
-        '        fso.MoveFile(updateAsar, currentAsar);',
-        '        success = true;',
-        '        break;',
-        '    } catch(err) {',
-        '        retries++;',
-        '        WScript.Sleep(1000);',
-        '    }',
-        '}',
-        '',
-        '// Relanzar launcher',
-        'if (success) {',
-        '    shell.Run("\\"" + exePath + "\\"");',
-        '}',
-        '',
-        '// Auto-eliminarse',
-        'try {',
-        '    fso.DeleteFile(WScript.ScriptFullName, true);',
-        '} catch(e) {}'
-    ].join('\r\n');
+    if (process.platform === 'win32') {
+        const scriptPath = path.join(resourcesDir, 'apply_update.js');
+        const scriptContent = [
+            'var shell = WScript.CreateObject("WScript.Shell");',
+            'var fso = WScript.CreateObject("Scripting.FileSystemObject");',
+            '',
+            '// Matar el proceso del launcher',
+            'try {',
+            '    shell.Run("taskkill /f /im \\\"Nebula Launcher.exe\\\"", 0, true);',
+            '} catch(e) {}',
+            'WScript.Sleep(1500);',
+            '',
+            'var currentAsar = WScript.Arguments(0);',
+            'var updateAsar = WScript.Arguments(1);',
+            'var appDir = WScript.Arguments(2);',
+            'var exePath = WScript.Arguments(3);',
+            '',
+            '// Esperar y reemplazar',
+            'var retries = 0;',
+            'var success = false;',
+            'while (retries < 15) {',
+            '    try {',
+            '        if (fso.FileExists(currentAsar)) {',
+            '            fso.DeleteFile(currentAsar, true);',
+            '        }',
+            '        if (fso.FolderExists(appDir)) {',
+            '            fso.DeleteFolder(appDir, true);',
+            '        }',
+            '        fso.MoveFile(updateAsar, currentAsar);',
+            '        success = true;',
+            '        break;',
+            '    } catch(err) {',
+            '        retries++;',
+            '        WScript.Sleep(1000);',
+            '    }',
+            '}',
+            '',
+            '// Relanzar launcher',
+            'if (success) {',
+            '    shell.Run("\\\"" + exePath + "\\\"");',
+            '}',
+            '',
+            '// Auto-eliminarse',
+            'try {',
+            '    fso.DeleteFile(WScript.ScriptFullName, true);',
+            '} catch(e) {}'
+        ].join('\r\n');
 
-    try {
-        fs.writeFileSync(scriptPath, scriptContent, 'utf8');
+        try {
+            fs.writeFileSync(scriptPath, scriptContent, 'utf8');
 
-        // Ejecutar con wscript.exe, que es una aplicación GUI (nunca abre consola)
-        const child = spawn('wscript.exe', [
-            '//E:JScript',
-            scriptPath,
-            currentAsar,
-            updateAsar,
-            currentAppDir,
-            exePath
-        ], {
-            detached: true,
-            stdio: 'ignore',
-            windowsHide: true
-        });
-        child.unref();
-    } catch (e) {
-        console.error('[apply-update] wscript error:', e);
+            // Ejecutar con wscript.exe, que es una aplicación GUI (nunca abre consola)
+            const child = spawn('wscript.exe', [
+                '//E:JScript',
+                scriptPath,
+                currentAsar,
+                updateAsar,
+                currentAppDir,
+                exePath
+            ], {
+                detached: true,
+                stdio: 'ignore',
+                windowsHide: true
+            });
+            child.unref();
+        } catch (e) {
+            console.error('[apply-update] wscript error:', e);
+        }
+    } else {
+        const shPath = path.join(resourcesDir, 'apply_update.sh');
+        const shContent = `#!/bin/sh
+sleep 1
+rm -f "${currentAsar}"
+rm -rf "${currentAppDir}"
+mv -f "${updateAsar}" "${currentAsar}"
+"${exePath}" &
+rm -f "$0"
+`;
+        try {
+            fs.writeFileSync(shPath, shContent, { mode: 0o755 });
+            const child = spawn('/bin/sh', [shPath], {
+                detached: true,
+                stdio: 'ignore'
+            });
+            child.unref();
+        } catch (e) {
+            console.error('[apply-update] linux script error:', e);
+        }
     }
 
     // Cerrar inmediatamente el proceso de Electron
