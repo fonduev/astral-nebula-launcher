@@ -1019,6 +1019,10 @@ function cleanCorruptedLibs(mcPath) {
     if (cleaned > 0) sendLog(`🧹 ${cleaned} librería(s) corruptas eliminadas — se re-descargarán`);
 }
 
+// ── CurseForge Constants ──────────────────────────────────────────
+const CF_API_KEY = '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm';
+const CF_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) CurseForge/1.321.1-39714 Chrome/148.0.7778.280 Electron/42.11.2 Safari/537.36';
+
 // ── Network utils ─────────────────────────────────────────────────
 function downloadFile(url, dest, onProgress, opts = {}) {
     const socketTimeoutMs = opts.socketTimeoutMs || 60000; // default 60s idle timeout
@@ -1028,11 +1032,19 @@ function downloadFile(url, dest, onProgress, opts = {}) {
         const attempt = (reqUrl, redirectCount = 0) => {
             if (redirectCount > 10) return reject(new Error('Demasiados redirects'));
             const lib = reqUrl.startsWith('https') ? https : http;
+            const isCurse = reqUrl.includes('curseforge.com') || reqUrl.includes('forgecdn.net');
+            const defaultUa = isCurse ? CF_USER_AGENT : 'Mozilla/5.0 NebulaLauncher/1.0';
+            const defaultHeaders = {
+                'User-Agent': defaultUa,
+                'Accept': '*/*'
+            };
+            if (isCurse && reqUrl.includes('api.curseforge.com') && !opts.headers?.['x-api-key']) {
+                defaultHeaders['x-api-key'] = CF_API_KEY;
+            }
+            const reqHeaders = Object.assign(defaultHeaders, opts.headers || {});
+
             const req = lib.get(reqUrl, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 NebulaLauncher/1.0',
-                    'Accept': '*/*'
-                }
+                headers: reqHeaders
             }, (res) => {
                 // Seguir redirects (301, 302, 303, 307, 308)
                 if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
@@ -3443,75 +3455,8 @@ ipcMain.handle('import-modpack', async (event) => {
             };
 
         } else if (modpackType === 'curseforge') {
-            const mcVersion = manifest.minecraft.version;
-            const forgeVersion = manifest.minecraft.modLoaders?.[0]?.id?.replace('forge-', '');
-
-            sendLog(`Minecraft: ${mcVersion}, Forge: ${forgeVersion || 'N/A'}`);
-
-            const overridesPrefix = manifest.overrides || 'overrides';
-            zipEntries.forEach(entry => {
-                if (entry.entryName.startsWith(overridesPrefix + '/')) {
-                    const relativePath = entry.entryName.substring(overridesPrefix.length + 1);
-                    const targetPath = path.join(instancePath, relativePath);
-
-                    if (entry.isDirectory) {
-                        fs.mkdirSync(targetPath, { recursive: true });
-                    } else {
-                        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-                        fs.writeFileSync(targetPath, entry.getData());
-                    }
-                }
-            });
-
-            sendProgress(50, 'Descargando mods...');
-
-            const modsDir = path.join(instancePath, 'mods');
-            fs.mkdirSync(modsDir, { recursive: true });
-
-            let downloaded = 0;
-            let failedMods = [];
-            for (const file of manifest.files) {
-                try {
-                    const modPath = path.join(modsDir, `mod_${file.fileID}.jar`);
-                    await downloadCurseForgeMod(file.projectID, file.fileID, modPath);
-                    downloaded++;
-                    sendProgress(50 + Math.floor((downloaded / manifest.files.length) * 40), `Descargando mods: ${downloaded}/${manifest.files.length}`);
-                } catch (err) {
-                    failedMods.push({ projectID: file.projectID, fileID: file.fileID, error: err.message });
-                    sendLog(`⚠️ Error descargando mod ${file.projectID}: ${err.message}`);
-                }
-            }
-            if (failedMods.length > 0) {
-                sendLog(`⚠️ ${failedMods.length} mod(s) no pudieron descargarse. El modpack podría no funcionar correctamente.`, 'warn');
-            }
-
-            // Write instance.json metadata
-            const loaderId = manifest.minecraft.modLoaders?.[0]?.id || '';
-            const isFabric = loaderId.toLowerCase().includes('fabric');
-            const isQuilt = loaderId.toLowerCase().includes('quilt');
-            const isNeoForge = loaderId.toLowerCase().includes('neoforge');
-            const loaderVer = loaderId.replace(/^(forge-|fabric-|neoforge-|quilt-)/i, '');
-            const metadata = {
-                name: instanceName,
-                mcVersion,
-                loader: isFabric ? 'fabric' : (isQuilt ? 'quilt' : (isNeoForge ? 'neoforge' : (loaderId ? 'forge' : 'vanilla'))),
-                loaderVersion: loaderVer,
-                iconUrl: '',
-                screenshotUrl: '',
-                description: 'Importado localmente desde CurseForge.'
-            };
-            fs.writeFileSync(path.join(instancePath, 'instance.json'), JSON.stringify(metadata, null, 2));
-
-            sendProgress(100, 'Modpack importado ✓');
-            sendLog(`✅ Modpack "${instanceName}" importado correctamente`);
-
-            return {
-                success: true,
-                name: instanceName,
-                mcVersion,
-                forgeVersion,
-                path: instancePath
-            };
+            const result = await installCurseForgeZip(modpackPath, null, { mode: 'new' });
+            return result;
 
         } else if (modpackType === 'modrinth') {
             const mcVersion = manifest.dependencies?.minecraft;
@@ -3882,10 +3827,9 @@ ipcMain.handle('delete-modpack', async (event, folderName) => {
     }
 });
 
-// ── CurseForge mod download with fallback strategies ─────────────────
-const CF_API_KEY = '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm';
+// ── CurseForge mod download & installation system ─────────────────
 
-async function downloadCurseForgeMod(projectID, fileID, destPath) {
+async function downloadCurseForgeMod(projectID, fileID, destPathOrDir) {
     const isJarValid = (filePath) => {
         try {
             if (!fs.existsSync(filePath)) return false;
@@ -3907,49 +3851,99 @@ async function downloadCurseForgeMod(projectID, fileID, destPath) {
         } catch { return false; }
     };
 
-    // Strategy 1: Official API con API Key para obtener la URL de descarga directa
+    let targetDir = destPathOrDir;
+    let explicitDest = null;
+    if (fs.existsSync(destPathOrDir) && fs.statSync(destPathOrDir).isDirectory()) {
+        targetDir = destPathOrDir;
+    } else if (destPathOrDir.endsWith('.jar')) {
+        targetDir = path.dirname(destPathOrDir);
+        explicitDest = destPathOrDir;
+    }
+
+    if (explicitDest && isJarValid(explicitDest)) {
+        return true;
+    }
+
+    // Consultar información oficial del archivo en CurseForge Core API
+    let fileName = null;
+    let realUrl = null;
     try {
         const apiUrl = `https://api.curseforge.com/v1/mods/${projectID}/files/${fileID}`;
-        const fileData = JSON.parse(await httpsGetWithHeaders(apiUrl, { 'x-api-key': CF_API_KEY }));
-        const realUrl = fileData?.data?.downloadUrl;
-        if (realUrl) {
-            await downloadFile(realUrl, destPath);
-            if (isJarValid(destPath)) return true;
-            try { fs.unlinkSync(destPath); } catch {}
+        const rawJson = await httpsGetWithHeaders(apiUrl, { 'x-api-key': CF_API_KEY });
+        const fileData = JSON.parse(rawJson);
+        fileName = fileData?.data?.fileName;
+        realUrl = fileData?.data?.downloadUrl;
+    } catch (apiErr) {
+        sendLog(`[CurseForge] Info lookup notice for ${projectID}/${fileID}: ${apiErr.message}`, 'debug');
+    }
+
+    const finalFileName = fileName || (explicitDest ? path.basename(explicitDest) : `mod_${fileID}.jar`);
+    const finalDestPath = path.join(targetDir, finalFileName);
+
+    if (isJarValid(finalDestPath)) {
+        return true;
+    }
+
+    // Estrategia 1: Descarga directa oficial si la URL está provista
+    if (realUrl) {
+        try {
+            await downloadFile(realUrl, finalDestPath);
+            if (isJarValid(finalDestPath)) return true;
+            try { fs.unlinkSync(finalDestPath); } catch {}
+        } catch (e1) {}
+    }
+
+    // Estrategia 2: CDN Edge de CurseForge (edge.forgecdn.net / mediafilez.forgecdn.net) con headers auténticos
+    if (fileName) {
+        const idStr = String(fileID);
+        const splitIdx = idStr.length > 3 ? idStr.length - 3 : 0;
+        const firstPart = idStr.substring(0, splitIdx);
+        const lastPart = idStr.substring(splitIdx);
+
+        const cdnUrls = [
+            `https://edge.forgecdn.net/files/${firstPart}/${lastPart}/${encodeURIComponent(fileName)}`,
+            `https://mediafilez.forgecdn.net/files/${firstPart}/${lastPart}/${encodeURIComponent(fileName)}`
+        ];
+
+        for (const cdnUrl of cdnUrls) {
+            try {
+                await downloadFile(cdnUrl, finalDestPath);
+                if (isJarValid(finalDestPath)) return true;
+                try { fs.unlinkSync(finalDestPath); } catch {}
+            } catch (e2) {}
         }
+    }
 
-        // Strategy 2: CDN fallback con particionado correcto de IDs de archivo
-        const fileName = fileData?.data?.fileName;
+    // Estrategia 3: Fallback a Modrinth buscando por nombre de archivo/mod
+    try {
         if (fileName) {
-            const idStr = String(fileID);
-            const splitIdx = idStr.length > 3 ? idStr.length - 3 : 0;
-            const firstPart = idStr.substring(0, splitIdx);
-            const lastPart = idStr.substring(splitIdx);
-
-            const cdnUrls = [
-                `https://edge.forgecdn.net/files/${firstPart}/${lastPart}/${encodeURIComponent(fileName)}`,
-                `https://mediafilez.forgecdn.net/files/${firstPart}/${lastPart}/${encodeURIComponent(fileName)}`
-            ];
-
-            for (const cdnUrl of cdnUrls) {
-                try {
-                    await downloadFile(cdnUrl, destPath);
-                    if (isJarValid(destPath)) return true;
-                    try { fs.unlinkSync(destPath); } catch {}
-                } catch {}
+            const cleanSearch = fileName.replace(/[\-_][0-9v\.]+\.jar$/i, '').replace(/\.jar$/i, '').trim();
+            if (cleanSearch.length > 2) {
+                const mrSearchUrl = `https://api.modrinth.com/v2/search?query=${encodeURIComponent(cleanSearch)}&facets=[["project_type:mod"]]&limit=3`;
+                const mrRes = await httpsGet(mrSearchUrl);
+                const mrData = JSON.parse(mrRes);
+                if (mrData?.hits?.length > 0) {
+                    const candidate = mrData.hits[0];
+                    const mrVersUrl = `https://api.modrinth.com/v2/project/${candidate.project_id}/version`;
+                    const versList = JSON.parse(await httpsGet(mrVersUrl));
+                    if (Array.isArray(versList) && versList.length > 0) {
+                        const targetVer = versList[0];
+                        const primFile = targetVer.files?.find(f => f.primary) || targetVer.files?.[0];
+                        if (primFile?.url) {
+                            await downloadFile(primFile.url, finalDestPath);
+                            if (isJarValid(finalDestPath)) {
+                                sendLog(`✓ Mod "${cleanSearch}" resuelto y descargado mediante mirror Modrinth.`);
+                                return true;
+                            }
+                            try { fs.unlinkSync(finalDestPath); } catch {}
+                        }
+                    }
+                }
             }
         }
-    } catch (e1) {}
+    } catch (e3) {}
 
-    // Strategy 3: Public endpoint fallback
-    const publicUrl = `https://www.curseforge.com/api/v1/mods/${projectID}/files/${fileID}/download`;
-    try {
-        await downloadFile(publicUrl, destPath);
-        if (isJarValid(destPath)) return true;
-        try { fs.unlinkSync(destPath); } catch {}
-    } catch (e2) {}
-
-    throw new Error(`Mod ${projectID}/${fileID} no disponible para descarga automática`);
+    throw new Error(`Mod ${projectID}/${fileID} (${finalFileName}) no disponible para descarga`);
 }
 
 function httpsGetWithHeaders(url, headers = {}, timeoutMs = 15000) {
@@ -3957,14 +3951,25 @@ function httpsGetWithHeaders(url, headers = {}, timeoutMs = 15000) {
         const attempt = (reqUrl, redirectCount = 0) => {
             if (redirectCount > 10) return reject(new Error('Demasiados redirects'));
             const lib = reqUrl.startsWith('https') ? https : http;
+            const isCurse = reqUrl.includes('curseforge.com') || reqUrl.includes('forgecdn.net');
+            const defaultUa = isCurse ? CF_USER_AGENT : 'Mozilla/5.0 NebulaLauncher/1.0';
             const finalHeaders = Object.assign({
-                'User-Agent': 'Mozilla/5.0 NebulaLauncher/1.0'
+                'User-Agent': defaultUa,
+                'Accept': 'application/json, */*'
             }, headers);
+            if (isCurse && reqUrl.includes('api.curseforge.com') && !finalHeaders['x-api-key']) {
+                finalHeaders['x-api-key'] = CF_API_KEY;
+            }
             
             const req = lib.get(reqUrl, { headers: finalHeaders }, (res) => {
                 if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
                     res.resume();
-                    return attempt(res.headers.location, redirectCount + 1);
+                    let loc = res.headers.location;
+                    if (!loc.startsWith('http')) {
+                        const u = new URL(reqUrl);
+                        loc = `${u.protocol}//${u.host}${loc}`;
+                    }
+                    return attempt(loc, redirectCount + 1);
                 }
                 if (res.statusCode < 200 || res.statusCode >= 300) {
                     res.resume();
@@ -3982,104 +3987,152 @@ function httpsGetWithHeaders(url, headers = {}, timeoutMs = 15000) {
     });
 }
 
-async function installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl, description, targetFileId) {
-    currentOperation = { type: 'install-modpack', cancelled: false };
+// ── Descargar Perfil Compartido de CurseForge (Enlace o Código de 7 días) ──
+async function downloadCurseForgeSharedProfile(code) {
+    const tempDir = path.join(BASE_DATA_DIR, 'temp');
+    fs.mkdirSync(tempDir, { recursive: true });
+    const tempZip = path.join(tempDir, `cf-shared-${code}.zip`);
+    const shareUrl = `https://api.curseforge.com/v1/shared-profile/${code}`;
+
+    sendLog(`☁️ Conectando con CurseForge para descargar perfil compartido (${code})...`);
+    sendProgress(5, 'Obteniendo modpack compartido de CurseForge...');
+
     try {
-        sendLog(`📥 Obteniendo información de "${title}" desde CurseForge...`);
-        sendProgress(5, 'Obteniendo archivos...');
-
-        const CF_API_KEY = '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm';
-        const filesUrl = `https://api.curseforge.com/v1/mods/${projectId}/files`;
-        const headers = { 'x-api-key': CF_API_KEY };
-        
-        const filesData = JSON.parse(await httpsGetWithHeaders(filesUrl, headers));
-        if (!filesData.data || filesData.data.length === 0) {
-            throw new Error('No se encontraron archivos para este modpack.');
-        }
-
-        // Sort files by ID descending to ensure we get the latest file version
-        filesData.data.sort((a, b) => b.id - a.id);
-        const latestFile = targetFileId ? filesData.data.find(f => String(f.id) === String(targetFileId)) || filesData.data[0] : filesData.data[0];
-        const downloadUrl = latestFile.downloadUrl;
-        if (!downloadUrl) {
-            throw new Error('El modpack no permite descargas directas automatizadas desde la API de CurseForge.');
-        }
-
-        const tempDir = path.join(BASE_DATA_DIR, 'temp');
-        const tempZipPath = path.join(tempDir, `modpack-${projectId}.zip`);
-
-        sendLog(`📥 Descargando archivo del modpack: ${latestFile.displayName}...`);
-        sendProgress(10, 'Descargando modpack...');
-        await downloadFile(downloadUrl, tempZipPath, (p, mb, extra) => {
-            if (currentOperation.cancelled) throw new Error('Operación cancelada');
-            let label = `Descargando modpack: ${p}%`;
+        await downloadFile(shareUrl, tempZip, (p, mb, extra) => {
+            if (currentOperation && currentOperation.cancelled) throw new Error('Operación cancelada');
+            let label = `Descargando modpack compartido: ${p}%`;
             if (extra && extra.remainingTimeStr) {
                 label += ` (${extra.speedMBps.toFixed(1)} MB/s, restante: ${extra.remainingTimeStr})`;
             }
-            sendProgress(10 + Math.floor(p * 0.15), label);
+            sendProgress(5 + Math.floor(p * 0.20), label);
         });
-
-        sendLog(`📦 Instalando modpack...`);
-        sendProgress(25, 'Extrayendo archivos...');
-
-        const s = loadSettings();
-        const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
-        
-        const cleanName = title.replace(/[^a-zA-Z0-9_\- ]/g, '').trim();
-        const instancePath = path.join(mcPath, 'instances', cleanName);
-        fs.mkdirSync(instancePath, { recursive: true });
-
-        const zip = new AdmZip(tempZipPath);
-        const zipEntries = zip.getEntries();
-
-        const manifestEntry = zipEntries.find(e => e.entryName === 'manifest.json');
-        if (!manifestEntry) {
-            throw new Error('No se encontró el manifest.json en el modpack de CurseForge.');
+    } catch (err) {
+        try { fs.unlinkSync(tempZip); } catch {}
+        if (err.message && err.message.includes('404')) {
+            throw new Error(`El código CurseForge "${code}" no existe o ya ha expirado (los enlaces compartidos de CurseForge expiran automáticamente a los 7 días).`);
         }
+        throw err;
+    }
 
-        const manifest = JSON.parse(manifestEntry.getData().toString('utf8'));
-        const mcVersion = manifest.minecraft.version;
-        const loaderId = manifest.minecraft.modLoaders?.[0]?.id || '';
-        const isFabric = loaderId.toLowerCase().includes('fabric');
-        const isQuilt = loaderId.toLowerCase().includes('quilt');
-        const isNeoForge = loaderId.toLowerCase().includes('neoforge');
-        const loaderVer = loaderId.replace(/^(forge-|fabric-|neoforge-|quilt-)/i, '');
+    if (!fs.existsSync(tempZip) || fs.statSync(tempZip).size < 100) {
+        try { fs.unlinkSync(tempZip); } catch {}
+        throw new Error(`No se pudo obtener el archivo del modpack compartido desde CurseForge (${code}).`);
+    }
 
-        sendLog(`Minecraft: ${mcVersion}, Loader: ${isFabric ? 'Fabric ' + loaderVer : (isQuilt ? 'Quilt ' + loaderVer : (isNeoForge ? 'NeoForge ' + loaderVer : (loaderId ? 'Forge ' + loaderVer : 'Vanilla')))}`);
+    return tempZip;
+}
 
-        const overridesPrefix = manifest.overrides || 'overrides';
-        zipEntries.forEach(entry => {
-            if (entry.entryName.startsWith(overridesPrefix + '/')) {
-                const relativePath = entry.entryName.substring(overridesPrefix.length + 1);
-                const targetPath = path.join(instancePath, relativePath);
+// ── Instalador Unificado de ZIP CurseForge (manifest.json + overrides + mods) ──
+async function installCurseForgeZip(zipFilePath, customName = null, options = {}) {
+    const s = loadSettings();
+    const mcPath = s.gameDir || path.join(BASE_DATA_DIR, '.minecraft');
 
-                if (entry.isDirectory) {
-                    fs.mkdirSync(targetPath, { recursive: true });
-                } else {
-                    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-                    fs.writeFileSync(targetPath, entry.getData());
-                }
+    const zip = new AdmZip(zipFilePath);
+    const zipEntries = zip.getEntries();
+
+    const manifestEntry = zipEntries.find(e => e.entryName === 'manifest.json' || e.entryName.endsWith('/manifest.json'));
+    if (!manifestEntry) {
+        throw new Error('El archivo ZIP no contiene manifest.json de CurseForge válido.');
+    }
+
+    const manifest = JSON.parse(manifestEntry.getData().toString('utf8'));
+    const packName = customName || manifest.name || path.basename(zipFilePath).replace(/\.zip$/i, '');
+    let cleanName = packName.replace(/[^a-zA-Z0-9_\- ]/g, '').trim() || 'CurseForge Modpack';
+
+    const mode = options.mode || 'auto'; // 'auto', 'update', 'new'
+    const exactExistingPath = path.join(mcPath, 'instances', cleanName);
+
+    if (fs.existsSync(exactExistingPath) && mode === 'auto') {
+        const totalFiles = manifest.files ? manifest.files.length : 0;
+        return {
+            success: false,
+            needConfirmation: true,
+            existingName: cleanName,
+            totalMods: totalFiles,
+            code: options.originalCode || cleanName,
+            manifestName: manifest.name
+        };
+    }
+
+    let targetFolder = cleanName;
+    let isUpdating = false;
+    if (mode === 'update' && fs.existsSync(exactExistingPath)) {
+        targetFolder = cleanName;
+        isUpdating = true;
+    } else {
+        let counter = 1;
+        while (fs.existsSync(path.join(mcPath, 'instances', targetFolder))) {
+            targetFolder = `${cleanName} (${counter++})`;
+        }
+    }
+
+    const instancePath = path.join(mcPath, 'instances', targetFolder);
+    fs.mkdirSync(instancePath, { recursive: true });
+
+    currentOperation = { type: 'install-modpack', cancelled: false };
+    if (isUpdating) {
+        sendLog(`🔄 Actualizando modpack CurseForge "${targetFolder}"...`);
+        sendProgress(25, 'Actualizando modpack...');
+    } else {
+        sendLog(`📦 Creando nueva instancia CurseForge: "${targetFolder}"...`);
+        sendProgress(25, 'Preparando modpack...');
+    }
+
+    const mcVersion = manifest.minecraft?.version || '1.20.1';
+    const loaderId = manifest.minecraft?.modLoaders?.[0]?.id || '';
+    const isFabric = loaderId.toLowerCase().includes('fabric');
+    const isQuilt = loaderId.toLowerCase().includes('quilt');
+    const isNeoForge = loaderId.toLowerCase().includes('neoforge');
+    const loaderVer = loaderId.replace(/^(forge-|fabric-|neoforge-|quilt-)/i, '');
+    const loaderType = isFabric ? 'fabric' : (isQuilt ? 'quilt' : (isNeoForge ? 'neoforge' : (loaderId ? 'forge' : 'vanilla')));
+
+    sendLog(`Minecraft: ${mcVersion}, Loader: ${loaderType} ${loaderVer}`);
+
+    // Extraer carpeta de overrides y archivos de configuración
+    sendProgress(30, 'Extrayendo configuraciones...');
+    const overridesPrefix = manifest.overrides || 'overrides';
+    zipEntries.forEach(entry => {
+        if (entry.entryName.startsWith(overridesPrefix + '/')) {
+            const relativePath = entry.entryName.substring(overridesPrefix.length + 1);
+            if (!relativePath) return;
+            // Preservar mundos (saves/) y capturas si estamos actualizando
+            if (isUpdating && (relativePath.startsWith('saves/') || relativePath.startsWith('screenshots/'))) {
+                return;
             }
-        });
+            const targetPath = path.join(instancePath, relativePath);
+            if (entry.isDirectory) {
+                fs.mkdirSync(targetPath, { recursive: true });
+            } else {
+                fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+                fs.writeFileSync(targetPath, entry.getData());
+            }
+        } else if (entry.entryName.startsWith('mods/') && entry.entryName.endsWith('.jar')) {
+            // Mods pre-empaquetados directamente en el zip
+            const targetModPath = path.join(instancePath, entry.entryName);
+            fs.mkdirSync(path.dirname(targetModPath), { recursive: true });
+            fs.writeFileSync(targetModPath, entry.getData());
+        }
+    });
 
-        sendProgress(40, 'Descargando mods...');
+    // Descargar mods desde manifest.files
+    const modsDir = path.join(instancePath, 'mods');
+    fs.mkdirSync(modsDir, { recursive: true });
 
-        const modsDir = path.join(instancePath, 'mods');
-        fs.mkdirSync(modsDir, { recursive: true });
+    const files = manifest.files || [];
+    const totalFiles = files.length;
+    let downloaded = 0;
+    let failedMods = [];
+    const startTimeMods = Date.now();
 
-        let downloaded = 0;
-        let failedMods = [];
-        const totalFiles = manifest.files.length;
-        const startTimeMods = Date.now();
-        
-        for (const file of manifest.files) {
-            if (currentOperation.cancelled) throw new Error('Operación cancelada');
-            
+    if (totalFiles > 0) {
+        sendLog(`📥 Descargando ${totalFiles} mods de CurseForge...`);
+        sendProgress(35, `Descargando mods (0/${totalFiles})...`);
+
+        for (const file of files) {
+            if (currentOperation && currentOperation.cancelled) throw new Error('Operación cancelada');
             try {
-                const modPath = path.join(modsDir, `mod_${file.fileID}.jar`);
-                await downloadCurseForgeMod(file.projectID, file.fileID, modPath);
+                await downloadCurseForgeMod(file.projectID, file.fileID, modsDir);
                 downloaded++;
-                
                 let etaStr = '';
                 if (downloaded > 2) {
                     const elapsed = (Date.now() - startTimeMods) / 1000;
@@ -4091,37 +4144,109 @@ async function installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl
                         etaStr = `, restante: ${remainingSeconds}s`;
                     }
                 }
-                sendProgress(40 + Math.floor((downloaded / totalFiles) * 55), `Descargando mods: ${downloaded}/${totalFiles}${etaStr}`);
+                const progressPct = 35 + Math.floor((downloaded / totalFiles) * 60);
+                sendProgress(progressPct, `Descargando mods: ${downloaded}/${totalFiles}${etaStr}`);
             } catch (err) {
                 failedMods.push({ projectID: file.projectID, fileID: file.fileID, error: err.message });
-                sendLog(`⚠️ Error descargando mod ${file.projectID}: ${err.message}`);
+                sendLog(`⚠️ [CurseForge] Mod ${file.projectID}/${file.fileID}: ${err.message}`, 'warn');
             }
         }
-        if (failedMods.length > 0) {
-            sendLog(`⚠️ ${failedMods.length} mod(s) no pudieron descargarse. El modpack podría no funcionar correctamente.`, 'warn');
+    }
+
+    if (failedMods.length > 0) {
+        sendLog(`⚠️ ${failedMods.length} mod(s) no pudieron descargarse automáticamente. El modpack podría requerir descargarlos manualmente desde CurseForge.`, 'warn');
+    }
+
+    // Escribir metadata instance.json
+    const metadata = {
+        name: targetFolder,
+        mcVersion,
+        loader: loaderType,
+        loaderVersion: loaderVer,
+        iconUrl: options.iconUrl || '',
+        screenshotUrl: options.screenshotUrl || '',
+        description: options.description || manifest.description || `Modpack CurseForge "${manifest.name || targetFolder}".`,
+        source: 'curseforge',
+        projectId: String(options.projectId || manifest.projectID || ''),
+        versionId: String(options.versionId || ''),
+        versionNumber: options.versionNumber || manifest.version || '1.0'
+    };
+    fs.writeFileSync(path.join(instancePath, 'instance.json'), JSON.stringify(metadata, null, 2), 'utf8');
+
+    sendProgress(100, 'Modpack instalado ✓');
+    sendLog(`✅ Modpack CurseForge "${targetFolder}" instalado con éxito en instances/${targetFolder}`);
+    currentOperation = null;
+
+    return {
+        success: true,
+        name: targetFolder,
+        folderName: targetFolder,
+        mcVersion,
+        loader: loaderType,
+        path: instancePath,
+        failedModsCount: failedMods.length,
+        isUpdating
+    };
+}
+
+async function installCurseForgeModpack(projectId, title, iconUrl, screenshotUrl, description, targetFileId) {
+    currentOperation = { type: 'install-modpack', cancelled: false };
+    try {
+        sendLog(`📥 Obteniendo información de "${title}" desde CurseForge...`);
+        sendProgress(5, 'Obteniendo archivos...');
+
+        const filesUrl = `https://api.curseforge.com/v1/mods/${projectId}/files`;
+        const headers = { 'x-api-key': CF_API_KEY };
+        
+        const filesData = JSON.parse(await httpsGetWithHeaders(filesUrl, headers));
+        if (!filesData.data || filesData.data.length === 0) {
+            throw new Error('No se encontraron archivos para este modpack.');
         }
 
-        try { fs.unlinkSync(tempZipPath); } catch {}
+        // Ordenar archivos por ID descendente
+        filesData.data.sort((a, b) => b.id - a.id);
+        const latestFile = targetFileId ? filesData.data.find(f => String(f.id) === String(targetFileId)) || filesData.data[0] : filesData.data[0];
+        
+        let downloadUrl = latestFile.downloadUrl;
+        if (!downloadUrl && latestFile.fileName) {
+            const idStr = String(latestFile.id);
+            const splitIdx = idStr.length > 3 ? idStr.length - 3 : 0;
+            const firstPart = idStr.substring(0, splitIdx);
+            const lastPart = idStr.substring(splitIdx);
+            downloadUrl = `https://edge.forgecdn.net/files/${firstPart}/${lastPart}/${encodeURIComponent(latestFile.fileName)}`;
+        }
 
-        const metadata = {
-            name: title,
-            mcVersion,
-            loader: isFabric ? 'fabric' : (isQuilt ? 'quilt' : (isNeoForge ? 'neoforge' : (loaderId ? 'forge' : 'vanilla'))),
-            loaderVersion: loaderVer,
+        if (!downloadUrl) {
+            throw new Error('El modpack no permite descargas directas automatizadas desde CurseForge.');
+        }
+
+        const tempDir = path.join(BASE_DATA_DIR, 'temp');
+        fs.mkdirSync(tempDir, { recursive: true });
+        const tempZipPath = path.join(tempDir, `modpack-${projectId}.zip`);
+
+        sendLog(`📥 Descargando archivo del modpack: ${latestFile.displayName || latestFile.fileName}...`);
+        sendProgress(10, 'Descargando modpack...');
+        await downloadFile(downloadUrl, tempZipPath, (p, mb, extra) => {
+            if (currentOperation.cancelled) throw new Error('Operación cancelada');
+            let label = `Descargando modpack: ${p}%`;
+            if (extra && extra.remainingTimeStr) {
+                label += ` (${extra.speedMBps.toFixed(1)} MB/s, restante: ${extra.remainingTimeStr})`;
+            }
+            sendProgress(10 + Math.floor(p * 0.15), label);
+        });
+
+        const result = await installCurseForgeZip(tempZipPath, title, {
+            mode: 'new',
+            projectId: String(projectId),
             iconUrl,
             screenshotUrl,
             description,
-            projectId: String(projectId),
-            source: 'curseforge',
-            versionId: String(latestFile.id),
+            versionId: latestFile.id,
             versionNumber: latestFile.displayName || latestFile.fileName
-        };
-        fs.writeFileSync(path.join(instancePath, 'instance.json'), JSON.stringify(metadata, null, 2));
+        });
 
-        sendLog(`✅ Modpack "${title}" instalado correctamente.`);
-        sendProgress(100, 'Instalación completada ✓');
-        currentOperation = null;
-        return { success: true, name: title };
+        try { fs.unlinkSync(tempZipPath); } catch {}
+        return result;
 
     } catch (err) {
         sendLog(`❌ Error instalando modpack: ${err.message}`, 'error');
@@ -5079,9 +5204,60 @@ ipcMain.handle('redeem-modpack-share-code', async (event, args) => {
         }
 
         if (!rawCode || typeof rawCode !== 'string') {
-            throw new Error('Por favor ingresa un código válido.');
+            throw new Error('Por favor ingresa un código o enlace válido.');
         }
         let clean = rawCode.trim();
+
+        // ── 1. Detectar Enlace Compartido de CurseForge (ej: curseforge.com/minecraft/share/Cd77OhpJ) ──
+        const cfShareMatch = clean.match(/(?:https?:\/\/)?(?:www\.)?curseforge\.com\/minecraft\/share\/([a-zA-Z0-9_\-]+)/i);
+        if (cfShareMatch) {
+            const cfCode = cfShareMatch[1].trim();
+            sendLog(`🔗 Detectado enlace compartido de CurseForge: ${cfCode}`);
+            const tempZip = await downloadCurseForgeSharedProfile(cfCode);
+            try {
+                return await installCurseForgeZip(tempZip, null, { mode, originalCode: rawCode });
+            } finally {
+                try { fs.unlinkSync(tempZip); } catch {}
+            }
+        }
+
+        // ── 2. Detectar Enlace Web de Modpack CurseForge (ej: curseforge.com/minecraft/modpacks/all-the-mods-9) ──
+        const cfModpackMatch = clean.match(/(?:https?:\/\/)?(?:www\.)?curseforge\.com\/minecraft\/modpacks\/([a-zA-Z0-9_\-]+)/i);
+        if (cfModpackMatch) {
+            const cfSlug = cfModpackMatch[1].trim();
+            sendLog(`🔗 Detectado modpack de CurseForge por enlace: ${cfSlug}`);
+            sendProgress(5, 'Buscando modpack en CurseForge...');
+            const searchUrl = `https://api.curseforge.com/v1/mods/search?gameId=432&classId=4471&slug=${encodeURIComponent(cfSlug)}`;
+            const searchRes = JSON.parse(await httpsGetWithHeaders(searchUrl, { 'x-api-key': CF_API_KEY }));
+            if (!searchRes?.data || searchRes.data.length === 0) {
+                throw new Error(`No se encontró el modpack "${cfSlug}" en CurseForge.`);
+            }
+            const project = searchRes.data[0];
+            return await installCurseForgeModpack(
+                project.id,
+                project.name,
+                project.logo?.thumbnailUrl || '',
+                project.logo?.url || '',
+                project.summary || ''
+            );
+        }
+
+        // ── 3. Detectar Enlace Directo a archivo ZIP o MRPACK ──
+        if (clean.startsWith('http://') || clean.startsWith('https://')) {
+            if (clean.toLowerCase().includes('.zip') || clean.toLowerCase().includes('.mrpack')) {
+                sendLog(`🔗 Descargando modpack directo desde URL...`);
+                sendProgress(5, 'Descargando paquete...');
+                const tempDir = path.join(BASE_DATA_DIR, 'temp');
+                fs.mkdirSync(tempDir, { recursive: true });
+                const tempZip = path.join(tempDir, `remote-modpack-${Date.now()}.zip`);
+                try {
+                    await downloadFile(clean, tempZip, (p) => sendProgress(5 + Math.floor(p * 0.2), `Descargando: ${p}%`));
+                    return await installCurseForgeZip(tempZip, null, { mode });
+                } finally {
+                    try { fs.unlinkSync(tempZip); } catch {}
+                }
+            }
+        }
 
         // Limpiar prefijo NEBULA- o NEBULA: o URL
         if (clean.startsWith('NEBULA-')) clean = clean.substring(7);
@@ -5094,29 +5270,48 @@ ipcMain.handle('redeem-modpack-share-code', async (event, args) => {
 
         // Caso 1: Código corto en la nube (ej: 6X2RCs9iLD)
         if (clean.length > 0 && clean.length <= 40 && !clean.includes('{') && !clean.includes(';')) {
-            sendLog(`☁️ Descargando receta del modpack desde el código "${clean}"...`);
-            sendProgress(5, 'Consultando código...');
+            try {
+                sendLog(`☁️ Descargando receta del modpack desde el código "${clean}"...`);
+                sendProgress(5, 'Consultando código...');
 
-            const cloudData = await new Promise((resolve, reject) => {
-                const req = https.get(`https://bytebin.lucko.me/${clean}`, {
-                    headers: { 'User-Agent': 'NebulaLauncher/1.0' },
-                    timeout: 12000
-                }, (res) => {
-                    if (res.statusCode !== 200) {
-                        res.resume();
-                        return reject(new Error(`Código no encontrado (HTTP ${res.statusCode})`));
-                    }
-                    let b = '';
-                    res.on('data', c => b += c);
-                    res.on('end', () => {
-                        try { resolve(JSON.parse(b)); } catch { resolve({}); }
+                const cloudData = await new Promise((resolve, reject) => {
+                    const req = https.get(`https://bytebin.lucko.me/${clean}`, {
+                        headers: { 'User-Agent': 'NebulaLauncher/1.0' },
+                        timeout: 12000
+                    }, (res) => {
+                        if (res.statusCode !== 200) {
+                            res.resume();
+                            return reject(new Error(`CODE_NOT_FOUND_BYTEBIN_${res.statusCode}`));
+                        }
+                        let b = '';
+                        res.on('data', c => b += c);
+                        res.on('end', () => {
+                            try { resolve(JSON.parse(b)); } catch { resolve({}); }
+                        });
                     });
+                    req.on('error', reject);
+                    req.on('timeout', () => { req.destroy(); reject(new Error('Timeout de conexión')); });
                 });
-                req.on('error', reject);
-                req.on('timeout', () => { req.destroy(); reject(new Error('Timeout de conexión')); });
-            });
 
-            payload = cloudData;
+                payload = cloudData;
+            } catch (cloudErr) {
+                // Si el código no estaba en Nebula Cloud (bytebin), intentar como código directo de CurseForge
+                if (cloudErr.message && cloudErr.message.includes('CODE_NOT_FOUND_BYTEBIN')) {
+                    sendLog(`ℹ️ No encontrado en Nebula. Verificando código CurseForge "${clean}"...`);
+                    try {
+                        const tempZip = await downloadCurseForgeSharedProfile(clean);
+                        try {
+                            return await installCurseForgeZip(tempZip, null, { mode, originalCode: rawCode });
+                        } finally {
+                            try { fs.unlinkSync(tempZip); } catch {}
+                        }
+                    } catch (cfErr) {
+                        throw new Error(`Código "${clean}" no encontrado ni en Nebula ni en CurseForge (recuerda que los enlaces compartidos de CurseForge expiran a los 7 días).`);
+                    }
+                } else {
+                    throw cloudErr;
+                }
+            }
         } else {
             // Caso 2: Código Base64 directo
             try {

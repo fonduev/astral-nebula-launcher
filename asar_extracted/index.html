@@ -5670,7 +5670,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
           <button class="btn btn-primary" id="btn-show-my-modpacks" onclick="switchModpacksView('my')">🎒 Mis Modpacks</button>
           <button class="btn btn-ghost" id="btn-show-search-modpacks" onclick="switchModpacksView('search')">🔍 Buscar Modpacks</button>
           <div style="flex: 1;"></div>
-          <button class="btn btn-ghost btn-sm" onclick="openRedeemShareCodeModal()" title="Instalar modpack compartido mediante código">🔗 Código de Amigo</button>
+          <button class="btn btn-ghost btn-sm" onclick="openRedeemShareCodeModal()" title="Instalar modpack compartido mediante enlace o código de CurseForge / Nebula">👥 Modpack Compartido</button>
           <button class="btn btn-ghost btn-sm" onclick="importModpackLocal()" title="Importar archivo .zip o .mrpack como instancia separada">📦 Importar Paquete (.zip)</button>
           <button class="btn btn-primary btn-sm" onclick="showCreateModpackModal()">🛠️ Crear Modpack</button>
         </div>
@@ -12735,11 +12735,11 @@ function updateMyStatus(status, activity) {
         <span style="font-size: 1.6rem;">🔗</span>
       </div>
 
-      <h2 style="font-size: 1.3rem; font-weight: 800; background: linear-gradient(135deg, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 4px 0 2px 0;">Canjear Código de Amigo</h2>
-      <p style="font-size: 0.78rem; color: var(--text-dim); margin: 0 0 14px 0;">Pega aquí el código que te envió tu amigo para instalar su modpack con todos sus mods y configuraciones.</p>
+      <h2 style="font-size: 1.3rem; font-weight: 800; background: linear-gradient(135deg, #ffffff 40%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 4px 0 2px 0;">Instalar Modpack Compartido</h2>
+      <p style="font-size: 0.78rem; color: var(--text-dim); margin: 0 0 14px 0;">Pega un enlace compartido de CurseForge (ej: <code>curseforge.com/minecraft/share/Cd77OhpJ</code> o código de 7 días), o un Código Nebula de un amigo.</p>
 
       <div style="margin-bottom: 12px;">
-        <input type="text" id="redeem-code-input" placeholder="Ej: NEBULA-6X2RCs9iLD" style="width: 100%; padding: 12px 14px; border-radius: 10px; background: rgba(14, 12, 28, 0.95); border: 1px solid var(--btn-border); color: #38bdf8; font-size: 0.95rem; font-weight: 700; text-align: center; outline: none; font-family: monospace; letter-spacing: 1px; box-sizing: border-box;" onkeydown="if(event.key==='Enter') submitRedeemShareCode()">
+        <input type="text" id="redeem-code-input" placeholder="Ej: https://curseforge.com/minecraft/share/Cd77OhpJ o NEBULA-6X2RCs9iLD" style="width: 100%; padding: 12px 14px; border-radius: 10px; background: rgba(14, 12, 28, 0.95); border: 1px solid var(--btn-border); color: #38bdf8; font-size: 0.95rem; font-weight: 700; text-align: center; outline: none; font-family: monospace; letter-spacing: 1px; box-sizing: border-box;" onkeydown="if(event.key==='Enter') submitRedeemShareCode()">
       </div>
 
       <!-- Caja de confirmación de actualización -->
@@ -13829,7 +13829,7 @@ function updateMyStatus(status, activity) {
       const input = document.getElementById('redeem-code-input');
       const code = (input ? input.value.trim() : '') || window._lastRedeemPendingCode;
       if (!code) {
-        toast('❌ Por favor pega un Código Nebula (ej: NEBULA-6X2RCs9iLD).', 'error');
+        toast('❌ Por favor pega un enlace de CurseForge o Código Nebula.', 'error');
         return;
       }
 
