@@ -12,7 +12,8 @@ const path = require('path');
 const fs = require('fs');
 const https = require('https');
 const http = require('http');
-const { execSync, spawn, exec } = require('child_process');
+const cp = require('child_process');
+const { execSync, spawn, exec } = cp;
 const crypto = require('crypto');
 const AdmZip = require('adm-zip');
 const zlib = require('zlib');
@@ -983,13 +984,35 @@ async function ensureMesaDriver(mode = 'llvmpipe') {
     const chosenMode = validModes.includes(mode) ? mode : 'llvmpipe';
     const mesaDir = path.join(BASE_DATA_DIR, 'runtimes', 'mesa', chosenMode);
     const targetDll = path.join(mesaDir, 'opengl32.dll');
-    if (fs.existsSync(targetDll)) return targetDll;
+    
+    // Si ya existe opengl32.dll y tiene tamaño válido (> 1MB), reutilizar
+    if (fs.existsSync(targetDll)) {
+        try {
+            const st = fs.statSync(targetDll);
+            if (st.size > 1024 * 1024) return targetDll;
+            fs.unlinkSync(targetDll);
+        } catch {}
+    }
 
     fs.mkdirSync(mesaDir, { recursive: true });
     const archiveName = `mesa-${chosenMode}-x64-26.2.3.7z`;
     const local7z = path.join(BASE_DATA_DIR, 'runtimes', 'mesa', archiveName);
 
-    if (!fs.existsSync(local7z)) {
+    let needsDownload = true;
+    if (fs.existsSync(local7z)) {
+        try {
+            const stat = fs.statSync(local7z);
+            if (stat.size > 1024 * 1024) {
+                needsDownload = false;
+            } else {
+                try { fs.unlinkSync(local7z); } catch {}
+            }
+        } catch {
+            try { fs.unlinkSync(local7z); } catch {}
+        }
+    }
+
+    if (needsDownload) {
         sendLog(`📥 Descargando controlador gráfico Mesa3D (${chosenMode})...`);
         const url = `https://github.com/mmozeiko/build-mesa/releases/download/26.2.3/${archiveName}`;
         await downloadFile(url, local7z, (p) => {
@@ -998,9 +1021,10 @@ async function ensureMesaDriver(mode = 'llvmpipe') {
     }
 
     sendLog(`📦 Extrayendo controlador de compatibilidad Mesa3D (${chosenMode})...`);
+    const tarExe = fs.existsSync('C:\\Windows\\System32\\tar.exe') ? 'C:\\Windows\\System32\\tar.exe' : 'tar';
     await new Promise((resolve, reject) => {
-        cp.exec(`tar -xf "${local7z}" -C "${mesaDir}"`, (err) => {
-            if (err) return reject(err);
+        cp.exec(`"${tarExe}" -xf "${local7z}" -C "${mesaDir}"`, (err, stdout, stderr) => {
+            if (err) return reject(new Error(`Fallo al extraer ${archiveName}: ${err.message || stderr || stdout}`));
             resolve();
         });
     });
@@ -1016,9 +1040,12 @@ function cleanAllJavaGpuCompat() {
     const runtimesDir = path.join(BASE_DATA_DIR, 'runtimes');
     const companionDlls = ['opengl32.dll', 'libEGL.dll', 'libGLESv1_CM.dll', 'libGLESv2.dll'];
     try {
-        const mcDll = path.join(BASE_DATA_DIR, '.minecraft', 'opengl32.dll');
-        if (fs.existsSync(mcDll)) {
-            try { fs.unlinkSync(mcDll); } catch {}
+        const mcDir = path.join(BASE_DATA_DIR, '.minecraft');
+        for (const f of companionDlls) {
+            const mcF = path.join(mcDir, f);
+            if (fs.existsSync(mcF)) {
+                try { fs.unlinkSync(mcF); } catch {}
+            }
         }
         if (fs.existsSync(runtimesDir)) {
             const items = fs.readdirSync(runtimesDir);
@@ -1067,6 +1094,14 @@ async function applyGpuCompatMode(javaExe, mode, gameDir) {
         if (mcDll && fs.existsSync(mcDll)) {
             try { fs.unlinkSync(mcDll); } catch {}
         }
+        if (gameDir && fs.existsSync(gameDir)) {
+            for (const f of companionDlls) {
+                const target = path.join(gameDir, f);
+                if (fs.existsSync(target)) {
+                    try { fs.unlinkSync(target); } catch {}
+                }
+            }
+        }
         return;
     }
 
@@ -1087,9 +1122,15 @@ async function applyGpuCompatMode(javaExe, mode, gameDir) {
             } catch (copyErr) {
                 sendLog(`⚠️ No se pudo copiar opengl32.dll a Java bin: ${copyErr.message}`, 'warn');
             }
-            if (mcDll) {
+            if (gameDir && fs.existsSync(gameDir)) {
                 try {
-                    fs.copyFileSync(srcDll, mcDll);
+                    fs.copyFileSync(srcDll, path.join(gameDir, 'opengl32.dll'));
+                    for (const f of companionDlls) {
+                        const srcComp = path.join(sourceDir, f);
+                        if (fs.existsSync(srcComp)) {
+                            fs.copyFileSync(srcComp, path.join(gameDir, f));
+                        }
+                    }
                 } catch (mcErr) {
                     sendLog(`⚠️ No se pudo inyectar opengl32.dll en gameDir: ${mcErr.message}`, 'warn');
                 }
