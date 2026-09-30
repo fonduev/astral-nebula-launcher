@@ -1122,17 +1122,18 @@ async function applyGpuCompatMode(javaExe, mode, gameDir) {
             } catch (copyErr) {
                 sendLog(`⚠️ No se pudo copiar opengl32.dll a Java bin: ${copyErr.message}`, 'warn');
             }
+            // Asegurar que no quede ningún opengl32.dll duplicado en gameDir (.minecraft)
+            // para evitar que GLFW y LWJGL carguen dos instancias separadas de opengl32.dll
             if (gameDir && fs.existsSync(gameDir)) {
-                try {
-                    fs.copyFileSync(srcDll, path.join(gameDir, 'opengl32.dll'));
-                    for (const f of companionDlls) {
-                        const srcComp = path.join(sourceDir, f);
-                        if (fs.existsSync(srcComp)) {
-                            fs.copyFileSync(srcComp, path.join(gameDir, f));
-                        }
+                const mcDll = path.join(gameDir, 'opengl32.dll');
+                if (fs.existsSync(mcDll)) {
+                    try { fs.unlinkSync(mcDll); } catch {}
+                }
+                for (const f of companionDlls) {
+                    const comp = path.join(gameDir, f);
+                    if (fs.existsSync(comp)) {
+                        try { fs.unlinkSync(comp); } catch {}
                     }
-                } catch (mcErr) {
-                    sendLog(`⚠️ No se pudo inyectar opengl32.dll en gameDir: ${mcErr.message}`, 'warn');
                 }
             }
             sendLog(`✅ Controlador de compatibilidad inyectado en Java runtime: ${path.basename(javaBin)}`);
@@ -7685,13 +7686,6 @@ ipcMain.on('launch-game', async (event, data) => {
         if (isForge || isNeoForge) {
             if (!opts.customArgs.includes('-Dfml.earlyprogresswindow=false')) {
                 opts.customArgs.push('-Dfml.earlyprogresswindow=false');
-            }
-        }
-        if (s.gpuCompatMode && s.gpuCompatMode !== 'off') {
-            const mesaMode = s.gpuCompatMode === 'd3d12' ? 'd3d12' : 'llvmpipe';
-            const mesaDll = path.join(BASE_DATA_DIR, 'runtimes', 'mesa', mesaMode, 'opengl32.dll');
-            if (fs.existsSync(mesaDll)) {
-                opts.customArgs.push(`-Dorg.lwjgl.opengl.libname=${mesaDll}`);
             }
         }
 
