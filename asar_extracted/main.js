@@ -1014,20 +1014,25 @@ async function ensureMesaDriver(mode = 'llvmpipe') {
 
 function cleanAllJavaGpuCompat() {
     const runtimesDir = path.join(BASE_DATA_DIR, 'runtimes');
-    if (!fs.existsSync(runtimesDir)) return;
     const companionDlls = ['opengl32.dll', 'libEGL.dll', 'libGLESv1_CM.dll', 'libGLESv2.dll'];
     try {
-        const items = fs.readdirSync(runtimesDir);
-        for (const item of items) {
-            if (item.startsWith('java')) {
-                const jDir = path.join(runtimesDir, item);
-                const javaExe = findJavaExe(jDir);
-                if (javaExe) {
-                    const binDir = path.dirname(javaExe);
-                    for (const f of companionDlls) {
-                        const target = path.join(binDir, f);
-                        if (fs.existsSync(target)) {
-                            try { fs.unlinkSync(target); } catch {}
+        const mcDll = path.join(BASE_DATA_DIR, '.minecraft', 'opengl32.dll');
+        if (fs.existsSync(mcDll)) {
+            try { fs.unlinkSync(mcDll); } catch {}
+        }
+        if (fs.existsSync(runtimesDir)) {
+            const items = fs.readdirSync(runtimesDir);
+            for (const item of items) {
+                if (item.startsWith('java')) {
+                    const jDir = path.join(runtimesDir, item);
+                    const javaExe = findJavaExe(jDir);
+                    if (javaExe) {
+                        const binDir = path.dirname(javaExe);
+                        for (const f of companionDlls) {
+                            const target = path.join(binDir, f);
+                            if (fs.existsSync(target)) {
+                                try { fs.unlinkSync(target); } catch {}
+                            }
                         }
                     }
                 }
@@ -1039,11 +1044,12 @@ function cleanAllJavaGpuCompat() {
     }
 }
 
-async function applyGpuCompatMode(javaExe, mode) {
+async function applyGpuCompatMode(javaExe, mode, gameDir) {
     if (!javaExe) return;
     const javaBin = path.dirname(javaExe);
     const targetDll = path.join(javaBin, 'opengl32.dll');
     const companionDlls = ['libEGL.dll', 'libGLESv1_CM.dll', 'libGLESv2.dll'];
+    const mcDll = gameDir ? path.join(gameDir, 'opengl32.dll') : null;
 
     if (!mode || mode === 'off') {
         if (fs.existsSync(targetDll)) {
@@ -1058,6 +1064,9 @@ async function applyGpuCompatMode(javaExe, mode) {
                 sendLog(`⚠️ No se pudo remover opengl32.dll de Java: ${e.message}`, 'warn');
             }
         }
+        if (mcDll && fs.existsSync(mcDll)) {
+            try { fs.unlinkSync(mcDll); } catch {}
+        }
         return;
     }
 
@@ -1067,11 +1076,22 @@ async function applyGpuCompatMode(javaExe, mode) {
         const sourceDir = path.join(BASE_DATA_DIR, 'runtimes', 'mesa', mode);
         const srcDll = path.join(sourceDir, 'opengl32.dll');
         if (fs.existsSync(srcDll)) {
-            fs.copyFileSync(srcDll, targetDll);
-            for (const f of companionDlls) {
-                const srcComp = path.join(sourceDir, f);
-                if (fs.existsSync(srcComp)) {
-                    fs.copyFileSync(srcComp, path.join(javaBin, f));
+            try {
+                fs.copyFileSync(srcDll, targetDll);
+                for (const f of companionDlls) {
+                    const srcComp = path.join(sourceDir, f);
+                    if (fs.existsSync(srcComp)) {
+                        fs.copyFileSync(srcComp, path.join(javaBin, f));
+                    }
+                }
+            } catch (copyErr) {
+                sendLog(`⚠️ No se pudo copiar opengl32.dll a Java bin: ${copyErr.message}`, 'warn');
+            }
+            if (mcDll) {
+                try {
+                    fs.copyFileSync(srcDll, mcDll);
+                } catch (mcErr) {
+                    sendLog(`⚠️ No se pudo inyectar opengl32.dll en gameDir: ${mcErr.message}`, 'warn');
                 }
             }
             sendLog(`✅ Controlador de compatibilidad inyectado en Java runtime: ${path.basename(javaBin)}`);
@@ -1498,6 +1518,8 @@ ipcMain.handle('set-gpu-compat-mode', async (e, mode) => {
 });
 ipcMain.on('save-settings', (e, s) => {
     fs.writeFileSync(SETTINGS_PATH, JSON.stringify(s, null, 2));
+    _cachedSettings = s;
+    _cachedSettingsTime = Date.now();
     e.reply('settings-saved');
 });
 
@@ -7457,7 +7479,7 @@ ipcMain.on('launch-game', async (event, data) => {
         await ensureMinecraftBase(launchVersion, mcPath);
 
         const javaExe = await ensureJava(launchVersion, s.javaPath);
-        await applyGpuCompatMode(javaExe, s.gpuCompatMode || 'off');
+        await applyGpuCompatMode(javaExe, s.gpuCompatMode || 'off', mcPath);
 
         // Verificar cancelación tras descarga de Java
         if (currentOperation?.cancelled) {
@@ -7737,13 +7759,31 @@ ipcMain.on('launch-game', async (event, data) => {
             sendLog(`✅ Instancia #${instanceId} cerrada (código: ${code}).`);
 
             if (code !== 0) {
-                const fullRecent = recentGameLogs.join('\n');
+                let fullRecent = recentGameLogs.join('\n');
+                try {
+                    if (fs.existsSync(mcPath)) {
+                        const hsFiles = fs.readdirSync(mcPath).filter(f => f.startsWith('hs_err_pid') && f.endsWith('.log'));
+                        for (const hf of hsFiles) {
+                            const hPath = path.join(mcPath, hf);
+                            const st = fs.statSync(hPath);
+                            if (Date.now() - st.mtimeMs < 45000) {
+                                const hsContent = fs.readFileSync(hPath, 'utf8').slice(0, 8000);
+                                fullRecent += '\n' + hsContent;
+                                break;
+                            }
+                        }
+                    }
+                } catch {}
+
                 if (fullRecent.includes('GLFW error 65542') || 
                     fullRecent.includes('The driver does not appear to support OpenGL') || 
                     fullRecent.includes('Pixel format not accelerated') ||
                     fullRecent.includes('WGL: The driver does not appear to support OpenGL') ||
-                    fullRecent.includes('OpenGL 3.2')) {
-                    sendLog('⚠️ Incompatibilidad gráfica detectada (GLFW error 65542 / Falta OpenGL 3.2).', 'error');
+                    fullRecent.includes('OpenGL 3.2') ||
+                    fullRecent.includes('OpenGLOn12.dll') ||
+                    fullRecent.includes('0xc000001d') ||
+                    fullRecent.includes('EXCEPTION_ILLEGAL_INSTRUCTION')) {
+                    sendLog('⚠️ Incompatibilidad gráfica detectada (Falta OpenGL 3.2 o conflicto OpenGLOn12/AVX).', 'error');
                     win?.webContents.send('opengl-crash-detected', {
                         version: launchVersion,
                         code

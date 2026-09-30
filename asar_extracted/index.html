@@ -12929,12 +12929,12 @@ function updateMyStatus(status, activity) {
         <h3 style="margin: 0 0 6px 0; font-size: 1.15rem; font-weight: 800; color: #fff; letter-spacing: -0.01em;">
           Incompatibilidad Gráfica Detectada
         </h3>
-        <p style="margin: 0; font-size: 0.8rem; color: #38bdf8; font-weight: 600;">Error GLFW 65542 (Falta soporte para OpenGL 3.2)</p>
+        <p style="margin: 0; font-size: 0.8rem; color: #38bdf8; font-weight: 600;">Error GLFW 65542 / Conflicto OpenGL 3.2 (AVX / OpenGLOn12)</p>
       </div>
 
       <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 14px 16px; font-size: 0.78rem; color: var(--text-dim, #94a3b8); line-height: 1.5; text-align: left;">
-        Minecraft <span id="opengl-crash-version-tag" style="color:#fff; font-weight:700;">1.21.11</span> no pudo iniciar porque tu tarjeta gráfica (típico de Intel HD Graphics antiguas) no soporta OpenGL 3.2 de fábrica. Este es el motivo por el cual muchas PCs se quedan en la 1.16.<br><br>
-        <strong style="color:#fff;">¡Podemos solucionarlo ahora mismo!</strong> Nebula Launcher cuenta con el <strong>Modo Compatibilidad Gráfica (Mesa3D Universal)</strong> que traduce los gráficos para que el juego arranque en tu computadora.
+        Minecraft <span id="opengl-crash-version-tag" style="color:#fff; font-weight:700;">1.21.11</span> no pudo iniciar o se cerró porque tu tarjeta gráfica o procesador (típico de Intel HD Graphics antiguas o CPUs sin soporte AVX) no soporta OpenGL 3.2 de fábrica o falló en la capa nativa OpenGLOn12.<br><br>
+        <strong style="color:#fff;">¡Podemos solucionarlo ahora mismo!</strong> Nebula Launcher cuenta con el <strong>Modo Compatibilidad Gráfica (Mesa3D Universal)</strong> que traduce los gráficos mediante CPU/Mesa de forma totalmente compatible para que el juego corra sin crasheos.
       </div>
 
       <div style="display: flex; gap: 10px; width: 100%; margin-top: 4px;">
