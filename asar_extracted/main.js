@@ -977,6 +977,110 @@ async function ensureJava(mcVersion, customJava) {
     return exe;
 }
 
+// ── GPU Compatibility & Mesa3D (OpenGL 3.2+ fix para Intel HD y gráficas antiguas) ──
+async function ensureMesaDriver(mode = 'llvmpipe') {
+    const validModes = ['llvmpipe', 'd3d12'];
+    const chosenMode = validModes.includes(mode) ? mode : 'llvmpipe';
+    const mesaDir = path.join(BASE_DATA_DIR, 'runtimes', 'mesa', chosenMode);
+    const targetDll = path.join(mesaDir, 'opengl32.dll');
+    if (fs.existsSync(targetDll)) return targetDll;
+
+    fs.mkdirSync(mesaDir, { recursive: true });
+    const archiveName = `mesa-${chosenMode}-x64-26.2.3.7z`;
+    const local7z = path.join(BASE_DATA_DIR, 'runtimes', 'mesa', archiveName);
+
+    if (!fs.existsSync(local7z)) {
+        sendLog(`📥 Descargando controlador gráfico Mesa3D (${chosenMode})...`);
+        const url = `https://github.com/mmozeiko/build-mesa/releases/download/26.2.3/${archiveName}`;
+        await downloadFile(url, local7z, (p) => {
+            sendProgress(p, `Descargando Mesa3D (${chosenMode}): ${p}%`);
+        });
+    }
+
+    sendLog(`📦 Extrayendo controlador de compatibilidad Mesa3D (${chosenMode})...`);
+    await new Promise((resolve, reject) => {
+        cp.exec(`tar -xf "${local7z}" -C "${mesaDir}"`, (err) => {
+            if (err) return reject(err);
+            resolve();
+        });
+    });
+
+    if (fs.existsSync(targetDll)) {
+        sendLog(`✅ Controlador de compatibilidad Mesa3D (${chosenMode}) instalado correctamente.`);
+        return targetDll;
+    }
+    throw new Error(`No se pudo extraer opengl32.dll para el modo ${chosenMode}`);
+}
+
+function cleanAllJavaGpuCompat() {
+    const runtimesDir = path.join(BASE_DATA_DIR, 'runtimes');
+    if (!fs.existsSync(runtimesDir)) return;
+    const companionDlls = ['opengl32.dll', 'libEGL.dll', 'libGLESv1_CM.dll', 'libGLESv2.dll'];
+    try {
+        const items = fs.readdirSync(runtimesDir);
+        for (const item of items) {
+            if (item.startsWith('java')) {
+                const jDir = path.join(runtimesDir, item);
+                const javaExe = findJavaExe(jDir);
+                if (javaExe) {
+                    const binDir = path.dirname(javaExe);
+                    for (const f of companionDlls) {
+                        const target = path.join(binDir, f);
+                        if (fs.existsSync(target)) {
+                            try { fs.unlinkSync(target); } catch {}
+                        }
+                    }
+                }
+            }
+        }
+        sendLog('⚪ Modo Compatibilidad Gráfica desactivado. Controladores nativos restaurados.');
+    } catch (e) {
+        sendLog(`⚠️ Error al limpiar controladores de compatibilidad: ${e.message}`, 'warn');
+    }
+}
+
+async function applyGpuCompatMode(javaExe, mode) {
+    if (!javaExe) return;
+    const javaBin = path.dirname(javaExe);
+    const targetDll = path.join(javaBin, 'opengl32.dll');
+    const companionDlls = ['libEGL.dll', 'libGLESv1_CM.dll', 'libGLESv2.dll'];
+
+    if (!mode || mode === 'off') {
+        if (fs.existsSync(targetDll)) {
+            try {
+                fs.unlinkSync(targetDll);
+                for (const f of companionDlls) {
+                    const cpPath = path.join(javaBin, f);
+                    if (fs.existsSync(cpPath)) fs.unlinkSync(cpPath);
+                }
+                sendLog('⚪ Modo Compatibilidad Gráfica: Desactivado (usando GPU nativa).');
+            } catch (e) {
+                sendLog(`⚠️ No se pudo remover opengl32.dll de Java: ${e.message}`, 'warn');
+            }
+        }
+        return;
+    }
+
+    sendLog(`🛡️ Modo Compatibilidad Gráfica activo: [${mode.toUpperCase()}]. Preparando controladores...`);
+    try {
+        await ensureMesaDriver(mode);
+        const sourceDir = path.join(BASE_DATA_DIR, 'runtimes', 'mesa', mode);
+        const srcDll = path.join(sourceDir, 'opengl32.dll');
+        if (fs.existsSync(srcDll)) {
+            fs.copyFileSync(srcDll, targetDll);
+            for (const f of companionDlls) {
+                const srcComp = path.join(sourceDir, f);
+                if (fs.existsSync(srcComp)) {
+                    fs.copyFileSync(srcComp, path.join(javaBin, f));
+                }
+            }
+            sendLog(`✅ Controlador de compatibilidad inyectado en Java runtime: ${path.basename(javaBin)}`);
+        }
+    } catch (err) {
+        sendLog(`⚠️ Error aplicando Modo Compatibilidad Gráfica: ${err.message}`, 'warn');
+    }
+}
+
 // ── Limpiar librerías corruptas antes de lanzar ────────────────────
 // Una descarga interrumpida deja JARs con ZIP truncado → crash en Fabric/Forge
 function cleanCorruptedLibs(mcPath) {
@@ -1325,6 +1429,7 @@ function loadSettings() {
         language: 'es',
         lastLoginType: 'offline',
         updateUrl: 'https://raw.githubusercontent.com/fonduev/astral-nebula-launcher/main/update.json',
+        gpuCompatMode: 'off',
 
         socialFirebase: {
             apiKey: "AIzaSyCfka9dpsVQvfsJ883segPzATNDUEuIVwc",
@@ -1370,6 +1475,27 @@ function loadSettings() {
 }
 ipcMain.handle('get-settings', () => loadSettings());
 ipcMain.handle('get-app-version', () => app.getVersion());
+ipcMain.handle('get-gpu-compat-mode', () => {
+    const s = loadSettings();
+    return s.gpuCompatMode || 'off';
+});
+ipcMain.handle('set-gpu-compat-mode', async (e, mode) => {
+    const s = loadSettings();
+    s.gpuCompatMode = mode || 'off';
+    fs.writeFileSync(SETTINGS_PATH, JSON.stringify(s, null, 2));
+    _cachedSettings = s;
+    _cachedSettingsTime = Date.now();
+    if (mode && mode !== 'off') {
+        try {
+            await ensureMesaDriver(mode);
+        } catch (err) {
+            sendLog(`⚠️ Error preparando Mesa3D (${mode}): ${err.message}`, 'warn');
+        }
+    } else {
+        cleanAllJavaGpuCompat();
+    }
+    return { success: true, mode: s.gpuCompatMode };
+});
 ipcMain.on('save-settings', (e, s) => {
     fs.writeFileSync(SETTINGS_PATH, JSON.stringify(s, null, 2));
     e.reply('settings-saved');
@@ -1383,6 +1509,20 @@ child_process.spawn = function(command, args, options) {
     if (isMinecraft) {
         try {
             const s = loadSettings();
+            if (s.gpuCompatMode && s.gpuCompatMode !== 'off') {
+                options = options || {};
+                const mesaMode = s.gpuCompatMode === 'd3d12' ? 'd3d12' : 'llvmpipe';
+                const mesaDir = path.join(BASE_DATA_DIR, 'runtimes', 'mesa', mesaMode);
+                const currentPath = (options.env && options.env.PATH) || process.env.PATH || '';
+                options.env = Object.assign({}, process.env, options.env || {}, {
+                    PATH: `${mesaDir};${currentPath}`,
+                    MESA_GL_VERSION_OVERRIDE: '4.5',
+                    MESA_GLSL_VERSION_OVERRIDE: '450',
+                    GALLIUM_DRIVER: mesaMode === 'd3d12' ? 'd3d12' : 'llvmpipe',
+                    LIBGL_ALWAYS_SOFTWARE: mesaMode === 'd3d12' ? '0' : '1'
+                });
+                console.log(`[GPU Compat] Injected Mesa3D (${mesaMode}) environment to Minecraft spawn`);
+            }
             if (s.prependCommand && s.prependCommand.trim()) {
                 const prependParts = s.prependCommand.trim().split(/\s+/);
                 const wrapperCommand = prependParts[0];
@@ -1394,7 +1534,7 @@ child_process.spawn = function(command, args, options) {
                 return originalSpawn(newCommand, newArgs, options);
             }
         } catch (err) {
-            console.error('[Wrapper] Error loading settings for wrapper prepend:', err.message);
+            console.error('[Wrapper/GPU Compat] Error loading settings for spawn:', err.message);
         }
     }
     return originalSpawn(command, args, options);
@@ -1553,7 +1693,7 @@ ipcMain.handle('get-installed-versions', () => {
             if (!fs.statSync(versionDir).isDirectory()) continue;
 
             const low = dir.toLowerCase();
-            if (low.includes('nebulapvp') || low.includes('nebula_client') || low.includes('flight')) {
+            if (low.includes('flight')) {
                 continue;
             }
 
@@ -6654,7 +6794,7 @@ ipcMain.handle('get-pvp-clients', () => {
                 const low = d.toLowerCase();
                 const jsonPath = path.join(versionsDir, d, `${d}.json`);
                 if (!fs.existsSync(jsonPath)) continue;
-                if (low.includes('cmpack') || low === 'cmclient' || low.includes('nebulapvp') || low.includes('nebula_client') || low.includes('flight')) continue;
+                if (low.includes('cmpack') || low === 'cmclient' || low.includes('flight')) continue;
                 if (low.includes('pvp') || low.includes('client')) {
                     list.push({
                         id: d,
@@ -6885,14 +7025,14 @@ ipcMain.on('microsoft-login', async (event) => {
 });
 
 ipcMain.handle('get-microsoft-profile', async () => {
-    const s = readSettings();
+    const s = loadSettings();
     let auth = s.lastAuthData;
     if (!auth || !auth.accessToken) return null;
 
     try {
         auth = await validateOrRefreshMicrosoftAuth(auth);
         s.lastAuthData = auth;
-        writeSettings(s);
+        saveSettings(s);
 
         return await new Promise((resolve) => {
             const req = https.get({
@@ -7317,6 +7457,7 @@ ipcMain.on('launch-game', async (event, data) => {
         await ensureMinecraftBase(launchVersion, mcPath);
 
         const javaExe = await ensureJava(launchVersion, s.javaPath);
+        await applyGpuCompatMode(javaExe, s.gpuCompatMode || 'off');
 
         // Verificar cancelación tras descarga de Java
         if (currentOperation?.cancelled) {
@@ -7483,6 +7624,13 @@ ipcMain.on('launch-game', async (event, data) => {
                 opts.customArgs.push('-Dfml.earlyprogresswindow=false');
             }
         }
+        if (s.gpuCompatMode && s.gpuCompatMode !== 'off') {
+            const mesaMode = s.gpuCompatMode === 'd3d12' ? 'd3d12' : 'llvmpipe';
+            const mesaDll = path.join(BASE_DATA_DIR, 'runtimes', 'mesa', mesaMode, 'opengl32.dll');
+            if (fs.existsSync(mesaDll)) {
+                opts.customArgs.push(`-Dorg.lwjgl.opengl.libname=${mesaDll}`);
+            }
+        }
 
         // Inyección del Java Agent para Cuenta Nebula o cuentas no-premium con skin personalizada
         if (data.type !== 'microsoft' && (data.type === 'nebula' || (data.auth && data.auth.skinUrl))) {
@@ -7553,8 +7701,11 @@ ipcMain.on('launch-game', async (event, data) => {
 
         // Ocultar launcher a la bandeja SOLO cuando Minecraft ya haya inicializado su ventana/render
         let trayHiddenThisInstance = false;
+        const recentGameLogs = [];
         launcher.on('data', e => {
             const rawStr = String(e);
+            recentGameLogs.push(rawStr);
+            if (recentGameLogs.length > 60) recentGameLogs.shift();
             sendLog(rawStr);
             const isGameWindowReady = rawStr.includes('Created window') || 
                                       rawStr.includes('Backend library: LWJGL') || 
@@ -7584,6 +7735,28 @@ ipcMain.on('launch-game', async (event, data) => {
             runningInstances.delete(instanceId);
             const count = runningInstances.size;
             sendLog(`✅ Instancia #${instanceId} cerrada (código: ${code}).`);
+
+            if (code !== 0) {
+                const fullRecent = recentGameLogs.join('\n');
+                if (fullRecent.includes('GLFW error 65542') || 
+                    fullRecent.includes('The driver does not appear to support OpenGL') || 
+                    fullRecent.includes('Pixel format not accelerated') ||
+                    fullRecent.includes('WGL: The driver does not appear to support OpenGL') ||
+                    fullRecent.includes('OpenGL 3.2')) {
+                    sendLog('⚠️ Incompatibilidad gráfica detectada (GLFW error 65542 / Falta OpenGL 3.2).', 'error');
+                    win?.webContents.send('opengl-crash-detected', {
+                        version: launchVersion,
+                        code
+                    });
+                } else if (fullRecent.includes('OutOfMemoryError') || fullRecent.includes('java.lang.OutOfMemoryError')) {
+                    sendLog('⚠️ Memoria RAM insuficiente detectada (OutOfMemoryError).', 'error');
+                    win?.webContents.send('ram-crash-detected', {
+                        version: launchVersion,
+                        code
+                    });
+                }
+            }
+
             win?.webContents.send('instances-update', { count, closedId: instanceId });
             if (count === 0) {
                 sendProgress(0, '');

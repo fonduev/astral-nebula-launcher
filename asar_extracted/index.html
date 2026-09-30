@@ -6532,6 +6532,31 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
               </label>
             </div>
 
+            <!-- 🛡️ MODO COMPATIBILIDAD GRÁFICA / FIX OPENGL (MESA3D / INTEL HD) -->
+            <div class="settings-card" style="grid-column: 1 / -1; background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(168, 85, 247, 0.08)); border: 1px solid rgba(56, 189, 248, 0.28); border-radius: 16px; padding: 20px 24px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+                <div style="max-width:620px;">
+                  <h3 style="margin:0; font-family:var(--font-heading); font-size:1.1rem; color:#fff; display:flex; align-items:center; gap:8px;">
+                    <span>🛡️</span> <span>MODO COMPATIBILIDAD GRÁFICA (FIX OPENGL 1.21 / PCS ANTIGUAS)</span>
+                  </h3>
+                  <p style="font-size:0.75rem; color:var(--text-dim); margin-top:6px; line-height:1.5;">
+                    Permite iniciar Minecraft 1.17+ y 1.21+ en tarjetas gráficas antiguas o integradas (Intel HD Graphics 2000, 3000, 4000, etc.) que no soportan OpenGL 3.2 de forma nativa. Soluciona el error <code>GLFW error 65542: The driver does not appear to support OpenGL</code>.
+                  </p>
+                </div>
+                <div style="min-width:270px; display:flex; flex-direction:column; gap:6px;">
+                  <select id="gpuCompatModeSelect" class="inp" style="width:100%; font-size:0.8rem; font-weight:700; padding:8px 12px; border-radius:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(56,189,248,0.4); color:#38bdf8;" onchange="changeGpuCompatMode(this.value)">
+                    <option value="off">⚪ Desactivado (Rendimiento nativo GPU)</option>
+                    <option value="llvmpipe">🟣 Mesa3D Universal (Fix Intel HD / GLFW 65542)</option>
+                    <option value="d3d12">🔷 Mesa3D DirectX 12 (Traducción a DX12)</option>
+                  </select>
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:var(--text-dim);">
+                    <span>Estado del controlador:</span>
+                    <span id="gpuCompatBadge" style="color:#10b981; font-weight:700;">Nativo</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- ✨ DESENFOQUE DE FONDOS / GLASS BLUR SLIDER CARD -->
             <div class="settings-card" style="grid-column: 1 / -1; background: rgba(14, 18, 32, 0.65); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 18px 24px;">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
@@ -9199,7 +9224,7 @@ function escapeVersionHtml(str) {
 
 function isExcludedVersion(str) {
   const low = String(str || '').toLowerCase();
-  return low.includes('nebulapvp') || low.includes('nebula_client') || low.includes('flight');
+  return low.includes('flight');
 }
 
 function loadVersionsList() {
@@ -10308,12 +10333,79 @@ function saveSettings() {
   const jvmEl = document.getElementById('sJvmArgs');
   if (jvmEl) settings.jvmArgs = jvmEl.value.trim();
   
+  const gpuCompatSel = document.getElementById('gpuCompatModeSelect');
+  if (gpuCompatSel) settings.gpuCompatMode = gpuCompatSel.value;
+
   ipc.send('save-settings', settings);
   toast('Guardado. Inicializando base de datos social...', 'success');
   
   setTimeout(() => {
     initSocial();
   }, 500);
+}
+
+async function changeGpuCompatMode(mode) {
+  settings.gpuCompatMode = mode;
+  updateGpuCompatBadge(mode);
+  toast('Configurando modo de compatibilidad gráfica...', 'info');
+  try {
+    const res = await ipc.invoke('set-gpu-compat-mode', mode);
+    if (res.mode === 'off') {
+      toast('⚪ Modo compatibilidad desactivado (usando GPU nativa).', 'info');
+    } else {
+      toast(`🛡️ Modo compatibilidad activado (${mode === 'd3d12' ? 'DirectX 12' : 'Mesa3D Universal'}).`, 'success');
+    }
+  } catch (err) {
+    toast(`⚠️ Error configurando GPU compat: ${err.message}`, 'error');
+  }
+}
+
+function updateGpuCompatBadge(mode) {
+  const badge = document.getElementById('gpuCompatBadge');
+  if (!badge) return;
+  if (!mode || mode === 'off') {
+    badge.textContent = 'Nativo (GPU)';
+    badge.style.color = '#10b981';
+  } else if (mode === 'llvmpipe') {
+    badge.textContent = 'Mesa3D Universal (Activo)';
+    badge.style.color = '#c084fc';
+  } else if (mode === 'd3d12') {
+    badge.textContent = 'DirectX 12 (Activo)';
+    badge.style.color = '#38bdf8';
+  }
+}
+
+let lastOpenglCrashData = null;
+ipc.on('opengl-crash-detected', (event, data) => {
+  lastOpenglCrashData = data;
+  const verTag = document.getElementById('opengl-crash-version-tag');
+  if (verTag) verTag.textContent = data.version || '1.21.11';
+  const modal = document.getElementById('modal-opengl-crash');
+  if (modal) modal.style.display = 'flex';
+});
+
+ipc.on('ram-crash-detected', (event, data) => {
+  toast(`⚠️ Minecraft ${data.version || ''} se cerró por falta de RAM. Te sugerimos subir la asignación de RAM en Ajustes.`, 'warn', 8000);
+});
+
+function closeOpenglCrashModal() {
+  const modal = document.getElementById('modal-opengl-crash');
+  if (modal) modal.style.display = 'none';
+}
+
+async function activateCompatAndRetry() {
+  closeOpenglCrashModal();
+  toast('🛡️ Activando Modo Compatibilidad Gráfica (Mesa3D Universal)...', 'info');
+  await ipc.invoke('set-gpu-compat-mode', 'llvmpipe');
+  settings.gpuCompatMode = 'llvmpipe';
+  const sel = document.getElementById('gpuCompatModeSelect');
+  if (sel) sel.value = 'llvmpipe';
+  updateGpuCompatBadge('llvmpipe');
+  toast('✅ Modo Compatibilidad activo. Iniciando Minecraft...', 'success');
+  setTimeout(() => {
+    const launchBtn = document.getElementById('launchBtn');
+    if (launchBtn) launchBtn.click();
+  }, 600);
 }
 
 let titleClickCount = 0;
@@ -11186,6 +11278,13 @@ function ensureFirebaseInitialized() {
       const isHide = !!settings.hideToTrayOnMinimize;
       hideTog.checked = isHide;
       toggleHideToTrayOnMinimize(isHide);
+    }
+    // Restaurar selector de compatibilidad GPU
+    const gpuCompatSel = document.getElementById('gpuCompatModeSelect');
+    if (gpuCompatSel) {
+      const gMode = settings.gpuCompatMode || 'off';
+      gpuCompatSel.value = gMode;
+      updateGpuCompatBadge(gMode);
     }
     // Cargar modpacks instalados
     loadInstalledModpacks();
@@ -12816,7 +12915,38 @@ function updateMyStatus(status, activity) {
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <!-- MODAL: GALERÍA DE SCREENSHOTS                                     -->
   <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- MODAL: ASISTENTE DE COMPATIBILIDAD GRÁFICA (OPENGL 3.2 FIX)         -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div id="modal-opengl-crash" class="modal-overlay" style="display:none; z-index:10020; -webkit-app-region:no-drag;" onclick="if(event.target===this) closeOpenglCrashModal()">
+    <div class="modal-content" style="max-width: 480px; padding: 26px 22px; gap: 16px; border-radius: 20px; background: rgba(12, 14, 24, 0.96); border: 1px solid rgba(56, 189, 248, 0.35); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);">
+      
+      <div style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(168, 85, 247, 0.2)); border: 1px solid rgba(56, 189, 248, 0.4); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; box-shadow: 0 8px 24px rgba(56, 189, 248, 0.25); align-self:center;">
+        🛡️
+      </div>
+
+      <div style="text-align: center;">
+        <h3 style="margin: 0 0 6px 0; font-size: 1.15rem; font-weight: 800; color: #fff; letter-spacing: -0.01em;">
+          Incompatibilidad Gráfica Detectada
+        </h3>
+        <p style="margin: 0; font-size: 0.8rem; color: #38bdf8; font-weight: 600;">Error GLFW 65542 (Falta soporte para OpenGL 3.2)</p>
+      </div>
+
+      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 14px 16px; font-size: 0.78rem; color: var(--text-dim, #94a3b8); line-height: 1.5; text-align: left;">
+        Minecraft <span id="opengl-crash-version-tag" style="color:#fff; font-weight:700;">1.21.11</span> no pudo iniciar porque tu tarjeta gráfica (típico de Intel HD Graphics antiguas) no soporta OpenGL 3.2 de fábrica. Este es el motivo por el cual muchas PCs se quedan en la 1.16.<br><br>
+        <strong style="color:#fff;">¡Podemos solucionarlo ahora mismo!</strong> Nebula Launcher cuenta con el <strong>Modo Compatibilidad Gráfica (Mesa3D Universal)</strong> que traduce los gráficos para que el juego arranque en tu computadora.
+      </div>
+
+      <div style="display: flex; gap: 10px; width: 100%; margin-top: 4px;">
+        <button class="btn btn-ghost" style="flex: 1; font-size: 0.82rem;" onclick="closeOpenglCrashModal()">Cancelar</button>
+        <button class="btn btn-primary" style="flex: 2; font-size: 0.82rem; font-weight: 800; background: linear-gradient(135deg, #38bdf8, #a855f7); border: none; color: #fff;" onclick="activateCompatAndRetry()">
+          🛡️ Activar y Reintentar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
   <!-- MODAL: CONFIRMACIÓN DE CIERRE (MINIMALISTA)                         -->
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <div id="close-confirm-modal" class="modal-overlay" style="display:none; z-index:10015; -webkit-app-region:no-drag;" onclick="if(event.target===this) dismissCloseModal()">
@@ -18306,7 +18436,7 @@ function openAddOverlaySkinModal() {
         installed = new Set(installedMeta.map(v => v.id));
 
         let rawClients = await ipc.invoke('get-pvp-clients');
-        const clients = (rawClients || []).filter(c => c.id !== 'nebulapvp' && !c.id.toLowerCase().includes('flight') && !c.name.toLowerCase().includes('flight'));
+        const clients = (rawClients || []).filter(c => !c.id.toLowerCase().includes('flight') && !c.name.toLowerCase().includes('flight'));
         pvpGrid.innerHTML = '';
         if (!clients || clients.length === 0) {
           pvpGrid.innerHTML = '<p style="color:var(--text-dim); text-align:center; padding: 40px; grid-column: 1/-1;">No hay clientes PVP disponibles.</p>';
@@ -18325,20 +18455,7 @@ function openAddOverlaySkinModal() {
           const badgeStyle = isInstalled ? 'background:rgba(16,185,129,0.15);color:#10b981;border-color:rgba(16,185,129,0.3);' : '';
 
           let btnHtml = '';
-          if (c.hasVersionSelect) {
-            const versionOpts = (c.versions || []).map(v => `<option value="${v.id}">${v.name}</option>`).join('');
-            btnHtml = `
-              <div style="display:flex; flex-direction:column; gap:8px; width:100%; margin-top:8px;">
-                <label style="font-size:0.72rem; color:var(--text-dim); font-weight:600;">Seleccionar Versión:</label>
-                <select id="${c.id}-version-select" class="inp" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.4); color: white; border-radius: 8px; border: 1px solid rgba(168,85,247,0.3); height: 36px; outline: none; padding: 0 10px; font-size: 0.82rem;">
-                  ${versionOpts}
-                </select>
-                <button class="client-install-btn" style="background: linear-gradient(135deg, #a855f7aa, #7e22ce66); border: 0.5px solid #a855f7; color: white; font-weight:700; cursor:pointer;" onclick="playNebulaPvpClient('${c.id}')">
-                  ▶ Jugar ${c.name}
-                </button>
-              </div>
-            `;
-          } else if (isInstalled) {
+          if (isInstalled) {
             let actualId = c.id;
             if (c.id === 'cmpack') actualId = installedMeta.find(v => v.id.toLowerCase() === 'cmclient' || v.id.toLowerCase().includes('cmpack'))?.id || 'cmpack_1.8.8';
             btnHtml = `
@@ -18500,27 +18617,6 @@ function openAddOverlaySkinModal() {
     }
 
 
-
-    async function playNebulaPvpClient(clientId) {
-      const versionSelect = document.getElementById(clientId + '-version-select');
-      const selectedVersion = versionSelect ? versionSelect.value : '1.8.9';
-      if (!authUser) {
-        toast('Inicia sesión primero en la pestaña Jugar.', 'error');
-        showTab('play');
-        return;
-      }
-      const ram = parseInt(document.getElementById('ramSlider')?.value || 4);
-      toast(`🚀 Iniciando Nebula PVP (${selectedVersion})...`, 'info');
-      showAbortButton('⏹️ Cancelar');
-      ipc.send('launch-game', {
-        version: selectedVersion,
-        modId: 'nebulapvp_' + selectedVersion,
-        ram,
-        username: authUser,
-        type: authType,
-        auth: authData
-      });
-    }
 
     function openPvpClientUrl(url) {
       require('electron').shell.openExternal(url);
