@@ -1,16 +1,16 @@
 {
-  "version": "5.0.5",
-  "name": "Nebula Launcher v5.0.5 — Fix Contexto OpenGL en Hilo de Render (Mesa3D LWJGL Fix)",
+  "version": "5.0.6",
+  "name": "Nebula Launcher v5.0.6 — Perfil Vanilla 60 FPS & Multihilo Mesa3D para PCs Antiguas",
   "releaseDate": "2026-09-30",
   "url": "https://raw.githubusercontent.com/fonduev/astral-nebula-launcher/main/app.asar",
-  "installerUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.5/Nebula.Launcher.Setup.5.0.5.exe",
-  "portableUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.5/Nebula-Launcher-v5.0.5-Portable.zip",
+  "installerUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.6/Nebula.Launcher.Setup.5.0.6.exe",
+  "portableUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.6/Nebula-Launcher-v5.0.6-Portable.zip",
   "mandatory": false,
   "changelog": [
-    "🛡️ Modo Compatibilidad Gráfica (Mesa3D): Permite iniciar Minecraft 1.21+ en PCs que se habían quedado en la 1.16 por falta de soporte OpenGL 3.2. Traduce gráficos mediante LLVMpipe o DirectX 12, solucionando de raíz el error GLFW 65542 en gráficas integradas e Intel HD.",
-    "🤖 Asistente Inteligente de Crashes: Si Minecraft falla al iniciar con error de OpenGL o memoria RAM insuficiente, el launcher lo detecta al instante y te ofrece repararlo y reintentar con 1 solo clic.",
-    "⚙️ Control Total en Configuración: Interruptor personalizable para activar o desactivar la compatibilidad gráfica cuando lo necesites, manteniendo el 100% de rendimiento nativo en GPUs dedicadas.",
-    "🌿 Soporte para Minecraft Vanilla Puro: Creación de instancias aisladas de Minecraft oficial sin modloaders obligatorios.",
-    "⚡ Optimizaciones de Rendimiento: Parámetros JVM optimizados, recolector de basura balanceado y tasa de refresco desbloqueada sin VSync forzado."
+    "⚡ Perfil Vanilla 60 FPS Puro: Optimización automática y manual en 1-clic para jugar Minecraft 1.21+ sin ningún mod instalado a máxima tasa de refresco (50-60 FPS en PCs antiguas).",
+    "🧵 Renderizado Multihilo Mesa3D: El rasterizador por software ahora utiliza todos los núcleos e hilos lógicos del procesador (LP_NUM_THREADS) con colas asíncronas de Gallium.",
+    "🚫 Mipmaps a 0 & Texturizado Ultrarrápido: Desactiva el cálculo de mipmaps por CPU que saturaba el procesador en laptops y PCs con gráficas integradas heredadas.",
+    "🚀 Prioridad Alta en Windows 11/10: Elevación automática de prioridad del proceso javaw.exe y preferencia de GPU de alto rendimiento en el registro del sistema.",
+    "🧹 Recolector de Basura G1GC de Baja Latencia: Eliminación de microtirones y congelamientos ajustando pausas de GC a 20ms y previniendo sobrepaginación en disco con 8GB de RAM."
   ]
 }

@@ -5469,7 +5469,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
               <div>
                 <div style="font-size:.64rem;letter-spacing:.1em;color:var(--text-dim);text-transform:uppercase;margin-bottom:2px;">ESTADO DEL LAUNCHER</div>
                 <div style="font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:8px;">
-                  <span id="updater-panel-ver">Nebula Launcher v5.0.2</span>
+                  <span id="updater-panel-ver">Nebula Launcher v5.0.6</span>
                   <span style="font-size:0.65rem; background:rgba(74,222,128,0.15); color:#4ade80; border:1px solid rgba(74,222,128,0.4); padding:2px 7px; border-radius:10px;">🟢 Actualizado</span>
                 </div>
               </div>
@@ -6553,6 +6553,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
                     <span>Estado del controlador:</span>
                     <span id="gpuCompatBadge" style="color:#10b981; font-weight:700;">Nativo</span>
                   </div>
+                  <button id="btnOptimizeVanillaFps" onclick="applyVanilla60FpsOptimization()" class="btn btn-sm" style="margin-top:6px; background:linear-gradient(135deg, #10b981, #059669); color:#fff; font-size:0.75rem; font-weight:700; border:none; border-radius:8px; padding:7px 12px; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer; box-shadow:0 2px 10px rgba(16,185,129,0.25); transition:all 0.2s ease;">
+                    <span>⚡</span> <span>Optimizar Minecraft Vanilla (60 FPS)</span>
+                  </button>
+                  <span style="font-size:0.68rem; color:var(--text-dim); text-align:center;">Configura gráficos rápidos, 0 mipmaps y multihilo en CPU para máxima fluidez.</span>
                 </div>
               </div>
             </div>
@@ -7082,7 +7086,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
 
 
-<div id="launcher-version-tag" style="position: fixed; right: 16px; bottom: 14px; font-size: 0.68rem; color: rgba(255, 255, 255, 0.22); font-family: 'Outfit', sans-serif; font-weight: 700; pointer-events: none; z-index: 99999; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.6);">v5.0.2</div>
+<div id="launcher-version-tag" style="position: fixed; right: 16px; bottom: 14px; font-size: 0.68rem; color: rgba(255, 255, 255, 0.22); font-family: 'Outfit', sans-serif; font-weight: 700; pointer-events: none; z-index: 99999; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0,0,0,0.6);">v5.0.6</div>
 
 <script>
 const { ipcRenderer: ipc } = require('electron');
@@ -10372,6 +10376,20 @@ function updateGpuCompatBadge(mode) {
   } else if (mode === 'd3d12') {
     badge.textContent = 'DirectX 12 (Activo)';
     badge.style.color = '#38bdf8';
+  }
+}
+
+async function applyVanilla60FpsOptimization() {
+  toast('⚡ Optimizando opciones de Minecraft Vanilla...', 'info');
+  try {
+    const res = await ipc.invoke('optimize-vanilla-fps');
+    if (res && res.success) {
+      toast('⚡ ¡Perfil 60 FPS Vanilla aplicado! (Gráficos rápidos, Mipmap 0, Multihilo)', 'success');
+    } else {
+      toast(`⚠️ No se pudo aplicar: ${res?.error || 'Error desconocido'}`, 'error');
+    }
+  } catch (err) {
+    toast(`⚠️ Error optimizando opciones: ${err.message}`, 'error');
   }
 }
 

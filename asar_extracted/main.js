@@ -17,6 +17,7 @@ const { execSync, spawn, exec } = cp;
 const crypto = require('crypto');
 const AdmZip = require('adm-zip');
 const zlib = require('zlib');
+const os = require('os');
 
 process.on('uncaughtException', (err) => {
   try {
@@ -1143,6 +1144,77 @@ async function applyGpuCompatMode(javaExe, mode, gameDir) {
     }
 }
 
+function registerHighPerformanceGpu(javaExe) {
+    if (process.platform !== 'win32' || !javaExe || !fs.existsSync(javaExe)) return;
+    try {
+        const regKey = 'HKCU\\Software\\Microsoft\\DirectX\\UserGpuPreferences';
+        const regVal = 'GpuPreference=2;'; // 2 = High Performance GPU
+        cp.exec(`reg add "${regKey}" /v "${javaExe}" /t REG_SZ /d "${regVal}" /f`, () => {});
+    } catch {}
+}
+
+const VANILLA_PERF_OPTIONS = {
+    renderDistance: '4',
+    simulationDistance: '4',
+    entityDistanceScaling: '0.5',
+    particles: '2',               // 0=todas, 1=reducidas, 2=mínimas
+    graphicsMode: '0',            // 0=rápidos (Fast), 1=elegantes (Fancy), 2=fabulosos
+    ao: 'false',                  // Oclusión ambiental desactivada (libera CPU del cálculo de sombreado)
+    prioritizeChunkUpdates: '0',  // 0=multihilo asíncrono (evita congelamientos del hilo de render)
+    biomeBlendRadius: '0',        // 0=sin degradado entre biomas (ahorra miles de cálculos por frame)
+    renderClouds: '"false"',      // Nubes desactivadas
+    entityShadows: 'false',       // Sombras de entidades desactivadas
+    mipmapLevels: '0',            // 0 mipmaps: ¡CRÍTICO! Aumenta drásticamente los FPS en software rasterizer / GPUs antiguas
+    enableVsync: 'false',         // Sin límite de refresco ni retraso de sincronización vertical
+    maxFps: '120',                // Margen fluido
+    glDebugVerbosity: '0',        // Cero overhead de depuración OpenGL
+    bobView: 'false',             // Balanceo desactivado
+    distortionEffectsScale: '0.0',// Efectos de distorsión desactivados
+    fovEffectScale: '0.0',        // Efectos dinámicos de FOV desactivados
+    screenEffectScale: '0.0',     // Efectos de pantalla desactivados
+    damageTiltStrength: '0.0'
+};
+
+function optimizeVanillaOptions(targetDir) {
+    try {
+        if (!targetDir || !fs.existsSync(targetDir)) return false;
+        const optPath = path.join(targetDir, 'options.txt');
+        let lines = [];
+        if (fs.existsSync(optPath)) {
+            const content = fs.readFileSync(optPath, 'utf8');
+            lines = content.split(/\r?\n/);
+        }
+
+        const keysFound = new Set();
+        const newLines = lines.map(line => {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith('#')) return line;
+            const colonIdx = trimmed.indexOf(':');
+            if (colonIdx > 0) {
+                const key = trimmed.slice(0, colonIdx).trim();
+                if (key in VANILLA_PERF_OPTIONS) {
+                    keysFound.add(key);
+                    return `${key}:${VANILLA_PERF_OPTIONS[key]}`;
+                }
+            }
+            return line;
+        });
+
+        for (const [k, v] of Object.entries(VANILLA_PERF_OPTIONS)) {
+            if (!keysFound.has(k)) {
+                newLines.push(`${k}:${v}`);
+            }
+        }
+
+        fs.writeFileSync(optPath, newLines.join('\r\n'), 'utf8');
+        sendLog(`⚡ Perfil Vanilla 60 FPS inyectado en ${path.basename(targetDir)}/options.txt (Mipmaps=0, Render=4, Fast)`);
+        return true;
+    } catch (err) {
+        sendLog(`⚠️ Error optimizando options.txt: ${err.message}`, 'warn');
+        return false;
+    }
+}
+
 // ── Limpiar librerías corruptas antes de lanzar ────────────────────
 // Una descarga interrumpida deja JARs con ZIP truncado → crash en Fabric/Forge
 function cleanCorruptedLibs(mcPath) {
@@ -1550,6 +1622,8 @@ ipcMain.handle('set-gpu-compat-mode', async (e, mode) => {
     if (mode && mode !== 'off') {
         try {
             await ensureMesaDriver(mode);
+            const mcPath = getMcPath(s.customMcPath);
+            optimizeVanillaOptions(mcPath);
         } catch (err) {
             sendLog(`⚠️ Error preparando Mesa3D (${mode}): ${err.message}`, 'warn');
         }
@@ -1558,12 +1632,36 @@ ipcMain.handle('set-gpu-compat-mode', async (e, mode) => {
     }
     return { success: true, mode: s.gpuCompatMode };
 });
+ipcMain.handle('optimize-vanilla-fps', async () => {
+    try {
+        const s = loadSettings();
+        const mcPath = getMcPath(s.customMcPath);
+        const ok = optimizeVanillaOptions(mcPath);
+        return { success: ok };
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+});
 ipcMain.on('save-settings', (e, s) => {
     fs.writeFileSync(SETTINGS_PATH, JSON.stringify(s, null, 2));
     _cachedSettings = s;
     _cachedSettingsTime = Date.now();
     e.reply('settings-saved');
 });
+
+function elevateMinecraftPriority(proc) {
+    if (proc && proc.pid && process.platform === 'win32') {
+        try {
+            cp.exec(`wmic process where processid=${proc.pid} CALL setpriority "high priority"`, (err) => {
+                if (err) {
+                    try {
+                        cp.exec(`powershell -NoProfile -Command "(Get-Process -Id ${proc.pid}).PriorityClass = 'High'"`);
+                    } catch {}
+                }
+            });
+        } catch {}
+    }
+}
 
 // Monkeypatch child_process.spawn globally to prepend wrapper commands
 const child_process = require('child_process');
@@ -1578,14 +1676,20 @@ child_process.spawn = function(command, args, options) {
                 const mesaMode = s.gpuCompatMode === 'd3d12' ? 'd3d12' : 'llvmpipe';
                 const mesaDir = path.join(BASE_DATA_DIR, 'runtimes', 'mesa', mesaMode);
                 const currentPath = (options.env && options.env.PATH) || process.env.PATH || '';
+                const numCpus = os.cpus()?.length || 4;
                 options.env = Object.assign({}, process.env, options.env || {}, {
                     PATH: `${mesaDir};${currentPath}`,
                     MESA_GL_VERSION_OVERRIDE: '4.5',
                     MESA_GLSL_VERSION_OVERRIDE: '450',
                     GALLIUM_DRIVER: mesaMode === 'd3d12' ? 'd3d12' : 'llvmpipe',
-                    LIBGL_ALWAYS_SOFTWARE: mesaMode === 'd3d12' ? '0' : '1'
+                    LIBGL_ALWAYS_SOFTWARE: mesaMode === 'd3d12' ? '0' : '1',
+                    LP_NUM_THREADS: String(numCpus),
+                    GALLIUM_THREAD: '1',
+                    MESA_NO_ERROR: '1',
+                    LP_PERF: 'no_mipmap',
+                    SHIM_MCCOMPAT: '0xD'
                 });
-                console.log(`[GPU Compat] Injected Mesa3D (${mesaMode}) environment to Minecraft spawn`);
+                console.log(`[GPU Compat] Injected Mesa3D (${mesaMode}) multithreading environment to Minecraft spawn (Threads: ${numCpus})`);
             }
             if (s.prependCommand && s.prependCommand.trim()) {
                 const prependParts = s.prependCommand.trim().split(/\s+/);
@@ -1595,11 +1699,16 @@ child_process.spawn = function(command, args, options) {
                 console.log(`[Wrapper] Original executable: ${command}`);
                 const newCommand = wrapperCommand;
                 const newArgs = [...wrapperArgs, command, ...args];
-                return originalSpawn(newCommand, newArgs, options);
+                const proc = originalSpawn(newCommand, newArgs, options);
+                elevateMinecraftPriority(proc);
+                return proc;
             }
         } catch (err) {
             console.error('[Wrapper/GPU Compat] Error loading settings for spawn:', err.message);
         }
+        const proc = originalSpawn(command, args, options);
+        elevateMinecraftPriority(proc);
+        return proc;
     }
     return originalSpawn(command, args, options);
 };
@@ -7522,6 +7631,7 @@ ipcMain.on('launch-game', async (event, data) => {
 
         const javaExe = await ensureJava(launchVersion, s.javaPath);
         await applyGpuCompatMode(javaExe, s.gpuCompatMode || 'off', mcPath);
+        registerHighPerformanceGpu(javaExe);
 
         // Verificar cancelación tras descarga de Java
         if (currentOperation?.cancelled) {
@@ -7658,9 +7768,14 @@ ipcMain.on('launch-game', async (event, data) => {
             customLaunchArgs.push('--gameDir', instanceDir);
         }
 
-        const parsedRam = parseInt(data.ram) || 6;
+        let parsedRam = parseInt(data.ram) || 6;
+        const totalMemGb = Math.round(os.totalmem() / (1024 * 1024 * 1024));
+        if (s.gpuCompatMode && s.gpuCompatMode !== 'off' && totalMemGb <= 8 && parsedRam > 3) {
+            parsedRam = 3;
+            sendLog(`⚡ [Auto-RAM] Ajustando RAM a 3GB para evitar paginación en disco con rasterizado por software (${totalMemGb}GB en sistema).`);
+        }
         const maxMemGb = Math.min(Math.max(2, parsedRam), 16);
-        const minMemGb = Math.max(2, Math.min(maxMemGb, 4));
+        const minMemGb = Math.max(2, Math.min(maxMemGb, 3));
         const opts = {
             authorization: auth, root: mcPath, javaPath: javaExe,
             version: versionOpts,
@@ -7686,6 +7801,27 @@ ipcMain.on('launch-game', async (event, data) => {
         if (isForge || isNeoForge) {
             if (!opts.customArgs.includes('-Dfml.earlyprogresswindow=false')) {
                 opts.customArgs.push('-Dfml.earlyprogresswindow=false');
+            }
+        }
+        // Inyectar flags de GC de baja latencia cuando se usa modo de compatibilidad
+        if (s.gpuCompatMode && s.gpuCompatMode !== 'off') {
+            const compatG1Flags = [
+                '-XX:+UseG1GC',
+                '-XX:MaxGCPauseMillis=20',
+                '-XX:G1ReservePercent=15',
+                '-XX:G1HeapRegionSize=32M',
+                '-XX:+DisableExplicitGC',
+                '-XX:+AlwaysPreTouch'
+            ];
+            for (const flag of compatG1Flags) {
+                const flagKey = flag.split('=')[0];
+                if (!opts.customArgs.some(a => a.startsWith(flagKey))) {
+                    opts.customArgs.push(flag);
+                }
+            }
+            optimizeVanillaOptions(instanceDir || mcPath);
+            if (instanceDir !== mcPath) {
+                optimizeVanillaOptions(mcPath);
             }
         }
 
