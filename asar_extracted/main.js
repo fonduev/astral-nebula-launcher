@@ -4675,7 +4675,17 @@ function copyDirSync(src, dest) {
         if (entry.isDirectory()) {
             copyDirSync(srcPath, destPath);
         } else {
-            fs.copyFileSync(srcPath, destPath);
+            try {
+                if (fs.existsSync(destPath)) {
+                    try { fs.chmodSync(destPath, 0o666); } catch {}
+                }
+                fs.copyFileSync(srcPath, destPath);
+            } catch (copyErr) {
+                try {
+                    fs.unlinkSync(destPath);
+                    fs.copyFileSync(srcPath, destPath);
+                } catch {}
+            }
         }
     }
 }
@@ -4686,6 +4696,7 @@ function cleanDirSync(dir) {
     for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
         try {
+            try { fs.chmodSync(fullPath, 0o666); } catch {}
             if (entry.isDirectory()) {
                 fs.rmSync(fullPath, { recursive: true, force: true });
             } else {
@@ -4715,8 +4726,18 @@ function copyDirSafelySync(src, dest) {
             copyDirSafelySync(srcPath, destPath);
         } else {
             if (!sensitive.has(nameLower) || !fs.existsSync(destPath)) {
-                fs.mkdirSync(path.dirname(destPath), { recursive: true });
-                fs.copyFileSync(srcPath, destPath);
+                try {
+                    fs.mkdirSync(path.dirname(destPath), { recursive: true });
+                    if (fs.existsSync(destPath)) {
+                        try { fs.chmodSync(destPath, 0o666); } catch {}
+                    }
+                    fs.copyFileSync(srcPath, destPath);
+                } catch (copyErr) {
+                    try {
+                        fs.unlinkSync(destPath);
+                        fs.copyFileSync(srcPath, destPath);
+                    } catch {}
+                }
             }
         }
     }
@@ -5063,7 +5084,17 @@ ipcMain.handle('change-modpack-version', async (event, data) => {
                         fs.mkdirSync(targetPath, { recursive: true });
                     } else {
                         fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-                        fs.writeFileSync(targetPath, entry.getData());
+                        try {
+                            if (fs.existsSync(targetPath)) {
+                                try { fs.chmodSync(targetPath, 0o666); } catch {}
+                            }
+                            fs.writeFileSync(targetPath, entry.getData());
+                        } catch (writeErr) {
+                            try {
+                                fs.unlinkSync(targetPath);
+                                fs.writeFileSync(targetPath, entry.getData());
+                            } catch {}
+                        }
                     }
                 }
             });
@@ -5172,6 +5203,7 @@ ipcMain.handle('change-modpack-version', async (event, data) => {
                 try {
                     const targetFilePath = path.join(instancePath, file.path);
                     fs.mkdirSync(path.dirname(targetFilePath), { recursive: true });
+                    try { if (fs.existsSync(targetFilePath)) fs.chmodSync(targetFilePath, 0o666); } catch {}
                     await downloadFile(file.downloads[0], targetFilePath, () => {});
                     downloaded++;
 
