@@ -46,7 +46,7 @@
     }
   },
   "datePublished": "2026-09-08",
-  "dateModified": "2026-09-08"
+  "dateModified": "2026-10-12"
 }
   </script>
 
@@ -344,7 +344,7 @@
       <div class="badge">☕ Entorno de Ejecución</div>
       <h1>Guía de Versiones de Java para Minecraft: De Java 8 a Java 21 y Rendimiento JVM</h1>
       <div class="article-meta">
-        <span>📅 Actualizado: Septiembre 2026</span>
+        <span>📅 Revisado: 12 de octubre de 2026</span>
         <span>⏱️ 7 min de lectura</span>
         <span>✍️ Equipo Técnico de Nebula</span>
       </div>
@@ -374,7 +374,7 @@
             <tr>
               <td><strong>Minecraft 1.0 a 1.16.4</strong></td>
               <td><strong>Java 8 (OpenJDK 1.8)</strong></td>
-              <td>La versión clásica para PvP (1.7.10 y 1.8.9) y mods de Forge 1.12.2.</td>
+              <td>Comprueba Java y el cargador requeridos por la versión concreta del juego y los mods.</td>
             </tr>
             <tr>
               <td><strong>Minecraft 1.16.5 a 1.17.1</strong></td>
@@ -389,43 +389,44 @@
             <tr>
               <td><strong>Minecraft 1.20.5, 1.21 y posteriores</strong></td>
               <td><strong>Java 21 (OpenJDK 21 LTS)</strong></td>
-              <td>Requisito obligatorio moderno con recolección de basura avanzada (ZGC) y Virtual Threads.</td>
+              <td>Comprueba el runtime requerido en las notas oficiales de la versión y del cargador.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h2>2. ¿Por qué NO deberías usar el instalador clásico de Oracle Java?</h2>
+      <h2>2. Elige una distribución compatible y mantenida</h2>
       <p>
-        Históricamente, los usuarios solían ir a la web de Oracle y descargar el ejecutable tradicional. Sin embargo, Oracle Java contiene licencias restrictivas y no incluye las optimizaciones modernas de compilación Just-In-Time (JIT) que ofrecen las distribuciones de código abierto.
+        Hay varias distribuciones de Java compatibles con OpenJDK. La licencia y las condiciones de uso dependen de la distribución y su versión; no es correcto afirmar que una distribución comunitaria tenga automáticamente más optimizaciones JIT que otra. Para jugar, lo más importante es usar una versión compatible y actualizada, preferentemente la que administra el launcher o recomienda el proyecto.
       </p>
-      <p>Hoy en día, las distribuciones más rápidas y recomendadas para videojuegos son:</p>
+      <p>Ejemplos de distribuciones con documentación y descargas propias:</p>
       <ul>
-        <li><strong>Eclipse Adoptium (Temurin):</strong> La distribución comunitaria más sólida, estable y testeada del mundo. Es la opción recomendada por defecto.</li>
-        <li><strong>GraalVM:</strong> Un compilador de Java ultra optimizado desarrollado por Oracle Labs. Puede ofrecer entre un <strong>5% y un 15% más de rendimiento en FPS</strong> en procesadores modernos gracias a su avanzado análisis de escape y vectorización automática de bucles.</li>
-        <li><strong>Microsoft Build of OpenJDK:</strong> Extremadamente optimizado para sistemas Windows y arquitecturas x64 y ARM64.</li>
+        <li><strong>Eclipse Temurin:</strong> una distribución OpenJDK mantenida por Adoptium; consulta sus versiones disponibles y ciclo de soporte.</li>
+        <li><strong>Oracle JDK:</strong> distribución de Java de Oracle; revisa la licencia aplicable a tu uso y los términos de la versión concreta.</li>
+        <li><strong>Microsoft Build of OpenJDK:</strong> distribución OpenJDK con instaladores y documentación de Microsoft para plataformas compatibles.</li>
+        <li><strong>GraalVM:</strong> distribución basada en Java con herramientas adicionales; no asumas una ganancia de FPS en Minecraft sin medir la misma instancia y carga con ambas JVM.</li>
       </ul>
 
-      <h2>3. Detección y Descarga Automática de Java en Nebula Launcher</h2>
+      <h2>3. Comprobar qué Java usa tu launcher</h2>
       <p>
-        Tener que instalar múltiples versiones de Java en Windows (Java 8 para 1.8.9 y Java 21 para 1.21) solía causar conflictos con las variables de entorno <code>JAVA_HOME</code> y el registro de Windows.
+        Puedes tener más de una distribución de Java instalada. Un launcher puede elegir un runtime propio por instancia, por lo que cambiar las variables de entorno <code>JAVA_HOME</code> o <code>PATH</code> no necesariamente cambia el Java que usa el juego.
       </p>
       <p>
-        <strong>Nebula Launcher resuelve este problema de raíz:</strong>
+        Si tu launcher administra runtimes por instancia, deja que seleccione la versión compatible o verifica la ruta y salida de <code>java -version</code> al diagnosticar un fallo. Cambiar <code>JAVA_HOME</code> no garantiza que un launcher use ese runtime: algunos mantienen una ruta interna configurada en el perfil.
       </p>
       <ul>
-        <li>El launcher incluye un gestor interno multi-instancia de Java totalmente aislado.</li>
-        <li>Cuando inicias una versión 1.8.9, Nebula invoca un runtime aislado de Java 8 sin tocar el sistema.</li>
-        <li>Al cambiar a 1.21, Nebula conmuta automáticamente a Java 21 LTS con arquitectura de 64 bits y flags de memoria G1GC ya afinados.</li>
+        <li>Revisa el requisito de Java de la versión de Minecraft y del cargador que estás iniciando.</li>
+        <li>Si aparece <code>UnsupportedClassVersionError</code>, compara la versión de Java en ejecución con la que requiere el archivo o mod.</li>
+        <li>No añadas argumentos de memoria o GC copiados de otra instancia salvo que tengas una razón y puedas repetir la comparación.</li>
       </ul>
 
       <div class="cta-card">
-        <h3>Olvídate de Configurar Java a Mano</h3>
+        <h3>Revisa el Java de tu instancia</h3>
         <p style="color: var(--text-muted); margin-bottom: 1.2rem;">
-          Descarga Nebula Launcher y disfruta de Minecraft sin errores de versiones, con Java 21 nativo y rendimiento óptimo desde el primer segundo.
+          Consulta la configuración del launcher y confirma que el runtime seleccionado corresponde a la versión de Minecraft que quieres ejecutar.
         </p>
-        <a href="../index.html#descargar" class="nav-btn" style="padding: 0.75rem 1.8rem; font-size: 1rem;">
-          Descargar Nebula Launcher Gratis &rarr;
+        <a href="../metodologia.html" class="nav-btn" style="padding: 0.75rem 1.8rem; font-size: 1rem;">
+          Consulta la metodología editorial &rarr;
         </a>
       </div>
 
@@ -435,14 +436,14 @@
         <div class="author-avatar" style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, #c084fc, #38bdf8); display:flex; align-items:center; justify-content:center; font-size:1.8rem; flex-shrink:0; box-shadow:0 0 15px rgba(192,132,252,0.4);">👨‍💻</div>
         <div class="author-info">
           <h4 style="font-family:'Outfit', sans-serif; color:#fff; font-size:1.1rem; margin-bottom:0.25rem;">Escrito por fondue_x — Desarrollador Principal</h4>
-          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Laboratorio Técnico de Rendimiento & Modding de Nebula</div>
+          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Guías técnicas de Nebula Dev Studios</div>
           <p class="author-bio" style="color:#94a3b8; font-size:0.9rem; line-height:1.55; margin-bottom:0.6rem;">
-            Especialista en optimización de JVM, perfiles de frametime en Minecraft y arquitectura de cargadores Fabric/NeoForge. Esta guía ha sido probada y verificada en hardware real de escritorio y portátiles para asegurar resultados reproducibles sin mitos ni efectos placebo.
+            Esta guía resume compatibilidad de Java y Minecraft; no presenta resultados de pruebas comparativas propias. Confirma la versión de Java requerida en las notas de lanzamiento de la versión y en las instrucciones del launcher o modpack que utilizas.
           </p>
           <div class="author-meta-links" style="display:flex; gap:1rem; font-size:0.82rem; color:#64748b;">
             <a href="https://github.com/fonduev" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Perfil en GitHub</a>
             <span>•</span>
-            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología de Pruebas</a>
+            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología editorial</a>
             <span>•</span>
             <a href="https://discord.gg/7Uv5CjX8" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Comunidad en Discord</a>
           </div>
@@ -501,29 +502,23 @@
   <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
     <div class="cookie-content">
       <p>
-        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+        🍪 <strong>Aviso de privacidad:</strong> Este sitio puede cargar recursos y servicios de terceros. El botón solo cierra este aviso; no registra ni transmite una elección de consentimiento publicitario. Consulta la <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y los <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
       </p>
-      <div class="cookie-buttons" style="display:flex; gap:10px; align-items:center;">
-        <button class="btn-cookie-reject" onclick="rejectCookieConsent()" style="background:transparent; border:1px solid rgba(255,255,255,0.25); color:#94a3b8; padding:9px 18px; border-radius:10px; font-weight:600; font-size:0.84rem; cursor:pointer; transition:all 0.2s;">Solo Necesarias</button>
-        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+      <div class="cookie-buttons">
+        <button class="btn-cookie-accept" onclick="dismissCookieBanner()">Cerrar aviso</button>
       </div>
     </div>
   </div>
 
   <script>
     function initCookieConsent() {
-      // Google manages advertising consent through its certified CMP.
-      document.getElementById('cookieConsentBanner')?.remove();
-    }
-    function acceptCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'accepted');
-      dismissCookieBanner();
-    }
-    function rejectCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'essential_only');
-      dismissCookieBanner();
+      if (!localStorage.getItem('nebula_cookie_notice_dismissed')) {
+        const banner = document.getElementById('cookieConsentBanner');
+        if (banner) banner.style.display = 'block';
+      }
     }
     function dismissCookieBanner() {
+      localStorage.setItem('nebula_cookie_notice_dismissed', 'true');
       const banner = document.getElementById('cookieConsentBanner');
       if (banner) {
         banner.style.opacity = '0';

@@ -46,7 +46,7 @@
     }
   },
   "datePublished": "2026-09-08",
-  "dateModified": "2026-09-08"
+  "dateModified": "2026-10-12"
 }
   </script>
 
@@ -360,7 +360,7 @@
       <div class="badge">🛠️ Soporte Técnico</div>
       <h1>Solución a los Errores Más Frecuentes de Minecraft: Código de Salida 1, Crashes y Java</h1>
       <div class="article-meta">
-        <span>📅 Actualizado: Septiembre 2026</span>
+        <span>📅 Revisado el 12 de octubre de 2026</span>
         <span>⏱️ 9 min de lectura</span>
         <span>✍️ Equipo Técnico de Nebula</span>
       </div>
@@ -368,70 +368,70 @@
 
     <article class="article-body">
       <p>
-        Pocos momentos son tan frustrantes para un jugador de Minecraft como pulsar el botón "Jugar" y ver cómo la ventana se cierra inesperadamente mostrando un escueto mensaje: <strong>"Se produjo un error y el juego ha crasheado. Código de salida: 1"</strong>.
+        Cuando Minecraft se cierra inesperadamente, el launcher puede mostrar un código de salida o un mensaje genérico. El código no identifica la causa por sí solo: comienza por guardar el registro de esa instancia y anotar la versión del juego, launcher y cambios recientes.
       </p>
       <p>
-        El código de salida 1 (Exit Code 1) es un error genérico que simplemente indica que el proceso de Java terminó de forma anómala. En este artículo te enseñaremos a identificar la causa exacta del fallo y a solucionarlo en menos de 5 minutos.
+        El código de salida 1 (Exit Code 1) es un estado de salida genérico: por sí solo no identifica la causa. Revisa el registro o el informe de cierre y cambia una cosa cada vez para aislar el fallo.
       </p>
 
-      <h2>1. Cómo leer el archivo de Crash Report</h2>
+      <h2>1. Revisa el crash report o latest.log</h2>
       <p>
-        En lugar de adivinar qué mod o ajuste está fallando, la clave está en consultar el registro generado por el juego en tu carpeta de Minecraft:
+        El registro puede aportar contexto sobre el cierre. La carpeta depende del directorio de juego configurado en el launcher:
       </p>
       <pre><code>.minecraft/crash-reports/crash-YYYY-MM-DD_HH.MM.SS-client.txt</code></pre>
       <p>
-        Abre ese archivo de texto con el Bloc de notas y busca las primeras 15 líneas. Casi siempre verás una línea que comienza por <code>Caused by:</code>. Ahí se especifica exactamente el mod o la librería responsable del fallo.
+        Abre el informe y revisa el encabezado, la sección de descripción y la cadena de causas hasta el final; algunos errores no incluyen <code>Caused by:</code> o señalan primero una dependencia. Si no se generó crash report, busca <code>latest.log</code> en la carpeta de la instancia y examina las líneas finales anteriores al cierre. El registro aporta pistas, pero confirma el mod implicado con la versión y las dependencias declaradas.
       </p>
 
-      <h2>2. Los Tres Errores Más Comunes y Cómo Repararlos</h2>
+      <h2>2. Causas frecuentes y comprobaciones seguras</h2>
 
       <div class="error-card">
-        <h4>🚨 Error 1: java.lang.OutOfMemoryError (Falta de Memoria RAM)</h4>
+        <h4>🚨 Error 1: java.lang.OutOfMemoryError</h4>
         <p>
-          <strong>Causa:</strong> El modpack o los shaders intentaron cargar más texturas y modelos 3D de los permitidos por el límite de memoria asignado a Java.
+          <strong>Qué comprobar:</strong> Lee el mensaje completo para distinguir <code>Java heap space</code>, <code>Metaspace</code> y errores de memoria nativa. No todos significan que falte RAM del sistema ni prueban una fuga.
         </p>
         <p>
-          <strong>Solución:</strong> Ve a los ajustes de tu lanzador y aumenta la memoria RAM asignada a la instancia. Para modpacks medianos pon al menos <strong>6 GB (6144 MB)</strong>. Recuerda nunca asignar más del 70% de la RAM total física de tu ordenador para evitar congelar Windows.
+          <strong>Siguiente paso:</strong> Comprueba la memoria física disponible y el valor de <code>-Xmx</code>. Si el heap llega al límite durante una prueba repetible, consulta <a href="./como-asignar-mas-ram-minecraft-sin-crashes.html">cómo ajustar el heap</a>; no hay una cantidad fija de RAM válida para todos los modpacks.
         </p>
       </div>
 
       <div class="error-card">
         <h4>🚨 Error 2: UnsupportedClassVersionError (Versión Incorrecta de Java)</h4>
         <p>
-          <strong>Causa:</strong> Intentar ejecutar una versión moderna de Minecraft (como la 1.20.5 o 1.21) usando una instalación antigua de Java 8 o Java 17.
+          <strong>Qué comprobar:</strong> La versión en ejecución puede ser demasiado antigua o incompatible con Minecraft, el cargador o un mod. El requisito depende de la versión exacta; no asumas una versión de Java universal.
         </p>
         <p>
-          <strong>Solución:</strong> Minecraft 1.20.5 en adelante requiere obligatoriamente <strong>Java 21 (JDK 21)</strong>. En Nebula Launcher, el sistema detecta la versión del juego y descarga automáticamente el binario oficial de Java 21 adecuado para tu arquitectura (x64 o ARM).
+          <strong>Siguiente paso:</strong> Comprueba el requisito en las notas de lanzamiento de Minecraft o la documentación del cargador, y revisa qué runtime tiene seleccionado tu launcher. Para identificar el ejecutable de la terminal, usa <code>java -version</code>; un launcher puede tener un runtime propio.
         </p>
       </div>
 
       <div class="error-card">
         <h4>🚨 Error 3: Incompatibilidad entre Mods (DuplicateModsFoundException o IncompatibleModException)</h4>
         <p>
-          <strong>Causa:</strong> Tienes dos versiones del mismo mod en la carpeta <code>mods/</code> (por ejemplo, <code>sodium-0.5.8.jar</code> y <code>sodium-0.5.11.jar</code>), o un mod incompatible con tu cargador (un mod de Forge dentro de una instancia de Fabric).
+          <strong>Qué comprobar:</strong> Lee el ID de mod o dependencia que señala el launcher. Confirma versión exacta de Minecraft, cargador, lado cliente/servidor y los requisitos declarados por el proyecto.
         </p>
         <p>
-          <strong>Solución:</strong> Revisa tu carpeta <code>mods/</code> y elimina versiones duplicadas. Asegúrate de que todos los archivos descargados especifiquen exactamente el loader que estás usando.
+          <strong>Siguiente paso:</strong> Conserva una copia de la instancia, retira únicamente los archivos identificados como duplicados o incompatibles y vuelve a iniciar. Consulta el error de dependencia de <code>latest.log</code> antes de descargar reemplazos desde la página del autor.
         </p>
       </div>
 
-      <h2>3. Problemas con la Tarjeta Gráfica y Pantalla Negra</h2>
+      <h2>3. Problemas con la tarjeta gráfica y pantalla negra</h2>
       <p>
         Si el juego se cierra justo antes de mostrar el menú principal o la pantalla se queda completamente en blanco o negro con el error <code>GLFW error 65542: WGL: The driver does not appear to support OpenGL</code>:
       </p>
       <ol>
-        <li><strong>Laptops con doble tarjeta (Integrada + Dedicada):</strong> Windows a veces intenta abrir Minecraft con los gráficos integrados de Intel o AMD en lugar de la GPU NVIDIA GeForce. Ve a <em>Configuración de Windows &rarr; Pantalla &rarr; Gráficos</em>, añade el ejecutable <code>javaw.exe</code> y selecciona <strong>"Alto rendimiento (GPU dedicada)"</strong>.</li>
-        <li><strong>Actualiza tus controladores gráficos:</strong> Descarga la versión más reciente de los controladores desde la web oficial de NVIDIA, AMD o Intel. Los drivers genéricos que instala Windows Update carecen frecuentemente de soporte completo para OpenGL 4.5.</li>
+        <li><strong>Laptops con gráficos híbridos:</strong> En <em>Configuración de Windows → Sistema → Pantalla → Gráficos</em>, puedes añadir el ejecutable Java que usa el launcher y elegir una preferencia de GPU. El nombre y las opciones pueden variar según Windows y el fabricante; selecciona la GPU dedicada solo si el juego estaba usando la incorrecta.</li>
+        <li><strong>Controladores:</strong> Comprueba el modelo exacto de GPU y busca actualizaciones en el soporte oficial del fabricante del equipo o de la GPU. No instales DLL sueltas ni utilidades de sitios de terceros para reemplazar componentes gráficos.</li>
       </ol>
 
       <div class="cta-card">
-        <h3>¿Cansado de lidiar con logs y errores de consola?</h3>
+        <h3>¿No encuentras el error?</h3>
         <p style="color: var(--text-muted); margin-bottom: 1.2rem;">
-          Nebula Launcher cuenta con un analizador de crashes inteligente integrado que traduce el reporte de error a lenguaje comprensible y te dice qué mod debes desactivar.
+          Conserva una copia de <code>latest.log</code> y del crash report, anota la versión de Minecraft, Java, cargador y cambios recientes, y consulta la documentación correspondiente antes de reinstalar el juego.
         </p>
-        <a href="../index.html#descargar" class="nav-btn" style="padding: 0.75rem 1.8rem; font-size: 1rem;">
-          Descargar Nebula Launcher Gratis &rarr;
-        </a>
+        <p style="color: var(--text-muted); margin-bottom: 1.2rem;">
+          También puedes usar el <a href="./como-leer-latest-log-crash-reports-minecraft.html">protocolo detallado para leer registros</a> o revisar la <a href="../contact.html">página de contacto</a> si necesitas informar de un error.
+        </p>
       </div>
 
     
@@ -440,14 +440,14 @@
         <div class="author-avatar" style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, #c084fc, #38bdf8); display:flex; align-items:center; justify-content:center; font-size:1.8rem; flex-shrink:0; box-shadow:0 0 15px rgba(192,132,252,0.4);">👨‍💻</div>
         <div class="author-info">
           <h4 style="font-family:'Outfit', sans-serif; color:#fff; font-size:1.1rem; margin-bottom:0.25rem;">Escrito por fondue_x — Desarrollador Principal</h4>
-          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Laboratorio Técnico de Rendimiento & Modding de Nebula</div>
+          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Guías técnicas de Nebula Dev Studios</div>
           <p class="author-bio" style="color:#94a3b8; font-size:0.9rem; line-height:1.55; margin-bottom:0.6rem;">
-            Especialista en optimización de JVM, perfiles de frametime en Minecraft y arquitectura de cargadores Fabric/NeoForge. Esta guía ha sido probada y verificada en hardware real de escritorio y portátiles para asegurar resultados reproducibles sin mitos ni efectos placebo.
+            Esta guía reúne pasos generales de diagnóstico; no afirma resultados de pruebas comparativas propias. Si los pasos no coinciden con tu instalación, conserva el registro y consulta la documentación de tu versión y cargador.
           </p>
           <div class="author-meta-links" style="display:flex; gap:1rem; font-size:0.82rem; color:#64748b;">
             <a href="https://github.com/fonduev" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Perfil en GitHub</a>
             <span>•</span>
-            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología de Pruebas</a>
+            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología editorial</a>
             <span>•</span>
             <a href="https://discord.gg/7Uv5CjX8" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Comunidad en Discord</a>
           </div>
@@ -506,29 +506,23 @@
   <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
     <div class="cookie-content">
       <p>
-        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+        🍪 <strong>Aviso de privacidad:</strong> Este sitio puede cargar recursos y servicios de terceros. El botón solo cierra este aviso; no registra ni transmite una elección de consentimiento publicitario. Consulta la <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y los <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
       </p>
-      <div class="cookie-buttons" style="display:flex; gap:10px; align-items:center;">
-        <button class="btn-cookie-reject" onclick="rejectCookieConsent()" style="background:transparent; border:1px solid rgba(255,255,255,0.25); color:#94a3b8; padding:9px 18px; border-radius:10px; font-weight:600; font-size:0.84rem; cursor:pointer; transition:all 0.2s;">Solo Necesarias</button>
-        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+      <div class="cookie-buttons">
+        <button class="btn-cookie-accept" onclick="dismissCookieBanner()">Cerrar aviso</button>
       </div>
     </div>
   </div>
 
   <script>
     function initCookieConsent() {
-      // Google manages advertising consent through its certified CMP.
-      document.getElementById('cookieConsentBanner')?.remove();
-    }
-    function acceptCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'accepted');
-      dismissCookieBanner();
-    }
-    function rejectCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'essential_only');
-      dismissCookieBanner();
+      if (!localStorage.getItem('nebula_cookie_notice_dismissed')) {
+        const banner = document.getElementById('cookieConsentBanner');
+        if (banner) banner.style.display = 'block';
+      }
     }
     function dismissCookieBanner() {
+      localStorage.setItem('nebula_cookie_notice_dismissed', 'true');
       const banner = document.getElementById('cookieConsentBanner');
       if (banner) {
         banner.style.opacity = '0';

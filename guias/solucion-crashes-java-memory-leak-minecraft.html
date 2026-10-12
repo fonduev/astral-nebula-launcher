@@ -5,23 +5,23 @@
   <link rel="icon" type="image/x-icon" href="../icon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
-  <title>Fugas de Memoria en Minecraft con Mods: Cómo Detectar Memory Leaks con VisualVM y Spark | Nebula Dev Studios</title>
-  <meta name="description" content="Aprende a diagnosticar por qué tu Minecraft empieza fluido a 140 FPS y tras 30 minutos de juego cae a 15 FPS o crashea con OutOfMemoryError." />
+  <title>Diagnosticar consumo de memoria en Minecraft con mods | Nebula</title>
+  <meta name="description" content="Distingue un heap Java lleno de una posible fuga en Minecraft con mods; reúne registros, revisa versiones y usa perfiles de memoria sin confundir síntomas con causas." />
 
   <!-- Canonical URL & Metadatos Oficiales -->
   <link rel="canonical" href="https://nebuladevstudios.com/guias/solucion-crashes-java-memory-leak-minecraft.html" />
   <meta property="og:locale" content="es_ES" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Nebula Dev Studios" />
-  <meta property="og:title" content="Fugas de Memoria en Minecraft con Mods: Cómo Detectar Memory Leaks con VisualVM y Spark | Nebula Dev Studios" />
-  <meta property="og:description" content="Aprende a diagnosticar por qué tu Minecraft empieza fluido a 140 FPS y tras 30 minutos de juego cae a 15 FPS o crashea con OutOfMemoryError." />
+  <meta property="og:title" content="Diagnosticar consumo de memoria en Minecraft con mods | Nebula" />
+  <meta property="og:description" content="Distingue un heap Java lleno de una posible fuga en Minecraft con mods; reúne registros, revisa versiones y usa perfiles de memoria sin confundir síntomas con causas." />
   <meta property="og:url" content="https://nebuladevstudios.com/guias/solucion-crashes-java-memory-leak-minecraft.html" />
   <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Fugas de Memoria en Minecraft con Mods: Cómo Detectar Memory Leaks con VisualVM y Spark | Nebula Dev Studios" />
-  <meta name="twitter:description" content="Aprende a diagnosticar por qué tu Minecraft empieza fluido a 140 FPS y tras 30 minutos de juego cae a 15 FPS o crashea con OutOfMemoryError." />
+  <meta name="twitter:title" content="Diagnosticar consumo de memoria en Minecraft con mods | Nebula" />
+  <meta name="twitter:description" content="Distingue un heap Java lleno de una posible fuga en Minecraft con mods; reúne registros, revisa versiones y usa perfiles de memoria sin confundir síntomas con causas." />
   <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
 
   <!-- Schema.org Datos Estructurados JSON-LD -->
@@ -31,8 +31,8 @@
     "@graph": [
       {
         "@type": "TechArticle",
-        "headline": "Fugas de Memoria en Minecraft con Mods: Diagnóstico con Spark",
-        "description": "Aprende a diagnosticar por qué tu Minecraft empieza fluido a 140 FPS y tras 30 minutos de juego cae a 15 FPS o crashea con OutOfMemoryError.",
+        "headline": "Diagnosticar consumo de memoria en Minecraft con mods",
+        "description": "Distingue un heap Java lleno de una posible fuga en Minecraft con mods; reúne registros, revisa versiones y usa perfiles de memoria sin confundir síntomas con causas.",
         "url": "https://nebuladevstudios.com/guias/solucion-crashes-java-memory-leak-minecraft.html",
         "author": {
           "@type": "Person",
@@ -48,7 +48,7 @@
           }
         },
         "datePublished": "2026-09-25",
-        "dateModified": "2026-09-25"
+        "dateModified": "2026-10-12"
       }
     ]
   }
@@ -401,40 +401,53 @@
     </div>
 
     <span class="badge">🛠️ Soporte Avanzado</span>
-    <h1>Fugas de Memoria en Minecraft con Mods: Cómo Detectar Memory Leaks con VisualVM y Spark</h1>
+    <h1>Cómo diagnosticar el consumo de memoria de Minecraft con mods</h1>
 
     <div class="article-meta">
       <div>✍️ <strong>fondue_x</strong> (Nebula Lab)</div>
-      <div>📅 <strong>25 de Septiembre de 2026</strong></div>
+      <div>📅 <strong>Revisado el 12 de octubre de 2026</strong></div>
       <div>⏱️ <strong>13 min de lectura</strong></div>
-      <div>🔍 <strong>Verificado en hardware real</strong></div>
     </div>
 
     <article class="article-body">
       
           <p class="lead" style="font-size:1.15rem; color:#e2e8f0; margin-bottom:2rem; line-height:1.8;">
-            El síntoma es inconfundible: abres el juego y funciona a la perfección a 120 FPS. Sin embargo, tras media hora de exploración o de entrar a distintas dimensiones, el rendimiento se degrada progresivamente, la memoria RAM llega al 99% y el juego termina congelándose con un error <code>java.lang.OutOfMemoryError: Java heap space</code>. Esto se debe a una <strong>fuga de memoria (Memory Leak)</strong> en uno o varios mods mal programados.
+            Un cierre con <code>java.lang.OutOfMemoryError</code>, tirones o un uso de memoria que sube con el tiempo no demuestran por sí solos una fuga. El mensaje exacto del error ayuda a separar heap Java, Metaspace y memoria nativa; una fuga es una causa posible, pero también puede haber un heap demasiado pequeño para el modpack o una carga puntual.
           </p>
 
-          <h2>1. ¿Qué es una Fuga de Memoria en Java?</h2>
+          <h2>1. Identifica qué memoria se agotó</h2>
           <p>
-            Una fuga de memoria ocurre cuando un mod crea objetos en la memoria RAM (por ejemplo, texturas de entidades cargadas o datos de chunks descargados) pero olvida eliminar las referencias a ellos. Como Java detecta que todavía hay una variable apuntando al objeto, el recolector de basura no puede liberarlo, acumulando gigabytes de datos obsoletos hasta saturar la memoria.
+            Lee la línea completa del error en <code>latest.log</code> o en el informe de cierre. <code>Java heap space</code> indica que no se pudo reservar un objeto en el heap, pero no prueba una fuga; <code>Metaspace</code> y los mensajes de memoria nativa requieren un diagnóstico distinto. Consulta la <a href="https://docs.oracle.com/en/java/javase/26/troubleshoot/troubleshooting-memory-leaks.html" target="_blank" rel="noopener">guía de Oracle sobre errores de memoria Java</a> y evita cambiar varios argumentos JVM a la vez.
+          </p>
+          <p>
+            Anota la versión de Minecraft, Java, cargador y mods, además del valor de <code>-Xmx</code>. Cierra otras aplicaciones y comprueba la memoria disponible del sistema. Si el heap llega a su máximo de forma estable, compara el tamaño del modpack y la memoria física libre antes de aumentarlo; asignar más memoria de la que el equipo puede reservar puede empeorar la situación.
           </p>
 
-          <h2>2. Paso 1: Instalar el Mod 'Memory Leak Fix'</h2>
+          <h2>2. Reproduce el problema con una instancia aislada</h2>
+          <ol>
+            <li>Copia el perfil y el mundo, y conserva intacta la instancia original.</li>
+            <li>Repite una ruta breve con la misma distancia de renderizado y los mismos ajustes. Anota el uso del heap al iniciar, después de cargar el mundo y tras repetir la ruta.</li>
+            <li>Si el uso sube, deja que Java recolecte memoria de forma normal y observa si vuelve a bajar. Un pico temporal no basta para diagnosticar una fuga.</li>
+            <li>Desactiva mods por grupos pequeños en una copia y revisa cambios en el registro; después reduce al mod sospechoso y sus dependencias para confirmar la relación.</li>
+          </ol>
+          <p>Para consultar el registro, sigue la <a href="./como-leer-latest-log-crash-reports-minecraft.html">guía de lectura de latest.log y crash reports</a>. No subas registros o volcados públicos sin revisar si incluyen nombres de usuario, rutas locales o datos de servidores.</p>
+
+          <h2>3. Usa Spark para resumir o capturar el heap</h2>
           <p>
-            La comunidad ha desarrollado el mod <strong>Memory Leak Fix</strong> para Fabric y Forge/NeoForge. Este mod parchea fallos nativos de Minecraft en la clase <code>ChunkBiomeData</code> y en el limpiador de texturas de la biblioteca de sonidos OpenAL, solucionando el 80% de las fugas estándar del juego.
+            Spark ofrece dos comandos diferentes: <code>/spark heapsummary</code> crea un resumen del heap para inspección en su visor, mientras que <code>/spark heapdump</code> guarda una instantánea completa <code>.hprof</code> en disco. En una instalación Fabric/Forge de cliente, el comando puede requerir el prefijo <code>/sparkc</code>; consulta la <a href="https://spark.lucko.me/docs/Command-Usage" target="_blank" rel="noopener">documentación de comandos de Spark</a> para tu entorno y permisos.
+          </p>
+          <p>
+            Un heap dump puede ocupar mucho espacio y contener datos de la sesión: guárdalo localmente y no lo compartas sin inspeccionarlo. Ábrelo con <a href="https://visualvm.github.io/features.html" target="_blank" rel="noopener">VisualVM</a> o Eclipse MAT y compara instantáneas tomadas en condiciones equivalentes; el número de objetos por sí solo no identifica al mod responsable. Spark también permite perfilar asignaciones con <code>/spark profiler start --alloc</code>, opción que sirve para observar presión de asignación, no para probar por sí sola una fuga.
           </p>
 
-          <h2>3. Paso 2: Generar un Perfil de Heap con Spark</h2>
+          <h2>4. Verifica mods de corrección antes de instalarlos</h2>
           <p>
-            Si juegas con modpacks y la fuga persiste, instala el mod <strong>Spark</strong> y ejecuta en el chat:
+            No instales automáticamente un mod llamado “Memory Leak Fix”: su propia ficha indica que los problemas que corregía en Minecraft 1.20.5 y posteriores ya fueron solucionados en el juego y que allí queda obsoleto. En versiones antiguas puede haber publicaciones aplicables; revisa siempre la versión exacta y el cargador en la <a href="https://modrinth.com/mod/memoryleakfix" target="_blank" rel="noopener">ficha de Memory Leak Fix</a>. Para otros mods, comprueba la documentación y los reportes de errores de la versión que utilizas.
           </p>
-          <div class="code-block">
-            <code>/spark heapdump</code>
-          </div>
+
+          <h2>Fuentes y límites de esta guía</h2>
           <p>
-            Esto generará un archivo snapshot <code>.hprof</code> en la carpeta de tu instancia. Puedes abrirlo con la herramienta gratuita <strong>Eclipse Memory Analyzer (MAT)</strong> o <strong>VisualVM</strong> para ver qué clase o mod ocupa el 80% del Heap.
+            Esta guía ofrece un procedimiento de diagnóstico general y no presenta perfiles medidos por nuestro equipo ni atribuye fugas a un mod sin evidencia. Las herramientas y opciones cambian por versión; sigue las instrucciones de Spark, Oracle y los autores de cada mod antes de capturar o compartir datos.
           </p>
         
 
@@ -443,14 +456,14 @@
         <div class="author-avatar">👨‍💻</div>
         <div class="author-info">
           <h4>Escrito por fondue_x — Desarrollador Principal</h4>
-          <div class="author-role">Laboratorio Técnico de Rendimiento & Modding de Nebula</div>
+          <div class="author-role">Nebula Dev Studios</div>
           <p class="author-bio">
-            Especialista en optimización de JVM, perfiles de frametime en Minecraft y arquitectura de cargadores Fabric/NeoForge. Esta guía ha sido probada y verificada en hardware real de escritorio y portátiles para asegurar resultados reproducibles sin mitos ni efectos placebo.
+            Esta guía explica cómo distinguir mensajes de memoria y preparar una comparación repetible; no contiene resultados de benchmarks propios. Las versiones de Minecraft, Java, Spark y cada mod pueden cambiar el diagnóstico disponible.
           </p>
           <div class="author-meta-links">
             <a href="https://github.com/fonduev" target="_blank" rel="noopener">Perfil en GitHub</a>
             <span>•</span>
-            <a href="../metodologia.html">Metodología de Pruebas</a>
+            <a href="../metodologia.html">Metodología editorial</a>
             <span>•</span>
             <a href="https://discord.gg/7Uv5CjX8" target="_blank" rel="noopener">Comunidad en Discord</a>
           </div>
@@ -465,7 +478,7 @@
       <div class="footer-col">
         <h4>NEBULA DEV STUDIOS</h4>
         <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
-          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+          Guías independientes sobre Minecraft y herramientas relacionadas. Los artículos distinguen recomendaciones de resultados medidos y enlazan fuentes para facilitar su verificación.
         </p>
       </div>
       <div class="footer-col">
@@ -474,7 +487,7 @@
           <li><a href="../index.html">Inicio</a></li>
           <li><a href="../guias.html">Guías & Tutoriales</a></li>
           <li><a href="../about.html">Acerca de</a></li>
-          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../metodologia.html">Metodología editorial</a></li>
           <li><a href="../contact.html">Contacto</a></li>
         </ul>
       </div>

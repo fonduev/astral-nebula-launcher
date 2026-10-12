@@ -5,23 +5,23 @@
   <link rel="icon" type="image/x-icon" href="../icon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
-  <title>ZGC Generacional vs G1GC en Minecraft: Análisis de Pausas de Basura en Java 21 y 25 | Nebula Dev Studios</title>
-  <meta name="description" content="Benchmark técnico del recolector de basura ZGC Generacional (-XX:+UseZGC -XX:+ZGenerational) frente a G1GC de Aikar en Minecraft moderno." />
+  <title>ZGC o G1GC en Minecraft: cómo elegir y medir Java | Nebula Dev Studios</title>
+  <meta name="description" content="Qué cambia entre G1GC y ZGC, en qué versiones de Java están disponibles y cómo comparar pausas y rendimiento sin prometer resultados universales." />
 
   <!-- Canonical URL & Metadatos Oficiales -->
   <link rel="canonical" href="https://nebuladevstudios.com/guias/configuracion-zgc-vs-g1gc-minecraft.html" />
   <meta property="og:locale" content="es_ES" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Nebula Dev Studios" />
-  <meta property="og:title" content="ZGC Generacional vs G1GC en Minecraft: Análisis de Pausas de Basura en Java 21 y 25 | Nebula Dev Studios" />
-  <meta property="og:description" content="Benchmark técnico del recolector de basura ZGC Generacional (-XX:+UseZGC -XX:+ZGenerational) frente a G1GC de Aikar en Minecraft moderno." />
+  <meta property="og:title" content="ZGC o G1GC en Minecraft: cómo elegir y medir Java | Nebula Dev Studios" />
+  <meta property="og:description" content="Qué cambia entre G1GC y ZGC, en qué versiones de Java están disponibles y cómo comparar pausas y rendimiento sin prometer resultados universales." />
   <meta property="og:url" content="https://nebuladevstudios.com/guias/configuracion-zgc-vs-g1gc-minecraft.html" />
   <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="ZGC Generacional vs G1GC en Minecraft: Análisis de Pausas de Basura en Java 21 y 25 | Nebula Dev Studios" />
-  <meta name="twitter:description" content="Benchmark técnico del recolector de basura ZGC Generacional (-XX:+UseZGC -XX:+ZGenerational) frente a G1GC de Aikar en Minecraft moderno." />
+  <meta name="twitter:title" content="ZGC o G1GC en Minecraft: cómo elegir y medir Java | Nebula Dev Studios" />
+  <meta name="twitter:description" content="Qué cambia entre G1GC y ZGC, en qué versiones de Java están disponibles y cómo comparar pausas y rendimiento sin prometer resultados universales." />
   <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
 
   <!-- Schema.org Datos Estructurados JSON-LD -->
@@ -31,8 +31,8 @@
     "@graph": [
       {
         "@type": "TechArticle",
-        "headline": "ZGC Generacional vs G1GC en Minecraft: Análisis en Java 21",
-        "description": "Benchmark técnico del recolector de basura ZGC Generacional (-XX:+UseZGC -XX:+ZGenerational) frente a G1GC de Aikar en Minecraft moderno.",
+        "headline": "ZGC o G1GC en Minecraft: cómo elegir y medir Java",
+        "description": "Qué cambia entre G1GC y ZGC, en qué versiones de Java están disponibles y cómo comparar pausas y rendimiento sin prometer resultados universales.",
         "url": "https://nebuladevstudios.com/guias/configuracion-zgc-vs-g1gc-minecraft.html",
         "author": {
           "@type": "Person",
@@ -48,7 +48,7 @@
           }
         },
         "datePublished": "2026-09-25",
-        "dateModified": "2026-09-25"
+        "dateModified": "2026-10-12"
       }
     ]
   }
@@ -401,55 +401,64 @@
     </div>
 
     <span class="badge">☕ Java & Rendimiento</span>
-    <h1>ZGC Generacional vs G1GC en Minecraft: Análisis de Pausas de Basura en Java 21 y 25</h1>
+    <h1>ZGC o G1GC en Minecraft: diferencias y cómo compararlos</h1>
 
     <div class="article-meta">
       <div>✍️ <strong>fondue_x</strong> (Nebula Lab)</div>
-      <div>📅 <strong>25 de Septiembre de 2026</strong></div>
+      <div>📅 <strong>Revisado el 12 de octubre de 2026</strong></div>
       <div>⏱️ <strong>13 min de lectura</strong></div>
-      <div>🔍 <strong>Verificado en hardware real</strong></div>
     </div>
 
     <article class="article-body">
       
           <p class="lead" style="font-size:1.15rem; color:#e2e8f0; margin-bottom:2rem; line-height:1.8;">
-            Durante más de siete años, los famosos "Aikar's Flags" basados en el recolector <strong>G1GC</strong> han sido el estándar indiscutible para correr Minecraft. No obstante, con la llegada de <strong>Java 21 LTS</strong> y <strong>Java 25</strong>, Oracle y la comunidad de OpenJDK introdujeron <strong>ZGC Generacional</strong> (Generational ZGC), prometiendo pausas de recolección de basura menores a un milisegundo. Analizamos si realmente vale la pena en partidas locales y servidores.
+            G1GC y ZGC son recolectores de basura incluidos en Java, pero priorizan objetivos distintos. G1 es el recolector predeterminado en la mayoría de configuraciones y busca equilibrar rendimiento total y pausas; ZGC está diseñado para baja latencia y hace gran parte del trabajo concurrentemente. Eso no convierte a ZGC en una solución automática para cualquier tirón: el rendimiento final depende del equipo, la memoria, la carga del mundo y otros cuellos de botella.
           </p>
 
-          <h2>1. La Batalla de los Recolectores: G1GC vs ZGC</h2>
+          <h2>Qué significa “pausa” y qué no significa</h2>
+          <p>Una pausa del recolector es una detención breve de los hilos de la aplicación durante una fase de recolección. La documentación de Oracle describe pausas máximas de ZGC inferiores a un milisegundo como objetivo/característica del recolector, pero no promete que Minecraft nunca tenga tirones: la carga de chunks, compilación, drivers, mods, CPU y almacenamiento también afectan la fluidez. G1 tampoco tiene una duración fija garantizada; su objetivo de pausa no es un límite estricto.</p>
+          <p>La guía de Oracle recomienda comenzar con el recolector que selecciona la JVM y ajustar primero el tamaño del heap si hace falta. Cambiar de recolector tiene sentido cuando observas pausas atribuibles al GC en los registros y una prueba controlada muestra una mejora que compensa cualquier cambio en rendimiento general.</p>
+
+          <h2>Disponibilidad por versión de Java</h2>
           <ul>
-            <li><strong>G1GC (Garbage-First):</strong> Divide la memoria en regiones y busca recolectar las áreas con más basura. Tiene un rendimiento excelente en throughput (FPS promedio altos), pero sus pausas de pausa pueden rondar entre 20 y 80 milisegundos.</li>
-            <li><strong>ZGC Generacional:</strong> Ejecuta casi toda la recolección de forma concurrente en hilos secundarios mientras el juego sigue corriendo. Reduce las pausas a menos de <strong>1 milisegundo</strong>, eliminando por completo los microtirones de frametime.</li>
+            <li><strong>Java 17:</strong> G1 está disponible; ZGC no ofrece el modo generacional descrito aquí.</li>
+            <li><strong>Java 21 y 22:</strong> Generational ZGC se activa con <code>-XX:+UseZGC -XX:+ZGenerational</code>.</li>
+            <li><strong>Java 23 y posteriores:</strong> Generational ZGC pasa a ser el modo por defecto al seleccionar ZGC; normalmente basta con <code>-XX:+UseZGC</code>. La opción explícita <code>-XX:+ZGenerational</code> queda obsoleta en Java 23 según OpenJDK, así que evita copiar flags antiguos sin comprobar la versión.</li>
           </ul>
+          <div class="alert-box alert-warning"><strong>Importante:</strong> Minecraft y cada cargador pueden requerir una versión concreta de Java. Conserva la configuración predeterminada del launcher si no tienes un motivo medido para cambiarla; no añadas <code>-XX:+UseNUMA</code>, <code>-XX:+AlwaysPreTouch</code> ni un tamaño fijo de heap como receta universal.</div>
 
-          <h2>2. Cuándo Usar ZGC Generacional</h2>
-          <p>
-            ZGC Generacional solo está disponible a partir de <strong>Java 21</strong> y requiere al menos 4 núcleos de CPU libres para sus hilos concurrentes. Si cumples estos requisitos, es el mejor recolector para eliminar los tirones en Minecraft con shaders.
-          </p>
-          <div class="code-block">
-            <code># Argumentos de lanzamiento recomendados para ZGC Generacional en Java 21+:
--XX:+UseZGC -XX:+ZGenerational -XX:+AlwaysPreTouch -XX:+UseNUMA -Xms6G -Xmx6G</code>
-          </div>
+          <h2>Cómo hacer una comparación útil</h2>
+          <ol>
+            <li>Anota la versión de Minecraft, Java, cargador, mods, resolución, distancia de renderizado, memoria asignada y estado del equipo.</li>
+            <li>Haz una copia del mundo y usa la misma zona y recorrido para ambas pruebas. Mantén iguales los ajustes; cambia solo el recolector.</li>
+            <li>Repite el mismo recorrido varias veces y deja que el juego se caliente antes de registrar. Una sola partida no separa variación normal de una mejora real.</li>
+            <li>Para ver actividad de GC, añade temporalmente <code>-Xlog:gc</code> a una instancia de prueba. Retira después el argumento si no necesitas el registro; este muestra eventos de GC, no FPS ni toda la causa de los tirones.</li>
+            <li>Compara fluidez observada y registros bajo la misma carga. Si los tirones coinciden con eventos de GC y ZGC los reduce sin causar otros problemas, conserva el cambio. Si no hay esa relación, busca la causa en mods, renderizado o carga de chunks.</li>
+          </ol>
 
-          <h2>3. Cuándo Quedarse con G1GC</h2>
-          <p>
-            Si tu procesador es de 2 o 4 núcleos (como un Intel Core i3 o laptops antiguas) o utilizas Java 17 o Java 8, <strong>G1GC sigue siendo superior</strong> porque ZGC consume un 15% más de uso de CPU en hilos de fondo.
-          </p>
+          <h2>Lectura recomendada</h2>
+          <ul>
+            <li><a href="https://docs.oracle.com/en/java/javase/21/gctuning/available-collectors.html" target="_blank" rel="noopener">Documentación de Oracle: recolectores disponibles y criterios para elegir</a>.</li>
+            <li><a href="https://docs.oracle.com/en/java/javase/21/gctuning/garbage-first-g1-garbage-collector1.html" target="_blank" rel="noopener">Documentación de Oracle: G1 y sus objetivos de pausa</a>.</li>
+            <li><a href="https://openjdk.org/jeps/439" target="_blank" rel="noopener">OpenJDK JEP 439: ZGC generacional (Java 21)</a>.</li>
+            <li><a href="https://openjdk.org/jeps/474" target="_blank" rel="noopener">OpenJDK JEP 474: modo generacional predeterminado (Java 23)</a>.</li>
+          </ul>
+          <p>Esta página explica diferencias documentadas; no publica un benchmark propio. Para recomendar una configuración concreta, hace falta medirla en una carga comparable.</p>
         
 
       <!-- Author Card EEAT -->
       <div class="author-card-eeat">
         <div class="author-avatar">👨‍💻</div>
         <div class="author-info">
-          <h4>Escrito por fondue_x — Desarrollador Principal</h4>
-          <div class="author-role">Laboratorio Técnico de Rendimiento & Modding de Nebula</div>
+          <h4>Redacción: fondue_x</h4>
+          <div class="author-role">Guías técnicas de Nebula Dev Studios</div>
           <p class="author-bio">
-            Especialista en optimización de JVM, perfiles de frametime en Minecraft y arquitectura de cargadores Fabric/NeoForge. Esta guía ha sido probada y verificada en hardware real de escritorio y portátiles para asegurar resultados reproducibles sin mitos ni efectos placebo.
+            Esta guía se basa en la documentación de Oracle y las propuestas entregadas de OpenJDK enlazadas arriba. No presenta mediciones propias; los resultados de Minecraft dependen de la carga y el hardware, por lo que se recomienda validar cualquier cambio con registros y pruebas repetibles.
           </p>
           <div class="author-meta-links">
             <a href="https://github.com/fonduev" target="_blank" rel="noopener">Perfil en GitHub</a>
             <span>•</span>
-            <a href="../metodologia.html">Metodología de Pruebas</a>
+            <a href="../metodologia.html">Metodología editorial</a>
             <span>•</span>
             <a href="https://discord.gg/7Uv5CjX8" target="_blank" rel="noopener">Comunidad en Discord</a>
           </div>
@@ -464,7 +473,7 @@
       <div class="footer-col">
         <h4>NEBULA DEV STUDIOS</h4>
         <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
-          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+          Guías independientes sobre Minecraft, lanzadores y herramientas técnicas, con fuentes enlazadas y límites indicados cuando aplica.
         </p>
       </div>
       <div class="footer-col">
@@ -473,7 +482,7 @@
           <li><a href="../index.html">Inicio</a></li>
           <li><a href="../guias.html">Guías & Tutoriales</a></li>
           <li><a href="../about.html">Acerca de</a></li>
-          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../metodologia.html">Metodología editorial</a></li>
           <li><a href="../contact.html">Contacto</a></li>
         </ul>
       </div>

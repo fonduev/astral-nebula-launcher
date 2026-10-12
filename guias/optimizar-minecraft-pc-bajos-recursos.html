@@ -5,23 +5,23 @@
   <link rel="icon" type="image/x-icon" href="../icon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
-  <title>Cómo Optimizar Minecraft en 2026: Guía Definitiva de FPS con Sodium y JVM | Nebula</title>
-  <meta name="description" content="Aprende a duplicar tus FPS y eliminar tirones en Minecraft. Guía completa con el stack moderno de Sodium, Lithium, FerriteCore, argumentos JVM y configuración para PCs de bajos recursos." />
+  <title>Diagnosticar y mejorar el rendimiento de Minecraft paso a paso | Nebula</title>
+  <meta name="description" content="Identifica si el límite de Minecraft está en CPU, GPU, memoria o servidor y prueba ajustes reversibles y mods compatibles sin promesas universales de FPS." />
 
   <!-- Canonical URL & Metadatos Oficiales -->
   <link rel="canonical" href="https://nebuladevstudios.com/guias/optimizar-minecraft-pc-bajos-recursos.html" />
   <meta property="og:locale" content="es_ES" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Nebula Dev Studios" />
-  <meta property="og:title" content="Cómo Optimizar Minecraft en 2026: Guía Definitiva de FPS con Sodium y JVM | Nebula" />
-  <meta property="og:description" content="Aprende a duplicar tus FPS y eliminar tirones en Minecraft. Guía completa con el stack Sodium + Lithium + FerriteCore y argumentos JVM optimizados." />
+  <meta property="og:title" content="Diagnosticar y mejorar el rendimiento de Minecraft paso a paso | Nebula" />
+  <meta property="og:description" content="Identifica si el límite de Minecraft está en CPU, GPU, memoria o servidor y prueba ajustes reversibles y mods compatibles sin promesas universales de FPS." />
   <meta property="og:url" content="https://nebuladevstudios.com/guias/optimizar-minecraft-pc-bajos-recursos.html" />
   <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Cómo Optimizar Minecraft en 2026: Guía Definitiva de FPS con Sodium y JVM | Nebula" />
-  <meta name="twitter:description" content="Aprende a duplicar tus FPS y eliminar tirones en Minecraft. Guía completa con el stack Sodium + Lithium + FerriteCore y argumentos JVM optimizados." />
+  <meta name="twitter:title" content="Diagnosticar y mejorar el rendimiento de Minecraft paso a paso | Nebula" />
+  <meta name="twitter:description" content="Identifica si el límite de Minecraft está en CPU, GPU, memoria o servidor y prueba ajustes reversibles y mods compatibles sin promesas universales de FPS." />
   <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
 
   <!-- Schema.org Datos Estructurados JSON-LD -->
@@ -29,8 +29,8 @@
 {
   "@context": "https://schema.org",
   "@type": "TechArticle",
-  "headline": "Cómo Optimizar Minecraft en 2026: Guía Definitiva de FPS con Sodium y JVM",
-  "description": "Guía técnica para maximizar los FPS en Minecraft mediante mods de optimización gráfica y configuración de memoria JVM.",
+  "headline": "Diagnosticar y mejorar el rendimiento de Minecraft paso a paso",
+  "description": "Identifica si el límite de Minecraft está en CPU, GPU, memoria o servidor y prueba ajustes reversibles y mods compatibles sin promesas universales de FPS.",
   "url": "https://nebuladevstudios.com/guias/optimizar-minecraft-pc-bajos-recursos.html",
   "author": {
     "@type": "Organization",
@@ -46,7 +46,7 @@
     }
   },
   "datePublished": "2026-09-08",
-  "dateModified": "2026-09-08"
+  "dateModified": "2026-10-12"
 }
   </script>
 
@@ -426,116 +426,54 @@
 
     <div class="article-header">
       <div class="badge">⚡ Rendimiento y FPS</div>
-      <h1>Cómo Optimizar Minecraft en 2026: Guía Definitiva con Sodium y Argumentos JVM</h1>
+      <h1>Cómo diagnosticar y mejorar el rendimiento de Minecraft paso a paso</h1>
       <div class="article-meta">
-        <span>📅 Actualizado: Septiembre 2026</span>
+        <span>📅 Revisado: 12 de octubre de 2026</span>
         <span>⏱️ 8 min de lectura</span>
         <span>✍️ Equipo Técnico de Nebula</span>
       </div>
     </div>
 
     <article class="article-body">
-      <p>
-        Minecraft es uno de los juegos más populares del mundo, pero también uno de los peor optimizados por defecto. Debido a su motor gráfico basado en Java y a la renderización en un solo hilo (single-core), es muy común experimentar <strong>caídas bruscas de fotogramas, micro-tirones (stutters)</strong> y problemas de sobrecalentamiento incluso en computadoras modernas.
-      </p>
-      <p>
-        En esta guía exhaustiva aprenderás paso a paso cómo transformar el rendimiento de tu juego, pasando de 30-50 FPS con tirones a <strong>más de 150-200 FPS estables</strong> utilizando el stack moderno de optimización de código abierto.
-      </p>
+      <p>Minecraft puede tener FPS bajos, pausas al cargar chunks, consumo alto de memoria o retraso en un servidor; cada síntoma tiene causas distintas. Esta guía ayuda a aislar qué recurso limita tu instancia antes de cambiar mods o argumentos de Java.</p>
+      <p>No hay un paquete de mods que garantice duplicar FPS. Compara cambios con la misma versión, mundo, ruta y ajustes; anota los resultados y conserva una forma sencilla de volver atrás.</p>
 
-      <h2>1. El declive de OptiFine frente al "Modern Performance Stack"</h2>
-      <p>
-        Durante más de una década, <strong>OptiFine</strong> fue la opción predilecta de la comunidad. Sin embargo, en las versiones modernas de Minecraft (1.16 en adelante y especialmente 1.20+), OptiFine es de código cerrado, se actualiza lentamente y genera graves incompatibilidades con la mayoría de mods modernos.
-      </p>
-      <p>
-        Hoy en día, el estándar de la industria es el <strong>Stack de Optimización de Fabric</strong>, encabezado por <strong>Sodium</strong>.
-      </p>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Característica</th>
-              <th>Vanilla (Sin Mods)</th>
-              <th>OptiFine</th>
-              <th>Sodium Stack (Recomendado)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>FPS Promedio</strong></td>
-              <td>45 - 60 FPS</td>
-              <td>75 - 90 FPS</td>
-              <td><strong>160 - 240+ FPS</strong></td>
-            </tr>
-            <tr>
-              <td><strong>Carga de Chunks</strong></td>
-              <td>Lenta con congelamientos</td>
-              <td>Moderada</td>
-              <td><strong>Multihilo Instantánea</strong></td>
-            </tr>
-            <tr>
-              <td><strong>Compatibilidad con Shaders</strong></td>
-              <td>No soportado</td>
-              <td>Nativo (antiguo)</td>
-              <td><strong>Iris Shaders (Máximo rendimiento)</strong></td>
-            </tr>
-            <tr>
-              <td><strong>Consumo de RAM</strong></td>
-              <td>Alto (picos de memoria)</td>
-              <td>Medio</td>
-              <td><strong>Optimizado con FerriteCore (-50%)</strong></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h2>2. Los 5 Mods Esenciales para Duplicar tus FPS</h2>
-      <p>
-        Si utilizas el cargador <strong>Fabric</strong> (o <strong>NeoForge</strong> con sus respectivos puertos), estos son los cinco mods que debes instalar en tu carpeta <code>mods/</code>:
-      </p>
+      <h2>1. Identifica el tipo de problema</h2>
       <ul>
-        <li><strong>Sodium:</strong> Reemplaza por completo el motor de renderizado de Minecraft. Utiliza técnicas modernas de OpenGL para reducir drásticamente el uso de la CPU al dibujar bloques y caras invisibles (occlusion culling).</li>
-        <li><strong>Lithium:</strong> Optimiza la física general, la IA de los mobs y la lógica del servidor interno sin alterar el comportamiento vanilla. Reduce el lag interno (MSPT) hasta en un 40%.</li>
-        <li><strong>FerriteCore:</strong> Reduce drásticamente la memoria RAM requerida por el juego comprimiendo el almacenamiento de estados de bloques en memoria. Indispensable si juegas con 4 GB o menos de RAM.</li>
-        <li><strong>ImmediatelyFast:</strong> Acelera el renderizado de entidades, texto, cofres y partículas, eliminando las caídas de FPS que ocurren al entrar en granjas o aldeas densas.</li>
-        <li><strong>Entity Culling:</strong> Evita que la tarjeta gráfica procese mobs y entidades que están detrás de paredes o bajo tierra y que no puedes ver.</li>
+        <li><strong>FPS bajos de forma constante:</strong> baja temporalmente la resolución o distancia de renderizado y compara. Revisa también si hay límite de FPS o sincronización vertical activos.</li>
+        <li><strong>Pausas al explorar:</strong> observa actividad de disco, memoria y carga de CPU mientras se generan chunks. Un SSD puede ayudar con cargas, pero no sustituye un diagnóstico.</li>
+        <li><strong>Tirones después de jugar un rato:</strong> consulta <code>latest.log</code>, el uso de memoria del juego y la memoria disponible de Windows. No atribuyas automáticamente cada pausa al recolector de Java.</li>
+        <li><strong>Retraso solo en multijugador:</strong> contrasta TPS/MSPT del servidor, ping y pérdida de paquetes; los FPS del cliente no explican el estado del servidor.</li>
       </ul>
+      <p>Antes de probar, anota versión de Minecraft, cargador, lista de mods, resolución, distancias y equipo. Si el mundo importa, crea una copia y prueba ahí.</p>
+
+      <h2>2. Elige mods por función y compatibilidad</h2>
+      <p>Los mods de optimización no hacen todos lo mismo. Sodium se centra en el renderizado del cliente; otros proyectos actúan sobre lógica, memoria, interfaz o carga de recursos. Instala únicamente los que correspondan al síntoma y confirma en sus páginas oficiales la versión de Minecraft, cargador y dependencias.</p>
+      <ul>
+        <li><strong>Sodium:</strong> mod de renderizado para el cliente. Si quieres shaders, revisa el soporte de Iris y las versiones compatibles de ambos.</li>
+        <li><strong>Lithium:</strong> optimiza operaciones de la lógica del juego; su efecto depende de que esas operaciones sean el cuello de botella de tu escenario.</li>
+        <li><strong>FerriteCore:</strong> optimiza el uso de memoria de ciertos datos; la reducción concreta depende de la instancia.</li>
+        <li><strong>ImmediatelyFast:</strong> optimiza determinadas rutas de renderizado de interfaz y elementos.</li>
+        <li><strong>Entity Culling:</strong> puede omitir el renderizado de entidades no visibles en situaciones compatibles; no detiene la simulación de esas entidades.</li>
+      </ul>
+      <p>Los nombres de función no son resultados de benchmark. Consulta las notas de lanzamiento y dependencias de <a href="https://modrinth.com/mod/sodium" target="_blank" rel="noopener">Sodium</a>, <a href="https://modrinth.com/mod/lithium" target="_blank" rel="noopener">Lithium</a>, <a href="https://modrinth.com/mod/ferrite-core" target="_blank" rel="noopener">FerriteCore</a>, <a href="https://modrinth.com/mod/immediatelyfast" target="_blank" rel="noopener">ImmediatelyFast</a> y <a href="https://modrinth.com/mod/entityculling" target="_blank" rel="noopener">Entity Culling</a>.</p>
 
       <div class="alert-box">
-        <strong>💡 Consejo con Nebula Launcher:</strong> En Nebula Launcher no necesitas descargar estos mods a mano. Al crear una instancia de Fabric, puedes activar el preset <em>"Máximo Rendimiento"</em> y el launcher descargará y configurará automáticamente todo este stack en un solo clic.
+        <strong>💡 Si utilizas Nebula Launcher:</strong> Revisa la release instalada para conocer las opciones de gestión e importación disponibles. También puedes instalar los archivos desde las páginas de sus autores y verificar dependencias y compatibilidad antes de iniciar el perfil.
       </div>
 
-      <h2>3. Argumentos JVM Avanzados para Eliminar Microtirones</h2>
-      <p>
-        Muchos jugadores sufren tirones periódicos cada 5 a 10 segundos. Esto no ocurre por falta de potencia gráfica, sino por las pausas de recolección de basura del recolector de memoria de Java (Garbage Collector).
-      </p>
-      <p>
-        Para eliminar estas pausas por completo, recomendamos usar los argumentos optimizados del <strong>recolector G1GC</strong> adaptados a Java 17 / Java 21:
-      </p>
+      <h2>3. No copies argumentos de JVM sin motivo</h2>
+      <p>Empieza con los argumentos que proporciona tu launcher o modpack. El máximo <code>-Xmx</code> limita el heap Java, no la memoria total del proceso. Si investigas un error de heap, sigue las instrucciones de la guía <a href="./como-asignar-mas-ram-minecraft-sin-crashes.html">para ajustar la memoria</a> y cambia el máximo en incrementos pequeños, vigilando también la memoria física disponible en Windows.</p>
+      <p>Las opciones avanzadas del recolector dependen de la versión de Java y del patrón de carga. Cambia una sola opción si los registros aportan evidencia de un problema de GC; consérvala solo si una comparación repetible mejora el síntoma sin crear otros. Consulta la <a href="./configuracion-zgc-vs-g1gc-minecraft.html">explicación de G1GC y ZGC</a> antes de probar esos recolectores.</p>
 
-      <pre><code>-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=20 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1</code></pre>
-
-      <p>
-        <strong>¿Cuánta RAM asignar?</strong>  
-        Un error común es asignar 8 GB o 12 GB a Minecraft vanilla pensando que irá más rápido. ¡Esto empeora el rendimiento! Asignar demasiada RAM hace que el recolector de basura se sature.
-      </p>
-      <ul>
-        <li><strong>Minecraft Vanilla / Pocos mods:</strong> Asigna entre <strong>3 GB y 4 GB</strong>.</li>
-        <li><strong>Modpacks medianos (50-100 mods):</strong> Asigna <strong>6 GB</strong>.</li>
-        <li><strong>Modpacks pesados o Shaders exigentes:</strong> Asigna <strong>8 GB</strong>.</li>
-      </ul>
-
-      <h2>4. Configuración de Video Recomendada en el Menú</h2>
-      <p>
-        Dentro del juego, entra a <em>Opciones &rarr; Gráficos</em> y aplica estos ajustes para ganar hasta 40 FPS extra sin arruinar la calidad visual:
-      </p>
-      <ul>
-        <li><strong>Distancia de Renderizado (Render Distance):</strong> Ponlo entre 8 y 12 chunks. Más de 16 chunks multiplica el consumo de memoria geométricamente.</li>
-        <li><strong>Distancia de Simulación (Simulation Distance):</strong> Fíjala en 6 chunks.</li>
-        <li><strong>Nubes:</strong> Desactivadas o Rápidas.</li>
-        <li><strong>Sincronización Vertical (V-Sync):</strong> Desactívala si quieres menor retraso de entrada (input lag), o actívala si experimentas cortes de imagen (screen tearing).</li>
-        <li><strong>Nivel de Mipmap:</strong> Redúcelo a nivel 2 o 1 para ahorrar memoria de video (VRAM).</li>
-      </ul>
+      <h2>4. Prueba ajustes gráficos paso a paso</h2>
+      <ol>
+        <li>En Opciones de vídeo, cambia una opción por vez y repite la misma ruta. Empieza por la distancia de renderizado si el problema aparece al explorar.</li>
+        <li>Reduce partículas, nubes o efectos del shader si el juego se ralentiza en escenas cargadas; restáuralos si no cambia la fluidez.</li>
+        <li>Ajusta V-Sync y el límite de FPS según el monitor: V-Sync puede evitar tearing, mientras que un límite moderado puede reducir carga o calor, a costa de limitar los cuadros.</li>
+        <li>La distancia de simulación cambia actividad del mundo (por ejemplo, entidades y mecanismos); no la reduzcas como si fuera solo un ajuste gráfico.</li>
+      </ol>
+      <p>Para comprobar si el cuello de botella está en renderizado o simulación, consulta la <a href="./distancia-simulacion-vs-renderizado-minecraft.html">guía de distancias</a>. Esta página ofrece un método de prueba, no un benchmark propio ni una ganancia fija de FPS.</p>
 
       <div class="cta-card">
         <h3>¿Quieres aplicar todo esto de forma automática?</h3>
@@ -553,14 +491,14 @@
         <div class="author-avatar" style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, #c084fc, #38bdf8); display:flex; align-items:center; justify-content:center; font-size:1.8rem; flex-shrink:0; box-shadow:0 0 15px rgba(192,132,252,0.4);">👨‍💻</div>
         <div class="author-info">
           <h4 style="font-family:'Outfit', sans-serif; color:#fff; font-size:1.1rem; margin-bottom:0.25rem;">Escrito por fondue_x — Desarrollador Principal</h4>
-          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Laboratorio Técnico de Rendimiento & Modding de Nebula</div>
+          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Guías técnicas de Nebula Dev Studios</div>
           <p class="author-bio" style="color:#94a3b8; font-size:0.9rem; line-height:1.55; margin-bottom:0.6rem;">
-            Especialista en optimización de JVM, perfiles de frametime en Minecraft y arquitectura de cargadores Fabric/NeoForge. Esta guía ha sido probada y verificada en hardware real de escritorio y portátiles para asegurar resultados reproducibles sin mitos ni efectos placebo.
+            Esta guía ofrece una secuencia de ajustes para probar; no afirma resultados de pruebas comparativas propias. Cambia una opción cada vez, conserva la configuración original y compara en el mismo mundo y recorrido.
           </p>
           <div class="author-meta-links" style="display:flex; gap:1rem; font-size:0.82rem; color:#64748b;">
             <a href="https://github.com/fonduev" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Perfil en GitHub</a>
             <span>•</span>
-            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología de Pruebas</a>
+            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología editorial</a>
             <span>•</span>
             <a href="https://discord.gg/7Uv5CjX8" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Comunidad en Discord</a>
           </div>
@@ -620,29 +558,23 @@
   <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
     <div class="cookie-content">
       <p>
-        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+        🍪 <strong>Aviso de privacidad:</strong> Este sitio puede cargar recursos y servicios de terceros. El botón solo cierra este aviso; no registra ni transmite una elección de consentimiento publicitario. Consulta la <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y los <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
       </p>
-      <div class="cookie-buttons" style="display:flex; gap:10px; align-items:center;">
-        <button class="btn-cookie-reject" onclick="rejectCookieConsent()" style="background:transparent; border:1px solid rgba(255,255,255,0.25); color:#94a3b8; padding:9px 18px; border-radius:10px; font-weight:600; font-size:0.84rem; cursor:pointer; transition:all 0.2s;">Solo Necesarias</button>
-        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+      <div class="cookie-buttons">
+        <button class="btn-cookie-accept" onclick="dismissCookieBanner()">Cerrar aviso</button>
       </div>
     </div>
   </div>
 
   <script>
     function initCookieConsent() {
-      // Google manages advertising consent through its certified CMP.
-      document.getElementById('cookieConsentBanner')?.remove();
-    }
-    function acceptCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'accepted');
-      dismissCookieBanner();
-    }
-    function rejectCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'essential_only');
-      dismissCookieBanner();
+      if (!localStorage.getItem('nebula_cookie_notice_dismissed')) {
+        const banner = document.getElementById('cookieConsentBanner');
+        if (banner) banner.style.display = 'block';
+      }
     }
     function dismissCookieBanner() {
+      localStorage.setItem('nebula_cookie_notice_dismissed', 'true');
       const banner = document.getElementById('cookieConsentBanner');
       if (banner) {
         banner.style.opacity = '0';

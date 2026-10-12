@@ -5,23 +5,23 @@
   <link rel="icon" type="image/x-icon" href="../icon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
-  <title>Argumentos JVM para Minecraft: parámetros reales vs mitos | Nebula Dev Studios</title>
-  <meta name="description" content="Descubre qué argumentos JVM realmente optimizan Minecraft y cuáles provocan caídas de FPS. Configuración técnica probada de memoria, G1GC y ZGC." />
+  <title>Argumentos JVM para Minecraft: qué hacen y qué evitar | Nebula</title>
+  <meta name="description" content="Entiende -Xmx y las opciones de G1GC y ZGC en Minecraft. Comprueba compatibilidad por versión de Java y evalúa cambios con una prueba repetible." />
 
   <!-- Canonical URL & Metadatos Oficiales -->
   <link rel="canonical" href="https://nebuladevstudios.com/guias/argumentos-jvm-minecraft-mitos-realidad.html" />
   <meta property="og:locale" content="es_ES" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Nebula Dev Studios" />
-  <meta property="og:title" content="Argumentos JVM para Minecraft: parámetros reales vs mitos | Nebula Dev Studios" />
-  <meta property="og:description" content="Descubre qué argumentos JVM realmente optimizan Minecraft y cuáles provocan caídas de FPS. Configuración técnica probada de memoria, G1GC y ZGC." />
+  <meta property="og:title" content="Argumentos JVM para Minecraft: qué hacen y qué evitar | Nebula" />
+  <meta property="og:description" content="Entiende -Xmx y las opciones de G1GC y ZGC en Minecraft. Comprueba compatibilidad por versión de Java y evalúa cambios con una prueba repetible." />
   <meta property="og:url" content="https://nebuladevstudios.com/guias/argumentos-jvm-minecraft-mitos-realidad.html" />
   <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Argumentos JVM para Minecraft: parámetros reales vs mitos | Nebula Dev Studios" />
-  <meta name="twitter:description" content="Descubre qué argumentos JVM realmente optimizan Minecraft y cuáles provocan caídas de FPS. Configuración técnica probada de memoria, G1GC y ZGC." />
+  <meta name="twitter:title" content="Argumentos JVM para Minecraft: qué hacen y qué evitar | Nebula" />
+  <meta name="twitter:description" content="Entiende -Xmx y las opciones de G1GC y ZGC en Minecraft. Comprueba compatibilidad por versión de Java y evalúa cambios con una prueba repetible." />
   <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
 
   <!-- Schema.org Datos Estructurados JSON-LD -->
@@ -31,8 +31,8 @@
     "@graph": [
       {
         "@type": "TechArticle",
-        "headline": "Argumentos JVM para Minecraft: qué parámetros funcionan y cuáles son mitos",
-        "description": "Descubre qué argumentos JVM realmente optimizan Minecraft y cuáles provocan caídas de FPS. Configuración técnica probada de memoria, G1GC y ZGC.",
+        "headline": "Argumentos JVM para Minecraft: qué hacen y qué evitar",
+        "description": "Entiende -Xmx y las opciones de G1GC y ZGC en Minecraft. Comprueba compatibilidad por versión de Java y evalúa cambios con una prueba repetible.",
         "url": "https://nebuladevstudios.com/guias/argumentos-jvm-minecraft-mitos-realidad.html",
         "author": {
           "@type": "Person",
@@ -48,14 +48,14 @@
           }
         },
         "datePublished": "2026-09-19",
-        "dateModified": "2026-09-19"
+        "dateModified": "2026-10-12"
       },
       {
         "@type": "FAQPage",
         "mainEntity": [
-          {"@type": "Question", "name": "¿Qué sucede si asigno 12 GB de RAM a Minecraft en una PC con 16 GB?", "acceptedAnswer": {"@type": "Answer", "text": "El juego funcionará temporalmente, pero los procesos de Windows y los controladores gráficos se quedarán sin memoria física suficiente, provocando que el sistema recurra al archivo de paginación del disco duro y genere tirones severos (lag spikes)."}},
-          {"@type": "Question", "name": "¿Es mejor usar G1GC o ZGC para jugar con mods?", "acceptedAnswer": {"@type": "Answer", "text": "G1GC es el más estable y universal para la mayoría de versiones en Java 17. ZGC Generacional solo se recomienda si estás jugando en versiones modernas (1.20.5+) bajo Java 21 oficial y cuentas con un procesador con suficientes hilos libres."}},
-          {"@type": "Question", "name": "¿Por qué me aparece 'Unrecognized VM option' y el juego no abre?", "acceptedAnswer": {"@type": "Answer", "text": "Ese error significa que pegaste un argumento obsoleto que ya no existe en la versión de Java que estás ejecutando (como banderas antiguas de Java 8 en Java 17 o 21). Eliminar ese parámetro resuelve el cierre de inmediato."}}
+          {"@type": "Question", "name": "¿Qué ocurre si asigno un -Xmx muy alto?", "acceptedAnswer": {"@type": "Answer", "text": "-Xmx limita el heap de Java, pero no reserva toda esa memoria en el inicio ni garantiza mejor rendimiento. Deja margen para el sistema, el launcher y la memoria nativa, y ajusta el valor según la carga y los registros."}},
+          {"@type": "Question", "name": "¿Es mejor usar G1GC o ZGC para jugar con mods?", "acceptedAnswer": {"@type": "Answer", "text": "No hay una respuesta universal. Empieza con el recolector predeterminado de la JVM y compara solo si tienes indicios de pausas de GC; las opciones dependen de la versión de Java."}},
+          {"@type": "Question", "name": "¿Por qué aparece 'Unrecognized VM option'?", "acceptedAnswer": {"@type": "Answer", "text": "La JVM no reconoce una opción en ese entorno. Comprueba la versión de Java y elimina o corrige el argumento según la documentación antes de iniciar de nuevo."}}
         ]
       }
     ]
@@ -457,135 +457,97 @@
 
     <div class="article-meta">
       <span>✍️ Por <strong>fondue_x</strong></span>
-      <span>📅 19 de Septiembre, 2026</span>
+      <span>📅 Revisado el 12 de octubre de 2026</span>
       <span>⏱️ 8 min de lectura</span>
-      <span>💻 Probado en Windows 11</span>
+
     </div>
 
     <article class="article-body">
       <h2>El problema: la proliferación de listas de argumentos obsoletos para Java</h2>
-<p>En foros, servidores de Discord y vídeos de internet es común encontrar supuestas "líneas mágicas de argumentos JVM" que prometen duplicar los cuadros por segundo o eliminar por completo los tirones en Minecraft. La inmensa mayoría de estas cadenas de comandos son combinaciones de parámetros diseñadas hace más de ocho años para Java 8, adaptaciones ciegas de configuraciones pensadas exclusivamente para servidores dedicados de alto tráfico (como las banderas de Aikar para Paper), o directamente inventos que la máquina virtual de Java moderna ignora o rechaza.</p>
-<p>Copiar y pegar estas líneas sin comprender la función de cada variable suele provocar dos problemas graves: cierres inmediatos con Código de salida 1 (debido a parámetros eliminados en versiones modernas de Java) o pausas periódicas de congelamiento (lag spikes) provocadas por recolectores de basura mal configurados que detienen el hilo de renderizado del juego. Ajustar correctamente la máquina virtual de Java (JVM) no busca inventar rendimiento donde el hardware no lo permite, sino garantizar que la asignación de memoria y la recolección de residuos se ejecuten de manera predecible y sin interrumpir los fotogramas.</p>
+<p>En foros, vídeos y servidores de Discord circulan listas de argumentos JVM que prometen más FPS o menos tirones en Minecraft. Algunas contienen opciones específicas de versiones antiguas de Java o pensadas para servidores; otras son válidas solo en ciertas versiones. Antes de copiarlas, consulta qué hace cada opción y confirma que la JVM de tu launcher la reconoce.</p>
+<p>Una opción no reconocida puede impedir que Java arranque; otra puede no producir el efecto que esperabas. El resultado de un ajuste depende de la versión de Java, el tamaño del heap, la carga del mundo, los mods y el equipo. Esta página explica conceptos y propone una forma de comparar cambios; no presenta una configuración probada en hardware propio.</p>
 
 <h2>La base de todo: Cómo gestiona la memoria la JVM en Minecraft</h2>
-<p>Para entender qué argumentos son realmente útiles, es indispensable conocer cómo interactúa Minecraft con la memoria del ordenador:</p>
+<p>Para interpretar los argumentos de memoria, distingue el heap Java de otras áreas de memoria que utiliza el proceso:</p>
 <ul>
-  <li><strong>El montón de memoria (Java Heap Space):</strong> Es el área delimitada de memoria RAM física donde Minecraft almacena los objetos activos: entidades, bloques cargados, texturas y datos de sonido. Los argumentos <code>-Xmx</code> (límite máximo) y <code>-Xms</code> (asignación inicial) controlan estrictamente las dimensiones de este espacio.</li>
-  <li><strong>Memoria nativa fuera del montón (Off-Heap / Native Memory):</strong> Java no solo consume lo que le asignas en <code>-Xmx</code>. El motor gráfico de Minecraft (LWJGL, OpenGL o Vulkan) y los controladores de vídeo reservan memoria nativa adicional por fuera del montón. Si tienes 16 GB de RAM física en tu ordenador y le asignas 14 GB a Minecraft mediante <code>-Xmx14G</code>, la suma de la memoria nativa y los procesos del sistema operativo agotarán la memoria real, obligando a Windows a utilizar el disco como memoria virtual y destruyendo la fluidez del juego.</li>
-  <li><strong>El recolector de basura (Garbage Collector):</strong> A medida que juegas, destruyes bloques o te mueves por el mundo, miles de objetos dejan de ser útiles en la memoria. El recolector de basura es el subproceso encargado de identificar estos datos obsoletos y eliminarlos para liberar espacio. Si el recolector está mal configurado o la memoria asignada es excesiva, este proceso detendrá el juego durante medio segundo cada vez que se ejecute una limpieza completa.</li>
+  <li><strong>El montón de memoria (Java Heap Space):</strong> Es el espacio administrado por la JVM donde residen objetos Java vivos, incluidos datos de juego. No equivale al consumo total de memoria del proceso. Los argumentos <code>-Xmx</code> (límite máximo) y <code>-Xms</code> (asignación inicial) controlan estrictamente las dimensiones de este espacio.</li>
+  <li><strong>Memoria nativa fuera del montón (Off-Heap / Native Memory):</strong> Java no solo consume lo que le asignas en <code>-Xmx</code>. El motor gráfico de Minecraft (LWJGL, OpenGL o Vulkan) y los controladores de vídeo reservan memoria nativa adicional por fuera del montón. Por tanto, el uso total de memoria del proceso puede superar el límite de <code>-Xmx</code>. Reserva margen para Windows, el launcher, controladores gráficos y otras aplicaciones; el efecto de paginación depende del uso real del sistema.</li>
+  <li><strong>El recolector de basura (Garbage Collector):</strong> A medida que juegas, destruyes bloques o te mueves por el mundo, miles de objetos dejan de ser útiles en la memoria. El recolector de basura es el subproceso encargado de identificar estos datos obsoletos y eliminarlos para liberar espacio. Algunas fases de recolección pueden pausar temporalmente hilos de la aplicación; duración y frecuencia dependen de la JVM y de la carga. No hay una pausa fija deducible únicamente del valor de <code>-Xmx</code>.</li>
 </ul>
 
-<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Pantalla F3 de Minecraft señalando en la esquina superior derecha la memoria asignada y el porcentaje de uso oscilando</div>
+
 
 <h2>Los tres grandes mitos de los argumentos JVM desmentidos</h2>
 
 <h3>Mito 1: "Cuanta más memoria RAM asignes en los argumentos, más rápido irá el juego"</h3>
-<p>Asignar memoria en exceso es perjudicial para la estabilidad. En una instalación Vanilla o con pocos mods ligeros de optimización (como Sodium), Minecraft opera de forma holgada con entre 2 GB y 4 GB de RAM. Si a esa misma instalación le asignas 10 GB o 12 GB, el recolector de basura retrasará sus ciclos de limpieza porque verá abundante espacio disponible. Cuando la memoria finalmente se llene tras media hora de juego, el recolector se verá obligado a limpiar una montaña gigantesca de objetos huérfanos de golpe, congelando la pantalla por completo durante varios segundos (lo que en informática se conoce como pausa <em>Stop-the-World</em>). La regla técnica es asignar solo la cantidad de memoria que el paquete de mods realmente necesita para funcionar sin ahogarse.</p>
+<p>Un <code>-Xmx</code> más alto permite que el heap crezca, pero no acelera por sí solo el juego. Si el heap asignado consume demasiada memoria física, otros procesos y la memoria nativa de Java pueden quedarse sin margen; por otro lado, un valor bajo puede ser insuficiente para un modpack concreto. El recolector puede detener brevemente los hilos de la aplicación en algunas fases, pero el efecto depende de la versión de Java y del patrón de asignaciones. Ajusta el límite con las observaciones del perfil, no con una cantidad universal.</p>
 
 <h3>Mito 2: "Los argumentos de Aikar para servidores deben usarse en el cliente"</h3>
-<p>Las famosas banderas de Aikar fueron diseñadas minuciosamente para servidores dedicados de Minecraft que procesan decenas de jugadores concurrentes, entidades lógicas complejas y transacciones continuas en segundo plano. Un servidor no dibuja gráficos en una pantalla ni sincroniza fotogramas a 60 o 144 Hz. Copiar argumentos agresivos de servidores en el cliente puede desequilibrar los subprocesos de la CPU, priorizando la limpieza de datos por encima del hilo que dibuja la imagen en tu monitor.</p>
+<p>Los conjuntos de argumentos publicados para Paper se diseñan para ciertos perfiles de servidor y cargas; no deben trasladarse automáticamente al cliente. Lee la documentación que acompaña la configuración y confirma versión de Java, uso de memoria y objetivos previstos antes de probar una opción.</p>
 
 <h3>Mito 3: "Activar -XX:+UseConcMarkSweepGC mejora los FPS"</h3>
-<p>Este argumento activaba el recolector de basura CMS, un componente clásico de Java 8. Desde el lanzamiento de Java 9, CMS fue declarado obsoleto y en Java 14 fue eliminado definitivamente del código de OpenJDK. Si juegas en versiones modernas de Minecraft (1.18 a 1.21+) que operan sobre Java 17 o Java 21, colocar este argumento provocará que la máquina virtual aborte en el milisegundo cero, impidiendo que el juego llegue a abrirse.</p>
+<p>CMS fue eliminado de OpenJDK en Java 14, así que una JVM moderna puede rechazar esa opción. Si aparece <code>Unrecognized VM option</code>, consulta el mensaje completo, confirma qué Java ejecuta realmente el launcher y retira únicamente la opción incompatible. Una bandera antigua puede impedir el arranque, pero eso no implica que todas las listas heredadas contengan opciones inválidas.</p>
 
-<h2>Protocolo técnico: Qué argumentos sí funcionan y cómo configurarlos</h2>
+<h2>Protocolo para revisar argumentos y configurarlos con cuidado</h2>
 
-<h3>Paso 1: Establecer límites simétricos de memoria (-Xms y -Xmx)</h3>
-<p>Por defecto, muchos lanzadores configuran un <code>-Xms</code> bajo (por ejemplo, 512 MB) y un <code>-Xmx</code> alto (por ejemplo, 4 GB). Esto obliga a la máquina virtual a solicitar continuamente más memoria al sistema operativo en bloques pequeños a medida que el juego arranca, provocando micro-tirones durante la carga inicial.</p>
-<p>Al igualar ambos valores, o mantenerlos muy cercanos, obligas a Java a reservar el bloque de memoria de forma estable desde el inicio:</p>
-<pre><code>-Xms4G -Xmx4G</code></pre>
-<p><em>Pauta de dimensionamiento según tu equipo:</em></p>
-<table border="1" cellpadding="6" cellspacing="0">
-  <thead>
-    <tr>
-      <th>RAM total en el PC</th>
-      <th>Tipo de instalación</th>
-      <th>Asignación recomendada (-Xmx)</th>
-      <th>Memoria libre para Windows</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>4 GB físicos</td>
-      <td>Vanilla o Fabric ligero (Sodium)</td>
-      <td>2 GB a 2.5 GB (máximo)</td>
-      <td>1.5 GB a 2 GB restantes.</td>
-    </tr>
-    <tr>
-      <td>8 GB físicos</td>
-      <td>Mods moderados (30-60 mods)</td>
-      <td>4 GB</td>
-      <td>4 GB restantes.</td>
-    </tr>
-    <tr>
-      <td>16 GB físicos</td>
-      <td>Modpacks pesados con shaders</td>
-      <td>6 GB a 8 GB</td>
-      <td>8 GB a 10 GB restantes.</td>
-    </tr>
-  </tbody>
-</table>
+<h3>Paso 1: Ajustar el límite del heap (-Xmx)</h3>
+<p><code>-Xmx</code> establece el tamaño máximo del heap; <code>-Xms</code> establece su tamaño inicial. No es obligatorio hacerlos iguales: reserva el margen necesario para Windows, el launcher, los gráficos y otras aplicaciones. Empieza por el valor del perfil o modpack y cambia el máximo en incrementos moderados únicamente si los registros muestran falta de heap.</p>
+<pre><code>-Xmx4G</code></pre>
+<p>No asignes un valor solo por la cantidad total de RAM del equipo o por el número de mods. Empieza con lo que recomienda el launcher o el autor del modpack, vigila el margen del sistema y aumenta el límite solo si observas falta real de heap. La guía <a href="./como-asignar-mas-ram-minecraft-sin-crashes.html">sobre ajuste de memoria</a> describe una prueba gradual.</p>
 
 <h3>Paso 2: Utilizar el recolector de basura adecuado según tu versión de Java</h3>
-<p>Para Java 17 (Minecraft 1.18 a 1.20.4), el recolector predeterminado más robusto y equilibrado es <strong>G1GC</strong>. Para garantizar que no genere pausas prolongadas mientras juegas, se añade una directiva que le indica el tiempo máximo que toleras que se detenga el juego para limpiar memoria:</p>
-<pre><code>-XX:+UseG1GC -XX:MaxGCPauseMillis=35 -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=20 -XX:G1ReservePercent=15</code></pre>
-<p>Si utilizas Minecraft 1.20.5, 1.21 o versiones más recientes ejecutadas bajo <strong>Java 21</strong>, existe una alternativa de vanguardia: <strong>Generational ZGC</strong>. Este recolector divide los objetos por antigüedad y ejecuta prácticamente todas sus operaciones de limpieza de forma paralela en segundo plano, reduciendo los tiempos de pausa a menos de un milisegundo:</p>
-<pre><code>-XX:+UseZGC -XX:+ZGenerational</code></pre>
-<p><em>Condición técnica estricta:</em> Solo debes utilizar <code>-XX:+ZGenerational</code> si tienes la certeza de que tu entorno está ejecutando Java 21 oficial compilado (verificable mediante <code>java -version</code> en terminal), ya que en Java 17 el modificador generacional de ZGC no existe y provocará un error de sintaxis.</p>
+<p>En las versiones de Java donde está disponible, G1 es la opción predeterminada habitual; la JVM documenta sus opciones de pausa como objetivos de ajuste y no como una garantía de duración máxima. ZGC está diseñado para pausas bajas, pero no garantiza que Minecraft deje de tener tirones: carga de chunks, drivers, mods y otros recursos también influyen. Revisa la documentación de la versión de Java antes de cambiar el recolector.</p>
+<p>En Java 21, Generational ZGC se habilita con las opciones descritas por esa versión; en versiones posteriores las opciones pueden cambiar o quedar obsoletas. No copies <code>-XX:+ZGenerational</code> sin consultar la documentación correspondiente. Empieza con el recolector predeterminado y evalúa un cambio solo si los registros muestran pausas de GC relevantes.</p>
 
-<h3>Paso 3: Eliminar fallos de página durante la partida (-XX:+AlwaysPreTouch)</h3>
-<p>Cuando Windows asigna memoria RAM a una aplicación, inicialmente solo le entrega "direcciones virtuales". La memoria física real se asigna únicamente en el milisegundo exacto en que la aplicación escribe un dato en esa dirección por primera vez. Esto produce pequeños tropiezos de lectura (llamados <em>Page Faults</em>) mientras viajas por el mundo y se cargan nuevos bloques.</p>
-<p>Al incluir el argumento:</p>
-<pre><code>-XX:+AlwaysPreTouch</code></pre>
-<p>Obligas a la JVM a recorrer y reclamar físicamente cada byte de la memoria asignada en el instante en que presionas "Jugar". Esto añade entre uno y dos segundos al tiempo que tarda el lanzador en abrir la ventana, pero a cambio elimina por completo los tirones de asignación de memoria durante la partida.</p>
+<h3>Paso 3: Evalúa opciones avanzadas solo con evidencia</h3>
+<p>Opciones como <code>-XX:+AlwaysPreTouch</code> cambian el comportamiento de reserva de memoria y pueden afectar el inicio y el uso de recursos. No garantizan eliminar tirones. Déjalas fuera de una configuración general salvo que un diagnóstico específico justifique probarlas.</p>
 
-<h3>Paso 4: Desactivar la telemetría compartida (-XX:+PerfDisableSharedMem)</h3>
-<p>Por defecto, la máquina virtual de Java escribe constantemente pequeñas estadísticas de rendimiento en un archivo temporal dentro del directorio del usuario para permitir que herramientas externas de diagnóstico monitoreen el proceso. En sistemas con almacenamiento bajo carga constante, estas operaciones de escritura silenciosas pueden causar micro-congelamientos esporádicos. El parámetro siguiente neutraliza este mecanismo secundario:</p>
-<pre><code>-XX:+PerfDisableSharedMem</code></pre>
+<p>No añadas opciones de monitorización o memoria como <code>-XX:+PerfDisableSharedMem</code> sin una necesidad identificada: pueden cambiar la disponibilidad de datos para herramientas de diagnóstico y no constituyen por sí mismas una optimización comprobada de FPS.</p>
 
-<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Campo de configuración de Argumentos JVM en el lanzador mostrando la línea optimizada limpia</div>
 
-<h2>Caso técnico poco documentado: El mito de -XX:+UseNUMA y la saturación de hilos en CPUs de escritorio</h2>
-<p>Es muy frecuente ver en configuraciones compartidas de internet el argumento <code>-XX:+UseNUMA</code>, acompañado de la afirmación de que "activa todos los núcleos de tu procesador".</p>
-<p>Desde el punto de vista de la arquitectura de computadores, esto es falso en un ordenador de escritorio convencional. NUMA (Non-Uniform Memory Access) es una tecnología diseñada exclusivamente para placas base empresariales de servidores que albergan dos o más zócalos de procesador independientes (múltiples procesadores físicos montados en la misma placa), donde cada chip tiene su propio canal de memoria cercano y debe comunicarse mediante un bus intermedio para acceder a la memoria del otro chip.</p>
-<p>En un procesador de consumo de un solo zócalo (como una CPU Intel Core i7, i5 o AMD Ryzen estándar de escritorio), la memoria es completamente uniforme (UMA). Si colocas <code>-XX:+UseNUMA</code> en un procesador de escritorio convencional de cuatro o seis núcleos, Java intentará consultar al sistema operativo por nodos de memoria que no existen físicamente, introduciendo comprobaciones inútiles en el kernel de Windows. Peor aún: si se acompaña de comandos como <code>-XX:ParallelGCThreads</code> fijados en el número total de hilos del procesador (por ejemplo, 8 hilos en un i7-4790), cada vez que el recolector de basura realice una operación, acaparará la totalidad de los núcleos lógicos de la CPU, dejando al hilo de audio y al hilo de renderizado sin tiempo de procesamiento y provocando un congelamiento de imagen audible.</p>
-<p>En procesadores de escritorio de 4 a 8 hilos, la recomendación técnica es no sobrecargar las directivas de hilos paralelos y dejar que el programador de tareas nativo de OpenJDK asigne los hilos de manera balanceada.</p>
 
-<h2>Cómo comprobar que la configuración de memoria es estable</h2>
-<p>Para verificar con datos objetivos que tus argumentos JVM están trabajando correctamente sin saturar el sistema:</p>
+<h2>Opciones específicas de plataforma: revisa -XX:+UseNUMA antes de copiarla</h2>
+<p>NUMA es una característica de acceso a memoria de ciertas plataformas; <code>-XX:+UseNUMA</code> no activa núcleos de CPU. Su disponibilidad y efecto dependen del sistema operativo, la JVM y el hardware. Para una guía general de cliente, deja que la JVM seleccione el comportamiento predeterminado, salvo que la documentación de tu entorno y una prueba controlada justifiquen otra cosa. Evita fijar <code>-XX:ParallelGCThreads</code> al número de núcleos sin medirlo.</p>
+
+<h2>Cómo observar la memoria sin confundir el síntoma con la causa</h2>
+<p>Para observar el heap durante una prueba de diagnóstico, anota los valores iniciales y repite la misma carga después de cada cambio:</p>
 <ol>
   <li>Inicia Minecraft y entra a un mundo con tus mods habituales.</li>
   <li>Presiona la tecla <code>F3</code> y observa el gráfico de memoria en la esquina superior derecha.</li>
-  <li>Inspecciona el patrón de consumo: la memoria en uso debe aumentar de forma progresiva y suave (por ejemplo, subir de 40% a 70%) y luego descender limpiamente sin que la pantalla se congele ni un solo milisegundo al bajar. Este patrón regular en forma de "dientes de sierra" confirma que el recolector de basura está realizando limpiezas parciales eficientes.</li>
-  <li>Abre el Administrador de tareas de Windows (<code>Ctrl + Shift + Esc</code>) en la pestaña <em>Rendimiento &gt; Memoria</em> y comprueba que la cantidad de "Memoria disponible" en el sistema operativo no baje nunca de 1.5 GB. Mientras Windows tenga margen de maniobra, Minecraft no sufrirá caídas de rendimiento externas.</li>
+  <li>Un pico y una bajada del heap pueden formar parte del funcionamiento normal del recolector; el gráfico F3 por sí solo no identifica la causa de un tirón ni confirma una fuga.</li>
+  <li>Observa también la memoria física disponible del sistema y los registros de GC, si los estás recopilando. No hay un umbral único de memoria libre que garantice fluidez en todos los equipos.</li>
 </ol>
 
-<h2>Línea de argumentos recomendada lista para usar</h2>
-<p>Si buscas una configuración balanceada, probada y libre de parámetros obsoletos para jugar con mods en Java 17 o Java 21, utiliza esta base limpia (ajustando los 4G a 6G u 8G según la memoria de tu PC):</p>
-<pre><code>-Xms4G -Xmx4G -XX:+UseG1GC -XX:+AlwaysPreTouch -XX:+PerfDisableSharedMem</code></pre>
-<p>En lanzadores que permiten personalizar la instancia (como Nebula Launcher o perfiles avanzados de Mojang), este texto se introduce directamente en el campo <em>JVM Arguments</em> sin necesidad de alterar ningún archivo de configuración interno del sistema operativo.</p>
+<h2>Cómo evaluar un argumento sin asumir que optimiza</h2>
+<ol>
+  <li>Registra Java, Minecraft, cargador, mods, valor de <code>-Xmx</code> y ajustes del mundo.</li>
+  <li>Elige una ruta corta y repetible; deja que cargue el escenario y anota el síntoma y los registros relevantes.</li>
+  <li>Cambia una sola opción, repite varias veces en la misma instancia y compara pausas o mediciones pertinentes.</li>
+  <li>Si no hay diferencia consistente o aparecen errores, vuelve al valor anterior. No cambies a la vez heap, recolector y mods.</li>
+</ol>
+<p>El lanzador puede agregar argumentos propios. Antes de editar la línea completa, revisa qué opciones están activas y conserva una copia para poder revertirla.</p>
 
 <h2>Conclusión</h2>
-<p>La optimización de Java para Minecraft no consiste en acumular la mayor cantidad de comandos posibles, sino en aplicar los principios de la informática moderna: otorgar al juego la memoria justa que necesita, garantizar que Windows conserve recursos para sus controladores y permitir que los algoritmos modernos de recolección de residuos trabajen sin interferencias artificiales.</p>
+<p>Usa argumentos JVM solo cuando entiendas su propósito y hayas comprobado que corresponden a la versión de Java de tu instancia. El valor inicial del launcher suele ser el mejor punto de partida; cualquier ajuste debe compararse en condiciones repetibles y revertirse si no aporta una diferencia consistente.</p>
 
       <div class="author-box">
         <h3>Sobre el autor: fondue_x</h3>
-        <p><strong>fondue_x</strong> es desarrollador independiente y jugador de Minecraft desde hace más de 5 años, especializado en optimización de rendimiento, arquitectura de instancias y resolución de incompatibilidades en Fabric, Forge y NeoForge. Es el creador de <a href="https://github.com/fonduev" target="_blank" rel="noopener">Nebula Launcher</a>. Todas sus guías se prueban de primera mano en bancos de pruebas reales con Windows 11. Puedes consultar nuestra <a href="../metodologia.html">metodología editorial y banco de pruebas</a>.</p>
+        <p><strong>fondue_x</strong> es desarrollador independiente y jugador de Minecraft desde hace más de 5 años, especializado en optimización de rendimiento, arquitectura de instancias y resolución de incompatibilidades en Fabric, Forge y NeoForge. Es el creador de <a href="https://github.com/fonduev" target="_blank" rel="noopener">Nebula Launcher</a>. Las guías se preparan con referencias enlazadas y recomendaciones generales; los resultados propios solo se afirman cuando los datos de prueba aparecen en el artículo. Consulta nuestra <a href="../metodologia.html">metodología editorial</a>.</p>
       </div>
 
       <div class="faq-section">
         <h2 style="margin-top:0;">Preguntas Frecuentes</h2>
                 <div class="faq-item">
-          <h4>¿Qué sucede si asigno 12 GB de RAM a Minecraft en una PC con 16 GB?</h4>
-          <p>El juego funcionará temporalmente, pero los procesos de Windows y los controladores gráficos se quedarán sin memoria física suficiente, provocando que el sistema recurra al archivo de paginación del disco duro y genere tirones severos (lag spikes).</p>
+          <h4>¿Qué ocurre si asigno un -Xmx muy alto?</h4>
+          <p><code>-Xmx</code> limita el heap de Java, pero no garantiza mejor rendimiento. Deja margen para el sistema, el launcher y la memoria nativa; ajusta el límite según la carga y los registros.</p>
         </div>
         <div class="faq-item">
           <h4>¿Es mejor usar G1GC o ZGC para jugar con mods?</h4>
-          <p>G1GC es el más estable y universal para la mayoría de versiones en Java 17. ZGC Generacional solo se recomienda si estás jugando en versiones modernas (1.20.5+) bajo Java 21 oficial y cuentas con un procesador con suficientes hilos libres.</p>
+          <p>No hay una respuesta universal. Empieza con el recolector predeterminado de la JVM y compara solo si tienes indicios de pausas de GC; las opciones dependen de la versión de Java.</p>
         </div>
         <div class="faq-item">
           <h4>¿Por qué me aparece 'Unrecognized VM option' y el juego no abre?</h4>
-          <p>Ese error significa que pegaste un argumento obsoleto que ya no existe en la versión de Java que estás ejecutando (como banderas antiguas de Java 8 en Java 17 o 21). Eliminar ese parámetro resuelve el cierre de inmediato.</p>
+          <p>La JVM no reconoce una opción en ese entorno. Comprueba qué versión de Java ejecuta el launcher y corrige el argumento según la documentación antes de iniciar de nuevo.</p>
         </div>
       </div>
     
@@ -594,14 +556,14 @@
         <div class="author-avatar" style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, #c084fc, #38bdf8); display:flex; align-items:center; justify-content:center; font-size:1.8rem; flex-shrink:0; box-shadow:0 0 15px rgba(192,132,252,0.4);">👨‍💻</div>
         <div class="author-info">
           <h4 style="font-family:'Outfit', sans-serif; color:#fff; font-size:1.1rem; margin-bottom:0.25rem;">Escrito por fondue_x — Desarrollador Principal</h4>
-          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Laboratorio Técnico de Rendimiento & Modding de Nebula</div>
+          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Guías técnicas de Nebula Dev Studios</div>
           <p class="author-bio" style="color:#94a3b8; font-size:0.9rem; line-height:1.55; margin-bottom:0.6rem;">
-            Especialista en optimización de JVM, perfiles de frametime en Minecraft y arquitectura de cargadores Fabric/NeoForge. Esta guía ha sido probada y verificada en hardware real de escritorio y portátiles para asegurar resultados reproducibles sin mitos ni efectos placebo.
+            Las recomendaciones generales de esta guía no son resultados de pruebas comparativas propias. Comprueba los requisitos de Java y las versiones de Minecraft y del cargador en las fuentes oficiales antes de cambiar argumentos.
           </p>
           <div class="author-meta-links" style="display:flex; gap:1rem; font-size:0.82rem; color:#64748b;">
             <a href="https://github.com/fonduev" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Perfil en GitHub</a>
             <span>•</span>
-            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología de Pruebas</a>
+            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología editorial</a>
             <span>•</span>
             <a href="https://discord.gg/7Uv5CjX8" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Comunidad en Discord</a>
           </div>
@@ -617,7 +579,7 @@
       <div class="footer-col">
         <h4>NEBULA DEV STUDIOS</h4>
         <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
-          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+          Guías independientes sobre Minecraft y herramientas relacionadas. Los artículos distinguen recomendaciones de resultados medidos y enlazan fuentes para facilitar su verificación.
         </p>
       </div>
       <div class="footer-col">
@@ -626,7 +588,7 @@
           <li><a href="../index.html">Inicio</a></li>
           <li><a href="../guias.html">Guías & Tutoriales</a></li>
           <li><a href="../about.html">Acerca de</a></li>
-          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../metodologia.html">Metodología editorial</a></li>
           <li><a href="../contact.html">Contacto</a></li>
         </ul>
       </div>
@@ -660,31 +622,23 @@
   <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
     <div class="cookie-content">
       <p>
-        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+        🍪 <strong>Aviso de privacidad:</strong> Este sitio puede cargar recursos y servicios de terceros. El botón solo cierra este aviso; no registra ni transmite una elección de consentimiento publicitario. Consulta la <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y los <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
       </p>
       <div class="cookie-buttons">
-        <button class="btn-cookie-reject" onclick="rejectCookieConsent()">Solo Necesarias</button>
-        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+        <button class="btn-cookie-accept" onclick="dismissCookieBanner()">Cerrar aviso</button>
       </div>
     </div>
   </div>
 
   <script>
     function initCookieConsent() {
-      if (!localStorage.getItem('nebula_cookie_consent')) {
+      if (!localStorage.getItem('nebula_cookie_notice_dismissed')) {
         const banner = document.getElementById('cookieConsentBanner');
         if (banner) banner.style.display = 'block';
       }
     }
-    function acceptCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'accepted');
-      dismissCookieBanner();
-    }
-    function rejectCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'essential_only');
-      dismissCookieBanner();
-    }
     function dismissCookieBanner() {
+      localStorage.setItem('nebula_cookie_notice_dismissed', 'true');
       const banner = document.getElementById('cookieConsentBanner');
       if (banner) {
         banner.style.opacity = '0';

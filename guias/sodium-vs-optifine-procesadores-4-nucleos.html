@@ -5,23 +5,23 @@
   <link rel="icon" type="image/x-icon" href="../icon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
-  <title>Sodium vs OptiFine en CPU de 4 núcleos: pruebas en i7 4790 | Nebula Dev Studios</title>
-  <meta name="description" content="¿Sodium u OptiFine para un procesador de 4 núcleos? Analizamos la arquitectura de OpenGL, el cuello de botella de CPU y la configuración con Iris Shaders." />
+  <title>Sodium vs OptiFine: diferencias, compatibilidad y cómo elegir | Nebula Dev Studios</title>
+  <meta name="description" content="Compara Sodium e OptiFine por funciones, cargadores y compatibilidad. Sigue una prueba controlada para decidir qué perfil encaja con tu versión y tus mods." />
 
   <!-- Canonical URL & Metadatos Oficiales -->
   <link rel="canonical" href="https://nebuladevstudios.com/guias/sodium-vs-optifine-procesadores-4-nucleos.html" />
   <meta property="og:locale" content="es_ES" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Nebula Dev Studios" />
-  <meta property="og:title" content="Sodium vs OptiFine en CPU de 4 núcleos: pruebas en i7 4790 | Nebula Dev Studios" />
-  <meta property="og:description" content="¿Sodium u OptiFine para un procesador de 4 núcleos? Analizamos la arquitectura de OpenGL, el cuello de botella de CPU y la configuración con Iris Shaders." />
+  <meta property="og:title" content="Sodium vs OptiFine: diferencias, compatibilidad y cómo elegir | Nebula Dev Studios" />
+  <meta property="og:description" content="Compara Sodium e OptiFine por funciones, cargadores y compatibilidad. Sigue una prueba controlada para decidir qué perfil encaja con tu versión y tus mods." />
   <meta property="og:url" content="https://nebuladevstudios.com/guias/sodium-vs-optifine-procesadores-4-nucleos.html" />
   <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Sodium vs OptiFine en CPU de 4 núcleos: pruebas en i7 4790 | Nebula Dev Studios" />
-  <meta name="twitter:description" content="¿Sodium u OptiFine para un procesador de 4 núcleos? Analizamos la arquitectura de OpenGL, el cuello de botella de CPU y la configuración con Iris Shaders." />
+  <meta name="twitter:title" content="Sodium vs OptiFine: diferencias, compatibilidad y cómo elegir | Nebula Dev Studios" />
+  <meta name="twitter:description" content="Compara Sodium e OptiFine por funciones, cargadores y compatibilidad. Sigue una prueba controlada para decidir qué perfil encaja con tu versión y tus mods." />
   <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
 
   <!-- Schema.org Datos Estructurados JSON-LD -->
@@ -31,8 +31,8 @@
     "@graph": [
       {
         "@type": "TechArticle",
-        "headline": "Sodium vs OptiFine en procesadores de 4 núcleos: análisis en un i7 de 4ª generación",
-        "description": "¿Sodium u OptiFine para un procesador de 4 núcleos? Analizamos la arquitectura de OpenGL, el cuello de botella de CPU y la configuración con Iris Shaders.",
+        "headline": "Sodium vs OptiFine: diferencias, compatibilidad y cómo elegir",
+        "description": "Compara Sodium e OptiFine por funciones, cargadores y compatibilidad. Sigue una prueba controlada para decidir qué perfil encaja con tu versión y tus mods.",
         "url": "https://nebuladevstudios.com/guias/sodium-vs-optifine-procesadores-4-nucleos.html",
         "author": {
           "@type": "Person",
@@ -48,14 +48,14 @@
           }
         },
         "datePublished": "2026-09-19",
-        "dateModified": "2026-09-19"
+        "dateModified": "2026-10-12"
       },
       {
         "@type": "FAQPage",
         "mainEntity": [
-          {"@type": "Question", "name": "¿Puedo instalar Sodium y OptiFine al mismo tiempo?", "acceptedAnswer": {"@type": "Answer", "text": "No. Ambos intentan reescribir por completo el motor de renderizado de Minecraft a nivel de código fuente. Intentar instalarlos juntos provocará un cierre inmediato del juego con un error de inyección de Mixins."}},
-          {"@type": "Question", "name": "¿Cómo uso shaders en Minecraft si tengo Sodium en lugar de OptiFine?", "acceptedAnswer": {"@type": "Answer", "text": "Instalando el mod complementario Iris Shaders. Iris utiliza la misma tecnología de Sodium para el mundo y añade un menú para cargar paquetes de shaders (.zip) exactamente igual que OptiFine, pero con mayor tasa de cuadros por segundo."}},
-          {"@type": "Question", "name": "¿Por qué mis FPS son altos pero el juego se siente trabado con OptiFine?", "acceptedAnswer": {"@type": "Answer", "text": "Porque el contador de FPS solo muestra un promedio por segundo. Si el procesador sufre micro-congelamientos cada pocos milisegundos por una mala gestión de hilos, los fotogramas se entregan con retraso irregular (frametime inestable), generando una sensación de juego entrecortado."}}
+          {"@type": "Question", "name": "¿Se pueden instalar Sodium y OptiFine juntos?", "acceptedAnswer": {"@type": "Answer", "text": "No se deben combinar en una misma instancia: ambos modifican el renderizado y OptiFine no es un complemento de Sodium. Usa perfiles separados y consulta la compatibilidad de cada versión."}},
+          {"@type": "Question", "name": "¿Qué opción permite usar shaders con Sodium?", "acceptedAnswer": {"@type": "Answer", "text": "Iris es un cargador de shaders diseñado para trabajar con Sodium. Revisa en las páginas oficiales de Iris y del shader la compatibilidad con tu versión de Minecraft y cargador."}},
+          {"@type": "Question", "name": "¿Cuál ofrece más FPS?", "acceptedAnswer": {"@type": "Answer", "text": "No hay un resultado universal: influye el hardware, la versión, el mundo, los ajustes, los shaders y los mods. Para comparar, prueba perfiles separados con las mismas condiciones y sin interpretar esta guía como un benchmark propio."}}
         ]
       }
     ]
@@ -452,149 +452,76 @@
       <span>Rendimiento</span>
     </nav>
 
-    <div class="badge">Benchmark & Rendimiento</div>
-    <h1>Sodium vs OptiFine en procesadores de 4 núcleos: análisis en un i7 de 4ª generación</h1>
+    <div class="badge">Comparación de mods</div>
+    <h1>Sodium vs OptiFine: diferencias, compatibilidad y cómo elegir</h1>
 
     <div class="article-meta">
       <span>✍️ Por <strong>fondue_x</strong></span>
-      <span>📅 19 de Septiembre, 2026</span>
+      <span>Revisado el 12 de octubre de 2026</span>
       <span>⏱️ 8 min de lectura</span>
-      <span>💻 Probado en Windows 11</span>
     </div>
 
     <article class="article-body">
-      <h2>El problema: la ilusión de los FPS y el cuello de botella de CPU en Minecraft moderno</h2>
-<p>Muchos jugadores que actualizan su tarjeta gráfica a un modelo moderno (como una Nvidia GeForce RTX 3050) pero conservan un procesador veterano de cuatro núcleos y ocho hilos (como un Intel Core i7-4790) se encuentran con una paradoja desconcertante al jugar a Minecraft moderno (1.20 o 1.21): el juego no supera los 50 o 60 cuadros por segundo, sufre tirones intermitentes y la tarjeta gráfica apenas registra un 25% de uso en el Administrador de tareas.</p>
-<p>Durante más de una década, la solución universal fue instalar <strong>OptiFine</strong>. Sin embargo, en las versiones actuales del juego, OptiFine con frecuencia empeora la situación en procesadores de cuatro núcleos, provocando caídas severas en los tiempos de cuadro (frametimes). Frente a esto, el motor de renderizado <strong>Sodium</strong> (en el ecosistema de Fabric y NeoForge) fue diseñado desde cero para cambiar radicalmente la forma en que el procesador se comunica con la tarjeta gráfica. Entender cómo gestiona cada uno las llamadas de dibujado de OpenGL y el uso de los núcleos de la CPU es la clave para desbloquear el verdadero rendimiento de tu equipo.</p>
+      <h2>Resumen: no existe un ganador para todos los equipos</h2>
+<p><strong>Sodium</strong> es un mod de optimización del renderizado para Minecraft: Java Edition que se integra con el entorno Fabric y, según las versiones publicadas, con otros cargadores compatibles. <strong>OptiFine</strong> es una modificación independiente con opciones de vídeo, zoom y soporte para shaders. No son complementos entre sí: manténlos en perfiles separados y revisa la compatibilidad del archivo exacto que vayas a instalar.</p>
+<p>Esta página es una comparación de funciones y un procedimiento de prueba; no es un benchmark propio y no ofrece cifras universales de FPS. El resultado depende de GPU, CPU, Minecraft, cargador, mundo, resolución, distancia de renderizado, shaders y demás mods.</p>
 
-<h2>Arquitectura interna: Cómo dibuja los bloques cada optimizador</h2>
-<p>Minecraft no es un videojuego convencional con un mapa estático. Cada mundo está compuesto por millones de cubos individuales que pueden colocarse, destruirse o cambiar de estado en cualquier momento. La tarea más pesada del motor no es calcular las luces o las sombras, sino determinar qué caras de cada bloque son visibles para el ojo del jugador y comunicarle esa información a la tarjeta gráfica:</p>
-<ul>
-  <li><strong>El enfoque clásico de OptiFine:</strong> OptiFine divide el renderizado mediante técnicas diseñadas en la era de OpenGL 2.1. Aunque incluye opciones como <em>Carga Rápida de Chunks</em> o <em>Renderizado Multinúcleo</em>, su método base sigue enviando la información al procesador gráfico en miles de paquetes pequeños y secuenciales (llamados órdenes de dibujado o <em>Draw Calls</em>). En un procesador antiguo de cuatro núcleos, el hilo principal de la CPU se satura gestionando estas miles de órdenes, provocando un cuello de botella monohilo severo antes de que la tarjeta gráfica reciba el trabajo.</li>
-  <li><strong>El enfoque moderno de Sodium:</strong> Sodium reemplaza por completo el procesador de renderizado original de Minecraft por una estructura basada en OpenGL 4.6 moderno. En lugar de procesar cada cubo por separado, Sodium compacta las mallas geométricas de cientos de bloques en búferes de memoria unificados y utiliza la técnica <em>Multi-Draw Indirect</em>. Esto permite que el procesador ordene a la GPU dibujar cientos de miles de polígonos mediante una única instrucción, liberando a la CPU de una carga de trabajo gigantesca.</li>
-</ul>
-
-<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Comparativa de pantalla F3 con OptiFine frente a Sodium mostrando el porcentaje de uso de CPU y GPU</div>
-
-<h2>Comportamiento en procesadores de 4 núcleos y 8 hilos (Haswell / i7-4790)</h2>
-<p>Un procesador como el Intel Core i7-4790, aunque sigue siendo capaz para muchas tareas, cuenta con una arquitectura de cuatro núcleos físicos divididos en ocho hilos mediante Hyper-Threading, operando con memoria DDR3. En Minecraft moderno, la CPU debe atender simultáneamente:</p>
-<ol>
-  <li>El hilo lógico del juego (físicas de entidades, inteligencia artificial de criaturas y cálculos de red).</li>
-  <li>La generación procedural y descompresión de terreno en disco.</li>
-  <li>La recolección de basura de la máquina virtual de Java.</li>
-  <li>El hilo principal de renderizado gráfico.</li>
-</ol>
-<p>Cuando utilizas <strong>OptiFine</strong> en versiones modernas (1.20+), el intento de distribuir la carga gráfica entre varios hilos a menudo compite con el cálculo lógico del mundo. Esto produce el clásico síntoma de "FPS altos en el contador, pero juego con micro-congelamientos continuos".</p>
-<p>Por el contrario, <strong>Sodium</strong> delega casi la totalidad del cálculo de oclusión (determinar qué bloques están ocultos detrás de otros para no dibujarlos) en la tarjeta gráfica moderna mediante algoritmos geométricos compactos. Al liberar a los cuatro núcleos del procesador de esa tarea matemática, el i7-4790 puede dedicar sus hilos exclusivamente a la lógica del mapa y al procesamiento de chunks, eliminando los tirones de raíz.</p>
-
-<h2>Cuadro comparativo: OptiFine vs. Sodium en hardware real</h2>
+<h2>Qué comparar antes de decidir</h2>
 <table border="1" cellpadding="6" cellspacing="0">
-  <thead>
-    <tr>
-      <th>Característica técnica</th>
-      <th>OptiFine</th>
-      <th>Sodium (con ecosistema moderno)</th>
-    </tr>
-  </thead>
+  <thead><tr><th>Necesidad</th><th>Qué revisar</th><th>Cómo comprobarlo</th></tr></thead>
   <tbody>
-    <tr>
-      <td><strong>Versión de OpenGL utilizada</strong></td>
-      <td>OpenGL 2.1 / 3.0 heredado</td>
-      <td>OpenGL 4.6 moderno con Multi-Draw Indirect</td>
-    </tr>
-    <tr>
-      <td><strong>Consumo de memoria RAM</strong></td>
-      <td>Moderado a alto</td>
-      <td>Muy bajo (especialmente junto a FerriteCore)</td>
-    </tr>
-    <tr>
-      <td><strong>Soporte de paquetes de shaders</strong></td>
-      <td>Nativo interno</td>
-      <td>Requiere el mod <strong>Iris</strong> (totalmente compatible)</td>
-    </tr>
-    <tr>
-      <td><strong>Compatibilidad con otros mods</strong></td>
-      <td>Baja: suele romper mods en Fabric y Forge moderno</td>
-      <td>Muy alta: es el estándar oficial de la comunidad</td>
-    </tr>
-    <tr>
-      <td><strong>Estabilidad de frametime (tirones)</strong></td>
-      <td>Inestable en Minecraft 1.18+</td>
-      <td>Extremadamente estable en procesadores clásicos</td>
-    </tr>
+    <tr><td>Rendimiento de renderizado</td><td>Sodium está centrado en optimizar el renderizado del cliente. OptiFine ofrece un paquete separado de opciones; no asumas una ganancia numérica.</td><td>Prueba los perfiles con la misma versión, mundo, ruta y ajustes, y registra FPS y tirones.</td></tr>
+    <tr><td>Shaders</td><td>Iris se integra con Sodium para cargar shaders compatibles. OptiFine tiene su propia implementación; los packs pueden diferir en soporte.</td><td>Consulta la compatibilidad del shader y del cargador en sus páginas oficiales.</td></tr>
+    <tr><td>Mods existentes</td><td>La disponibilidad depende de Minecraft y del cargador, y de si cada mod usa APIs o mixins incompatibles.</td><td>Comprueba las versiones y dependencias declaradas por cada mod; inicia primero un perfil limpio.</td></tr>
+    <tr><td>Funciones de OptiFine</td><td>Zoom, texturas conectadas, CIT y otras funciones pueden requerir proyectos complementarios en otro perfil.</td><td>Verifica si el recurso pack depende de funciones específicas de OptiFine antes de migrar.</td></tr>
   </tbody>
 </table>
 
-<h2>Protocolo de 4 pasos para configurar el ecosistema Sodium en tu equipo</h2>
-<p>Para igualar y superar todas las funciones visuales clásicas de OptiFine (zoom, sombreadores, texturas conectadas y rendimiento) utilizando la tecnología moderna de Sodium, debes instalar un paquete modular coordinado:</p>
+<h2>Prueba comparativa reproducible</h2>
+<ol>
+  <li>Crea dos instancias independientes para la misma versión de Minecraft. Haz copia del mundo y no abras el mismo guardado simultáneamente en perfiles modificados.</li>
+  <li>Instala en cada instancia solo el renderizador que quieres comparar y sus dependencias obligatorias. No mezcles Sodium y OptiFine ni agregues varios mods de optimización a la vez.</li>
+  <li>Fija resolución, gráficos, distancia de renderizado, límite de FPS y demás opciones en ambos perfiles. Desactiva shaders para una primera comparación; después puedes medirlos aparte con el mismo pack.</li>
+  <li>Usa el mismo mundo y recorrido, deja que los chunks carguen y repite varias veces. Registra FPS promedio y, si está disponible, percentiles de frametime; anota versión, hardware, cargador y mods.</li>
+  <li>Compara también compatibilidad, estabilidad y funciones que realmente uses. Si un perfil falla, conserva el registro de arranque para identificar la dependencia o el mixin implicado.</li>
+</ol>
+<p>El uso global de CPU o GPU no identifica por sí solo un cuello de botella: Minecraft puede saturar un hilo aunque el promedio total de CPU sea bajo. Usa las mediciones como indicios, no como diagnóstico aislado.</p>
 
-<h3>Paso 1: Instalar el cargador Fabric o NeoForge</h3>
-<p>Descarga e instala el cargador de mods oficial de tu elección. En versiones modernas (1.20 y 1.21), Fabric es el entorno más pulido para maximizar cuadros por segundo con Sodium. Asegúrate de colocar siempre la biblioteca obligatoria <strong>Fabric API</strong> en la carpeta <code>mods</code>.</p>
-<p>En aplicaciones especializadas como Nebula Launcher, esta pila de rendimiento viene integrada en plantillas de un solo clic, instalando automáticamente el cargador y los módulos de optimización compatibles sin requerir descargas manuales.</p>
+<h2>Instalación segura de un perfil Sodium</h2>
+<ol>
+  <li>Comprueba en la <a href="https://modrinth.com/mod/sodium" target="_blank" rel="noopener">página oficial de Sodium en Modrinth</a> qué versiones de Minecraft y cargadores admite la publicación actual.</li>
+  <li>Instala el cargador indicado y las dependencias listadas por el proyecto; Fabric API solo es necesaria cuando el mod o el pack la requiere.</li>
+  <li>Si quieres shaders, consulta la <a href="https://irisshaders.dev/" target="_blank" rel="noopener">documentación y descargas de Iris</a> y confirma que las versiones de Iris y Sodium sean compatibles entre sí.</li>
+  <li>Añade los demás mods de uno en uno y abre el juego después de cada cambio. Mantén los mundos respaldados.</li>
+</ol>
+<p>La disponibilidad, los nombres de opciones y las dependencias cambian entre versiones. No copies números de hilos ni ajustes avanzados de una CPU concreta como si fueran valores recomendados para todas.</p>
 
-<h3>Paso 2: Incorporar la tríada de rendimiento base</h3>
-<p>Descarga desde <a href="https://modrinth.com/" target="_blank" rel="noopener">Modrinth</a> los tres archivos fundamentales que transforman el motor del juego:</p>
+<h2>Cuándo conservar OptiFine</h2>
+<p>Puede ser práctico si una instancia o un paquete de recursos que utilizas depende de una función específica de OptiFine y la combinación de Minecraft que tienes instalada está soportada. Consulta la <a href="https://optifine.net/downloads" target="_blank" rel="noopener">página oficial de descargas de OptiFine</a> y conserva esa configuración en un perfil aparte. Si necesitas un mod concreto, verifica primero que tenga una versión compatible con el cargador de tu instancia.</p>
+
+<h2>Fuentes</h2>
 <ul>
-  <li><strong>Sodium:</strong> Sustituye el motor de renderizado del mundo y acelera el dibujado de bloques.</li>
-  <li><strong>Lithium:</strong> Optimiza la física general, la inteligencia artificial de los aldeanos y el cálculo de colisiones sin alterar la jugabilidad original (totalmente del lado del cliente y compatible con servidores).</li>
-  <li><strong>FerriteCore:</strong> Comprime el consumo de memoria RAM de los modelos de bloques, algo vital si cuentas con 8 GB o 16 GB de memoria en tu computadora.</li>
+  <li><a href="https://modrinth.com/mod/sodium" target="_blank" rel="noopener">Sodium: descripción y versiones disponibles</a>.</li>
+  <li><a href="https://irisshaders.dev/" target="_blank" rel="noopener">Iris Shaders: sitio del proyecto</a>.</li>
+  <li><a href="https://optifine.net/downloads" target="_blank" rel="noopener">OptiFine: descargas oficiales</a>.</li>
 </ul>
+<p>Las páginas enlazadas son referencias de los proyectos, no pruebas independientes de rendimiento. Revisa las notas de versión antes de instalar o actualizar.</p>
 
-<h3>Paso 3: Recuperar las funciones visuales de OptiFine con módulos modernos</h3>
-<p>OptiFine incluía muchas herramientas estéticas que Sodium, por filosofía de diseño, no incluye en su archivo base. Para recuperarlas con un rendimiento superior, añade estos complementos:</p>
-<ul>
-  <li><strong>Iris Shaders:</strong> Permite cargar cualquier sombreador gráfico (.zip) compatible con OptiFine, pero ejecutándolo sobre la tubería optimizada de Sodium. En una tarjeta de 6 GB como la RTX 3050, Iris duplica los fotogramas de OptiFine manteniendo la misma calidad visual.</li>
-  <li><strong>Continuity:</strong> Añade soporte para texturas conectadas de cristal y bloques de construcción (CTM). Requiere también el mod <em>Indium</em> para enlazar con la API de renderizado de Fabric.</li>
-  <li><strong>Zoomify:</strong> Proporciona la función de zoom cinematográfico con transiciones suaves y personalización de atajos de teclado.</li>
-  <li><strong>Entity Culling:</strong> Deja de renderizar entidades y criaturas que se encuentran detrás de paredes o bajo tierra fuera de tu vista, aliviando de trabajo a la tarjeta gráfica.</li>
-</ul>
 
-<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Menú de opciones de vídeo de Sodium con la pestaña de configuración avanzada de renderizado</div>
-
-<h3>Paso 4: Ajustar los parámetros críticos de Sodium para una CPU de 4 núcleos</h3>
-<p>Una vez dentro del menú de opciones de vídeo de Sodium, aplica estos ajustes diseñados para balancear un procesador de 4 núcleos:</p>
-<ol>
-  <li>En la pestaña <em>Rendimiento</em>, localiza la opción <strong>Subprocesos de actualización de fragmentos (Chunk Update Threads)</strong>. Por defecto viene configurado en automático. En un i7-4790, fíjalo manualmente en <strong>3 o 4</strong>. No lo pongas en 8, ya que saturarás los núcleos lógicos e interrumpirás el hilo principal de audio y controles.</li>
-  <li>En la opción <em>Calidad</em>, ajusta los <strong>Gráficos de hojas</strong> en "Rápidos" si juegas en biomas de jungla densos.</li>
-  <li>En la sección <em>Avanzado</em>, asegúrate de que el <strong>Procesamiento en CPU (CPU Render Ahead Limit)</strong> esté configurado en <strong>2 o 3 fotogramas</strong> para mantener a la tarjeta gráfica RTX 3050 alimentada continuamente sin retrasos de entrada (input lag).</li>
-</ol>
-
-<h2>El caso técnico raro: Cuándo OptiFine sigue siendo la única opción viable</h2>
-<p>A pesar de la superioridad demostrada de Sodium en versiones modernas, existen dos escenarios técnicos específicos donde OptiFine no solo es útil, sino estrictamente necesario:</p>
-<ol>
-  <li><strong>Versiones clásicas competitivas (Minecraft 1.8.9 y 1.12.2):</strong> Sodium fue concebido a partir de las versiones 1.15 y 1.16. Aunque existen adaptaciones retroactivas no oficiales de la comunidad para versiones antiguas, en Minecraft 1.8.9 OptiFine está completamente integrado y madurado en el código de los clientes de PvP. En la versión 1.8.9, OptiFine no compite con las APIs modernas de Java y proporciona un rendimiento impecable en procesadores de cuatro núcleos.</li>
-  <li><strong>Paquetes de texturas con modelos CIT hiper-complejos:</strong> Si juegas en servidores de rol o modpacks estéticos que utilizan paquetes de recursos que transforman espadas o armaduras según su nombre en el yunque utilizando funciones patentadas de MCPatcher/OptiFine (Custom Item Textures complejas con lógica condicional no estandarizada), muchas de esas propiedades solo se renderizan con precisión mediante el motor de OptiFine clásico.</li>
-</ol>
-
-<h2>Cómo comprobar que la transición ha sido exitosa</h2>
-<p>Para validar que has eliminado el cuello de botella en tu procesador:</p>
-<ol>
-  <li>Carga tu mundo habitual y presiona la combinación <code>F3 + 2</code> (o abre el gráfico de frametimes integrado en Sodium con la tecla <code>Shift + F3</code>).</li>
-  <li>Observa el gráfico inferior: una línea continua y delgada sin picos verticales hacia arriba confirma que no hay tropiezos de cuadros (stuttering).</li>
-  <li>Abre el Administrador de tareas en un segundo monitor o en segundo plano: deberías observar que el uso de la tarjeta gráfica RTX 3050 sube al 70% u 85% al utilizar shaders con Iris, demostrando que la GPU ahora sí está trabajando a su capacidad real y que el i7-4790 ya no retiene el flujo de datos.</li>
-</ol>
-
-<h2>Conclusión</h2>
-<p>En el Minecraft moderno de 2026, aferrarse a OptiFine por costumbre en procesadores de cuatro núcleos es limitar deliberadamente el potencial de tu hardware. La transición al ecosistema modular de Sodium e Iris no solo devuelve la fluidez al juego, sino que permite que una tarjeta gráfica moderna trabaje a plena potencia sin que el procesador se ahogue en el intento.</p>
-
-      <div class="author-box">
-        <h3>Sobre el autor: fondue_x</h3>
-        <p><strong>fondue_x</strong> es desarrollador independiente y jugador de Minecraft desde hace más de 5 años, especializado en optimización de rendimiento, arquitectura de instancias y resolución de incompatibilidades en Fabric, Forge y NeoForge. Es el creador de <a href="https://github.com/fonduev" target="_blank" rel="noopener">Nebula Launcher</a>. Todas sus guías se prueban de primera mano en bancos de pruebas reales con Windows 11. Puedes consultar nuestra <a href="../metodologia.html">metodología editorial y banco de pruebas</a>.</p>
-      </div>
 
       <div class="faq-section">
         <h2 style="margin-top:0;">Preguntas Frecuentes</h2>
                 <div class="faq-item">
-          <h4>¿Puedo instalar Sodium y OptiFine al mismo tiempo?</h4>
-          <p>No. Ambos intentan reescribir por completo el motor de renderizado de Minecraft a nivel de código fuente. Intentar instalarlos juntos provocará un cierre inmediato del juego con un error de inyección de Mixins.</p>
+          <h4>¿Se pueden instalar Sodium y OptiFine juntos?</h4>
+          <p>No se deben combinar en una misma instancia. Usa perfiles separados y revisa la compatibilidad de las versiones elegidas.</p>
         </div>
         <div class="faq-item">
-          <h4>¿Cómo uso shaders en Minecraft si tengo Sodium en lugar de OptiFine?</h4>
-          <p>Instalando el mod complementario Iris Shaders. Iris utiliza la misma tecnología de Sodium para el mundo y añade un menú para cargar paquetes de shaders (.zip) exactamente igual que OptiFine, pero con mayor tasa de cuadros por segundo.</p>
+          <h4>¿Cómo uso shaders con Sodium?</h4>
+          <p>Iris es un cargador de shaders diseñado para trabajar con Sodium. Comprueba la compatibilidad entre las versiones de Minecraft, Sodium, Iris y el shader pack en sus páginas oficiales.</p>
         </div>
         <div class="faq-item">
-          <h4>¿Por qué mis FPS son altos pero el juego se siente trabado con OptiFine?</h4>
-          <p>Porque el contador de FPS solo muestra un promedio por segundo. Si el procesador sufre micro-congelamientos cada pocos milisegundos por una mala gestión de hilos, los fotogramas se entregan con retraso irregular (frametime inestable), generando una sensación de juego entrecortado.</p>
+          <h4>¿Cuál ofrece más FPS?</h4>
+          <p>No hay un resultado universal. El rendimiento depende del equipo, versión, mundo, ajustes, shaders y mods. Compara perfiles separados con las mismas condiciones; esta guía no publica un benchmark propio.</p>
         </div>
       </div>
     
@@ -602,15 +529,15 @@
       <div class="author-card-eeat" style="display:flex; gap:1.5rem; align-items:flex-start; background:rgba(14,10,32,0.85); border:1px solid rgba(192,132,252,0.3); border-radius:16px; padding:1.5rem; margin:3rem 0 1.5rem;">
         <div class="author-avatar" style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, #c084fc, #38bdf8); display:flex; align-items:center; justify-content:center; font-size:1.8rem; flex-shrink:0; box-shadow:0 0 15px rgba(192,132,252,0.4);">👨‍💻</div>
         <div class="author-info">
-          <h4 style="font-family:'Outfit', sans-serif; color:#fff; font-size:1.1rem; margin-bottom:0.25rem;">Escrito por fondue_x — Desarrollador Principal</h4>
-          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Laboratorio Técnico de Rendimiento & Modding de Nebula</div>
+          <h4 style="font-family:'Outfit', sans-serif; color:#fff; font-size:1.1rem; margin-bottom:0.25rem;">Guía de fondue_x</h4>
+          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Nebula Dev Studios</div>
           <p class="author-bio" style="color:#94a3b8; font-size:0.9rem; line-height:1.55; margin-bottom:0.6rem;">
-            Especialista en optimización de JVM, perfiles de frametime en Minecraft y arquitectura de cargadores Fabric/NeoForge. Esta guía ha sido probada y verificada en hardware real de escritorio y portátiles para asegurar resultados reproducibles sin mitos ni efectos placebo.
+            Esta página compara funciones y propone una prueba que puedes repetir; no publica benchmarks propios. Las versiones y requisitos deben confirmarse en las páginas enlazadas de cada proyecto.
           </p>
           <div class="author-meta-links" style="display:flex; gap:1rem; font-size:0.82rem; color:#64748b;">
             <a href="https://github.com/fonduev" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Perfil en GitHub</a>
             <span>•</span>
-            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología de Pruebas</a>
+            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología editorial</a>
             <span>•</span>
             <a href="https://discord.gg/7Uv5CjX8" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Comunidad en Discord</a>
           </div>
@@ -626,7 +553,7 @@
       <div class="footer-col">
         <h4>NEBULA DEV STUDIOS</h4>
         <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
-          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+          Guías independientes sobre Minecraft y herramientas relacionadas. Los artículos distinguen recomendaciones de resultados medidos y enlazan fuentes para facilitar su verificación.
         </p>
       </div>
       <div class="footer-col">
@@ -635,7 +562,7 @@
           <li><a href="../index.html">Inicio</a></li>
           <li><a href="../guias.html">Guías & Tutoriales</a></li>
           <li><a href="../about.html">Acerca de</a></li>
-          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../metodologia.html">Metodología editorial</a></li>
           <li><a href="../contact.html">Contacto</a></li>
         </ul>
       </div>
@@ -669,31 +596,23 @@
   <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
     <div class="cookie-content">
       <p>
-        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+        🍪 <strong>Aviso de privacidad:</strong> Este sitio puede cargar recursos y servicios de terceros. El botón solo cierra este aviso; no registra ni transmite una elección de consentimiento publicitario. Consulta la <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y los <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
       </p>
       <div class="cookie-buttons">
-        <button class="btn-cookie-reject" onclick="rejectCookieConsent()">Solo Necesarias</button>
-        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+        <button class="btn-cookie-accept" onclick="dismissCookieBanner()">Cerrar aviso</button>
       </div>
     </div>
   </div>
 
   <script>
     function initCookieConsent() {
-      if (!localStorage.getItem('nebula_cookie_consent')) {
+      if (!localStorage.getItem('nebula_cookie_notice_dismissed')) {
         const banner = document.getElementById('cookieConsentBanner');
         if (banner) banner.style.display = 'block';
       }
     }
-    function acceptCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'accepted');
-      dismissCookieBanner();
-    }
-    function rejectCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'essential_only');
-      dismissCookieBanner();
-    }
     function dismissCookieBanner() {
+      localStorage.setItem('nebula_cookie_notice_dismissed', 'true');
       const banner = document.getElementById('cookieConsentBanner');
       if (banner) {
         banner.style.opacity = '0';

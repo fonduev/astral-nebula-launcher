@@ -5,23 +5,23 @@
   <link rel="icon" type="image/x-icon" href="../icon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
-  <title>Cómo optimizar Minecraft en discos duros HDD tradicionales | Nebula Dev Studios</title>
-  <meta name="description" content="Reduce los tiempos de carga y elimina los tirones en Minecraft con disco HDD mecánico: optimización de I/O, formato Anvil y configuración en Windows." />
+  <title>Minecraft en HDD: diagnóstico y ajustes seguros | Nebula Dev Studios</title>
+  <meta name="description" content="Diagnostica si el HDD causa pausas o cargas lentas en Minecraft y prueba ajustes reversibles sin arriesgar tus mundos ni desactivar protecciones de Windows." />
 
   <!-- Canonical URL & Metadatos Oficiales -->
   <link rel="canonical" href="https://nebuladevstudios.com/guias/optimizar-minecraft-disco-hdd.html" />
   <meta property="og:locale" content="es_ES" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Nebula Dev Studios" />
-  <meta property="og:title" content="Cómo optimizar Minecraft en discos duros HDD tradicionales | Nebula Dev Studios" />
-  <meta property="og:description" content="Reduce los tiempos de carga y elimina los tirones en Minecraft con disco HDD mecánico: optimización de I/O, formato Anvil y configuración en Windows." />
+  <meta property="og:title" content="Minecraft en HDD: diagnóstico y ajustes seguros | Nebula Dev Studios" />
+  <meta property="og:description" content="Diagnostica si el HDD causa pausas o cargas lentas en Minecraft y prueba ajustes reversibles sin arriesgar tus mundos ni desactivar protecciones de Windows." />
   <meta property="og:url" content="https://nebuladevstudios.com/guias/optimizar-minecraft-disco-hdd.html" />
   <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Cómo optimizar Minecraft en discos duros HDD tradicionales | Nebula Dev Studios" />
-  <meta name="twitter:description" content="Reduce los tiempos de carga y elimina los tirones en Minecraft con disco HDD mecánico: optimización de I/O, formato Anvil y configuración en Windows." />
+  <meta name="twitter:title" content="Minecraft en HDD: diagnóstico y ajustes seguros | Nebula Dev Studios" />
+  <meta name="twitter:description" content="Diagnostica si el HDD causa pausas o cargas lentas en Minecraft y prueba ajustes reversibles sin arriesgar tus mundos ni desactivar protecciones de Windows." />
   <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
 
   <!-- Schema.org Datos Estructurados JSON-LD -->
@@ -31,8 +31,8 @@
     "@graph": [
       {
         "@type": "TechArticle",
-        "headline": "Cómo optimizar Minecraft en discos duros HDD tradicionales",
-        "description": "Reduce los tiempos de carga y elimina los tirones en Minecraft con disco HDD mecánico: optimización de I/O, formato Anvil y configuración en Windows.",
+        "headline": "Minecraft en HDD: diagnóstico y ajustes seguros",
+        "description": "Diagnostica si el HDD causa pausas o cargas lentas en Minecraft y prueba ajustes reversibles sin arriesgar tus mundos ni desactivar protecciones de Windows.",
         "url": "https://nebuladevstudios.com/guias/optimizar-minecraft-disco-hdd.html",
         "author": {
           "@type": "Person",
@@ -48,14 +48,14 @@
           }
         },
         "datePublished": "2026-09-19",
-        "dateModified": "2026-09-19"
+        "dateModified": "2026-10-12"
       },
       {
         "@type": "FAQPage",
         "mainEntity": [
-          {"@type": "Question", "name": "¿Minecraft funciona mejor en un disco SSD que en un disco HDD?", "acceptedAnswer": {"@type": "Answer", "text": "Sí, indudablemente. Un SSD elimina prácticamente los tiempos de búsqueda aleatoria de archivos, lo que agiliza el inicio y la carga de mundos. No obstante, un disco mecánico bien configurado y optimizado puede ejecutar el juego sin tirones durante la partida."}},
-          {"@type": "Question", "name": "¿Asignar más memoria RAM soluciona los tiempos de carga lentos de un disco HDD?", "acceptedAnswer": {"@type": "Answer", "text": "No necesariamente. Si asignas demasiada RAM (por ejemplo, 12 GB en un sistema de 16 GB), dejarás a Windows sin memoria suficiente para sus propias tareas, provocando que el sistema operativo use el disco mecánico como memoria virtual y ralentizando aún más la lectura."}},
-          {"@type": "Question", "name": "¿Desfragmentar el disco puede dañar los datos de mis mundos guardados?", "acceptedAnswer": {"@type": "Answer", "text": "No, la desfragmentación nativa de Windows es un procedimiento seguro que solo recoloca los bloques de datos de forma contigua. Siempre que Minecraft esté completamente cerrado durante el proceso, tus mundos se mantendrán intactos."}}
+          {"@type": "Question", "name": "¿Minecraft carga más rápido en un SSD que en un HDD?", "acceptedAnswer": {"@type": "Answer", "text": "Un SSD suele tener menor latencia de acceso, lo que puede reducir algunos tiempos de carga. El efecto concreto depende del equipo, el juego, los mods y el mundo."}},
+          {"@type": "Question", "name": "¿Asignar más memoria RAM soluciona los tiempos de carga lentos de un HDD?", "acceptedAnswer": {"@type": "Answer", "text": "No necesariamente. Más memoria solo ayuda si hay presión de memoria; aumentar el heap sin revisar el uso del sistema puede empeorar la paginación. Diagnostica primero la actividad del disco y la memoria disponible."}},
+          {"@type": "Question", "name": "¿Debo desfragmentar manualmente la carpeta .minecraft?", "acceptedAnswer": {"@type": "Answer", "text": "No. Usa la herramienta de optimización de unidades de Windows y deja que el sistema elija una operación adecuada para el tipo de unidad."}}
         ]
       }
     ]
@@ -453,128 +453,70 @@
     </nav>
 
     <div class="badge">Rendimiento & Almacenamiento</div>
-    <h1>Cómo optimizar Minecraft en discos duros HDD tradicionales</h1>
+    <h1>Minecraft en HDD: cómo diagnosticar pausas y probar ajustes seguros</h1>
 
     <div class="article-meta">
       <span>✍️ Por <strong>fondue_x</strong></span>
-      <span>📅 19 de Septiembre, 2026</span>
-      <span>⏱️ 9 min de lectura</span>
-      <span>💻 Probado en Windows 11</span>
+      <span>📅 Revisado el 12 de octubre de 2026</span>
+      <span>⏱️ 8 min de lectura</span>
     </div>
 
     <article class="article-body">
-      <h2>El problema: la sobrecarga de lectura en discos duros mecánicos con Minecraft moderno</h2>
-<p>La inmensa mayoría de guías de rendimiento actuales asumen que el jugador dispone de una unidad de estado sólido (SSD NVMe o SATA). Sin embargo, cuando se ejecuta Minecraft en un equipo equipado con un disco duro tradicional (HDD de 5400 o 7200 RPM), el almacenamiento se convierte en el cuello de botella más severo de todo el sistema, superando incluso las limitaciones del procesador o la tarjeta gráfica.</p>
-<p>Desde la actualización 1.18 (Caves & Cliffs) y en todas las versiones modernas (1.20, 1.21+), Minecraft ha multiplicado por cuatro el volumen de datos que lee y escribe por segundo. El aumento de la altura del mundo a 384 bloques, la densidad de biomas subterráneos y los cientos de archivos JSON que componen los modelos de bloques obligan al disco mecánico a realizar constantes operaciones de búsqueda aleatoria (I/O Seek Time). Mientras un SSD accede a cualquier sector de forma instantánea mediante celdas electrónicas, un HDD depende de un brazo mecánico físico que debe desplazarse sobre platos magnéticos giratorios. Si este proceso no se optimiza, el juego puede tardar entre tres y seis minutos en alcanzar el menú principal y experimentar congelamientos recurrentes (stuttering) cada vez que el jugador explora nuevos fragmentos de terreno (chunks).</p>
+      <h2>Qué puede notar un jugador al usar un HDD</h2>
+<p>Un disco duro mecánico suele tardar más que un SSD en acceder a muchos archivos dispersos. Esto puede alargar el inicio, la carga de una instancia o la lectura de chunks al explorar. No significa que todo tirón provenga del almacenamiento: la CPU, la memoria disponible, un mod, el controlador gráfico o el mundo también pueden ser la causa.</p>
+<p>El formato de región <code>.mca</code> agrupa datos del mundo en archivos de región. No es correcto asumir que toda escritura del mundo fragmenta esos archivos, que la distancia de simulación es el factor principal del I/O o que una cola de disco concreta diagnostica por sí sola el origen de una pausa.</p>
 
-<h2>Por qué Minecraft castiga tanto el almacenamiento mecánico</h2>
-<p>Para reducir los tiempos de carga en un HDD, es imprescindible comprender qué tipo de lectura realiza el juego al arrancar y durante la partida:</p>
+<h2>1. Comprueba el recurso antes de cambiar nada</h2>
+<ol>
+  <li>Abre el Administrador de tareas de Windows y observa la actividad del disco mientras Minecraft inicia o carga el área problemática. Anota también CPU y memoria.</li>
+  <li>Repite la misma acción una segunda vez: parte de los archivos podría estar ya en la caché del sistema, por lo que una carga posterior no se compara directamente con la primera.</li>
+  <li>Si el disco se mantiene ocupado y el proceso espera mientras CPU y GPU tienen margen, el almacenamiento podría contribuir al retraso. Si la memoria está casi llena o Windows está usando paginación, investiga eso antes de aumentar el heap.</li>
+  <li>Revisa <code>latest.log</code> y prueba un perfil limpio con los mismos ajustes si el problema empezó después de añadir mods.</li>
+</ol>
+
+<h2>2. Prueba acciones de bajo riesgo</h2>
 <ul>
-  <li><strong>Lectura dispersa de miles de micro-archivos:</strong> Durante el arranque, el cargador de mods (Fabric, Forge o NeoForge) no lee un único archivo continuo, sino que abre, descomprime e inspecciona decenas de miles de pequeños archivos individuales dentro de cada archivo <code>.jar</code>: modelos de bloques, archivos de idioma, sonidos y definiciones de entidades. Cada archivo obliga al cabezal del disco a detenerse, recalcular su posición y volver a leer.</li>
-  <li><strong>Formato Anvil y fragmentación de archivos de región (.mca):</strong> Los mundos de Minecraft se almacenan en la carpeta <code>region</code> en bloques de 32x32 chunks llamados archivos <code>r.X.Z.mca</code>. A medida que juegas, construyes o exploras, el juego reescribe constantemente estos sectores. En un disco mecánico sin mantenimiento, estos archivos terminan divididos en cientos de fragmentos dispersos por toda la superficie del plato magnético, multiplicando por diez el tiempo necesario para cargar un mapa guardado.</li>
-  <li><strong>Contención entre el archivo de paginación de Windows y el juego:</strong> Si el sistema operativo (como Windows 11) comparte la misma unidad mecánica que la instalación de Minecraft, el disco debe alternar constantemente entre atender los procesos en segundo plano de Windows y entregar texturas al motor del juego.</li>
+  <li>Deja espacio libre en la unidad y evita descargas, copias grandes o análisis manuales durante la prueba.</li>
+  <li>Usa el perfil del launcher para mantener separadas las versiones y los mods. No borres cachés ni bibliotecas de una instalación en uso para intentar acelerar el disco.</li>
+  <li>Si la carga de chunks causa pausas, reduce gradualmente la distancia de renderizado y repite el mismo recorrido. La simulación afecta el comportamiento del mundo; bájala solo si aceptas el efecto sobre entidades y granjas.</li>
+  <li>Considera instalar Minecraft o la instancia en un SSD si tienes uno disponible. La diferencia depende del patrón de acceso y el resto del equipo.</li>
 </ul>
 
-<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Administrador de tareas de Windows mostrando la columna Disco al 100% de uso activo durante el arranque de Minecraft</div>
+<h2>3. Mantén la seguridad de Windows</h2>
+<p>No desactives Microsoft Defender ni excluyas carpetas del juego solo para intentar reducir los tiempos de carga: los archivos de mods y Java descargados también pueden ser un riesgo. Tampoco ejecutes comandos de desfragmentación dirigidos a carpetas: la utilidad de Windows administra unidades completas y aplica operaciones adecuadas al tipo de almacenamiento. En SSD no se debe forzar una desfragmentación tradicional.</p>
+<p>Para mantenimiento, consulta las opciones de <strong>Desfragmentar y optimizar unidades</strong> de Windows y deja que el sistema determine la operación apropiada para HDD o SSD. Haz una copia independiente de tus mundos antes de cambios de almacenamiento.</p>
 
-<h2>Protocolo de 5 pasos para acelerar Minecraft en unidades HDD</h2>
+<h2>Compara los ajustes de forma repetible</h2>
+<ol>
+  <li>Elige una instancia, mundo y ruta que reproduzcan el problema. Conserva el mismo pack y versión.</li>
+  <li>Registra el tiempo desde que pulsas Jugar hasta que el mundo termina de cargar, además de actividad de disco, CPU y memoria.</li>
+  <li>Repite la medición varias veces con el mismo estado de caché, si es posible. No compares un arranque en frío con otro que reutiliza datos en memoria.</li>
+  <li>Cambia una sola opción, repite y anota ambos resultados. Si el cambio no ayuda o causa otros problemas, vuelve al valor original.</li>
+</ol>
+<p>Esta página no presenta un benchmark propio ni promete una reducción de tiempo específica. Un resultado útil debe indicar hardware, versión, mods, procedimiento y número de repeticiones.</p>
 
-<h3>Paso 1: Implementar mods de optimización de Entrada/Salida (ModernFix y FerriteCore)</h3>
-<p>Existen modificaciones desarrolladas específicamente para reescribir la forma en que Minecraft lee los recursos del disco duro:</p>
+<h2>Fuentes y lecturas relacionadas</h2>
 <ul>
-  <li><strong>ModernFix:</strong> Este mod incluye una optimización llamada <em>Dynamic Resources</em>. En lugar de cargar y descifrar en memoria las texturas, modelos y tablas de botín de todos los bloques del juego durante el inicio, ModernFix pospone la lectura de aquellos elementos que no se estén utilizando en el menú principal. Al activar esta opción, la cantidad de accesos aleatorios al disco durante el arranque se reduce drásticamente.</li>
-  <li><strong>FerriteCore:</strong> Reduce drásticamente el espacio que ocupan los estados de bloques y modelos en la memoria. Al hacer las estructuras más compactas, el archivo de paginación del sistema no necesita escribir datos en el disco mecánico para liberar RAM.</li>
+  <li><a href="https://support.microsoft.com/windows/tips-to-improve-pc-performance-in-windows-2d4c7a70-2f3f-5c75-8e63-9b7e7a2a4e40" target="_blank" rel="noopener">Microsoft Support: consejos para mejorar el rendimiento de Windows</a>.</li>
+  <li><a href="./distancia-simulacion-vs-renderizado-minecraft.html">Nuestra guía sobre distancia de renderizado y simulación</a>.</li>
+  <li><a href="./como-leer-latest-log-crash-reports-minecraft.html">Nuestra guía para leer logs y crash reports</a>.</li>
 </ul>
-<p>Ambos mods son de código abierto, compatibles con Fabric y NeoForge, y pueden descargarse directamente desde repositorios oficiales como <a href="https://modrinth.com/" target="_blank" rel="noopener">Modrinth</a>.</p>
 
-<h3>Paso 2: Empaquetar siempre los Resource Packs en formato comprimido (.zip)</h3>
-<p>Un error extremadamente común entre jugadores que instalan texturas o paquetes de sonido es descomprimir la carpeta dentro del directorio <code>resourcepacks</code>. En un disco de estado sólido la diferencia es imperceptible, pero en un disco mecánico es perjudicial.</p>
-<p>Un paquete de texturas típico puede contener entre 3.000 y 8.000 imágenes PNG individuales de pocos kilobytes. Si el paquete está en una carpeta abierta, el cabezal del HDD debe buscar 8.000 entradas de directorio diferentes. Si el paquete se conserva en un único archivo <code>.zip</code>, el cabezal lee un bloque secuencial continuo mucho más rápido, delegando la descompresión en el procesador, que opera a velocidades de gigabytes por segundo. Mantén siempre tus paquetes de recursos como archivos comprimidos.</p>
 
-<h3>Paso 3: Desfragmentación selectiva de las carpetas de mundos (Anvil Defragmentation)</h3>
-<p>En discos duros convencionales bajo Windows 11, la desfragmentación periódica es obligatoria para mantener un rendimiento de lectura aceptable. Sin embargo, ejecutar una desfragmentación de toda la unidad de 1 TB puede tomar horas y someter los platos a un desgaste mecánico innecesario.</p>
-<p>Es mucho más eficiente utilizar herramientas de mantenimiento selectivo (o comandos nativos de PowerShell) para desfragmentar exclusivamente la carpeta de Minecraft:</p>
-<ol>
-  <li>Asegúrate de que Minecraft y cualquier lanzador estén completamente cerrados.</li>
-  <li>Abre la consola de comandos o terminal de Windows con privilegios de administrador.</li>
-  <li>Ejecuta el comando de optimización apuntando a tu directorio de datos (por ejemplo, <code>defrag C: /O</code> o mediante utilidades que permitan desfragmentar solo la carpeta <code>.minecraft\saves</code>).</li>
-  <li>Esto unifica físicamente los sectores de los archivos <code>.mca</code>, permitiendo que cuando vueles o viajes en bote por tu mundo, el cabezal del disco lea el terreno en una trayectoria lineal continua sin caídas repentinas de cuadros por segundo.</li>
-</ol>
-
-<div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Detalle de fragmentación de archivos de región en el explorador de Windows</div>
-
-<h3>Paso 4: Reducir la distancia de simulación respecto a la de renderizado</h3>
-<p>Desde la versión 1.18, el menú de ajustes gráficos de Minecraft divide la visión en dos parámetros cruciales: <em>Distancia de renderizado</em> (Render Distance) y <em>Distancia de simulación</em> (Simulation Distance). Entender la diferencia técnica entre ambos salva a un disco HDD del colapso:</p>
-<table border="1" cellpadding="6" cellspacing="0">
-  <thead>
-    <tr>
-      <th>Parámetro</th>
-      <th>Qué hace internamente</th>
-      <th>Impacto en disco mecánico</th>
-      <th>Valor recomendado en HDD</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Distancia de renderizado</strong></td>
-      <td>Solo dibuja los bloques lejanos en pantalla utilizando la tarjeta gráfica.</td>
-      <td>Medio: se leen mallas visuales del disco una sola vez al entrar en el área.</td>
-      <td>10 a 12 fragmentos (chunks).</td>
-    </tr>
-    <tr>
-      <td><strong>Distancia de simulación</strong></td>
-      <td>Calcula la inteligencia artificial de entidades, crecimiento de cultivos y estados lógicos del mundo.</td>
-      <td><strong>Crítico:</strong> obliga al disco a escribir y guardar continuamente los cambios de estado en los archivos <code>.mca</code>.</td>
-      <td>5 a 6 fragmentos (chunks).</td>
-    </tr>
-  </tbody>
-</table>
-<p>Mantener la distancia de simulación en 5 o 6 chunks mientras dejas el renderizado en 10 o 12 permite ver el horizonte con claridad sin saturar la cola de lectura y escritura de tu disco mecánico.</p>
-
-<h3>Paso 5: Centralizar instancias y evitar la dispersión de rutas</h3>
-<p>Cuando se instalan múltiples versiones y modpacks en carpetas profundamente anidadas o se tienen docenas de versiones residuales en <code>.minecraft/versions</code>, el sistema de archivos NTFS tarda más tiempo en recorrer la tabla maestra de archivos (MFT). En entornos organizados donde se utilizan perfiles bien estructurados (como las instancias aisladas de Nebula Launcher o Prism), conviene eliminar periódicamente las carpetas de modpacks que ya no uses y purgar la caché temporal de librerías para que la cabeza magnética no pierda tiempo recorriendo árboles de carpetas obsoletos.</p>
-
-<h2>Caso técnico poco documentado: El cuello de botella por "Disk Queue Length" en Windows 11</h2>
-<p>Existe un síntoma muy particular en equipos con discos mecánicos: el procesador está al 30% de uso, la tarjeta gráfica al 25%, la memoria RAM tiene espacio libre suficiente, y sin embargo, el juego se congela durante diez segundos al cruzar la frontera de un nuevo bioma o al abrir un cofre con cientos de objetos.</p>
-<p>Si abres el <em>Monitor de rendimiento de Windows</em> (<code>perfmon.exe</code>) durante uno de estos tirones, notarás que el indicador clave no es la tasa de transferencia en megabytes por segundo, sino la <strong>Longitud actual de la cola de disco (Current Disk Queue Length)</strong>. En un disco mecánico saludable, este valor debe mantenerse entre 0 y 2. Cuando Minecraft intenta leer nuevos chunks mientras Windows 11 actualiza simultáneamente su índice de búsqueda o el registro del sistema, la longitud de la cola puede dispararse a valores superiores a 15.</p>
-<p>En ese instante, las solicitudes de lectura se encolan. Java no puede continuar ejecutando el bucle principal de renderizado hasta que el disco no le entregue los datos de los bloques solicitados, produciendo lo que el jugador percibe como un congelamiento completo de la imagen. La solución definitiva para amortiguar este efecto en un disco mecánico consiste en:</p>
-<ol>
-  <li>Excluir la carpeta <code>.minecraft</code> del servicio de indexación automática de Windows (Windows Search Indexer) para que el sistema operativo no intente indexar los archivos de región mientras el juego intenta escribirlos.</li>
-  <li>Añadir la carpeta del juego y el ejecutable de Java a las exclusiones de análisis en tiempo real de Microsoft Defender, evitando que el antivirus intercepte cada archivo <code>.jar</code> en el milisegundo en que se intenta cargar.</li>
-</ol>
-
-<h2>Cómo comprobar que el tiempo de arranque ha mejorado</h2>
-<p>Para cuantificar con precisión si las optimizaciones han tenido éxito en tu disco duro tradicional, no te fíes de percepciones subjetivas:</p>
-<ol>
-  <li>Reinicia tu computadora para asegurar que la memoria RAM no conserve en caché archivos de la sesión anterior (lectura fría o Cold Boot).</li>
-  <li>Prepara un cronómetro y abre tu lanzador.</li>
-  <li>Presiona el botón "Jugar" e inicia el cronómetro en el segundo exacto en que se lanza el proceso <code>javaw.exe</code>.</li>
-  <li>Detén el cronómetro en el momento en que suene la música del menú principal o aparezcan los botones de "Un jugador / Multijugador".</li>
-  <li>En nuestro banco de pruebas (Intel Core i7-4790, HDD mecánico de 7200 RPM y Windows 11), el tiempo de arranque en frío de Minecraft 1.20.4 con 45 mods pasó de 94 segundos a 42 segundos tras aplicar la desfragmentación de regiones, exclusión del servicio de indexación y el paquete de optimización de I/O.</li>
-</ol>
-<p>Si el tiempo se ha reducido sensiblemente y el disco mecánico deja de escucharse trabajar continuamente una vez cargado el mapa, el sistema de lectura ha alcanzado su punto óptimo de eficiencia física.</p>
-
-<h2>Conclusión</h2>
-<p>Tener un disco duro mecánico tradicional no significa estar condenado a tiempos de espera interminables ni a tirones constantes en Minecraft. Al controlar la fragmentación del formato Anvil, delegar la descompresión en la CPU mediante paquetes comprimidos y desactivar la indexación invasiva de Windows, es perfectamente posible disfrutar de partidas fluidas y tiempos de carga reducidos incluso en las versiones más complejas del juego moderno.</p>
-
-      <div class="author-box">
-        <h3>Sobre el autor: fondue_x</h3>
-        <p><strong>fondue_x</strong> es desarrollador independiente y jugador de Minecraft desde hace más de 5 años, especializado en optimización de rendimiento, arquitectura de instancias y resolución de incompatibilidades en Fabric, Forge y NeoForge. Es el creador de <a href="https://github.com/fonduev" target="_blank" rel="noopener">Nebula Launcher</a>. Todas sus guías se prueban de primera mano en bancos de pruebas reales con Windows 11. Puedes consultar nuestra <a href="../metodologia.html">metodología editorial y banco de pruebas</a>.</p>
-      </div>
 
       <div class="faq-section">
         <h2 style="margin-top:0;">Preguntas Frecuentes</h2>
                 <div class="faq-item">
-          <h4>¿Minecraft funciona mejor en un disco SSD que en un disco HDD?</h4>
-          <p>Sí, indudablemente. Un SSD elimina prácticamente los tiempos de búsqueda aleatoria de archivos, lo que agiliza el inicio y la carga de mundos. No obstante, un disco mecánico bien configurado y optimizado puede ejecutar el juego sin tirones durante la partida.</p>
+          <h4>¿Minecraft puede cargar más rápido en un SSD?</h4>
+          <p>Un SSD suele tener menor latencia de acceso y puede reducir algunos tiempos de carga. La diferencia concreta depende de la unidad, la instancia, los mods y el resto del equipo.</p>
         </div>
         <div class="faq-item">
-          <h4>¿Asignar más memoria RAM soluciona los tiempos de carga lentos de un disco HDD?</h4>
-          <p>No necesariamente. Si asignas demasiada RAM (por ejemplo, 12 GB en un sistema de 16 GB), dejarás a Windows sin memoria suficiente para sus propias tareas, provocando que el sistema operativo use el disco mecánico como memoria virtual y ralentizando aún más la lectura.</p>
+          <h4>¿Asignar más memoria RAM soluciona tiempos de carga lentos?</h4>
+          <p>No necesariamente. Más memoria ayuda solo si existe presión de memoria; observa el uso del sistema y la actividad del disco antes de aumentar el heap.</p>
         </div>
         <div class="faq-item">
-          <h4>¿Desfragmentar el disco puede dañar los datos de mis mundos guardados?</h4>
-          <p>No, la desfragmentación nativa de Windows es un procedimiento seguro que solo recoloca los bloques de datos de forma contigua. Siempre que Minecraft esté completamente cerrado durante el proceso, tus mundos se mantendrán intactos.</p>
+          <h4>¿Debo desfragmentar manualmente la carpeta .minecraft?</h4>
+          <p>No. Usa la herramienta de optimización de unidades de Windows y deja que el sistema aplique la operación apropiada para el tipo de unidad. Mantén una copia de seguridad de tus mundos.</p>
         </div>
       </div>
     
@@ -582,15 +524,15 @@
       <div class="author-card-eeat" style="display:flex; gap:1.5rem; align-items:flex-start; background:rgba(14,10,32,0.85); border:1px solid rgba(192,132,252,0.3); border-radius:16px; padding:1.5rem; margin:3rem 0 1.5rem;">
         <div class="author-avatar" style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, #c084fc, #38bdf8); display:flex; align-items:center; justify-content:center; font-size:1.8rem; flex-shrink:0; box-shadow:0 0 15px rgba(192,132,252,0.4);">👨‍💻</div>
         <div class="author-info">
-          <h4 style="font-family:'Outfit', sans-serif; color:#fff; font-size:1.1rem; margin-bottom:0.25rem;">Escrito por fondue_x — Desarrollador Principal</h4>
-          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Laboratorio Técnico de Rendimiento & Modding de Nebula</div>
+          <h4 style="font-family:'Outfit', sans-serif; color:#fff; font-size:1.1rem; margin-bottom:0.25rem;">Guía de fondue_x</h4>
+          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Nebula Dev Studios</div>
           <p class="author-bio" style="color:#94a3b8; font-size:0.9rem; line-height:1.55; margin-bottom:0.6rem;">
-            Especialista en optimización de JVM, perfiles de frametime en Minecraft y arquitectura de cargadores Fabric/NeoForge. Esta guía ha sido probada y verificada en hardware real de escritorio y portátiles para asegurar resultados reproducibles sin mitos ni efectos placebo.
+            Esta guía ofrece pasos de diagnóstico general y no publica resultados comparativos propios. Sigue las recomendaciones de seguridad del fabricante del sistema y compara en las mismas condiciones.
           </p>
           <div class="author-meta-links" style="display:flex; gap:1rem; font-size:0.82rem; color:#64748b;">
             <a href="https://github.com/fonduev" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Perfil en GitHub</a>
             <span>•</span>
-            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología de Pruebas</a>
+            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología editorial</a>
             <span>•</span>
             <a href="https://discord.gg/7Uv5CjX8" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Comunidad en Discord</a>
           </div>
@@ -606,7 +548,7 @@
       <div class="footer-col">
         <h4>NEBULA DEV STUDIOS</h4>
         <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
-          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+          Guías independientes sobre Minecraft y herramientas relacionadas. Los artículos distinguen recomendaciones de resultados medidos y enlazan fuentes para facilitar su verificación.
         </p>
       </div>
       <div class="footer-col">
@@ -615,7 +557,7 @@
           <li><a href="../index.html">Inicio</a></li>
           <li><a href="../guias.html">Guías & Tutoriales</a></li>
           <li><a href="../about.html">Acerca de</a></li>
-          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../metodologia.html">Metodología editorial</a></li>
           <li><a href="../contact.html">Contacto</a></li>
         </ul>
       </div>
@@ -649,31 +591,23 @@
   <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
     <div class="cookie-content">
       <p>
-        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+        🍪 <strong>Aviso de privacidad:</strong> Este sitio puede cargar recursos y servicios de terceros. El botón solo cierra este aviso; no registra ni transmite una elección de consentimiento publicitario. Consulta la <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y los <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
       </p>
       <div class="cookie-buttons">
-        <button class="btn-cookie-reject" onclick="rejectCookieConsent()">Solo Necesarias</button>
-        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+        <button class="btn-cookie-accept" onclick="dismissCookieBanner()">Cerrar aviso</button>
       </div>
     </div>
   </div>
 
   <script>
     function initCookieConsent() {
-      if (!localStorage.getItem('nebula_cookie_consent')) {
+      if (!localStorage.getItem('nebula_cookie_notice_dismissed')) {
         const banner = document.getElementById('cookieConsentBanner');
         if (banner) banner.style.display = 'block';
       }
     }
-    function acceptCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'accepted');
-      dismissCookieBanner();
-    }
-    function rejectCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'essential_only');
-      dismissCookieBanner();
-    }
     function dismissCookieBanner() {
+      localStorage.setItem('nebula_cookie_notice_dismissed', 'true');
       const banner = document.getElementById('cookieConsentBanner');
       if (banner) {
         banner.style.opacity = '0';

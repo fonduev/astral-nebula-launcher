@@ -5,23 +5,23 @@
   <link rel="icon" type="image/x-icon" href="../icon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
-  <title>Diferencia entre TPS, MSPT y FPS en Minecraft: Cómo Diagnosticar el Lag Real | Nebula Dev Studios</title>
-  <meta name="description" content="Aprende a diferenciar el lag visual (FPS) del lag de simulación del servidor o mundo (TPS y MSPT) para saber exactamente qué componente de tu PC o servidor está fallando." />
+  <title>Diferencia entre FPS, TPS y MSPT en Minecraft: cómo diagnosticar tirones | Nebula Dev Studios</title>
+  <meta name="description" content="Separa FPS bajos de ticks lentos, entiende el límite de 50 ms y usa métricas y spark para investigar problemas en Minecraft Java." />
 
   <!-- Canonical URL & Metadatos Oficiales -->
   <link rel="canonical" href="https://nebuladevstudios.com/guias/diferencia-tps-mspt-fps-minecraft.html" />
   <meta property="og:locale" content="es_ES" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Nebula Dev Studios" />
-  <meta property="og:title" content="Diferencia entre TPS, MSPT y FPS en Minecraft: Cómo Diagnosticar el Lag Real | Nebula Dev Studios" />
-  <meta property="og:description" content="Aprende a diferenciar el lag visual (FPS) del lag de simulación del servidor o mundo (TPS y MSPT) para saber exactamente qué componente de tu PC o servidor está fallando." />
+  <meta property="og:title" content="Diferencia entre FPS, TPS y MSPT en Minecraft: cómo diagnosticar tirones | Nebula Dev Studios" />
+  <meta property="og:description" content="Separa FPS bajos de ticks lentos, entiende el límite de 50 ms y usa métricas y spark para investigar problemas en Minecraft Java." />
   <meta property="og:url" content="https://nebuladevstudios.com/guias/diferencia-tps-mspt-fps-minecraft.html" />
   <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Diferencia entre TPS, MSPT y FPS en Minecraft: Cómo Diagnosticar el Lag Real | Nebula Dev Studios" />
-  <meta name="twitter:description" content="Aprende a diferenciar el lag visual (FPS) del lag de simulación del servidor o mundo (TPS y MSPT) para saber exactamente qué componente de tu PC o servidor está fallando." />
+  <meta name="twitter:title" content="Diferencia entre FPS, TPS y MSPT en Minecraft: cómo diagnosticar tirones | Nebula Dev Studios" />
+  <meta name="twitter:description" content="Separa FPS bajos de ticks lentos, entiende el límite de 50 ms y usa métricas y spark para investigar problemas en Minecraft Java." />
   <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
 
   <!-- Schema.org Datos Estructurados JSON-LD -->
@@ -31,8 +31,8 @@
     "@graph": [
       {
         "@type": "TechArticle",
-        "headline": "Diferencia entre TPS, MSPT y FPS en Minecraft: Guía de Diagnóstico de Lag",
-        "description": "Aprende a diferenciar el lag visual (FPS) del lag de simulación del servidor o mundo (TPS y MSPT) para saber exactamente qué componente de tu PC o servidor está fallando.",
+        "headline": "Diferencia entre FPS, TPS y MSPT en Minecraft: cómo diagnosticar tirones",
+        "description": "Separa FPS bajos de ticks lentos, entiende el límite de 50 ms y usa métricas y spark para investigar problemas en Minecraft Java.",
         "url": "https://nebuladevstudios.com/guias/diferencia-tps-mspt-fps-minecraft.html",
         "author": {
           "@type": "Person",
@@ -48,7 +48,7 @@
           }
         },
         "datePublished": "2026-09-25",
-        "dateModified": "2026-09-25"
+        "dateModified": "2026-10-12"
       }
     ]
   }
@@ -401,20 +401,23 @@
     </div>
 
     <span class="badge">🔍 Diagnóstico Técnico</span>
-    <h1>Diferencia entre TPS, MSPT y FPS en Minecraft: Cómo Diagnosticar el Lag Real</h1>
+    <h1>Diferencia entre FPS, TPS y MSPT en Minecraft: cómo diagnosticar tirones</h1>
 
     <div class="article-meta">
       <div>✍️ <strong>fondue_x</strong> (Nebula Lab)</div>
-      <div>📅 <strong>25 de Septiembre de 2026</strong></div>
+      <div>📅 <strong>Revisado el 12 de octubre de 2026</strong></div>
       <div>⏱️ <strong>9 min de lectura</strong></div>
-      <div>🔍 <strong>Verificado en hardware real</strong></div>
     </div>
 
     <article class="article-body">
       
           <p class="lead" style="font-size:1.15rem; color:#e2e8f0; margin-bottom:2rem; line-height:1.8;">
-            El término "lag" se utiliza popularmente para describir cualquier fallo de fluidez en Minecraft, pero desde el punto de vista técnico existen tres métricas completamente distintas: <strong>FPS</strong> (Frames Per Second), <strong>TPS</strong> (Ticks Per Second) y <strong>MSPT</strong> (Milliseconds Per Tick). Confundirlos hace que los jugadores intenten solucionar problemas de servidor bajando sus gráficos, o compren mejor hardware cuando el problema está en un archivo de configuración.
+            “Lag” puede describir problemas distintos. <strong>FPS</strong> cuentan fotogramas del cliente; <strong>TPS</strong> expresan cuántos ticks de simulación por segundo completa un servidor; <strong>MSPT</strong> es el tiempo que tarda en procesar un tick. Primero identifica cuál de ellos está afectado: bajar gráficos no suele arreglar ticks lentos del servidor, y un TPS estable no demuestra que el cliente tenga buenos FPS.
           </p>
+
+          <h2>Cómo se relacionan TPS y MSPT</h2>
+          <p>El objetivo normal de un servidor Java es 20 ticks por segundo. Eso deja un presupuesto de 50 ms por tick (1000 ÷ 20). Si el procesamiento excede repetidamente ese presupuesto, el servidor puede acumular retraso y bajar de 20 TPS; un tick que tarda 100 ms no significa automáticamente exactamente 10 TPS en cada ventana, porque las métricas se promedian y la carga varía.</p>
+          <p>MSPT es una duración de trabajo de servidor, no una medida de latencia de internet. Ping mide el tiempo de ida y vuelta de red; FPS mide la fluidez visual local. Puede haber una métrica mala mientras las otras parecen normales.</p>
 
           <h2>1. FPS: El Rendimiento Gráfico del Cliente (Tu Monitor)</h2>
           <p>
@@ -422,8 +425,8 @@
           </p>
           <ul>
             <li><strong>Síntomas de FPS bajos:</strong> La cámara se mueve a saltos, los menús se sienten lentos y la imagen no es fluida.</li>
-            <li><strong>Causa:</strong> Configuración gráfica muy alta, falta de mods como Sodium, drivers de video obsoletos o resolución excesiva.</li>
-            <li><strong>Solución:</strong> Instalar Sodium, bajar la distancia de renderizado o reducir la escala de renderizado.</li>
+            <li><strong>Posibles causas:</strong> carga de renderizado, shader pesado, límite de FPS, sincronización vertical, driver o CPU/GPU saturada.</li>
+            <li><strong>Primera prueba:</strong> reduce temporalmente una opción gráfica y repite la misma escena. Sodium puede ser una opción en perfiles compatibles, pero no es una solución garantizada a todo problema de FPS.</li>
           </ul>
 
           <h2>2. TPS: El Reloj Interno del Mundo (Simulación)</h2>
@@ -431,8 +434,8 @@
             Minecraft funciona internamente con un bucle de reloj fijado en exactamente <strong>20 ticks por segundo</strong>. Cada 50 milisegundos, el motor procesa el crecimiento de cultivos, el movimiento de animales, el cálculo de daño y los aldeanos.
           </p>
           <ul>
-            <li><strong>Síntomas de TPS bajos (ej. 12 TPS):</strong> Rompes un bloque y reaparece durante un segundo antes de romperse, las flechas vuelan en cámara lenta, comes pero no te regenera vida. ¡Pero tus FPS pueden seguir en 144!</li>
-            <li><strong>Causa:</strong> Demasiadas entidades activas, circuitos gigantes de redstone con tolvas (hoppers) o generación de terreno no precargado.</li>
+            <li><strong>Señales posibles:</strong> acciones y entidades parecen retrasadas o desincronizadas, aunque el contador de FPS del cliente se mantenga alto. El ping y el servidor también pueden influir en la respuesta percibida.</li>
+            <li><strong>Posibles causas:</strong> entidades, redstone, generación de chunks, plugins/mods o recursos limitados. Usa un perfil del servidor antes de atribuir el problema a una de ellas.</li>
           </ul>
 
           <h2>3. MSPT: La Salud Real en Milisegundos</h2>
@@ -440,30 +443,36 @@
             El MSPT indica cuánto tiempo real le toma a la CPU calcular un solo tick. Como un segundo tiene 1,000 milisegundos y hay 20 ticks, la CPU tiene un presupuesto máximo de <strong>50 ms por tick</strong>.
           </p>
           <div class="code-block">
-            <code>Fórmula Matemática:
-Si MSPT <= 50 ms  ==> TPS = 20 (Fluidez perfecta en el mundo)
-Si MSPT = 100 ms  ==> TPS = 10 (El mundo se mueve a la mitad de velocidad)
-Si MSPT = 200 ms  ==> TPS = 5  (Injugable, sobrecarga masiva)</code>
+            <code>Presupuesto objetivo: 1000 ms / 20 ticks = 50 ms por tick
+MSPT sostenido por encima de 50 ms: el servidor no completa el trabajo al ritmo objetivo.
+El TPS observado depende del intervalo medido y de la carga variable.</code>
           </div>
 
-          <div class="alert-box alert-success">
-            <strong>🛠️ Herramienta de Diagnóstico:</strong> En mundos locales o servidores Fabric, instala el mod <strong>Spark</strong> y ejecuta el comando <code>/spark tps</code> para ver una gráfica exacta en tiempo real de tu MSPT y uso de CPU por hilo.
-          </div>
+          <h2>Diagnóstico paso a paso</h2>
+          <ol>
+            <li>Si el contador de FPS cae, prueba una escena repetible y reduce una opción gráfica; revisa también uso de GPU/CPU y que no exista un límite de fotogramas.</li>
+            <li>Si el mundo tarda en procesar acciones, consulta las métricas del servidor. En Paper y servidores donde está disponible, <code>/spark tps</code> muestra TPS y CPU; la salida requiere los permisos adecuados.</li>
+            <li>Si el MSPT alto persiste, toma un perfil con spark durante el problema y revisa qué tareas dominan. No instales una versión cliente del mod en un servidor o cargador que no admita esa variante; consulta las instrucciones para el entorno correcto.</li>
+            <li>En multijugador, compara con otro servidor y revisa el ping. Si solo ocurre en uno, comparte con su administrador hora, TPS/MSPT y síntomas; si ocurre en todos, investiga cliente, red local y equipo.</li>
+            <li>Cambia una variable a la vez y repite en la misma zona o ruta. Guarda el registro y la configuración anterior para poder revertir.</li>
+          </ol>
+          <div class="alert-box alert-success"><strong>Recuerda:</strong> Los comandos y permisos de spark varían por plataforma. Consulta la guía oficial de <a href="https://spark.lucko.me/docs/Command-Usage" target="_blank" rel="noopener">uso de comandos de spark</a> y la documentación de tu servidor antes de instalar o perfilar.</div>
+          <p>Para aprender a interpretar excepciones y archivos de registro, consulta nuestra <a href="./como-leer-latest-log-crash-reports-minecraft.html">guía sobre latest.log y crash reports</a>.</p>
         
 
       <!-- Author Card EEAT -->
       <div class="author-card-eeat">
         <div class="author-avatar">👨‍💻</div>
         <div class="author-info">
-          <h4>Escrito por fondue_x — Desarrollador Principal</h4>
-          <div class="author-role">Laboratorio Técnico de Rendimiento & Modding de Nebula</div>
+          <h4>Redacción: fondue_x</h4>
+          <div class="author-role">Guías técnicas de Nebula Dev Studios</div>
           <p class="author-bio">
-            Especialista en optimización de JVM, perfiles de frametime en Minecraft y arquitectura de cargadores Fabric/NeoForge. Esta guía ha sido probada y verificada en hardware real de escritorio y portátiles para asegurar resultados reproducibles sin mitos ni efectos placebo.
+            Esta guía explica las métricas y propone un flujo de diagnóstico; no publica resultados de benchmark propios. Los comandos spark dependen de la plataforma, versión, instalación y permisos del servidor.
           </p>
           <div class="author-meta-links">
             <a href="https://github.com/fonduev" target="_blank" rel="noopener">Perfil en GitHub</a>
             <span>•</span>
-            <a href="../metodologia.html">Metodología de Pruebas</a>
+            <a href="../metodologia.html">Metodología editorial</a>
             <span>•</span>
             <a href="https://discord.gg/7Uv5CjX8" target="_blank" rel="noopener">Comunidad en Discord</a>
           </div>
@@ -478,7 +487,7 @@ Si MSPT = 200 ms  ==> TPS = 5  (Injugable, sobrecarga masiva)</code>
       <div class="footer-col">
         <h4>NEBULA DEV STUDIOS</h4>
         <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
-          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+          Guías independientes sobre Minecraft, lanzadores y herramientas de diagnóstico, con fuentes enlazadas y límites indicados cuando aplica.
         </p>
       </div>
       <div class="footer-col">
@@ -487,7 +496,7 @@ Si MSPT = 200 ms  ==> TPS = 5  (Injugable, sobrecarga masiva)</code>
           <li><a href="../index.html">Inicio</a></li>
           <li><a href="../guias.html">Guías & Tutoriales</a></li>
           <li><a href="../about.html">Acerca de</a></li>
-          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../metodologia.html">Metodología editorial</a></li>
           <li><a href="../contact.html">Contacto</a></li>
         </ul>
       </div>

@@ -4,23 +4,23 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/x-icon" href="./icon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Centro de Contacto & Soporte Oficial | Nebula Dev Studios</title>
-  <meta name="description" content="Ponte en contacto con el equipo de soporte técnico y desarrolladores de Nebula Launcher. Soporte oficial, preguntas frecuentes, reporte de bugs y comunidad en Discord." />
+  <title>Contacto y soporte | Nebula Dev Studios</title>
+  <meta name="description" content="Contacta con Nebula Dev Studios por correo, Discord o GitHub Issues para consultas y reportes sobre Nebula Launcher." />
 
   <!-- Canonical URL & Metadatos Oficiales -->
   <link rel="canonical" href="https://nebuladevstudios.com/contact.html" />
   <meta property="og:locale" content="es_ES" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Nebula Dev Studios" />
-  <meta property="og:title" content="Centro de Contacto & Soporte Oficial | Nebula Dev Studios" />
-  <meta property="og:description" content="Ponte en contacto con el equipo de soporte técnico y desarrolladores de Nebula Launcher. Soporte oficial, preguntas frecuentes, reporte de bugs y comunidad en Discord." />
+  <meta property="og:title" content="Contacto y soporte | Nebula Dev Studios" />
+  <meta property="og:description" content="Contacta con Nebula Dev Studios por correo, Discord o GitHub Issues para consultas y reportes sobre Nebula Launcher." />
   <meta property="og:url" content="https://nebuladevstudios.com/contact.html" />
   <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Centro de Contacto & Soporte Oficial | Nebula Dev Studios" />
-  <meta name="twitter:description" content="Ponte en contacto con el equipo de soporte técnico y desarrolladores de Nebula Launcher. Soporte oficial, preguntas frecuentes, reporte de bugs y comunidad en Discord." />
+  <meta name="twitter:title" content="Contacto y soporte | Nebula Dev Studios" />
+  <meta name="twitter:description" content="Contacta con Nebula Dev Studios por correo, Discord o GitHub Issues para consultas y reportes sobre Nebula Launcher." />
   <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
 
   <!-- Schema.org Datos Estructurados JSON-LD -->
@@ -28,7 +28,7 @@
 {
   "@context": "https://schema.org",
   "@type": "ContactPage",
-  "name": "Contacto y Soporte Oficial",
+  "name": "Contacto y soporte",
   "url": "https://nebuladevstudios.com/contact.html",
   "publisher": {
     "@type": "Organization",
@@ -484,9 +484,9 @@
   <div class="container">
     <div class="hero-contact">
       <div class="badge">✦ Centro de Soporte & Ayuda</div>
-      <h1>Contáctanos y Soporte Oficial</h1>
+      <h1>Contacto y soporte de Nebula Launcher</h1>
       <p class="hero-sub">
-        ¿Tienes dudas, sugerencias o necesitas asistencia técnica con Nebula Launcher? Estamos a tu disposición para ayudarte.
+        Para consultas, sugerencias o reportes, utiliza uno de los canales disponibles. La respuesta y los tiempos de atención dependen de la disponibilidad del equipo y de la comunidad.
       </p>
     </div>
 
@@ -495,7 +495,7 @@
       <a href="https://discord.gg/w797bC8G3H" target="_blank" rel="noopener" class="channel-card">
         <div class="channel-icon">💬</div>
         <h3>Comunidad en Discord</h3>
-        <p>Atención directa por parte del equipo de soporte, anuncios de nuevas versiones y ayuda de la comunidad en tiempo real.</p>
+        <p>Consulta novedades o pide orientación a la comunidad. La disponibilidad de respuestas depende de las personas que participen en el servidor.</p>
         <span class="channel-link-text">Unirse a Discord &rarr;</span>
       </a>
 
@@ -518,10 +518,10 @@
     <div class="form-wrapper">
       <h2>Envíanos un Mensaje Directo</h2>
       <p style="color: var(--text-muted); font-size: 0.95rem;">
-        Completa el siguiente formulario y un miembro de nuestro equipo te responderá en menos de 24 horas.
+        Completa el mensaje y se abrirá tu aplicación de correo predeterminada para que puedas revisarlo y enviarlo. No se envía desde este sitio.
       </p>
 
-      <form onsubmit="event.preventDefault(); const n = document.getElementById('name').value; const m = document.getElementById('message').value; window.location.href = `mailto:soporte@nebuladevstudios.com?subject=Soporte Nebula Launcher - ${encodeURIComponent(n)}&body=${encodeURIComponent(m)}`; alert('Abriendo tu cliente de correo para enviar el mensaje directamente a soporte@nebuladevstudios.com'); this.reset();">
+      <form onsubmit="event.preventDefault(); const n = document.getElementById('name').value; const subject = document.getElementById('subject').selectedOptions[0].textContent; const m = document.getElementById('message').value; window.location.href = `mailto:soporte@nebuladevstudios.com?subject=${encodeURIComponent('Nebula Launcher - ' + subject + ' - ' + n)}&body=${encodeURIComponent(m)}`;">
         <div class="form-grid">
           <div class="form-group">
             <label for="name">Nombre o Apodo *</label>
@@ -551,7 +551,7 @@
           </div>
 
           <div class="form-group full">
-            <button type="submit" class="submit-btn">Enviar Mensaje de Soporte</button>
+            <button type="submit" class="submit-btn">Abrir correo para enviar mensaje</button>
           </div>
         </div>
       </form>
@@ -564,28 +564,28 @@
       <div class="faq-item">
         <div class="faq-question">¿Nebula Launcher es compatible con cuentas de Microsoft?</div>
         <div class="faq-answer">
-          Sí. Nebula Launcher permite iniciar sesión con una cuenta oficial de Microsoft Minecraft.
+          Consulta la documentación de la release que estás usando para conocer las opciones de cuenta disponibles y los permisos que solicita el flujo de autenticación.
         </div>
       </div>
 
       <div class="faq-item">
         <div class="faq-question">¿Qué debo hacer si Minecraft no inicia o sale "Exit Code 1"?</div>
         <div class="faq-answer">
-          Generalmente ocurre por incompatibilidad entre mods o una versión incorrecta de Java. Consulta nuestra <a href="./guias/solucion-errores-comunes-minecraft.html" style="color: var(--accent-cyan);">Guía de Solución de Errores</a> para resolverlo en pocos pasos.
+          Exit Code 1 es un resultado genérico. Revisa el registro, las versiones recientes de Java, el cargador y los mods; nuestra <a href="./guias/exit-code-1-minecraft-solucion.html" style="color: var(--accent-cyan);">guía de diagnóstico</a> explica por dónde empezar.
         </div>
       </div>
 
       <div class="faq-item">
-        <div class="faq-question">¿Es seguro y libre de virus?</div>
+        <div class="faq-question">¿Dónde puedo consultar el código y las versiones?</div>
         <div class="faq-answer">
-          Publicamos el código fuente y las notas de versión para que la comunidad pueda revisarlos. Descarga siempre desde nuestros enlaces oficiales y reporta cualquier incidencia al equipo de soporte.
+          Revisa el <a href="https://github.com/fonduev/astral-nebula-launcher" target="_blank" rel="noopener">repositorio de GitHub</a> y sus releases. La publicación del código no sustituye una auditoría de seguridad independiente; verifica el origen de cualquier archivo que descargues.
         </div>
       </div>
 
       <div class="faq-item">
         <div class="faq-question">¿Cómo instalo Modpacks de CurseForge o Modrinth?</div>
         <div class="faq-answer">
-          Dentro del launcher ve a la pestaña "Modpacks", busca el pack que desees y haz clic en "Instalar". Nebula se encarga automáticamente de descargar el loader correspondiente, dependencias y mods.
+          La interfaz y las opciones de importación pueden variar entre versiones. Comprueba que el modpack, el cargador, la versión de Minecraft y las dependencias coincidan antes de instalar; consulta las notas de la release si tienes dudas.
         </div>
       </div>
     </div>
@@ -598,7 +598,7 @@
       <div class="footer-col">
         <h4>NEBULA DEV STUDIOS</h4>
         <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem;">
-          Desarrollando el ecosistema de Minecraft más avanzado, estético y fluido para jugadores y creadores de contenido.
+          Proyecto independiente de software y documentación relacionada con Minecraft.
         </p>
       </div>
       <div class="footer-col">
@@ -643,31 +643,23 @@
   <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
     <div class="cookie-content">
       <p>
-        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+        🍪 <strong>Aviso de privacidad:</strong> Este sitio puede cargar recursos y servicios de terceros. El botón solo cierra este aviso; no registra ni transmite una elección de consentimiento publicitario. Consulta la <a href="privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y los <a href="terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
       </p>
-      <div class="cookie-buttons" style="display:flex; gap:10px; align-items:center;">
-        <button class="btn-cookie-reject" onclick="rejectCookieConsent()" style="background:transparent; border:1px solid rgba(255,255,255,0.25); color:#94a3b8; padding:9px 18px; border-radius:10px; font-weight:600; font-size:0.84rem; cursor:pointer; transition:all 0.2s;">Solo Necesarias</button>
-        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+      <div class="cookie-buttons">
+        <button class="btn-cookie-accept" onclick="dismissCookieBanner()">Cerrar aviso</button>
       </div>
     </div>
   </div>
 
   <script>
     function initCookieConsent() {
-      if (!localStorage.getItem('nebula_cookie_consent')) {
+      if (!localStorage.getItem('nebula_cookie_notice_dismissed')) {
         const banner = document.getElementById('cookieConsentBanner');
         if (banner) banner.style.display = 'block';
       }
     }
-    function acceptCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'accepted');
-      dismissCookieBanner();
-    }
-    function rejectCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'essential_only');
-      dismissCookieBanner();
-    }
     function dismissCookieBanner() {
+      localStorage.setItem('nebula_cookie_notice_dismissed', 'true');
       const banner = document.getElementById('cookieConsentBanner');
       if (banner) {
         banner.style.opacity = '0';

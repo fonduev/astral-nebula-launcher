@@ -48,7 +48,7 @@
           }
         },
         "datePublished": "2026-09-19",
-        "dateModified": "2026-09-19"
+        "dateModified": "2026-10-12"
       },
       {
         "@type": "FAQPage",
@@ -457,26 +457,20 @@
 
     <div class="article-meta">
       <span>✍️ Por <strong>fondue_x</strong></span>
-      <span>📅 19 de Septiembre, 2026</span>
+      <span>📅 Revisado el 12 de octubre de 2026</span>
       <span>⏱️ 7 min de lectura</span>
-      <span>💻 Probado en Windows 11</span>
+
     </div>
 
     <article class="article-body">
       <h2>El problema: el caos de ejecutar múltiples versiones en la misma carpeta .minecraft</h2>
 <p>La mayoría de los jugadores habituales de Minecraft no juegan a una única versión del juego. Es muy común alternar entre un cliente optimizado de PvP en la versión 1.8.9, un modpack técnico pesado en la 1.20.1 con Forge y una instalación limpia de la versión 1.21 con Fabric para jugar en servidores multijugador con amigos. Sin embargo, por defecto, el juego almacena todas las configuraciones, mundos, capturas y modificaciones dentro de un único directorio central: <code>%appdata%\.minecraft</code>.</p>
-<p>Compartir este directorio raíz entre distintas generaciones del juego provoca problemas graves de estabilidad:</p>
-<ul>
-  <li><strong>Incompatibilidad directa en la carpeta de mods:</strong> Si dejas mods de Fabric de la 1.21 dentro de <code>.minecraft\mods</code> e inicias un perfil de Forge 1.20.1, el cargador intentará leer todos los archivos <code>.jar</code> de la carpeta. Al detectar clases no reconocidas, el juego colapsará en el arranque con un Código de salida 1.</li>
-  <li><strong>Sobreescritura y reseteo de controles (options.txt):</strong> Las versiones modernas y clásicas utilizan sistemas de entrada completamente distintos. Abrir una versión moderna y luego una antigua en la misma carpeta borra las configuraciones de teclas, la sensibilidad del ratón y el campo de visión (FOV).</li>
-  <li><strong>El peor escenario: corrupción irreversible de mundos:</strong> Si por error abres tu mundo de supervivencia con mods de la 1.20.1 mientras tienes seleccionado un perfil de la 1.21 Vanilla, el motor del juego actualizará la cabecera del archivo <code>level.dat</code> y eliminará todos los bloques y objetos personalizados de los mods que no reconozca en el mapa, destruyendo meses de construcciones de forma irrecuperable.</li>
-</ul>
-<p>La solución técnica profesional para erradicar este problema es el <strong>aislamiento de entornos mediante instancias independientes</strong>.</p>
+<p>Compartir una carpeta de juego puede mezclar mods, configuraciones, registros y mundos. Un cargador suele rechazar mods incompatibles, pero el mensaje depende del archivo y la versión; una carpeta compartida no significa que todos los mundos se corrompan automáticamente. El riesgo importante es abrir un mundo con una versión o conjunto de mods distinto sin copia de seguridad: bloques y datos desconocidos pueden perderse al guardarlo. Usa instancias separadas cuando alternes perfiles y conserva respaldos antes de cambiar versiones.</p>
 
 <h2>El principio técnico del aislamiento: El parámetro --gameDir</h2>
 <p>Minecraft está diseñado para que todos sus subcomponentes (mundos, mods, configuraciones, paquetes de recursos y registros de registro) busquen sus datos relativos a un directorio de trabajo específico. Este directorio se define mediante el argumento de lanzamiento:</p>
 <pre><code>--gameDir "C:\Ruta\De\Tu\Instancia"</code></pre>
-<p>Cuando este parámetro se configura correctamente, ocurre algo fundamental para la economía de almacenamiento de tu computadora: <strong>los archivos pesados de assets (sonidos, texturas globales del juego) y las librerías base de Mojang se siguen compartiendo globalmente</strong> desde el directorio central, pero las carpetas individuales de mods, mundos guardados (<code>saves</code>) y opciones se crean y gestionan de forma 100% aislada dentro de su propia carpeta.</p>
+<p>Al iniciar el juego con un directorio de juego diferente, Minecraft y el cargador guardan allí muchos datos de esa instalación, como mundos, opciones, registros y en general las carpetas de mods o configuración del perfil. La ubicación de bibliotecas, runtimes y archivos de descarga puede depender del launcher: no asumas que todos los assets pesados se comparten ni que dos instancias estén completamente aisladas sin comprobar sus rutas.</p>
 
 <div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Comparativa de estructura de carpetas mostrando la carpeta global .minecraft frente a una carpeta de instancia aislada</div>
 
@@ -488,7 +482,7 @@
     ├── 1.8.9_PvP\
     ├── 1.20.1_Forge_Modpack\
     └── 1.21.1_Fabric_VanillaPlus\</code></pre>
-<p><em>Regla técnica estricta:</em> Evita utilizar caracteres especiales, acentos, símbolos ortográficos o espacios excesivos en los nombres de las carpetas (utiliza guiones bajos en su lugar). Algunos cargadores de mods antiguos de Forge fallan al procesar rutas de archivos con caracteres no ASCII en Windows.</p>
+<p>Usa una ruta clara y con permisos de escritura para el usuario que ejecuta el launcher. Si un cargador antiguo o una herramienta externa falla con una ruta concreta, prueba temporalmente una ruta simple en ASCII para descartar un problema de compatibilidad.</p>
 
 <h3>Paso 2: Configurar la directiva de directorio en el lanzador oficial</h3>
 <p>Si utilizas el lanzador oficial de Mojang:</p>
@@ -499,7 +493,7 @@
   <li>Pulsa en <strong>Examinar</strong> y selecciona la carpeta específica que creaste para esa versión (por ejemplo, <code>C:\...\.minecraft\instances\1.20.1_Forge_Modpack</code>).</li>
   <li>Guarda los cambios de la instalación.</li>
 </ol>
-<p>A partir de ese segundo, cuando presiones "Jugar", Minecraft creará automáticamente dentro de esa carpeta vacía sus propias subcarpetas <code>mods</code>, <code>saves</code>, <code>config</code> y su propio archivo <code>options.txt</code> exclusivo.</p>
+<p>Al iniciar, Minecraft y el cargador crearán allí los datos de juego que correspondan a ese perfil. Revisa que el directorio seleccionado sea el esperado antes de copiar mundos o mods.</p>
 
 <h3>Paso 3: Migrar mundos y opciones de forma selectiva</h3>
 <p>Para transferir tus partidas antiguas a la nueva instancia sin contaminar el entorno, copia manualmente únicamente los archivos necesarios desde la carpeta central <code>.minecraft</code> hacia la carpeta de tu nueva instancia:</p>
@@ -539,21 +533,21 @@
 <p>Con la instancia aislada, ahora puedes abrir la carpeta <code>.minecraft\instances\1.20.1_Forge_Modpack\mods</code> y colocar allí 150 modificaciones de Forge sin preocuparte de que afecten a tu versión de 1.8.9 o a tu cliente de 1.21. Si una modificación provoca un fallo catastrófico, el registro de errores quedará confinado exclusivamente en la subcarpeta <code>logs</code> de esa instancia, facilitando su diagnóstico inmediato.</p>
 
 <h3>Paso 5: Automatización mediante lanzadores modulares</h3>
-<p>Hacer este procedimiento de forma manual en el lanzador oficial funciona perfectamente, pero exige crear carpetas a mano y configurar rutas de Java para cada perfil. En lanzadores modernos de arquitectura modular (como Nebula Launcher, Prism Launcher o CurseForge App), este proceso viene completamente integrado en el núcleo del programa: cada vez que creas un modpack o instalas una versión, el software genera automáticamente una carpeta de instancia aislada en segundo plano y aplica el parámetro <code>--gameDir</code> de forma transparente, permitiendo incluso ejecutar múltiples instancias de diferentes versiones de Minecraft de forma simultánea sin que se bloqueen archivos entre sí.</p>
+<p>Muchos launchers permiten crear perfiles con carpetas de juego separadas. Revisa las opciones de cada producto para comprobar qué archivos comparte, dónde almacena mundos y configuraciones y si permite ejecutar dos perfiles a la vez. El comportamiento concreto depende del launcher y su configuración.</p>
 
 <div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Menú de edición de instalación en el lanzador de Minecraft mostrando el campo Directorio del juego con ruta personalizada</div>
 
 <h2>El caso raro: La corrupción de controles entre LWJGL 2 y GLFW</h2>
-<p>Muchos jugadores que alternan entre Minecraft 1.8.9 (la versión reina de las modalidades PvP de puentes, SkyWars y BedWars) y versiones modernas como 1.20 experimentan un fallo molesto y poco documentado: cada vez que vuelven a la 1.8.9, el botón izquierdo del ratón deja de golpear, la tecla de agacharse cambia de lugar o la sensibilidad del ratón se dispara al 200%.</p>
-<p>Este comportamiento no es un virus ni un error de Windows; es un conflicto de arquitectura binaria en el archivo <code>options.txt</code>:</p>
+<p>Al alternar versiones con diferentes formatos de configuración, un archivo <code>options.txt</code> compartido puede producir cambios inesperados en controles o ajustes. El comportamiento depende de la versión del juego; separar directorios ayuda a mantener cada perfil organizado.</p>
+<p>Las versiones de Minecraft han cambiado bibliotecas y formatos de opciones a lo largo del tiempo. Si una configuración se restablece al cambiar de versión, conserva una copia y prueba perfiles separados antes de editar sus archivos:</p>
 <ol>
   <li>Minecraft 1.8.9 utiliza la biblioteca <strong>LWJGL 2</strong> para comunicarse con el teclado y el ratón. En esta versión antigua, los códigos de tecla se graban como números enteros primitivos (por ejemplo, el clic izquierdo se guardaba bajo el código <code>key_key.attack:-100</code>).</li>
   <li>A partir de Minecraft 1.13, Mojang migró todo el sistema de ventanas a la biblioteca moderna <strong>GLFW (LWJGL 3)</strong>, la cual adoptó una nomenclatura textual estandarizada (el clic izquierdo pasó a llamarse <code>key.mouse.left</code>).</li>
 </ol>
-<p>Si ambas versiones leen el mismo archivo <code>options.txt</code> dentro de la carpeta raíz compartida, la versión clásica no logra traducir los nombres modernos de GLFW, marca los controles como no asignados y los restablece a los valores de fábrica. Aislar ambas versiones en carpetas independientes es la única forma matemática de mantener intacta tu configuración de teclas competitiva sin tener que reasignarla en cada partida.</p>
+<p>Si los archivos compartidos causan cambios de configuración, restaura la copia o configura un directorio de juego separado para cada perfil. Comprueba el resultado en la versión concreta que utilizas; no hay una única causa para todos los restablecimientos de controles.</p>
 
-<h2>Cómo comprobar que tu instancia está completamente aislada</h2>
-<p>Para verificar con absoluta certeza técnica que tu perfil está operando dentro de su propio contenedor independiente y no está tocando los archivos generales de tu ordenador:</p>
+<h2>Cómo comprobar el directorio de juego seleccionado</h2>
+<p>Comprueba que el launcher utiliza el directorio elegido para los datos que te interesa separar:</p>
 <ol>
   <li>Inicia el perfil configurado y entra a cualquier mundo.</li>
   <li>Presiona la tecla <code>F2</code> para tomar una captura de pantalla dentro del juego.</li>
@@ -561,29 +555,29 @@
   <li>Comprueba que la captura de pantalla se haya guardado allí y no en la carpeta central <code>%appdata%\.minecraft\screenshots</code>.</li>
   <li>Presiona <code>F3</code> dentro del juego y revisa en la parte superior izquierda de la pantalla la ruta de depuración: debe señalar directamente a la carpeta de tu instancia.</li>
 </ol>
-<p>Si las capturas y los registros se generan dentro de la subcarpeta designada, tu entorno está 100% aislado, blindado contra corrupciones de mundos y listo para recibir modificaciones con total seguridad.</p>
+<p>Si las capturas, registros, mundos y configuraciones aparecen en la carpeta prevista, has confirmado la ruta de varios datos de ese perfil. Esto no sustituye una copia de seguridad ni demuestra que el launcher no comparta otros archivos como bibliotecas o recursos.</p>
 
 <h2>Conclusión</h2>
-<p>El aislamiento de instancias es la línea divisoria entre una instalación de Minecraft desordenada y propensa a fallos inexplicables, y un entorno técnico profesional y estable. Dedicar dos minutos a configurar carpetas separadas garantiza que tus mundos de supervivencia permanezcan a salvo y que puedas saltar entre versiones clásicas y modernas con la tranquilidad de que cada configuración permanecerá en su lugar.</p>
+<p>Las carpetas separadas ayudan a organizar mods y opciones por perfil y reducen cambios accidentales entre instalaciones. Para proteger un mundo, conserva una copia independiente antes de abrirlo con otra versión o conjunto de mods, incluso si usas instancias distintas.</p>
 
       <div class="author-box">
         <h3>Sobre el autor: fondue_x</h3>
-        <p><strong>fondue_x</strong> es desarrollador independiente y jugador de Minecraft desde hace más de 5 años, especializado en optimización de rendimiento, arquitectura de instancias y resolución de incompatibilidades en Fabric, Forge y NeoForge. Es el creador de <a href="https://github.com/fonduev" target="_blank" rel="noopener">Nebula Launcher</a>. Todas sus guías se prueban de primera mano en bancos de pruebas reales con Windows 11. Puedes consultar nuestra <a href="../metodologia.html">metodología editorial y banco de pruebas</a>.</p>
+        <p><strong>fondue_x</strong> es desarrollador independiente y jugador de Minecraft desde hace más de 5 años, especializado en optimización de rendimiento, arquitectura de instancias y resolución de incompatibilidades en Fabric, Forge y NeoForge. Es el creador de <a href="https://github.com/fonduev" target="_blank" rel="noopener">Nebula Launcher</a>. Las guías se preparan con referencias enlazadas y recomendaciones generales; los resultados propios solo se afirman cuando los datos de prueba aparecen en el artículo. Consulta nuestra <a href="../metodologia.html">metodología editorial</a>.</p>
       </div>
 
       <div class="faq-section">
         <h2 style="margin-top:0;">Preguntas Frecuentes</h2>
                 <div class="faq-item">
           <h4>¿Crear instancias separadas duplica el espacio que ocupa Minecraft en mi disco duro?</h4>
-          <p>No de forma masiva. Los archivos más pesados del juego (los paquetes de audio, recursos globales y librerías de Java que pesan varios gigabytes) se conservan en la carpeta central y se comparten entre todas las instancias. La carpeta aislada solo almacena tus mods, mundos y configuraciones particulares.</p>
+          <p>Depende del launcher. Algunos recursos o bibliotecas pueden compartirse y otros archivos se guardan en el directorio de la instancia. Revisa las carpetas creadas por tu aplicación para conocer el uso real de disco.</p>
         </div>
         <div class="faq-item">
           <h4>¿Puedo tener un perfil con Fabric y otro con Forge al mismo tiempo sin que choquen?</h4>
-          <p>Sí, precisamente para eso sirve el aislamiento de instancias. Al asignar un directorio de juego distinto a cada perfil, los mods de Fabric residirán en su propia carpeta y Forge nunca intentará leerlos, evitando los cierres en el arranque.</p>
+          <p>Los directorios separados ayudan a mantener archivos de perfil independientes. Comprueba que cada launcher apunte al directorio correcto y revisa las dependencias y cargador del conjunto de mods.</p>
         </div>
         <div class="faq-item">
           <h4>¿Dónde se guardan mis capturas de pantalla si juego en una instancia aislada?</h4>
-          <p>Se guardan dentro de la subcarpeta screenshots de esa instancia específica (por ejemplo, en .minecraft/instances/[nombre_instancia]/screenshots), en lugar de almacenarse en el directorio raíz de .minecraft.</p>
+          <p>Normalmente se guardan en la carpeta de juego del perfil, pero la ruta puede variar por launcher. Comprueba la ubicación elegida en las opciones de instalación o perfil.</p>
         </div>
       </div>
     
@@ -592,14 +586,14 @@
         <div class="author-avatar" style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, #c084fc, #38bdf8); display:flex; align-items:center; justify-content:center; font-size:1.8rem; flex-shrink:0; box-shadow:0 0 15px rgba(192,132,252,0.4);">👨‍💻</div>
         <div class="author-info">
           <h4 style="font-family:'Outfit', sans-serif; color:#fff; font-size:1.1rem; margin-bottom:0.25rem;">Escrito por fondue_x — Desarrollador Principal</h4>
-          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Laboratorio Técnico de Rendimiento & Modding de Nebula</div>
+          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Guías técnicas de Nebula Dev Studios</div>
           <p class="author-bio" style="color:#94a3b8; font-size:0.9rem; line-height:1.55; margin-bottom:0.6rem;">
-            Especialista en optimización de JVM, perfiles de frametime en Minecraft y arquitectura de cargadores Fabric/NeoForge. Esta guía ha sido probada y verificada en hardware real de escritorio y portátiles para asegurar resultados reproducibles sin mitos ni efectos placebo.
+            Esta guía explica cómo separar perfiles y archivos de Minecraft; no afirma resultados de pruebas comparativas propias. Verifica rutas y opciones con la documentación de tu launcher y conserva copias de tus mundos antes de mover datos.
           </p>
           <div class="author-meta-links" style="display:flex; gap:1rem; font-size:0.82rem; color:#64748b;">
             <a href="https://github.com/fonduev" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Perfil en GitHub</a>
             <span>•</span>
-            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología de Pruebas</a>
+            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología editorial</a>
             <span>•</span>
             <a href="https://discord.gg/7Uv5CjX8" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Comunidad en Discord</a>
           </div>
@@ -615,7 +609,7 @@
       <div class="footer-col">
         <h4>NEBULA DEV STUDIOS</h4>
         <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
-          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+          Guías independientes sobre Minecraft y herramientas relacionadas. Los artículos distinguen recomendaciones de resultados medidos y enlazan fuentes para facilitar su verificación.
         </p>
       </div>
       <div class="footer-col">
@@ -624,7 +618,7 @@
           <li><a href="../index.html">Inicio</a></li>
           <li><a href="../guias.html">Guías & Tutoriales</a></li>
           <li><a href="../about.html">Acerca de</a></li>
-          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../metodologia.html">Metodología editorial</a></li>
           <li><a href="../contact.html">Contacto</a></li>
         </ul>
       </div>
@@ -658,31 +652,23 @@
   <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
     <div class="cookie-content">
       <p>
-        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+        🍪 <strong>Aviso de privacidad:</strong> Este sitio puede cargar recursos y servicios de terceros. El botón solo cierra este aviso; no registra ni transmite una elección de consentimiento publicitario. Consulta la <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y los <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
       </p>
       <div class="cookie-buttons">
-        <button class="btn-cookie-reject" onclick="rejectCookieConsent()">Solo Necesarias</button>
-        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+        <button class="btn-cookie-accept" onclick="dismissCookieBanner()">Cerrar aviso</button>
       </div>
     </div>
   </div>
 
   <script>
     function initCookieConsent() {
-      if (!localStorage.getItem('nebula_cookie_consent')) {
+      if (!localStorage.getItem('nebula_cookie_notice_dismissed')) {
         const banner = document.getElementById('cookieConsentBanner');
         if (banner) banner.style.display = 'block';
       }
     }
-    function acceptCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'accepted');
-      dismissCookieBanner();
-    }
-    function rejectCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'essential_only');
-      dismissCookieBanner();
-    }
     function dismissCookieBanner() {
+      localStorage.setItem('nebula_cookie_notice_dismissed', 'true');
       const banner = document.getElementById('cookieConsentBanner');
       if (banner) {
         banner.style.opacity = '0';

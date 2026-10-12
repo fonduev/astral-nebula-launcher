@@ -233,7 +233,7 @@
 
   <main>
     <h1>Términos de Servicio</h1>
-    <p class="updated-date">Última actualización: 25 de Agosto de 2026</p>
+    <p class="updated-date">Última actualización: 12 de octubre de 2026</p>
 
     <p>
       Bienvenido a <strong>Nebula Launcher</strong>. Al acceder a nuestro sitio web oficial, descargar o utilizar nuestra aplicación, aceptas estar sujeto a los siguientes Términos y Condiciones de Servicio. Si no estás de acuerdo con alguno de estos términos, te solicitamos no utilizar nuestros servicios ni software.
@@ -246,32 +246,32 @@
 
     <h2>1. Uso del Software y Licencia</h2>
     <p>
-      Nebula Launcher se proporciona como una herramienta para facilitar la gestión de versiones, modpacks y personalizaciones de Minecraft. Se concede a los usuarios una licencia personal, no exclusiva y gratuita para descargar y ejecutar el software en sus dispositivos de conformidad con estos términos.
+      Nebula Launcher se proporciona como software independiente para funciones descritas en la página de la versión y en sus notas de publicación. La descarga puede estar disponible sin coste; el uso se rige por la licencia publicada en el repositorio, si corresponde, y por estos términos.
     </p>
 
             <h2>2. Requisitos de Licencia y Cuentas Oficiales</h2>
     <p>
-      Nebula Launcher es un gestor de instancias y entorno modular diseñado para complementar la experiencia del juego oficial. El uso de software y servicios en Nebula Dev Studios está sujeto a las siguientes condiciones obligatorias:
+      Nebula Launcher es un proyecto independiente relacionado con Minecraft. Las funciones, cuentas y servicios disponibles pueden variar por versión; consulta la documentación de la versión que utilizas y los términos de los servicios de terceros correspondientes.
     </p>
     <ul>
-      <li><strong>Licencia legítima requerida:</strong> Para acceder al juego completo y a servidores multijugador oficiales, el usuario debe poseer una copia legítima de Minecraft vinculada a una cuenta oficial de Microsoft.</li>
-      <li><strong>Autenticación segura:</strong> La autenticación de usuarios se realiza exclusivamente mediante los protocolos oficiales y directos de Microsoft OAuth. Nebula Dev Studios nunca almacena, procesa ni tiene acceso a tus contraseñas personales.</li>
+      <li><strong>Licencia del juego:</strong> El acceso a Minecraft y a sus servicios está sujeto a las condiciones de licencia y cuenta establecidas por Mojang y Microsoft.</li>
+      <li><strong>Autenticación:</strong> Si una versión ofrece inicio de sesión, revisa el proveedor y los permisos que muestra el flujo antes de introducir credenciales. El tratamiento de datos del proveedor se rige por sus propios términos y políticas.</li>
       <li><strong>Tolerancia cero a la piratería:</strong> Este software y este sitio web no eluden mecanismos de gestión de derechos digitales (DRM), no distribuyen binarios propietarios protegidos por derechos de autor de Mojang Studios y no proporcionan soporte técnico para copias no autorizadas.</li>
     </ul>
 
     <h2>3. Propiedad Intelectual de Terceros</h2>
     <p>
-      Los mods, paquetes de recursos, shaders y modpacks accesibles o integrados a través de plataformas como Modrinth, CurseForge o Fabric pertenecen a sus respectivos autores y creadores originales. Nebula Launcher actúa únicamente como un cliente de descarga automatizado e indexador.
+      Los mods, paquetes de recursos, shaders y modpacks pertenecen a sus respectivos autores. Disponibilidad, licencias y compatibilidad dependen de cada proyecto y de los servicios externos. Revisa las condiciones aplicables antes de descargar, compartir o utilizar archivos.
     </p>
 
     <h2>4. Descargo de Garantías y Limitación de Responsabilidad</h2>
     <p>
-      Nebula Launcher se distribuye "tal cual" (AS IS), sin garantías de ningún tipo, expresas o implícitas. En ningún caso Nebula Dev Studios o sus desarrolladores serán responsables por daños directos, indirectos, pérdida de datos o interrupciones derivadas del uso o incapacidad de uso del software.
+      Salvo cuando la ley aplicable disponga lo contrario, el software se ofrece tal cual y puede cambiar entre versiones. Antes de actualizar perfiles, mundos o configuraciones, conserva una copia de seguridad. Nada en estos términos limita derechos que no puedan excluirse legalmente.
     </p>
 
     <h2>5. Modificaciones a los Términos</h2>
     <p>
-      Nos reservamos el derecho de modificar o actualizar estos Términos de Servicio en cualquier momento. Cualquier cambio entrará en vigor inmediatamente después de su publicación en esta página web.
+      Podemos actualizar estos términos cuando cambien el sitio, el software o los requisitos aplicables. Publicaremos la fecha de actualización en esta página; revisa el texto vigente antes de continuar utilizando el servicio.
     </p>
 
     <h2>6. Contacto Legal y Soporte</h2>
@@ -300,31 +300,23 @@
   <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
     <div class="cookie-content">
       <p>
-        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+        🍪 <strong>Aviso de privacidad:</strong> Este sitio puede cargar recursos y servicios de terceros. El botón solo cierra este aviso; no registra ni transmite una elección de consentimiento publicitario. Consulta la <a href="privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y los <a href="terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
       </p>
-      <div class="cookie-buttons" style="display:flex; gap:10px; align-items:center;">
-        <button class="btn-cookie-reject" onclick="rejectCookieConsent()" style="background:transparent; border:1px solid rgba(255,255,255,0.25); color:#94a3b8; padding:9px 18px; border-radius:10px; font-weight:600; font-size:0.84rem; cursor:pointer; transition:all 0.2s;">Solo Necesarias</button>
-        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+      <div class="cookie-buttons">
+        <button class="btn-cookie-accept" onclick="dismissCookieBanner()">Cerrar aviso</button>
       </div>
     </div>
   </div>
 
   <script>
     function initCookieConsent() {
-      if (!localStorage.getItem('nebula_cookie_consent')) {
+      if (!localStorage.getItem('nebula_cookie_notice_dismissed')) {
         const banner = document.getElementById('cookieConsentBanner');
         if (banner) banner.style.display = 'block';
       }
     }
-    function acceptCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'accepted');
-      dismissCookieBanner();
-    }
-    function rejectCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'essential_only');
-      dismissCookieBanner();
-    }
     function dismissCookieBanner() {
+      localStorage.setItem('nebula_cookie_notice_dismissed', 'true');
       const banner = document.getElementById('cookieConsentBanner');
       if (banner) {
         banner.style.opacity = '0';

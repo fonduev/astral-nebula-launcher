@@ -48,7 +48,7 @@
           }
         },
         "datePublished": "2026-09-25",
-        "dateModified": "2026-09-25"
+        "dateModified": "2026-10-12"
       }
     ]
   }
@@ -405,55 +405,50 @@
 
     <div class="article-meta">
       <div>✍️ <strong>fondue_x</strong> (Nebula Lab)</div>
-      <div>📅 <strong>25 de Septiembre de 2026</strong></div>
+      <div>📅 <strong>Revisado el 12 de octubre de 2026</strong></div>
       <div>⏱️ <strong>12 min de lectura</strong></div>
-      <div>🔍 <strong>Verificado en hardware real</strong></div>
+
     </div>
 
     <article class="article-body">
-      
+
           <p class="lead" style="font-size:1.15rem; color:#e2e8f0; margin-bottom:2rem; line-height:1.8;">
-            Crear un servidor propio de Minecraft para jugar con amigos o construir una comunidad en 2026 ya no requiere lidiar con el software Vanilla tradicional, el cual sufre graves problemas de sobrecarga en el bucle principal de ticks (Tick Loop). En esta guía técnica paso a paso, abordaremos la instalación, configuración de red, selección de bifurcación (fork) de alto rendimiento como <strong>PaperMC</strong> o <strong>Purpur</strong>, y la configuración de argumentos de memoria Java.
+            Puedes alojar un servidor Java para jugar en una red local o con invitados remotos. Los pasos dependen de la versión de Minecraft y del software elegido. Esta guía se centra en preparar una carpeta, iniciar un servidor Paper o Purpur, aceptar el EULA y revisar el acceso de red; no promete una capacidad de jugadores ni una mejora de rendimiento.
           </p>
 
-          <h2>1. ¿Por Qué Nunca Debes Usar el Servidor Oficial Vanilla?</h2>
+          <h2>1. Escoge el software según los mods o plugins que necesitas</h2>
           <p>
-            El servidor estándar distribuido por Mojang (<code>server.jar</code>) ejecuta toda la lógica del mundo (entidades, inteligencia artificial, iluminación y chunks) de manera síncrona en un único hilo de CPU. A partir de la versión 1.18 y con los mundos de 384 bloques de altura, el servidor Vanilla no es capaz de mantener 20 TPS (Ticks Per Second) con más de 3 o 4 jugadores activos explorando terreno.
+            El servidor Vanilla distribuido por Mojang sirve para un mundo sin plugins de Bukkit/Paper. Paper y Purpur ofrecen compatibilidad con plugins de ese ecosistema, mientras que un servidor Fabric carga mods compatibles con Fabric. Cada opción puede cambiar comportamientos o requisitos: confirma que tus jugadores usan el mismo software, versión del juego y conjunto de mods/plugins. Ninguna opción es siempre la más rápida para todos los mundos y cargas.
           </p>
           <div class="table-responsive">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Software</th>
-                  <th>Arquitectura de Hilos</th>
-                  <th>Compatibilidad</th>
-                  <th>Uso Recomendado</th>
+                  <th>Servidor</th>
+                  <th>Complementos habituales</th>
+                  <th>Comprueba antes de elegir</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td><strong>Vanilla</strong></td>
-                  <td>Monohilo estricto</td>
-                  <td>Solo datapacks</td>
-                  <td>No recomendado</td>
+                  <td>Datapacks y funciones incluidas en el juego.</td>
+                  <td>La versión del server.jar debe coincidir con la de los jugadores.</td>
                 </tr>
                 <tr>
-                  <td><strong>PaperMC</strong></td>
-                  <td>Asíncrona (Chunks y Luces)</td>
-                  <td>Plugins Bukkit / Spigot / Paper</td>
-                  <td>Estándar de la industria</td>
+                  <td><strong>Paper</strong></td>
+                  <td>Plugins compatibles con Bukkit, Spigot o Paper.</td>
+                  <td>Revisa si un plugin requiere una API o build específica.</td>
                 </tr>
                 <tr>
                   <td><strong>Purpur</strong></td>
-                  <td>Paper optimizado + Ajustes de Gameplay</td>
-                  <td>Plugins Bukkit / Spigot / Purpur</td>
-                  <td>Máximo rendimiento y personalización</td>
+                  <td>Plugins compatibles con Paper y opciones de configuración propias.</td>
+                  <td>Confirma el comportamiento esperado y la compatibilidad de cada plugin.</td>
                 </tr>
                 <tr>
-                  <td><strong>Fabric Server</strong></td>
-                  <td>Híbrida con mods (Lithium/FerriteCore)</td>
-                  <td>Mods de Fabric</td>
-                  <td>Partidas con bloques y contenido nuevo</td>
+                  <td><strong>Fabric</strong></td>
+                  <td>Mods publicados para Fabric, en servidor y cliente cuando corresponda.</td>
+                  <td>Instala las dependencias requeridas y alinea versiones con todos los jugadores.</td>
                 </tr>
               </tbody>
             </table>
@@ -461,7 +456,7 @@
 
           <h2>2. Requisitos Previos de Software y Java</h2>
           <p>
-            Para las versiones modernas de Minecraft (1.20.5, 1.21 y posteriores como 26.3), el servidor requiere obligatoriamente <strong>Java 21</strong> o <strong>Java 25</strong> de 64 bits. Recomendamos instalar Eclipse Temurin o GraalVM CE.
+            La versión de Java necesaria depende de la versión exacta del servidor. Comprueba el requisito actual en la documentación de <a href="https://docs.papermc.io/paper/getting-started/" target="_blank" rel="noopener">Paper</a> o <a href="https://purpurmc.org/downloads" target="_blank" rel="noopener">Purpur</a> y usa una distribución de Java de 64 bits compatible con tu sistema. El comando <code>java -version</code> muestra qué runtime ejecuta la terminal.
           </p>
           <div class="code-block">
             <code># Verificar versión de Java instalada en tu terminal
@@ -478,8 +473,8 @@ java -version
           </p>
           <div class="code-block">
             <code>@echo off
-title Servidor Minecraft - Nebula Engine
-java -Xms4G -Xmx4G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -jar server.jar --nogui
+title Servidor Minecraft
+java -Xms2G -Xmx2G -jar server.jar --nogui
 pause</code>
           </div>
           <p>
@@ -497,30 +492,30 @@ pause</code>
             <strong>⚠️ Consejo de Seguridad:</strong> Si no dispones de acceso al router o tu proveedor de internet utiliza CGNAT (Carrier Grade NAT), la solución más limpia y segura sin compartir tu IP pública es utilizar herramientas modernas como <strong>Playit.gg</strong> o túneles Cloudflare, evitando programas obsoletos como Hamachi.
           </div>
 
-          <h2>5. Plugins Esenciales de Rendimiento Inicial</h2>
-          <p>
-            Antes de abrir el servidor a tus amigos, instala estos plugins en la carpeta <code>plugins/</code>:
-          </p>
-          <ul>
-            <li><strong>Spark:</strong> El analizador y profiler de rendimiento definitivo para inspeccionar qué entidad o bloque provoca caídas de ticks.</li>
-            <li><strong>Chunky:</strong> Generador previo de terreno. Generar un radio de 5,000 bloques con <code>/chunky start</code> antes de jugar elimina el 90% del lag por generación de chunks en tiempo real.</li>
-            <li><strong>CoreProtect:</strong> Registro y protección contra robos o destrucción accidental con comandos <code>/co rollback</code>.</li>
-          </ul>
-        
+          <h2>5. Verifica el arranque y deja el servidor cerrado hasta revisar la red</h2>
+          <ol>
+            <li>Inicia el servidor por primera vez desde la carpeta de instalación y espera a que genere sus archivos. Luego apágalo con <code>stop</code> en la consola.</li>
+            <li>Lee el EULA incluido, y solo si aceptas sus condiciones cambia <code>eula=false</code> a <code>eula=true</code>. Vuelve a iniciar y comprueba que el mundo termina de cargar.</li>
+            <li>Prueba primero desde la misma red local. Para acceso remoto, consulta la documentación de tu router y proveedor; expón solo el servicio requerido, usa una lista de permitidos si procede y mantén copias de seguridad.</li>
+            <li>Instala plugins únicamente desde los canales oficiales de sus autores. Añade uno a la vez, revisa la versión compatible y conserva los registros si el servidor no inicia.</li>
+          </ol>
+          <p>La RAM de ejemplo del archivo por lotes no es un requisito: ajusta <code>-Xms</code> y <code>-Xmx</code> al software, la carga y la memoria física disponible, dejando recursos para el sistema operativo.</p>
+          <p>Consulta las guías oficiales de <a href="https://docs.papermc.io/paper/getting-started/" target="_blank" rel="noopener">Paper</a>, <a href="https://purpurmc.org/docs/" target="_blank" rel="noopener">Purpur</a> y <a href="https://spark.lucko.me/docs/" target="_blank" rel="noopener">Spark</a>; sus instrucciones pueden cambiar entre versiones.</p>
+
 
       <!-- Author Card EEAT -->
       <div class="author-card-eeat">
         <div class="author-avatar">👨‍💻</div>
         <div class="author-info">
           <h4>Escrito por fondue_x — Desarrollador Principal</h4>
-          <div class="author-role">Laboratorio Técnico de Rendimiento & Modding de Nebula</div>
+          <div class="author-role">Guías técnicas de Nebula Dev Studios</div>
           <p class="author-bio">
-            Especialista en optimización de JVM, perfiles de frametime en Minecraft y arquitectura de cargadores Fabric/NeoForge. Esta guía ha sido probada y verificada en hardware real de escritorio y portátiles para asegurar resultados reproducibles sin mitos ni efectos placebo.
+            Esta guía cubre la preparación básica de un servidor; no presenta benchmarks propios. Confirma los requisitos de Java y las instrucciones vigentes de Paper o Purpur antes de publicar el servidor en Internet.
           </p>
           <div class="author-meta-links">
             <a href="https://github.com/fonduev" target="_blank" rel="noopener">Perfil en GitHub</a>
             <span>•</span>
-            <a href="../metodologia.html">Metodología de Pruebas</a>
+            <a href="../metodologia.html">Metodología editorial</a>
             <span>•</span>
             <a href="https://discord.gg/7Uv5CjX8" target="_blank" rel="noopener">Comunidad en Discord</a>
           </div>
@@ -535,7 +530,7 @@ pause</code>
       <div class="footer-col">
         <h4>NEBULA DEV STUDIOS</h4>
         <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
-          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+          Guías independientes sobre Minecraft y herramientas relacionadas. Los artículos distinguen recomendaciones de resultados medidos y enlazan fuentes para facilitar su verificación.
         </p>
       </div>
       <div class="footer-col">
@@ -544,7 +539,7 @@ pause</code>
           <li><a href="../index.html">Inicio</a></li>
           <li><a href="../guias.html">Guías & Tutoriales</a></li>
           <li><a href="../about.html">Acerca de</a></li>
-          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../metodologia.html">Metodología editorial</a></li>
           <li><a href="../contact.html">Contacto</a></li>
         </ul>
       </div>

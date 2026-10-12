@@ -5,23 +5,23 @@
   <link rel="icon" type="image/x-icon" href="../icon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
-  <title>Cómo leer latest.log y crash reports en Minecraft con mods | Nebula Dev Studios</title>
-  <meta name="description" content="Aprende a interpretar los archivos latest.log y crash-reports de Minecraft para encontrar el mod o error de Java causante de cierres sin dar palos de ciego." />
+  <title>Cómo leer latest.log y crash reports de Minecraft | Nebula Dev Studios</title>
+  <meta name="description" content="Aprende a revisar latest.log y crash reports de Minecraft, relacionar mensajes con versiones y dependencias, y ocultar datos privados antes de compartir registros." />
 
   <!-- Canonical URL & Metadatos Oficiales -->
   <link rel="canonical" href="https://nebuladevstudios.com/guias/como-leer-latest-log-crash-reports-minecraft.html" />
   <meta property="og:locale" content="es_ES" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Nebula Dev Studios" />
-  <meta property="og:title" content="Cómo leer latest.log y crash reports en Minecraft con mods | Nebula Dev Studios" />
-  <meta property="og:description" content="Aprende a interpretar los archivos latest.log y crash-reports de Minecraft para encontrar el mod o error de Java causante de cierres sin dar palos de ciego." />
+  <meta property="og:title" content="Cómo leer latest.log y crash reports de Minecraft | Nebula Dev Studios" />
+  <meta property="og:description" content="Aprende a revisar latest.log y crash reports de Minecraft, relacionar mensajes con versiones y dependencias, y ocultar datos privados antes de compartir registros." />
   <meta property="og:url" content="https://nebuladevstudios.com/guias/como-leer-latest-log-crash-reports-minecraft.html" />
   <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Cómo leer latest.log y crash reports en Minecraft con mods | Nebula Dev Studios" />
-  <meta name="twitter:description" content="Aprende a interpretar los archivos latest.log y crash-reports de Minecraft para encontrar el mod o error de Java causante de cierres sin dar palos de ciego." />
+  <meta name="twitter:title" content="Cómo leer latest.log y crash reports de Minecraft | Nebula Dev Studios" />
+  <meta name="twitter:description" content="Aprende a revisar latest.log y crash reports de Minecraft, relacionar mensajes con versiones y dependencias, y ocultar datos privados antes de compartir registros." />
   <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
 
   <!-- Schema.org Datos Estructurados JSON-LD -->
@@ -31,8 +31,8 @@
     "@graph": [
       {
         "@type": "TechArticle",
-        "headline": "Cómo leer latest.log y crash reports para identificar mods rotos",
-        "description": "Aprende a interpretar los archivos latest.log y crash-reports de Minecraft para encontrar el mod o error de Java causante de cierres sin dar palos de ciego.",
+        "headline": "Cómo leer latest.log y crash reports de Minecraft",
+        "description": "Aprende a revisar latest.log y crash reports de Minecraft, relacionar mensajes con versiones y dependencias, y ocultar datos privados antes de compartir registros.",
         "url": "https://nebuladevstudios.com/guias/como-leer-latest-log-crash-reports-minecraft.html",
         "author": {
           "@type": "Person",
@@ -48,14 +48,14 @@
           }
         },
         "datePublished": "2026-09-19",
-        "dateModified": "2026-09-19"
+        "dateModified": "2026-10-12"
       },
       {
         "@type": "FAQPage",
         "mainEntity": [
           {"@type": "Question", "name": "¿Por qué se genera un latest.log pero no un crash report?", "acceptedAnswer": {"@type": "Answer", "text": "Porque el crash report solo se crea cuando el propio código de Minecraft intercepta el error. Si el proceso de Java o el controlador gráfico de Windows se cierra abruptamente desde el exterior, solo quedará registrado el último rastro en latest.log."}},
-          {"@type": "Question", "name": "¿Es seguro compartir el archivo latest.log en foros de ayuda?", "acceptedAnswer": {"@type": "Answer", "text": "Sí, en su gran mayoría. No contiene contraseñas ni correos electrónicos. Lo único visible es el nombre de usuario local del sistema operativo en las rutas de carpetas y el nickname del juego."}},
-          {"@type": "Question", "name": "¿Cómo encuentro rápido el error sin leer miles de líneas?", "acceptedAnswer": {"@type": "Answer", "text": "Abre el archivo, presiona Ctrl + F y busca el término 'Caused by:'. Si hay varios, revisa el último de la lista: esa línea apunta a la causa raíz de la falla."}}
+          {"@type": "Question", "name": "¿Es seguro compartir latest.log en foros?", "acceptedAnswer": {"@type": "Answer", "text": "Revísalo primero: puede incluir nombres de usuario, rutas locales, nombres de servidores u otros datos de sesión. Oculta la información privada antes de compartirlo."}},
+          {"@type": "Question", "name": "¿Cómo encuentro pistas sobre el error?", "acceptedAnswer": {"@type": "Answer", "text": "Busca mensajes de error y lee su contexto antes y después. Una cadena Caused by puede aportar una pista, pero no siempre identifica por sí sola el origen."}}
         ]
       }
     ]
@@ -453,19 +453,19 @@
     </nav>
 
     <div class="badge">Diagnóstico & Logs</div>
-    <h1>Cómo leer latest.log y crash reports para identificar mods rotos</h1>
+    <h1>Cómo leer latest.log y crash reports de Minecraft</h1>
 
     <div class="article-meta">
       <span>✍️ Por <strong>fondue_x</strong></span>
-      <span>📅 19 de Septiembre, 2026</span>
+      <span>📅 Revisado el 12 de octubre de 2026</span>
       <span>⏱️ 7 min de lectura</span>
-      <span>💻 Probado en Windows 11</span>
+
     </div>
 
     <article class="article-body">
       <h2>El problema: Minecraft se cierra y la interfaz no explica el motivo</h2>
-<p>Cuando Minecraft experimenta un cierre inesperado con modificaciones instaladas, el lanzador suele mostrar un mensaje genérico acompañado de un código de salida como Exit Code 1 o Exit Code -1. Este aviso indica que el proceso de Java terminó de forma anómala, pero no especifica qué archivo desencadenó el fallo. Intentar resolver el problema retirando y probando mods uno por uno en paquetes con más de cincuenta elementos consume tiempo y no siempre revela incompatibilidades cruzadas.</p>
-<p>La causa exacta de cualquier fallo queda registrada en texto plano dentro de dos archivos que genera el juego: <code>latest.log</code> y los informes de fallo dentro de la carpeta <code>crash-reports</code>. Aprender a interpretar la estructura de estos archivos permite identificar el archivo .jar conflictivo, la dependencia faltante o el error de memoria en pocos minutos sin recurrir a suposiciones.</p>
+<p>Cuando Minecraft se cierra de forma inesperada, el launcher puede mostrar un código genérico como Exit Code 1 o Exit Code -1. El código informa que el proceso terminó, pero no identifica qué lo causó. Revisar los archivos de registro y el crash report, si existe, ayuda a decidir qué comprobar antes de cambiar mods o configuraciones.</p>
+<p>El juego y el launcher pueden dejar pistas en <code>latest.log</code> y, en algunos cierres, en un archivo de <code>crash-reports</code>. Los formatos y detalles cambian por versión y plataforma; estos archivos pueden orientar hacia una excepción o dependencia, pero no siempre identifican un único mod ni contienen la causa completa.</p>
 
 <h2>Diferencia fundamental entre latest.log y un Crash Report</h2>
 <p>Antes de abrir cualquier registro, es necesario entender qué información contiene cada archivo y cuándo se genera cada uno:</p>
@@ -475,8 +475,8 @@
 </ul>
 
 <h2>Rutas de acceso a los registros en Windows</h2>
-<p>La ubicación de estos registros depende de cómo gestiones tus versiones y perfiles del juego:</p>
-<p>Si utilizas el lanzador oficial de Mojang en Windows 10 o Windows 11 con la configuración predeterminada, los archivos se encuentran en el directorio central de datos. Puedes acceder presionando <code>Windows + R</code>, escribiendo <code>%appdata%\.minecraft</code> y presionando Enter. Dentro verás la carpeta <code>logs</code> (donde reside <code>latest.log</code>) y, si hubo un fallo reconocido, la subcarpeta <code>crash-reports</code>.</p>
+<p>La ubicación depende del launcher y del directorio de juego configurado; comprueba la ruta del perfil que presentó el error:</p>
+<p>En una instalación del launcher oficial con la ruta predeterminada de Windows, abre <code>%appdata%\.minecraft</code> y busca <code>logs/latest.log</code> y <code>crash-reports</code>. Si el perfil tiene un directorio de juego personalizado, revisa esa ubicación en su lugar.</p>
 <p>Si utilizas un gestor de instancias aisladas como Nebula Launcher, Prism o la aplicación de CurseForge, cada perfil tiene su propio árbol de archivos independiente para no mezclar configuraciones. En estos entornos, los registros se ubican dentro de la carpeta específica de la instancia (por ejemplo, <code>.minecraft/instances/[nombre_de_instancia]/logs/latest.log</code>). Esta separación es técnica: evita que un fallo producido por un mod de Fabric contamine el registro de una partida de Forge o Vanilla.</p>
 
 <div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Explorador de archivos de Windows mostrando la ubicación de latest.log y la carpeta crash-reports</div>
@@ -498,10 +498,10 @@ java.lang.NullPointerException: Cannot invoke method because field is null
 <h3>Paso 3: Buscar la instrucción "Caused by:" (Causa raíz)</h3>
 <p>El error inicial de la traza de Java suele referirse a métodos genéricos de renderizado o bucles de eventos que simplemente recibieron el impacto del fallo. Para encontrar el origen real, utiliza la función de búsqueda (<code>Ctrl + B</code> o <code>Ctrl + F</code>) y escribe:</p>
 <pre><code>Caused by:</code></pre>
-<p>Si hay varios resultados, revisa el último de ellos. El último bloque <code>Caused by:</code> en una traza de Java representa el fallo primario que desencadenó la cadena de errores. Justo después de esa línea aparecerá la clase de Java responsable.</p>
+<p>Si hay varios resultados, lee la cadena completa junto con las líneas anteriores y posteriores. Un bloque <code>Caused by:</code> puede señalar una causa anidada, pero el último no es necesariamente el único origen; el nombre de clase es una pista, no siempre identifica al mod responsable sin revisar versiones y contexto.</p>
 
 <h3>Paso 4: Distinguir entre paquetes del sistema y nombres de mods</h3>
-<p>Las clases de Java utilizan una nomenclatura de dominios inversos que te permite saber de inmediato a qué proyecto pertenece el código que falló:</p>
+<p>Los nombres de paquete pueden orientar sobre qué biblioteca o proyecto aparece en el stack trace, pero no atribuyen por sí solos la responsabilidad. Un mod puede fallar dentro de clases de Minecraft, Java o de otro mod:</p>
 <table border="1" cellpadding="6" cellspacing="0">
   <thead>
     <tr>
@@ -535,23 +535,23 @@ java.lang.NullPointerException: Cannot invoke method because field is null
 </table>
 
 <h3>Paso 5: Contrastar la sección "System Details"</h3>
-<p>Tanto <code>crash-reports</code> como la parte inferior de <code>latest.log</code> incluyen una sección titulada <code>System Details</code>. Esta sección enumera la versión exacta de Java en ejecución, los argumentos JVM aplicados, la memoria RAM física total, la memoria asignada al montón (heap) y la lista de todos los mods cargados junto con su versión. Si sospechas de una incompatibilidad de versión de Java (por ejemplo, ejecutar Minecraft 1.21 sobre Java 8), esta tabla lo confirmará de inmediato en la línea <code>Java Version:</code>.</p>
+<p>Algunos crash reports incluyen una sección <code>System Details</code> con datos del sistema, Java y mods, pero el formato y el nivel de detalle cambian por versión. <code>latest.log</code> no siempre contiene una sección equivalente. Compara la información disponible con los requisitos publicados para el juego, cargador y perfil que falló.</p>
 
 <div class="note-box" style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; font-size: 0.93rem; color: var(--text-muted);"><strong style="color: var(--accent-cyan);">💡 Verificación técnica en Windows 11:</strong> Fragmento de un archivo latest.log resaltando la línea Caused by: y el nombre de un mod</div>
 
-<h2>Los 4 errores más comunes y cómo leerlos en el texto</h2>
+<h2>Ejemplos de mensajes y siguientes comprobaciones</h2>
 
 <h3>1. Dependencia faltante o versión de mod incorrecta</h3>
 <p>Ocurre cuando descargas un mod pero olvidas la biblioteca base que requiere para funcionar, o cuando colocas un mod programado para otra versión del juego. En Fabric suele aparecer con claridad:</p>
 <pre><code>net.fabricmc.loader.impl.FormattedException: Some of your mods are incompatible with the game or each other!
  - Mod 'Sodium Extra' (sodium-extra) requires version 0.5.11 or later of 'Sodium', but only 0.5.8 is installed!</code></pre>
-<p><strong>Solución:</strong> El propio mensaje indica el nombre exacto de la dependencia que debes actualizar o añadir a la carpeta <code>mods</code>.</p>
+<p><strong>Qué hacer:</strong> Lee el ID y rango de versión solicitados y confirma en la publicación del proyecto qué archivo corresponde a tu Minecraft y cargador. No instales una biblioteca con un nombre parecido sin revisar sus requisitos.</p>
 
 <h3>2. Fallo de transformación de Mixins (MixinApplyError)</h3>
 <p>Los Mixins permiten que los mods modifiquen el código interno de Minecraft en memoria. Si dos mods intentan alterar exactamente la misma línea del motor de renderizado o de la lógica de entidades con métodos contradictorios, el juego no puede iniciar:</p>
 <pre><code>org.spongepowered.asm.mixin.transformer.throwables.MixinTransformerError: An unexpected critical error was encountered
 Caused by: org.spongepowered.asm.mixin.throwables.MixinApplyError: Mixin [sodium.mixins.core.json:features.buffer_builder.MixinBufferBuilder] from phase [DEFAULT] in library [sodium-fabric-0.5.11.jar] failed injection check</code></pre>
-<p><strong>Solución:</strong> Busca el nombre del archivo <code>.jar</code> citado entre corchetes (en este caso <code>sodium-fabric-0.5.11.jar</code>) y el nombre del mod con el que entra en conflicto, el cual aparecerá unas líneas más arriba en el contexto del fallo.</p>
+<p><strong>Qué hacer:</strong> Usa el nombre del archivo como punto de partida, revisa las líneas cercanas y comprueba las versiones compatibles en las páginas de los proyectos. Un fallo de Mixin indica una transformación fallida, pero no siempre demuestra por sí solo que dos mods específicos sean incompatibles.</p>
 
 <h3>3. Duplicidad de clases o mods repetidos</h3>
 <p>Sucede al actualizar un mod dejando la versión antigua en la carpeta o cuando dos archivos distintos contienen la misma biblioteca embebida con versiones dispares:</p>
@@ -559,38 +559,38 @@ Caused by: org.spongepowered.asm.mixin.throwables.MixinApplyError: Mixin [sodium
 Mod ID: 'cloth-config' has been detected in multiple files:
 	- cloth-config-13.0.121-fabric.jar
 	- cloth-config-11.1.106-fabric.jar</code></pre>
-<p><strong>Solución:</strong> Elimina de la carpeta <code>mods</code> el archivo con la versión inferior asegurándote de conservar únicamente la build actualizada.</p>
+<p><strong>Qué hacer:</strong> En una copia de la instancia, comprueba el ID que informa el cargador, identifica qué archivos lo declaran y sigue la versión compatible requerida. Conserva el registro antes de retirar duplicados.</p>
 
 <h3>4. Memoria asignada insuficiente (OutOfMemoryError)</h3>
 <p>Si el montón de memoria configurado para Java se llena por completo durante la carga de texturas o registros de bloques, verás esta línea:</p>
 <pre><code>java.lang.OutOfMemoryError: Java heap space</code></pre>
-<p><strong>Solución:</strong> Este fallo no requiere desinstalar mods inmediatamente, sino ajustar la variable <code>-Xmx</code> en los argumentos de Java para asignar mayor cantidad de memoria al proceso, siempre que el hardware físico lo permita.</p>
+<p><strong>Qué hacer:</strong> Distingue <code>Java heap space</code> de Metaspace o memoria nativa, y revisa el valor de <code>-Xmx</code> junto con la memoria física disponible. Ajusta el heap solo si la evidencia indica falta real de espacio y el equipo puede reservar el margen necesario.</p>
 
 <h2>Caso técnico especial: Cierres silenciosos sin Crash Report</h2>
 <p>Existe un escenario poco documentado en el que Minecraft se cierra de manera instantánea, el lanzador vuelve a primer plano con un Exit Code genérico y no se genera ningún archivo en la carpeta <code>crash-reports</code>. Esto suele desconcertar a los usuarios porque asumen que no quedó constancia del fallo.</p>
-<p>Cuando esto ocurre, la causa está fuera del alcance de la máquina virtual de Java. Las tres razones principales comprobadas son:</p>
+<p>La ausencia de un crash report no demuestra que el fallo sea ajeno a Java. Revisa <code>latest.log</code>, la salida del launcher y, si hace falta, el Visor de eventos de Windows. Entre las posibilidades a comprobar están:</p>
 <ol>
-  <li><strong>Colapso del controlador de vídeo (Kernel Mode Driver Crash):</strong> Si utilizas mods que exigen intensivamente a la GPU (como sombreadores o mods que reimplementan el renderizado con Vulkan) y el controlador gráfico se reinicia por tiempo de espera excedido (TDR en Windows), el proceso de Minecraft muere instantáneamente sin poder escribir un volcado de fallo de Java. En este caso, al final de <code>latest.log</code> la última línea suele ser una llamada de OpenGL o la carga de un pipeline gráfico.</li>
-  <li><strong>Agotamiento de memoria RAM física del sistema:</strong> Si tienes un equipo con recursos ajustados y asignas más memoria a Minecraft de la que Windows puede sostener en ese momento, el gestor de memoria del sistema operativo mata el proceso <code>javaw.exe</code> para evitar un bloqueo general de Windows.</li>
-  <li><strong>Incompatibilidad binaria con dependencias nativas:</strong> Ocurre cuando un mod incluye archivos <code>.dll</code> compilados para arquitecturas distintas o con dependencias de Visual C++ Redistributable que no están instaladas en el sistema operativo.</li>
+  <li><strong>Fallo gráfico o del controlador:</strong> un error de GPU puede interrumpir una sesión; comprueba el mensaje exacto, el controlador y los eventos del sistema antes de atribuirlo a un mod de renderizado.</li>
+  <li><strong>Presión de memoria del sistema:</strong> contrasta memoria disponible, uso total del proceso y registros del sistema; no deduzcas que Windows terminó <code>javaw.exe</code> únicamente por el código de salida.</li>
+  <li><strong>Bibliotecas o dependencias nativas:</strong> si la salida menciona una biblioteca, arquitectura o DLL concreta, comprueba los requisitos del proyecto y usa la reparación del launcher antes de reemplazar archivos manualmente.</li>
 </ol>
-<p>Para diagnosticar este escenario, revisa las últimas diez líneas de <code>latest.log</code> para identificar qué recurso se estaba solicitando en el milisegundo anterior a la interrupción, o abre el Visor de eventos de Windows (<code>eventvwr.msc</code>) en la sección <em>Registros de Windows &gt; Aplicación</em> para verificar si existe un evento de error atribuido a <code>javaw.exe</code> o al controlador de pantalla.</p>
+<p>Para orientar el diagnóstico, conserva el registro entero y su parte final, anota la hora del cierre y busca eventos cercanos en el Visor de eventos de Windows (<code>eventvwr.msc</code>). Correlaciona los mensajes con la versión de Minecraft y el runtime, sin asumir que la última línea aislada revela una causa raíz.</p>
 
 <h2>Cómo comprobar que el fallo ha sido resuelto</h2>
-<p>Una vez identificado el mod conflictivo y retirado de la carpeta, o tras corregir la versión de Java, debes verificar que la inicialización concluya limpiamente:</p>
+<p>Después de un cambio, comprueba si la sesión y el escenario que antes fallaban se comportan de forma distinta. Un arranque hasta el menú no verifica todas las funciones ni garantiza que no aparezcan otros errores:</p>
 <ol>
   <li>Inicia el juego y espera a que la pantalla de carga de Mojang termine por completo.</li>
   <li>Llega hasta el menú principal de Minecraft.</li>
   <li>Abre nuevamente el archivo <code>latest.log</code> sin cerrar el juego.</li>
-  <li>Verifica que las últimas líneas registren mensajes como <code>[Render thread/INFO]: Setting user: [nombre]</code> o la inicialización del sistema de sonido con <code>OpenAL initialized</code>. Esto confirma que el ciclo de vida de los mods completó su fase de registro e inyección sin errores bloqueantes.</li>
+  <li>Revisa si aparecen errores nuevos o si el mensaje original vuelve a producirse. Los mensajes de carga como <code>OpenAL initialized</code> solo confirman esa etapa, no el funcionamiento completo de todos los mods.</li>
 </ol>
 
 <h2>Conclusión</h2>
-<p>Aprender a leer los registros técnicos transforma la resolución de errores en Minecraft en un procedimiento sistemático y predecible. La combinación de <code>latest.log</code> para cierres de arranque y los informes de <code>crash-reports</code> para excepciones en partida proporciona toda la evidencia necesaria para mantener una instalación de mods estable sin necesidad de reinstalar el juego desde cero.</p>
+<p>Los registros ayudan a acotar un problema, pero no siempre contienen toda la evidencia ni permiten atribuirlo a un único archivo. Guarda una copia del perfil, anota versiones y cambios recientes y usa las líneas relevantes para decidir el siguiente paso. Si el origen sigue incierto, consulta la documentación del cargador o pide ayuda incluyendo el contexto necesario y ocultando datos privados.</p>
 
       <div class="author-box">
         <h3>Sobre el autor: fondue_x</h3>
-        <p><strong>fondue_x</strong> es desarrollador independiente y jugador de Minecraft desde hace más de 5 años, especializado en optimización de rendimiento, arquitectura de instancias y resolución de incompatibilidades en Fabric, Forge y NeoForge. Es el creador de <a href="https://github.com/fonduev" target="_blank" rel="noopener">Nebula Launcher</a>. Todas sus guías se prueban de primera mano en bancos de pruebas reales con Windows 11. Puedes consultar nuestra <a href="../metodologia.html">metodología editorial y banco de pruebas</a>.</p>
+        <p><strong>fondue_x</strong> es desarrollador independiente y jugador de Minecraft desde hace más de 5 años, especializado en optimización de rendimiento, arquitectura de instancias y resolución de incompatibilidades en Fabric, Forge y NeoForge. Es el creador de <a href="https://github.com/fonduev" target="_blank" rel="noopener">Nebula Launcher</a>. Las guías se preparan con referencias enlazadas y recomendaciones generales; los resultados propios solo se afirman cuando los datos de prueba aparecen en el artículo. Consulta nuestra <a href="../metodologia.html">metodología editorial</a>.</p>
       </div>
 
       <div class="faq-section">
@@ -614,14 +614,14 @@ Mod ID: 'cloth-config' has been detected in multiple files:
         <div class="author-avatar" style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, #c084fc, #38bdf8); display:flex; align-items:center; justify-content:center; font-size:1.8rem; flex-shrink:0; box-shadow:0 0 15px rgba(192,132,252,0.4);">👨‍💻</div>
         <div class="author-info">
           <h4 style="font-family:'Outfit', sans-serif; color:#fff; font-size:1.1rem; margin-bottom:0.25rem;">Escrito por fondue_x — Desarrollador Principal</h4>
-          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Laboratorio Técnico de Rendimiento & Modding de Nebula</div>
+          <div class="author-role" style="color:#38bdf8; font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.6rem;">Guías técnicas de Nebula Dev Studios</div>
           <p class="author-bio" style="color:#94a3b8; font-size:0.9rem; line-height:1.55; margin-bottom:0.6rem;">
-            Especialista en optimización de JVM, perfiles de frametime en Minecraft y arquitectura de cargadores Fabric/NeoForge. Esta guía ha sido probada y verificada en hardware real de escritorio y portátiles para asegurar resultados reproducibles sin mitos ni efectos placebo.
+            Esta guía propone un método para leer registros y crash reports; no afirma resultados de pruebas comparativas propias. Conserva el registro completo y comprueba las versiones de Minecraft, Java, el cargador y las dependencias antes de retirar archivos.
           </p>
           <div class="author-meta-links" style="display:flex; gap:1rem; font-size:0.82rem; color:#64748b;">
             <a href="https://github.com/fonduev" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Perfil en GitHub</a>
             <span>•</span>
-            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología de Pruebas</a>
+            <a href="../metodologia.html" style="color:#c084fc; text-decoration:none; font-weight:500;">Metodología editorial</a>
             <span>•</span>
             <a href="https://discord.gg/7Uv5CjX8" target="_blank" rel="noopener" style="color:#c084fc; text-decoration:none; font-weight:500;">Comunidad en Discord</a>
           </div>
@@ -637,7 +637,7 @@ Mod ID: 'cloth-config' has been detected in multiple files:
       <div class="footer-col">
         <h4>NEBULA DEV STUDIOS</h4>
         <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
-          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+          Guías independientes sobre Minecraft y herramientas relacionadas. Los artículos distinguen recomendaciones de resultados medidos y enlazan fuentes para facilitar su verificación.
         </p>
       </div>
       <div class="footer-col">
@@ -646,7 +646,7 @@ Mod ID: 'cloth-config' has been detected in multiple files:
           <li><a href="../index.html">Inicio</a></li>
           <li><a href="../guias.html">Guías & Tutoriales</a></li>
           <li><a href="../about.html">Acerca de</a></li>
-          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../metodologia.html">Metodología editorial</a></li>
           <li><a href="../contact.html">Contacto</a></li>
         </ul>
       </div>
@@ -680,31 +680,23 @@ Mod ID: 'cloth-config' has been detected in multiple files:
   <div id="cookieConsentBanner" class="cookie-banner" style="display:none;">
     <div class="cookie-content">
       <p>
-        🍪 <strong>Aviso de privacidad y cookies:</strong> Utilizamos almacenamiento técnico para recordar tus preferencias de navegación y servicios de terceros (como Google AdSense) para financiar el mantenimiento del sitio mediante publicidad. Consulta nuestra <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y nuestros <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
+        🍪 <strong>Aviso de privacidad:</strong> Este sitio puede cargar recursos y servicios de terceros. El botón solo cierra este aviso; no registra ni transmite una elección de consentimiento publicitario. Consulta la <a href="../privacy.html" style="color:#38bdf8; text-decoration:underline;">Política de Privacidad</a> y los <a href="../terms.html" style="color:#38bdf8; text-decoration:underline;">Términos</a>.
       </p>
       <div class="cookie-buttons">
-        <button class="btn-cookie-reject" onclick="rejectCookieConsent()">Solo Necesarias</button>
-        <button class="btn-cookie-accept" onclick="acceptCookieConsent()">Entendido</button>
+        <button class="btn-cookie-accept" onclick="dismissCookieBanner()">Cerrar aviso</button>
       </div>
     </div>
   </div>
 
   <script>
     function initCookieConsent() {
-      if (!localStorage.getItem('nebula_cookie_consent')) {
+      if (!localStorage.getItem('nebula_cookie_notice_dismissed')) {
         const banner = document.getElementById('cookieConsentBanner');
         if (banner) banner.style.display = 'block';
       }
     }
-    function acceptCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'accepted');
-      dismissCookieBanner();
-    }
-    function rejectCookieConsent() {
-      localStorage.setItem('nebula_cookie_consent', 'essential_only');
-      dismissCookieBanner();
-    }
     function dismissCookieBanner() {
+      localStorage.setItem('nebula_cookie_notice_dismissed', 'true');
       const banner = document.getElementById('cookieConsentBanner');
       if (banner) {
         banner.style.opacity = '0';

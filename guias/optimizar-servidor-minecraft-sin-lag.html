@@ -5,23 +5,23 @@
   <link rel="icon" type="image/x-icon" href="../icon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
-  <title>Optimización Extrema de Servidores Minecraft: Configuración de server.properties, paper.yml y purpur.yml | Nebula Dev Studios</title>
-  <meta name="description" content="Guía avanzada de optimización de ticks y reducción de MSPT para servidores Paper, Purpur y Spigot. Valores exactos para eliminar el lag sin arruinar la experiencia de juego." />
+  <title>Diagnosticar y optimizar un servidor Paper sin cambiar ajustes a ciegas | Nebula Dev Studios</title>
+  <meta name="description" content="Mide TPS y duración de ticks, localiza la causa de la carga y ajusta view-distance o simulation-distance de forma reversible en Paper." />
 
   <!-- Canonical URL & Metadatos Oficiales -->
   <link rel="canonical" href="https://nebuladevstudios.com/guias/optimizar-servidor-minecraft-sin-lag.html" />
   <meta property="og:locale" content="es_ES" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Nebula Dev Studios" />
-  <meta property="og:title" content="Optimización Extrema de Servidores Minecraft: Configuración de server.properties, paper.yml y purpur.yml | Nebula Dev Studios" />
-  <meta property="og:description" content="Guía avanzada de optimización de ticks y reducción de MSPT para servidores Paper, Purpur y Spigot. Valores exactos para eliminar el lag sin arruinar la experiencia de juego." />
+  <meta property="og:title" content="Diagnosticar y optimizar un servidor Paper sin cambiar ajustes a ciegas | Nebula Dev Studios" />
+  <meta property="og:description" content="Mide TPS y duración de ticks, localiza la causa de la carga y ajusta view-distance o simulation-distance de forma reversible en Paper." />
   <meta property="og:url" content="https://nebuladevstudios.com/guias/optimizar-servidor-minecraft-sin-lag.html" />
   <meta property="og:image" content="https://nebuladevstudios.com/hero-mockup.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Optimización Extrema de Servidores Minecraft: Configuración de server.properties, paper.yml y purpur.yml | Nebula Dev Studios" />
-  <meta name="twitter:description" content="Guía avanzada de optimización de ticks y reducción de MSPT para servidores Paper, Purpur y Spigot. Valores exactos para eliminar el lag sin arruinar la experiencia de juego." />
+  <meta name="twitter:title" content="Diagnosticar y optimizar un servidor Paper sin cambiar ajustes a ciegas | Nebula Dev Studios" />
+  <meta name="twitter:description" content="Mide TPS y duración de ticks, localiza la causa de la carga y ajusta view-distance o simulation-distance de forma reversible en Paper." />
   <meta name="twitter:image" content="https://nebuladevstudios.com/hero-mockup.png" />
 
   <!-- Schema.org Datos Estructurados JSON-LD -->
@@ -31,8 +31,8 @@
     "@graph": [
       {
         "@type": "TechArticle",
-        "headline": "Optimización Extrema de Servidores Minecraft: server.properties, paper y purpur",
-        "description": "Guía avanzada de optimización de ticks y reducción de MSPT para servidores Paper, Purpur y Spigot. Valores exactos para eliminar el lag sin arruinar la experiencia de juego.",
+        "headline": "Diagnosticar y optimizar un servidor Paper sin cambiar ajustes a ciegas",
+        "description": "Mide TPS y duración de ticks, localiza la causa de la carga y ajusta view-distance o simulation-distance de forma reversible en Paper.",
         "url": "https://nebuladevstudios.com/guias/optimizar-servidor-minecraft-sin-lag.html",
         "author": {
           "@type": "Person",
@@ -48,7 +48,7 @@
           }
         },
         "datePublished": "2026-09-25",
-        "dateModified": "2026-09-25"
+        "dateModified": "2026-10-12"
       }
     ]
   }
@@ -401,102 +401,71 @@
     </div>
 
     <span class="badge">⚡ Rendimiento de Servidores</span>
-    <h1>Optimización Extrema de Servidores Minecraft: Configuración de server.properties, paper.yml y purpur.yml</h1>
+    <h1>Cómo diagnosticar y optimizar un servidor Paper sin empeorar el juego</h1>
 
     <div class="article-meta">
       <div>✍️ <strong>fondue_x</strong> (Nebula Lab)</div>
-      <div>📅 <strong>25 de Septiembre de 2026</strong></div>
+      <div>📅 <strong>Revisado el 12 de octubre de 2026</strong></div>
       <div>⏱️ <strong>14 min de lectura</strong></div>
-      <div>🔍 <strong>Verificado en hardware real</strong></div>
     </div>
 
     <article class="article-body">
       
           <p class="lead" style="font-size:1.15rem; color:#e2e8f0; margin-bottom:2rem; line-height:1.8;">
-            El mayor desafío al administrar un servidor de Minecraft es el <strong>lag de ticks</strong>: cuando el servidor no puede procesar los 20 ciclos por segundo requeridos, provocando que los bloques tarden en romperse, los monstruos se teletransporten y la comida no se consuma. En esta guía detallamos los ajustes exactos de configuración en <code>server.properties</code>, <code>paper-world-defaults.yml</code> y <code>purpur.yml</code> para mantener 20 TPS estables.
+            Antes de tocar YAML o instalar plugins, averigua si el problema está en los ticks del servidor, en la red o en el cliente de un jugador. Los 20 TPS indican que el servidor mantiene su ritmo objetivo en el intervalo medido; el MSPT ayuda a saber cuánto tarda en procesar ticks y cuánto margen queda respecto al presupuesto de 50 ms por tick. Ninguna combinación de valores garantiza eliminar el lag en todos los mundos.
           </p>
 
-          <h2>1. El Mito de los 20 TPS vs el MSPT Real</h2>
-          <p>
-            Muchos administradores creen que su servidor va perfecto porque ven <code>20.0 TPS</code> en la lista. Sin embargo, los TPS son un promedio rezagado. La métrica real de salud de un servidor es el <strong>MSPT (Milliseconds Per Tick)</strong>:
-          </p>
+          <h2>1. Mide primero, durante el problema</h2>
+          <ol>
+            <li>Anota la versión de Minecraft, build de Paper, Java, complementos instalados, número de jugadores y cuándo aparecen los tirones.</li>
+            <li>En la consola o con permisos de operador, usa <code>/spark tps</code> para consultar TPS y CPU; en builds que incluyen spark, <code>/spark health</code> muestra un informe de salud. Si no está disponible, comprueba la documentación de tu build e instala spark desde la fuente oficial.</li>
+            <li>Cuando los ticks lentos persisten, toma un perfil durante la carga problemática con <code>/spark profiler start --only-ticks-over 50</code>, deja que capture el periodo y termina con <code>/spark profiler stop</code>. Revisa el informe antes de decidir qué cambiar.</li>
+            <li>Repite la medición en un periodo comparable. Una captura corta fuera del pico no identifica necesariamente el cuello de botella.</li>
+          </ol>
+          <p>Un MSPT superior a 50 ms significa que esos ticks exceden el ritmo necesario para 20 ticks por segundo; los valores de TPS también dependen del intervalo promediado. La CPU, un plugin, generación de chunks, entidades o almacenamiento pueden estar implicados. El perfil ayuda a enfocar la investigación; no demuestra por sí solo que una opción concreta sea la causa.</p>
+
+          <h2>2. Prueba primero las distancias, con copia de seguridad</h2>
+          <p>Si el informe apunta a carga de chunks o demasiada actividad alrededor de jugadores, prueba una reducción moderada de <code>view-distance</code> o <code>simulation-distance</code> en <code>server.properties</code>. Haz una copia del archivo y del mundo, cambia solo una opción, reinicia el servidor y repite la misma medición. Una menor distancia puede reducir el terreno visible o las zonas donde granjas y entidades siguen activas; informa a los jugadores y verifica las mecánicas que usan.</p>
+          <div class="code-block"><code># Ejemplo de parámetros editables en server.properties
+# No son valores universales; prueba un cambio a la vez.
+view-distance=8
+simulation-distance=6</code></div>
+          <p>Paper documenta estas propiedades y sus valores predeterminados en su referencia oficial. El valor elegido debe considerar hardware, jugadores simultáneos, estilo de juego y límites del proveedor de hosting.</p>
+
+          <h2>3. No copies configuraciones de entidades de otra versión</h2>
+          <p>Los archivos y opciones de configuración de Paper cambian entre versiones. No pegues bloques de <code>paper-world-defaults.yml</code>, <code>spigot.yml</code> o <code>purpur.yml</code> sin confirmar primero el nombre y la ruta de la opción en la documentación correspondiente a tu build. Ajustes de activación, aparición y ticks de aldeanos pueden afectar granjas, comportamiento de criaturas y plugins; copia el archivo actual antes de editar y modifica solo la clave investigada.</p>
+          <p>Evita porcentajes del tipo “reduce 40% el MSPT” salvo que hayas medido ese resultado con versiones, mundo, jugadores y procedimiento documentados. Los resultados de una prueba no se trasladan automáticamente a otro servidor.</p>
+
+          <h2>4. Verifica y revierte</h2>
           <ul>
-            <li><strong>0 a 35 ms:</strong> Servidor sumamente holgado. Hay margen suficiente para explosiones y granjas.</li>
-            <li><strong>35 a 49 ms:</strong> El servidor mantiene 20 TPS, pero está cerca de su límite de procesamiento.</li>
-            <li><strong>Mayor a 50 ms:</strong> El tick supera el tiempo disponible en un segundo (1000 ms / 20 = 50 ms). A partir de aquí, los TPS caen inevitablemente.</li>
+            <li>Repite la misma prueba después de cada cambio y registra la configuración anterior y nueva.</li>
+            <li>Si las métricas no mejoran o las granjas dejan de funcionar como se espera, restaura el archivo desde la copia.</li>
+            <li>Si el perfil señala un plugin o una tarea concreta, revisa su documentación o busca una actualización compatible antes de alterar reglas globales.</li>
+            <li>Si los MSPT están bajos pero una persona sigue viendo saltos, revisa ping, pérdida de paquetes y FPS en ese cliente: bajar la carga del servidor podría no corregir un problema local o de red.</li>
           </ul>
 
-          <h2>2. Ajustes Clave en server.properties</h2>
-          <div class="code-block">
-            <code># Reduce la distancia de visión enviada por el servidor
-view-distance=7
-
-# Mantiene el área de procesamiento de ticks controlada
-simulation-distance=5
-
-# Evita que el servidor gaste tiempo comprimiendo paquetes diminutos
-network-compression-threshold=256
-
-# Deshabilita el snooper innecesario
-snooper-enabled=false</code>
-          </div>
-
-          <h2>3. Optimización de Entidades en paper-world-defaults.yml</h2>
-          <p>
-            Las entidades pasivas y hostiles son responsables de más del 65% del consumo de CPU en cualquier servidor. Modificar los límites de activación (Entity Activation Range) evita que mobs lejanos ejecuten cálculos de ruta complejos:
-          </p>
-          <div class="code-block">
-            <code>entities:
-  activation-range:
-    animals: 16
-    monsters: 24
-    raiders: 32
-    misc: 8
-    water: 12
-    villagers: 16
-    tick-inactive-villagers: false
-  spawning:
-    despawn-ranges:
-      monster:
-        soft: 28
-        hard: 96</code>
-          </div>
-
-          <h2>4. Ajustes Exclusivos de Purpur (purpur.yml)</h2>
-          <p>
-            Purpur permite desactivar cálculos de IA en entidades que no están en combate o cuando no hay jugadores cerca, lo cual ahorra hasta un 40% de MSPT adicional en granjas de aldeanos y granjas masivas de hierro:
-          </p>
-          <div class="code-block">
-            <code>world-settings:
-  default:
-    mobs:
-      villager:
-        brain-ticks: 2
-        lobotomize:
-          enabled: true
-          check-interval: 100
-      zombie:
-        aggressive-towards-villager-when-lagging: false</code>
-          </div>
-
-          <div class="alert-box alert-success">
-            <strong>💡 Resultado Comprobado:</strong> La técnica de lobotomía de aldeanos (<code>lobotomize</code>) en Purpur desactiva el pathfinding pesado cuando un aldeano está encerrado en un bloque de 1x1 comerciando, sin romper sus ofertas ni sus horarios de trabajo.
-          </div>
+          <h2>Documentación</h2>
+          <ul>
+            <li><a href="https://docs.papermc.io/paper/reference/server-properties/" target="_blank" rel="noopener">PaperMC: referencia de server.properties</a>.</li>
+            <li><a href="https://docs.papermc.io/paper/reference/" target="_blank" rel="noopener">PaperMC: referencias de configuración por versión</a>.</li>
+            <li><a href="https://spark.lucko.me/docs/Command-Usage" target="_blank" rel="noopener">spark: sintaxis de comandos y perfiles</a>.</li>
+          </ul>
+          <p>Esta guía es un procedimiento de diagnóstico, no un benchmark propio. Registra las versiones y mediciones si publicas resultados para tu servidor.</p>
         
 
       <!-- Author Card EEAT -->
       <div class="author-card-eeat">
         <div class="author-avatar">👨‍💻</div>
         <div class="author-info">
-          <h4>Escrito por fondue_x — Desarrollador Principal</h4>
-          <div class="author-role">Laboratorio Técnico de Rendimiento & Modding de Nebula</div>
+          <h4>Redacción: fondue_x</h4>
+          <div class="author-role">Guías técnicas de Nebula Dev Studios</div>
           <p class="author-bio">
-            Especialista en optimización de JVM, perfiles de frametime en Minecraft y arquitectura de cargadores Fabric/NeoForge. Esta guía ha sido probada y verificada en hardware real de escritorio y portátiles para asegurar resultados reproducibles sin mitos ni efectos placebo.
+            El procedimiento se basa en la referencia de PaperMC y los comandos documentados de spark enlazados arriba. No publica porcentajes de mejora ni pruebas propias; las opciones disponibles y sus efectos dependen de la versión y configuración del servidor.
           </p>
           <div class="author-meta-links">
             <a href="https://github.com/fonduev" target="_blank" rel="noopener">Perfil en GitHub</a>
             <span>•</span>
-            <a href="../metodologia.html">Metodología de Pruebas</a>
+            <a href="../metodologia.html">Metodología editorial</a>
             <span>•</span>
             <a href="https://discord.gg/7Uv5CjX8" target="_blank" rel="noopener">Comunidad en Discord</a>
           </div>
@@ -511,7 +480,7 @@ snooper-enabled=false</code>
       <div class="footer-col">
         <h4>NEBULA DEV STUDIOS</h4>
         <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; line-height: 1.6;">
-          Portal técnico independiente y lanzador de alto rendimiento para Minecraft en PC. Documentación verificada en hardware real.
+          Guías independientes sobre Minecraft, lanzadores y herramientas técnicas, con fuentes enlazadas y límites indicados cuando aplica.
         </p>
       </div>
       <div class="footer-col">
@@ -520,7 +489,7 @@ snooper-enabled=false</code>
           <li><a href="../index.html">Inicio</a></li>
           <li><a href="../guias.html">Guías & Tutoriales</a></li>
           <li><a href="../about.html">Acerca de</a></li>
-          <li><a href="../metodologia.html">Metodología de Pruebas</a></li>
+          <li><a href="../metodologia.html">Metodología editorial</a></li>
           <li><a href="../contact.html">Contacto</a></li>
         </ul>
       </div>
