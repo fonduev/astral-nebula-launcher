@@ -140,6 +140,8 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 22px rgba(139, 92, 246, 0.6);
     }
+    .page-lang-btn { border-radius: 5px; font-size: 0.78rem; font-weight: 700; }
+    .page-lang-btn.active { color: var(--text-main) !important; background: rgba(192, 132, 252, 0.18) !important; }
 
     /* Container */
     .container {
@@ -462,6 +464,7 @@
     }
   </style>
 
+  <script src="./site-language.js" defer></script>
 </head>
 <body>
 
@@ -478,6 +481,11 @@
       <li><a href="./metodologia.html" class="nav-link">Metodología</a></li>
       <li><a href="./contact.html" class="nav-link active">Contacto</a></li>
     </ul>
+    <div class="page-language" role="group" aria-label="Idioma" style="display:flex;align-items:center;gap:0.2rem;white-space:nowrap;">
+      <button type="button" class="page-lang-btn" onclick="setWebLanguage('es')" aria-label="Español" style="background:transparent;border:0;color:var(--text-muted);padding:0.35rem;cursor:pointer;">ES</button>
+      <button type="button" class="page-lang-btn" onclick="setWebLanguage('en')" aria-label="English" style="background:transparent;border:0;color:var(--text-muted);padding:0.35rem;cursor:pointer;">EN</button>
+      <button type="button" class="page-lang-btn" onclick="setWebLanguage('pt')" aria-label="Português" style="background:transparent;border:0;color:var(--text-muted);padding:0.35rem;cursor:pointer;">PT</button>
+    </div>
     <a href="./index.html#descargar" class="nav-btn">Descargar Launcher</a>
   </nav>
 
