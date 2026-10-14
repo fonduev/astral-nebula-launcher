@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/x-icon" href="./icon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6612759594307142" crossorigin="anonymous"></script>
   <title>Política de Privacidad | Nebula Launcher</title>
   <meta name="description" content="Información sobre los datos, servicios de terceros y tecnologías que pueden utilizar este sitio y Nebula Launcher." />
 
@@ -262,10 +264,15 @@
       Este sitio puede integrar Google AdSense; la publicación de anuncios depende de la configuración de la cuenta, la disponibilidad y las políticas aplicables. Cuando se sirven anuncios, Google y sus socios pueden tratar datos y utilizar cookies o identificadores según el consentimiento y las opciones disponibles en cada región. Consulta la <a href="https://policies.google.com/technologies/partner-sites?hl=es" target="_blank" rel="noopener noreferrer">información de Google sobre el uso de datos en sitios de socios</a>.
     </p>
     <ul>
-      <li><strong>Preferencias publicitarias:</strong> Las opciones de consentimiento y personalización disponibles dependen de la región y de la configuración implementada en el sitio. Consulta el mensaje de consentimiento que aparezca, si corresponde, y las opciones de privacidad de Google; esta página por sí sola no confirma que exista un CMP certificado activo.</li>
+      <li><strong>Preferencias publicitarias:</strong> El consentimiento de anuncios se gestiona con la plataforma de consentimiento de Google, que se sirve a través de la etiqueta de AdSense instalada en el sitio. Cuando las normas de tu región lo exigen, el mensaje de consentimiento aparece de forma automática antes de servir anuncios personalizados.</li>
       <li><strong>Opciones del usuario:</strong> Puedes revisar opciones de personalización en la <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Configuración de Anuncios de Google</a>. Las opciones y su disponibilidad pueden variar por región y navegador.</li>
       <li>Para más detalles sobre el tratamiento de datos por parte de nuestro socio publicitario, consulta <a href="https://www.google.com/policies/privacy/partners/" target="_blank" rel="noopener noreferrer">Cómo utiliza Google los datos cuando usas sitios web o aplicaciones de sus colaboradores</a>.</li>
     </ul>
+
+    <p>
+      <strong>Cambiar o retirar tu decisión:</strong> Puedes revisar o retirar la decisión que hayas tomado en el mensaje de consentimiento en cualquier momento. El botón siguiente solo aparece cuando las normas de tu región aplican y el mensaje de consentimiento está disponible.
+    </p>
+    <p id="consentSettingsSlot"></p>
 
     <h2>4. Privacidad de menores</h2>
     <p>
@@ -324,23 +331,8 @@
     </div>
   </div>
 
-  <script>
-    function initCookieConsent() {
-      if (!localStorage.getItem('nebula_cookie_notice_dismissed')) {
-        const banner = document.getElementById('cookieConsentBanner');
-        if (banner) banner.style.display = 'block';
-      }
-    }
-    function dismissCookieBanner() {
-      localStorage.setItem('nebula_cookie_notice_dismissed', 'true');
-      const banner = document.getElementById('cookieConsentBanner');
-      if (banner) {
-        banner.style.opacity = '0';
-        setTimeout(() => { banner.style.display = 'none'; }, 300);
-      }
-    }
-    document.addEventListener('DOMContentLoaded', initCookieConsent);
-  </script>
+  
+  <script src="./consent.js" defer></script>
 
 </body>
 </html>

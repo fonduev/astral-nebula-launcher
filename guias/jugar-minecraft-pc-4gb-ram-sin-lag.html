@@ -627,23 +627,8 @@
     </div>
   </div>
 
-  <script>
-    function initCookieConsent() {
-      if (!localStorage.getItem('nebula_cookie_notice_dismissed')) {
-        const banner = document.getElementById('cookieConsentBanner');
-        if (banner) banner.style.display = 'block';
-      }
-    }
-    function dismissCookieBanner() {
-      localStorage.setItem('nebula_cookie_notice_dismissed', 'true');
-      const banner = document.getElementById('cookieConsentBanner');
-      if (banner) {
-        banner.style.opacity = '0';
-        setTimeout(() => { banner.style.display = 'none'; }, 300);
-      }
-    }
-    document.addEventListener('DOMContentLoaded', initCookieConsent);
-  </script>
+  
+  <script src="../consent.js" defer></script>
 
 </body>
 </html>
