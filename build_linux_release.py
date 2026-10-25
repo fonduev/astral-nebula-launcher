@@ -8,7 +8,7 @@ import urllib.request
 sys.stdout.reconfigure(encoding='utf-8')
 
 BASE_DIR = r"C:\Users\renee\Documents\Web"
-VERSION = "5.0.3"
+VERSION = "5.0.7"
 ELECTRON_VERSION = "v43.0.0"
 CACHE_DIR = os.path.join(BASE_DIR, "cache")
 OUTPUT_DIR = os.path.join(BASE_DIR, "dist")
@@ -107,7 +107,7 @@ desktop_file_path = os.path.join(TARGET_DIR, "nebula-launcher.desktop")
 desktop_content = """[Desktop Entry]
 Name=Nebula Launcher
 Comment=Minecraft Launcher con soporte Premium, Forge, NeoForge, Fabric y OptiFine
-Exec=nebula-launcher %U
+Exec=nebula-launcher --ozone-platform-hint=auto --enable-features=WaylandWindowDecorations %U
 Terminal=false
 Type=Application
 Icon=nebula-launcher
@@ -123,7 +123,7 @@ apprun_path = os.path.join(TARGET_DIR, "AppRun")
 apprun_content = """#!/bin/sh
 HERE="$(dirname "$(readlink -f "${0}")")"
 export PATH="${HERE}:${PATH}"
-exec "${HERE}/nebula-launcher" "$@"
+exec "${HERE}/nebula-launcher" --ozone-platform-hint=auto --enable-features=WaylandWindowDecorations "$@"
 """
 with open(apprun_path, "w", encoding="utf-8", newline="\n") as f:
     f.write(apprun_content)
