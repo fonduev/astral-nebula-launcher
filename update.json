@@ -1,16 +1,16 @@
 {
-  "version": "5.0.6",
-  "name": "Nebula Launcher v5.0.6 — Perfil Vanilla 60 FPS & Multihilo Mesa3D para PCs Antiguas",
-  "releaseDate": "2026-09-30",
+  "version": "5.0.7",
+  "name": "Nebula Launcher v5.0.7 — Rendimiento, Analizador de Espacio y Aceleración Wayland",
+  "releaseDate": "2026-10-24",
   "url": "https://raw.githubusercontent.com/fonduev/astral-nebula-launcher/main/app.asar",
-  "installerUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.6/Nebula.Launcher.Setup.5.0.6.exe",
-  "portableUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.6/Nebula-Launcher-v5.0.6-Portable.zip",
+  "installerUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.7/Nebula.Launcher.Setup.5.0.7.exe",
+  "portableUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.7/Nebula-Launcher-v5.0.7-Portable.zip",
   "mandatory": false,
   "changelog": [
-    "⚡ Perfil Vanilla 60 FPS Puro: Optimización automática y manual en 1-clic para jugar Minecraft 1.21+ sin ningún mod instalado a máxima tasa de refresco (50-60 FPS en PCs antiguas).",
-    "🧵 Renderizado Multihilo Mesa3D: El rasterizador por software ahora utiliza todos los núcleos e hilos lógicos del procesador (LP_NUM_THREADS) con colas asíncronas de Gallium.",
-    "🚫 Mipmaps a 0 & Texturizado Ultrarrápido: Desactiva el cálculo de mipmaps por CPU que saturaba el procesador en laptops y PCs con gráficas integradas heredadas.",
-    "🚀 Prioridad Alta en Windows 11/10: Elevación automática de prioridad del proceso javaw.exe y preferencia de GPU de alto rendimiento en el registro del sistema.",
-    "🧹 Recolector de Basura G1GC de Baja Latencia: Eliminación de microtirones y congelamientos ajustando pausas de GC a 20ms y previniendo sobrepaginación en disco con 8GB de RAM."
+    "📊 Dashboard de Estadísticas & Gráfica Semanal: Historial visual interactivo de los últimos 7 días con detección de día pico, promedio diario y tooltips holográficos.",
+    "🚀 Diagnóstico & Puntuación FPS (Readiness Score): Checklist dinámico de RAM (4-8GB), tarjeta gráfica acelerada por hardware, hilos de CPU y flags G1GC con calificación Grado S (100/100).",
+    "💾 Analizador de Espacio & Limpiador en 1-Clic: Desglose completo de almacenamiento de mundos, mods, texturas, shaders y capturas con botón de limpieza segura de archivos basura y reportes de error antiguos.",
+    "🐧 Bandera de Aceleración Wayland para Linux: Soporte nativo para Wayland (--ozone-platform-hint=auto y --enable-features=WaylandWindowDecorations) con cero borrosidad y soporte para 144Hz+.",
+    "☕ Detección Inteligente de Java & .minecraft: Priorización de Java instalado en el sistema sobre descargas innecesarias y escaneo nativo de OpenJDK en Linux (/usr/lib/jvm, /usr/java, ~/.jdks)."
   ]
 }
