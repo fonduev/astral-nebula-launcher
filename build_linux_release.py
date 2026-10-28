@@ -8,7 +8,7 @@ import urllib.request
 sys.stdout.reconfigure(encoding='utf-8')
 
 BASE_DIR = r"C:\Users\renee\Documents\Web"
-VERSION = "5.0.7"
+VERSION = "5.0.8"
 ELECTRON_VERSION = "v43.0.0"
 CACHE_DIR = os.path.join(BASE_DIR, "cache")
 OUTPUT_DIR = os.path.join(BASE_DIR, "dist")

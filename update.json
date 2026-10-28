@@ -1,16 +1,17 @@
 {
-  "version": "5.0.7",
-  "name": "Nebula Launcher v5.0.7 — Rendimiento, Analizador de Espacio y Aceleración Wayland",
-  "releaseDate": "2026-10-24",
+  "version": "5.0.8",
+  "name": "Nebula Launcher v5.0.8 — Detección Java del Sistema, Integración Nativa .minecraft y Lanzamiento Ultrarrápido",
+  "releaseDate": "2026-10-28",
   "url": "https://raw.githubusercontent.com/fonduev/astral-nebula-launcher/main/app.asar",
-  "installerUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.7/Nebula.Launcher.Setup.5.0.7.exe",
-  "portableUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.7/Nebula-Launcher-v5.0.7-Portable.zip",
+  "installerUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.8/Nebula.Launcher.Setup.5.0.8.exe",
+  "portableUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.8/Nebula-Launcher-v5.0.8-Portable.zip",
+  "linuxUrl": "https://github.com/fonduev/astral-nebula-launcher/releases/download/v5.0.8/Nebula-Launcher-v5.0.8-Linux-x64.tar.gz",
   "mandatory": false,
   "changelog": [
-    "📊 Dashboard de Estadísticas & Gráfica Semanal: Historial visual interactivo de los últimos 7 días con detección de día pico, promedio diario y tooltips holográficos.",
-    "🚀 Diagnóstico & Puntuación FPS (Readiness Score): Checklist dinámico de RAM (4-8GB), tarjeta gráfica acelerada por hardware, hilos de CPU y flags G1GC con calificación Grado S (100/100).",
-    "💾 Analizador de Espacio & Limpiador en 1-Clic: Desglose completo de almacenamiento de mundos, mods, texturas, shaders y capturas con botón de limpieza segura de archivos basura y reportes de error antiguos.",
-    "🐧 Bandera de Aceleración Wayland para Linux: Soporte nativo para Wayland (--ozone-platform-hint=auto y --enable-features=WaylandWindowDecorations) con cero borrosidad y soporte para 144Hz+.",
-    "☕ Detección Inteligente de Java & .minecraft: Priorización de Java instalado en el sistema sobre descargas innecesarias y escaneo nativo de OpenJDK en Linux (/usr/lib/jvm, /usr/java, ~/.jdks)."
+    "☕ Detección Automática de Java en el Sistema: Escaneo en tiempo real de Java 21, 17 y 8 (Oracle, Adoptium, PATH, JAVA_HOME) con selector inteligente en Configuración.",
+    "📂 Integración Nativa con %APPDATA%\\.minecraft: Conexión transparente con tu carpeta real de Minecraft para todas tus versiones, mundos, shaders y paquetes de recursos, con botón directo '📂 Abrir Carpeta'.",
+    "⚡ Lanzamiento Ultrarrápido (<200ms): Verificación optimizada de librerías y assets sin recálculo redundante de SHA1 y recolector de basura G1GC de baja latencia.",
+    "📊 Panel de Estadísticas & Monitor de Hardware: Horas de juego, sesiones, monitor de CPU, GPU NVIDIA RTX 3050 y uso de RAM en vivo.",
+    "🛠️ Correcciones de Estabilidad & Sincronización Discord RPC: Resolución de desconexiones intermitentes de presencia en Discord y optimización general de procesos en segundo plano."
   ]
 }

@@ -1,6 +1,6 @@
-; Script de Instalación de Inno Setup para Nebula Launcher v5.0.3 (Multilenguaje)
+; Script de Instalación de Inno Setup para Nebula Launcher v5.0.8 (Multilenguaje)
 #define MyAppName "Nebula Launcher"
-#define MyAppVersion "5.0.7"
+#define MyAppVersion "5.0.8"
 #define MyAppPublisher "Nebula Studios"
 #define MyAppURL "https://nebuladevstudios.com"
 #define MyAppExeName "Nebula Launcher.exe"
@@ -16,7 +16,7 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={localappdata}\Programs\{#MyAppName}
 DisableProgramGroupPage=yes
-OutputBaseFilename=Nebula.Launcher.Setup.5.0.7
+OutputBaseFilename=Nebula.Launcher.Setup.5.0.8
 OutputDir=C:\Users\renee\Documents\Web
 Compression=lzma
 SolidCompression=yes
@@ -32,7 +32,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "C:\Users\renee\AppData\Local\Programs\Nebula Launcher\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\renee\AppData\Local\Programs\Nebula Launcher\*"; Excludes: "*nul*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\renee\AppData\Local\Programs\Nebula Launcher\*"; Excludes: "*nul*,unins000.*,*.bak,resources\app,resources\app\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
